@@ -240,6 +240,13 @@ EOF
 	fatal   "Fatal, halting errors (always shown)"
 }
 
+##
+## this function handles the running of a backup action
+##
+## these globals are modified:
+## fatals, errors, warnings, actions_run, errormsg
+##
+
 function process_action() {
 	local file="$1"
 	local suffix="$2"
@@ -268,16 +275,24 @@ function process_action() {
 		IFS=$' \t\n'
 	fi
 	
+	let "actions_run += 1"
 	echo_debug_msg=1
+
 	# call the handler:
 	ret=`( . $scriptdir/$suffix $file )`
 	retcode="$?"
-	warnings=`echo $ret | grep -e "^Warning: " | wc -l`
-	errors=`echo $ret | grep -e "^Error: \|^Fatal: " | wc -l`
-	if [ $errors != 0 ]; then
+
+	_warnings=`echo $ret | grep "Warning: " | wc -l`
+	_errors=`echo $ret | grep "Error: " | wc -l`
+	_fatals=`echo $ret | grep "Fatal: " | wc -l`
+
+	if [ $_fatals != 0 ]; then
 		msg "*failed* -- $file"
+		errormsg="$errormsg\n== failures from $file ==\n\n$ret\n"
+	elif [ $_errors != 0 ]; then
+		msg "*error* -- $file"
 		errormsg="$errormsg\n== errors from $file ==\n\n$ret\n"
-	elif [ $warnings != 0 ]; then
+	elif [ $_warnings != 0 ]; then
 		msg "*warning* -- $file"
 		errormsg="$errormsg\n== warnings from $file ==\n\n$ret\n"
 	elif [ $retcode == 0 ]; then
@@ -285,7 +300,11 @@ function process_action() {
 	else
 		msg "unknown -- $file"
 	fi
-	echo_debug_msg=0
+
+	echo_debug_msg=0	
+	let "fatals += _fatals"
+	let "errors += _errors"
+	let "warnings += _warnings"
 }
 
 #####################################################
@@ -356,12 +375,15 @@ fi
 
 ## Process each configuration file
 
-info "====== starting at "`date`" ======"
-
 # by default, don't make files which are world or group readable.
 umask 077
 
+# these globals are set by process_action()
+fatals=0
 errors=0
+warnings=0
+actions_run=0
+errormsg=""
 
 for file in $configdirectory/*; do
 	[ -f $file ] || continue;
@@ -384,7 +406,9 @@ done
 
 ## mail the messages to the report address
 
-if [ "$reportemail" == "" ]; then doit=0
+if [ $actions_run == 0 ]; then doit=0
+elif [ "$reportemail" == "" ]; then doit=0
+elif [ $fatals != 0 ]; then doit=1
 elif [ $errors != 0 ]; then doit=1
 elif [ "$reportsuccess" == "yes" ]; then doit=1
 elif [ "$reportwarning" == "yes" -a $warnings != 0 ]; then doit=1
@@ -392,15 +416,17 @@ else doit=0
 fi
 
 if [ $doit == 1 ]; then
+	debug "send report to $reportemail"
 	hostname=`hostname`
+	[ $warnings == 0 ] || subject="WARNING"
+	[ $errors == 0 ] || subject="ERROR"
+	[ $fatals == 0 ] || subject="FAILED"
+	
 	{
 		for ((i=0; i < ${#messages[@]} ; i++)); do
 	 		echo ${messages[$i]}
 		done
 		echo -e "$errormsg"
-	} | mail $reportemail -s "backupninja: $hostname"
+	} | mail $reportemail -s "backupninja: $hostname $subject"
 fi
 
-info "====== finished at "`date`" ======"
-
-############################################################
