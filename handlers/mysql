@@ -27,7 +27,7 @@ dumpdir="$backupdir/sqldump"
  # temporary ~/.my.cnf in root's home directory).
 
 if [ "$dbusername" != "" ]; then
-	home=`grep '^root' /etc/passwd | awk -F: '{print $6}'`
+	home=`grep '^root:' /etc/passwd | awk -F: '{print $6}'`
 	[ -d $home ] || fatal "Can't find root's home directory ($home)."
 	mycnf="$home/.my.cnf"
 	if [ -f $mycnf ]; then
