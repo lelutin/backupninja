@@ -192,6 +192,8 @@ setfile $CONFFILE
 # get global config options (second param is the default)
 getconf configdirectory /etc/backup.d
 getconf reportemail
+getconf reportsuccess yes
+getconf reportwarning yes
 getconf loglevel 3
 getconf logfile /var/log/backupninja.log
 getconf SLAPCAT /usr/sbin/slapcat
@@ -211,7 +213,9 @@ debug 1 "====== starting at "`date`" ======"
 # by default, don't make files which are world or group readable.
 umask 077
 
-for file in $configdirectory/*; do	
+for file in $configdirectory/*; do
+	[ -f $file ] || continue;
+
 	perms=`ls -ld $file`
 	perms=${perms:4:6}
 	if [ "$perms" != "------" ]; then
@@ -238,10 +242,10 @@ for file in $configdirectory/*; do
 		errors=`echo $ret | grep -e "^Error: \|^Fatal: " | wc -l`
 		if [ $errors != 0 ]; then
 			msg "*failed* -- $file"
-			error="$error\n== errors from $file ==\n\n$ret\n"
+			errormsg="$error\n== errors from $file ==\n\n$ret\n"
 		elif [ $warnings != 0 ]; then
 			msg "*warning* -- $file"
-			error="$error\n== warnings from $file ==\n\n$ret\n"
+			errormsg="$error\n== warnings from $file ==\n\n$ret\n"
 		elif [ $retcode == 0 ]; then
 			msg "success -- $file"
 		else
@@ -256,13 +260,20 @@ done
 
 ## mail the messages to the report address
 
-if [ "$reportemail" != "" ]; then
+if [ "$reportemail" == "" ]; then doit=0
+elif [ $errors != 0 ]; then doit=1
+elif [ "$reportsuccess" == "yes" ]; then doit=1
+elif [ "$reportwarning" == "yes" -a $warnings != 0 ]; then doit=1
+else doit=0
+fi
+
+if [ $doit == 1 ]; then
 	hostname=`hostname`
 	{
 		for ((i=0; i < ${#messages[@]} ; i++)); do
 	 		echo ${messages[$i]}
 		done
-		echo -e "$error"
+		echo -e "$errormsg"
 	} | mail $reportemail -s "backupninja: $hostname"
 fi
 
