@@ -133,6 +133,77 @@ function getconf() {
 	eval $1='$ret'
 }
 
+#
+# enforces very strict permissions on configuration file $file.
+#
+
+function check_perms() {
+	local file=$1
+	local perms=`ls -ld $file`
+	perms=${perms:4:6}
+	if [ "$perms" != "------" ]; then
+		fatal "Configuration files must not be group or world readable! Dying on file $file"
+	fi
+	if [ `ls -ld $file | awk '{print $3}'` != "root" ]; then
+		fatal "Configuration files must be owned by root! Dying on file $file"
+	fi
+}
+
+# simple lowercase function
+function tolower() {
+	echo "$1" | tr [:upper:] [:lower:]
+}
+
+# simple to integer function
+function toint() {
+	echo "$1" | tr [:alpha:] -d 
+}
+
+#
+# function isnow(): returns 1 if the time/day passed as $1 matches
+# the current time/day.
+#
+# format is <day> at <time>:
+#   sunday at 16
+#   8th at 01
+#   everyday at 22
+#
+
+# we grab the current time once, since processing
+# all the configs might take more than an hour.
+nowtime=`date +%H`
+nowday=`date +%d`
+nowdayofweek=`date +%A`
+nowdayofweek=`tolower "$nowdayofweek"`
+
+function isnow() {
+	local when="$1"
+	set -- $when
+	whendayofweek=$1; at=$2; whentime=$3;
+	whenday=`toint "$whendayofweek"`
+	whendayofweek=`tolower "$whendayofweek"`
+	whentime=`echo "$whentime" | sed 's/:[0-9][0-9]$//'`
+
+	if [ "$whendayofweek" == "everyday" ]; then
+		whendayofweek=$nowdayofweek
+	fi
+
+	if [ "$whenday" == "" ]; then
+		if [ "$whendayofweek" != "$nowdayofweek" ]; then
+			whendayofweek=${whendayofweek%s}
+			if [ "$whendayofweek" != "$nowdayofweek" ]; then
+				return 0
+			fi
+		fi
+	elif [ "$whenday" != "$nowday" ]; then
+		return 0
+	fi
+
+	[ "$at" == "at" ] || return 0
+	[ "$whentime" == "$nowtime" ] || return 0
+
+	return 1
+}
 
 #####################################################
 ## MAIN
@@ -195,6 +266,8 @@ getconf reportemail
 getconf reportsuccess yes
 getconf reportwarning yes
 getconf loglevel 3
+getconf when "Everyday at 01:00"
+defaultwhen=$when
 getconf logfile /var/log/backupninja.log
 getconf SLAPCAT /usr/sbin/slapcat
 getconf RDIFFBACKUP /usr/bin/rdiff-backup
@@ -213,17 +286,12 @@ debug 1 "====== starting at "`date`" ======"
 # by default, don't make files which are world or group readable.
 umask 077
 
+errors=0
+
 for file in $configdirectory/*; do
 	[ -f $file ] || continue;
 
-	perms=`ls -ld $file`
-	perms=${perms:4:6}
-	if [ "$perms" != "------" ]; then
-		fatal "Configuration files must not be group or world readable! Dying on file $file"
-	fi
-	if [ `ls -ld $file | awk '{print $3}'` != "root" ]; then
-		fatal "Configuration files must be owned by root! Dying on file $file"
-	fi
+	check_perms $file
 	suffix="${file##*.}"
 	base=`basename $file`
 	if [ "${base:0:1}" == "0" ]; then
@@ -235,7 +303,28 @@ for file in $configdirectory/*; do
 
 	if [ -e "$scriptdir/$suffix" ]; then
 		setfile $file
+
+		# skip over this config if "when" option
+		# is not set to the current time.
+		getconf when "$defaultwhen"
+		IFS=$'\t\n'
+		for w in $when; do
+			IFS=$' \t\n'
+			isnow "$w"
+			ret=$?
+			IFS=$'\t\n'
+			if [ $ret == 0 ]; then
+				debug 0 "skipping $file because it is not $w"
+				continue
+			else
+				debug 0 "running $file because it is $w"
+				continue
+			fi		
+		done
+		IFS=$' \t\n'
+
 		echo_debug_msg=1
+		# call the handler:
 		ret=`( . $scriptdir/$suffix $file )`
 		retcode="$?"
 		warnings=`echo $ret | grep -e "^Warning: " | wc -l`

@@ -1,2 +1,2 @@
-# cron job for backupninja (once a day)
-00 01 * * * root if [ -x /usr/sbin/backupninja -a -f /etc/backupninja.conf ]; then /usr/sbin/backupninja; fi
+# cron job for backupninja (every hour, on the hour)
+00 * * * * root if [ -x /usr/sbin/backupninja -a -f /etc/backupninja.conf ]; then /usr/sbin/backupninja; fi
