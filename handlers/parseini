@@ -1,0 +1,130 @@
+# 
+# parseini --- parses 'ini' style configuration files.
+#
+# Usage:
+#   awk -f parseini S=<section> P=<param> <ini file>
+#
+# if section is an empty string, then we use the default section
+#
+# example ini file:
+# 
+#		fruit = apple
+#		fruit = pear
+#		multiline = this is a multiline \
+#       parameter
+#
+#       # this is a comment
+#
+#		[colors]  
+#		red = yes
+#		green = no
+#		blue = maybe
+#		
+#		[ocean] 
+#		fish = red 
+#		fish = blue
+#       
+# example usage:
+#       > awk -f parseini S=ocean P=fish testfile.ini 
+# would return: 
+#       red
+#       blue
+#
+   
+BEGIN { 
+    readlines = 1 
+    implied = 1 
+} 
+
+# remove lines starting with #, but not #!
+/^#[^!]/ {next} 
+
+# skip blank
+/^[ \r\t]*$/ {next} 
+
+# we want to read the lines of the matched section
+# and disable for other sections
+/^\[.+\][ \r\t]*$/ { 
+    continueline = 0 
+    if (S && implied) { 
+        nline = 0 
+        implied = 0 
+    } 
+    if (S && match($0, "^\\[" S "\\][ \n]*")) { 
+        # we found the section, so start reading.
+        readlines = 1 
+    } 
+    else { 
+        # no section, so stop reading lines
+        if (readlines) readlines = 0 
+    } 
+    next 
+} 
+
+# when reading, store lines.
+
+{ 
+    if (!readlines) next 
+    line[nline++] = $0 
+    if ($0 ~ /\\[ \r\t]*$/) 
+        continueline = 1 
+    else 
+        continueline = 0 
+} 
+
+# process the read lines lines, matching parameters
+
+END { 
+    # if section is set but implied is still true
+    # then we never found the section, so use everything
+    if (S && implied) { 
+        nline = 0 
+    } 
+
+    # if have P then find P in read lines and get values 
+    if (P) { 
+        MATCH = "^[ \r\t]*" P "[ \r\t]*=" 
+        continueline = 0 
+        for (x = 0; x < nline; ++x) { 
+            v = line[x] 
+            if (continueline) { 
+                sub(/[ \r\t]+$/, "", v) 
+                if (v ~ /\\$/) { 
+                   v = substr(v, 1, length(v)-1) 
+                   sub(/[ \r\t]+$/, "", v) 
+                } 
+                if (v) value[nvalue++] = v 
+            } 
+            else if (v ~ MATCH) { 
+                sub(MATCH, "", v) 
+                sub(/^[ \r\t]+/, "", v) 
+                sub(/[ \r\t]+$/, "", v) 
+                if (v ~ /\\$/) { 
+                    continueline = 1 
+                    v = substr(v, 1, length(v)-1) 
+                    sub(/[ \r\t]+$/, "", v) 
+                } 
+                if (v) value[nvalue++] = v 
+            } 
+        } 
+        # copy parameter definition to output array 
+        nline = nvalue 
+        for (x = 0; x < nvalue; ++x) 
+            line[x] = value[x] 
+    } 
+
+    # trim all leading & trailing whitespace; 
+    # except for leading whitespace in continuation lines, 
+ 
+    for (x = 0; x < nline; ++x) { 
+        sub(/^[ \r\t]+/, "", line[x]) 
+        sub(/[ \r\t]+$/, "", line[x]) 
+     } 
+ 
+    # output the final result
+    for (x = 0; x < nline; ++x) 
+        print line[x] 
+
+    if (nline) exit 0 
+    else exit 1 
+}

@@ -1,0 +1,69 @@
+#
+# openldap backup handler script for backupninja
+#
+
+getconf backupdir /var/backups/ldap
+getconf conf /etc/ldap/slapd.conf
+getconf databases all
+getconf compress yes
+getconf ldif yes
+getconf hotcopy no
+
+# hot copy is not yet supported
+
+status="ok"
+
+[ -f $conf ] || fatal "slapd config file ($conf) not found"
+[ -d $backupdir ] || mkdir -p $backupdir
+[ -d $backupdir ] || fatal "Backup directory '$backupdir'"
+
+dbsuffixes=(`awk 'BEGIN {OFS=":"} /[:space:]*^database[:space:]*\w*/ {db=$2}; /^[:space:]*suffix[:space:]*\w*/ {if (db=="bdb"||db=="ldbm") print db,$2}' $conf|sed -e 's/[" ]//g'`)
+
+## LDIF DUMP
+
+if [ "$ldif" == "yes" ]; then
+	dumpdir="$backupdir"
+	[ -d $dumpdir ] || mkdir -p $dumpdir
+
+	if [ "$databases" == 'all' ]; then
+		dbcount=`grep '^database' $conf | wc -l`
+		let "dbcount = dbcount - 1"
+		databases=`seq 0 $dbcount`;
+	fi	
+	
+	for db in $databases; do
+		if [ `expr index "$dbnum" "="` == "0" ]; then
+			# db is a number, get the suffix.
+			dbsuffix=${dbsuffixes[$db]/*:/}
+		else
+			dbsuffix=$db
+		fi
+		# some databases don't have suffix (like monitor), skip these
+		if [ "$dbsuffix" == "" ]; then
+			continue;
+		fi
+		touch $dumpdir/$dbsuffix.ldif
+		if [ ! -f $dumpdir/$dbsuffix.ldif ]; then
+			fatal "Couldn't create ldif dump file: $dumpdir/$dbsuffix.ldif"
+		fi
+		execstr="$SLAPCAT -f $conf -b $dbsuffix -l $dumpdir/$dbsuffix.ldif"
+		debug 0 "$execstr"
+		if [ ! $test ]; then
+			output=`$execstr`
+			code=$?
+			if [ "$code" == "0" ]; then
+				debug 0 $output
+				debug 1 "Successfully finished ldif export of $dbsuffix"
+			else
+				debug 2 $output
+				debug 2 "Failed ldif export of $dbsuffix"
+			fi
+			if [ "$compress" == "yes" ]; then
+				output=`$GZIP -f "$dumpdir/$dbsuffix.ldif" 2>&1`
+				debug 0 $output
+			fi
+		fi
+	done	
+fi
+
+return 0

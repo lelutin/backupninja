@@ -1,0 +1,271 @@
+#!/bin/bash
+#                          |\_
+# B A C K U P N I N J A   /()/
+#                         `\|
+#
+# Copyright (C) 2004 riseup.net -- property is theft.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+
+#####################################################
+## DEFAULTS
+
+DEBUG=${DEBUG:=0}
+CONFFILE="/etc/backupninja.conf"
+USECOLOURS=1
+
+#####################################################
+## FUNCTIONS
+
+function setupcolors() {
+	if [  "$USECOLOURS" == 1 ]
+	then
+		BLUE="\033[34;01m"
+		GREEN="\033[32;01m"
+		YELLOW="\033[33;01m"
+		PURPLE="\033[35;01m"
+		RED="\033[31;01m"
+		OFF="\033[0m"
+		CYAN="\033[36;01m"
+	fi
+}
+
+function run() {
+	RUNERROR=0
+	debug 0 "$@"
+	returnstring=`$@ 2>&1`
+	RUNERROR=$?
+	RUNERRORS=$[RUNERRORS+RUNERROR]
+	if [ "$RUNERROR" != 0 ]; then
+		debug 3 "Exitcode $RUNERROR returned when running: $@"
+		debug 3 "$returnstring"
+	else
+		debug 0 "$returnstring"
+	fi
+	return $RUNERROR
+}
+
+# We have the following debug levels:
+# 0 - debug - blue
+# 1 - normal messages - green
+# 2 - warnings - yellow
+# 3 - errors - orange
+# 4 - fatal - red
+# First variable passed is the error level, all others are printed
+
+# if 1, echo out all warnings, errors, or fatal
+# used to capture output from handlers
+echo_debug_msg=0
+
+function debug() {
+
+	[ ${#@} -gt 1 ] || return
+	 
+	TYPES=(Debug Info Warning Error Fatal)
+	COLOURS=($BLUE $GREEN $YELLOW $RED $PURPLE)
+	type=$1
+	colour=${COLOURS[$type]}
+	shift
+	print=$[4-type]
+	if [ "$print" -lt "$loglevel" -o "$DEBUG" == 1 ]; then
+		if [ -z "$logfile" ]; then
+			echo -e "${colour}${TYPES[$type]}: $@${OFF}" >&2
+		else
+			if [ "$DEBUG" == 1 -o "$type" == 4 ]; then
+				echo -e "${colour}${TYPES[$type]}: $@${OFF}" >&2
+			fi
+			echo -e "${colour}${TYPES[$type]}: $@${OFF}" >> $logfile
+		fi
+	fi
+	if [ "$echo_debug_msg" != "0" -a "$type" -gt "1" ]; then
+		echo -e "${TYPES[$type]}: $@"
+	fi
+}
+
+function fatal() {
+	debug 4 "$@"
+	exit 2
+}
+
+msgcount=0
+function msg {
+	messages[$msgcount]=$1
+	let "msgcount += 1"
+}
+
+function setfile() {
+	CURRENT_CONF_FILE=$1
+}
+
+function setsection() {
+	CURRENT_SECTION=$1
+}
+
+#
+# sets a global var with name equal to $1
+# to the value of the configuration parameter $1
+# $2 is the default.
+# 
+
+function getconf() {
+	CURRENT_PARAM=$1
+	ret=`awk -f $scriptdir/parseini S=$CURRENT_SECTION P=$CURRENT_PARAM $CURRENT_CONF_FILE`
+	# if nothing is returned, set the default
+	if [ "$ret" == "" -a "$2" != "" ]; then
+		ret="$2"
+	fi
+
+	# replace * with %, so that it is not globbed.
+	ret="${ret//\\*/__star__}"
+
+	# this is weird, but single quotes are needed to 
+	# allow for returned values with spaces. $ret is still expanded
+	# because it is in an 'eval' statement.
+	eval $1='$ret'
+}
+
+
+#####################################################
+## MAIN
+
+## process command line options
+
+if [ "$1" == "--help" ]; then
+	HELP=1;DEBUG=1;loglevel=4
+else
+	while getopts h,f:,d,t option
+	do
+		case "$option" in
+			h) HELP=1;DEBUG=1;loglevel=4;;
+			d) DEBUG=1;loglevel=4;;
+			f) CONFFILE="$OPTARG";;
+			t) test=1;DEBUG=1;;
+		esac
+	done
+fi
+	
+setupcolors
+
+## Print help
+
+if [ "$HELP" == 1 ]; then
+cat << EOF
+$0 usage:
+This script allows you to coordinate system backup by dropping a few
+simple configuration files into /etc/backup.d/. In general, this script
+is run from a cron job late at night. 
+
+The following options are available:
+-h         This help message
+-d         Run in debug mode, where all log messages are output to the current shell.
+-f <file>  Use <file> for the main configuration instead of /etc/backupninja.conf
+-t         Run in test mode, no actions are actually taken.
+
+When using colored output, there are:
+EOF
+debug 0 "Debugging info (when run with -d)"
+debug 1 "Informational messages (verbosity level 4)"
+debug 2 "Warnings (verbosity level 3 and up)"
+debug 3 "Errors (verbosity level 2 and up)"
+debug 4 "Fatal, halting errors (always shown)"
+exit 0
+fi
+
+## Load and confirm basic configuration values
+
+# bootstrap
+[ -r "$CONFFILE" ] || fatal "Configuration file $CONFFILE not found."
+scriptdir=`grep scriptdirectory $CONFFILE | awk '{print $3}'`
+[ -n "$scriptdir" ] || fatal "Cound not find entry 'scriptdirectory' in $CONFFILE."
+[ -d "$scriptdir" ] || fatal "Script directory $scriptdir not found."
+setfile $CONFFILE
+
+# get global config options (second param is the default)
+getconf configdirectory /etc/backup.d
+getconf reportemail
+getconf loglevel 3
+getconf logfile /var/log/backupninja.log
+getconf SLAPCAT /usr/sbin/slapcat
+getconf RDIFFBACKUP /usr/bin/rdiff-backup
+getconf MYSQL /usr/bin/mysql
+getconf MYSQLHOTCOPY /usr/bin/mysqlhotcopy
+getconf MYSQLDUMP /usr/bin/mysqldump
+getconf GZIP /bin/gzip
+
+[ -d "$configdirectory" ] || fatal "Configuration directory '$configdirectory' not found."
+[ `id -u` == "0" ] || fatal "Can only be run as root"
+
+## Process each configuration file
+
+debug 1 "====== starting at "`date`" ======"
+
+# by default, don't make files which are world or group readable.
+umask 077
+
+for file in $configdirectory/*; do	
+	perms=`ls -ld $file`
+	perms=${perms:4:6}
+	if [ "$perms" != "------" ]; then
+		fatal "Configuration files must not be group or world readable! Dying on file $file"
+	fi
+	if [ `ls -ld $file | awk '{print $3}'` != "root" ]; then
+		fatal "Configuration files must be owned by root! Dying on file $file"
+	fi
+	suffix="${file##*.}"
+	base=`basename $file`
+	if [ "${base:0:1}" == "0" ]; then
+		debug 1 "Skipping $file"
+		continue
+	else
+		debug 1 "Processing $file"
+	fi
+
+	if [ -e "$scriptdir/$suffix" ]; then
+		setfile $file
+		echo_debug_msg=1
+		ret=`( . $scriptdir/$suffix $file )`
+		retcode="$?"
+		warnings=`echo $ret | grep -e "^Warning: " | wc -l`
+		errors=`echo $ret | grep -e "^Error: \|^Fatal: " | wc -l`
+		if [ $errors != 0 ]; then
+			msg "*failed* -- $file"
+			error="$error\n== errors from $file ==\n\n$ret\n"
+		elif [ $warnings != 0 ]; then
+			msg "*warning* -- $file"
+			error="$error\n== warnings from $file ==\n\n$ret\n"
+		elif [ $retcode == 0 ]; then
+			msg "success -- $file"
+		else
+			msg "unknown -- $file"
+		fi
+		echo_debug_msg=0
+	else
+		debug 3 "Can't process file '$file': no handler script for suffix '$suffix'"
+		msg "*missing handler* -- $file"
+	fi
+done
+
+## mail the messages to the report address
+
+if [ "$reportemail" != "" ]; then
+	hostname=`hostname`
+	{
+		for ((i=0; i < ${#messages[@]} ; i++)); do
+	 		echo ${messages[$i]}
+		done
+		echo -e "$error"
+	} | mail $reportemail -s "backupninja: $hostname"
+fi
+
+debug 1 "====== finished at "`date`" ======"
+
+############################################################

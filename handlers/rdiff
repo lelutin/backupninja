@@ -1,0 +1,116 @@
+#
+# rdiff-backup handler script for backupninja
+# requires rdiff-backup
+#
+
+setsection source
+getconf type; sourcetype=$type
+getconf label
+getconf user; sourceuser=$user
+getconf keep
+getconf include
+getconf exclude
+
+### DESTINATION ###
+
+setsection dest
+getconf directory; destdir=$directory
+# strip trailing /
+destdir=${destdir%/}
+getconf type; desttype=$type
+getconf user; destuser=$user
+getconf host; desthost=$host
+
+[ "$destdir" != "" ] || fatal "Destination directory not set"
+[ "$desttype" == "remote" ] || fatal "Only remote destinations are supported"
+
+# see if we can login
+debug 0 "su $sourceuser -c \"ssh -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1'\""
+if [ ! $test ]; then
+	result=`su $sourceuser -c "ssh -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1'" 2>&1`
+	if [ "$result" != "1" ]; then
+		fatal "Can't connect to $desthost as $destuser."
+	fi
+fi
+
+# see that rdiff-backup has the same version as here
+debug 0 "su $sourceuser -c \"ssh $desthost -l $destuser '$RDIFFBACKUP -V'\""
+if [ ! $test ]; then
+	remoteversion=`su $sourceuser -c "ssh $desthost -l $destuser '$RDIFFBACKUP -V'" 2>&1`
+	localversion=`$RDIFFBACKUP -V`
+	if [ "$remoteversion" != "$localversion" ]; then
+		fatal "rdiff-backup does not have the same version on this computer and the backup server."
+	fi
+fi
+
+execstr_serverpart="$destuser@$desthost::$destdir/$label"
+		
+### SOURCE ###
+
+[ "$label" != "" ] || fatal "Source missing label"
+[ "$sourcetype" == "local" ] || fatal "Only local source type supported"
+[ "$include" != "" ] || fatal "No source includes specified"
+
+execstr_clientpart="/"
+	
+## REMOVE OLD BACKUPS
+
+if [ "$keep" -gt "0" ]; then
+	removestr="rdiff-backup --force --remove-older-than ${keep}D "
+	if [ "$desttype" == "remote" ]; then
+		removestr="${removestr}${destuser}@${desthost}::"
+	fi
+	removestr="${removestr}${destdir}/${label}";
+	
+	debug 0 "su $sourceuser -c '$removestr'"
+	if [ ! $test ]; then
+		output=`su $sourceuser -c "$removestr" 2>&1`
+		code=$?
+		if [ "$code" == "0" ]; then
+			debug 0 $output
+			debug 1 "Removing backups older than $keep days succeeded."
+		else
+			debug 2 $output
+			debug 2 "Failed removing backups older than $keep."
+		fi
+	fi
+fi
+
+## EXECUTE ##
+	
+execstr="$RDIFFBACKUP --print-statistics "
+
+# TODO: order the includes and excludes
+
+# excludes
+for i in $exclude; do
+	str="${i//__star__/*}"
+	execstr="${execstr}--exclude '$str' "
+done
+	
+# includes 
+for i in $include; do
+	str="${i//__star__/*}"
+	execstr="${execstr}--include '$str' "
+done
+
+# exclude everything else
+execstr="${execstr}--exclude '/*' "
+		
+# include client-part and server-part
+execstr="${execstr}$execstr_clientpart $execstr_serverpart"
+
+debug 0 "su $sourceuser -c '$execstr'"
+if [ ! $test ]; then
+	output=`su $sourceuser -c "$execstr" 2>&1`
+	code=$?
+	if [ "$code" == "0" ]; then
+		debug 0 $output
+		debug 1 "Successfully finished backing up source '$label'"
+	else
+		debug 2 $output
+		debug 2 "Failed backup up source '$label'"
+	fi
+fi	
+
+return 0

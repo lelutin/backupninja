@@ -1,0 +1,52 @@
+
+######################################################
+## source section
+## (where the files to be backed up are coming from)
+
+[source]
+
+# an optional subdirectory below 'directory' (see [dest])
+label = thishostname
+
+# only local type is currently supported
+type = local
+
+# how many days of data to keep
+keep = 185
+
+# files to include in the backup
+# (supports globbing with '*')
+include = /var/spool/cron/crontabs
+include = /var/backups
+include = /etc
+include = /root
+include = /home
+include = /usr/local/bin
+include = /usr/local/sbin
+include = /var/lib/dpkg/status
+include = /var/lib/dpkg/status-old
+
+# files to exclude from the backup
+# (supports globbing with '*')
+#exclude = /home/*/.gnupg
+
+######################################################
+## destination section
+## (where the files are copied to)
+
+[dest]
+
+# only remote type is currently supported
+type = remote
+
+# the machine which will receive the backups
+host = backuphost
+
+# put the backups under this directory
+directory = /backups
+
+# make the files owned by this user
+# note: you must be able to ssh backupuser@backhost
+# without specifying a password 
+user = backupuser
+

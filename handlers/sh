@@ -1,0 +1,6 @@
+#
+# shell script handler for backupninja
+# runs the file /etc/backup.d/scriptname.sh
+# 
+
+[ $test ] || ( . $1 )

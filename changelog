@@ -1,0 +1,38 @@
+version 0.3.4
+	fixed numerical variable quoting compatibility with older wc	
+
+version 0.3.3
+	'*' (asterisk) works now in rdiff config files
+	works now with gawk as well as mawk
+	many bug fixes to ldap handler
+	paths to helper scripts can be configured in global config
+	does not require /usr/bin/stat
+
+version 0.3.2
+	handler scripts are no longer executable (to comply with debian policy)
+	handler error and warning messages are sent with the notify email
+    
+version 0.3.1
+	added ldap handler
+	moved sh support to a handler script
+	add test mode, where no action is taken.
+	added --help
+	force only root can read /etc/backup.d/*
+	fixed missing equals symbols in example.rdiff
+	changed backupninja executable to be /usr/sbin rather than /usr/bin
+	
+version 0.3
+	** IMPORTANT ** all config files are now ini style, not apache style
+	rewrote all scripts in bash for portability
+	added drop-in backupninja lib directory (/usr/share/backupninja)
+	all scripts are now run as root
+
+version 0.2
+	move distribution folder ./cron.d to ./etc/cron.d
+	fixed bug: removed printr of excludes (!)
+	added support for changing the user/group in rdiff sources.
+	added support for .mysql config files.
+	
+version 0.1
+	initial release Fri Oct  8 17:25:00 PDT 2004
+

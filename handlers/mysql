@@ -1,0 +1,133 @@
+#
+# mysql handler script for backupninja
+#
+
+getconf backupdir /var/backups/mysql
+getconf databases all
+getconf compress yes
+getconf dbusername
+getconf dbpassword
+getconf dbhost localhost
+getconf hotcopy no
+getconf sqldump no
+getconf user root
+
+# create backup dirs
+
+[ -d $backupdir ] || mkdir -p $backupdir
+[ -d $backupdir ] || fatal "Backup directory '$backupdir'"
+hotdir="$backupdir/hotcopy"
+dumpdir="$backupdir/sqldump"
+[ "$sqldump" == "no" -o -d $dumpdir ] || mkdir -p $dumpdir
+[ "$hotcopy" == "no" -o -d $hotdir ] || mkdir -p $hotdir
+
+# create .my.cnf
+ # (we do this because we don't want to have to specify the password on the command line
+ # because then anyone would be able to see it with a 'ps aux'. instead, we create a 
+ # temporary ~/.my.cnf in root's home directory).
+
+if [ "$dbusername" != "" ]; then
+	home=`grep '^root' /etc/passwd | awk -F: '{print $6}'`
+	[ -d $home ] || fatal "Can't find root's home directory ($home)."
+	mycnf="$home/.my.cnf"
+	if [ -f $mycnf ]; then
+		# rename temporarily
+		tmpcnf="$home/my.cnf.disable"
+		debug 0 "mv $mycnf $tmpcnf"
+		mv $mycnf $tmpcnf
+	fi
+	oldmask=`umask`
+	umask 077
+	cat > $mycnf <<EOF
+# auto generated backupninja mysql conf
+[mysql]
+user=$dbusername
+password=$dbpassword
+
+[mysqldump]
+user=$dbusername
+password=$dbpassword
+
+[mysqlhotcopy]
+user=$dbusername
+password=$dbpassword
+EOF
+	umask $oldmask
+fi
+	
+## HOT COPY
+
+if [ "$hotcopy" == "yes" ]; then 
+	if [ "$databases" == "all" ]; then
+		execstr="$MYSQLHOTCOPY --quiet --allowold --regexp /.\*/./.\*/ $hotdir"
+		debug 0 "su $user -c '$execstr'"
+		if [ ! $test ]; then
+			output=`su $user -c "$execstr" 2>&1`
+			code=$?
+			if [ "$code" == "0" ]; then
+				debug 0 $output
+				debug 1 "Successfully finished hotcopy of all mysql databases"
+			else
+				debug 2 $output
+				debug 2 "Failed to hotcopy all mysql databases"
+			fi
+		fi
+	else	
+		for db in $databases; do
+			execstr="$MYSQLHOTCOPY --allowold $db $hotdir"
+			debug 0 "su $user -c '$execstr'"
+			if [ ! $test ]; then
+				output=`su $user -c "$execstr" 2>&1`
+				code=$?
+				if [ "$code" == "0" ]; then
+					debug 0 $output
+					debug 1 "Successfully finished hotcopy of mysql database $db"
+				else
+					debug 2 $output
+					debug 2 "Failed to hotcopy mysql database $db"
+				fi
+			fi
+		done
+	fi
+fi
+	
+## SQL DUMP
+
+if [ "$sqldump" == "yes" ]; then
+	if [ "$databases" == "all" ]; then
+		databases=`echo 'show databases' | su $user -c "$MYSQL" | grep -v Database`
+	fi
+
+	for db in $databases; do
+		execstr="$MYSQLDUMP --lock-tables --complete-insert --add-drop-table --quick --quote-names $db > $dumpdir/${db}.sql"
+		debug 0 "su $user -c '$execstr'"
+		if [ ! $test ]; then
+			output=`su $user -c "$execstr" 2>&1`
+			code=$?
+			if [ "$code" == "0" ]; then
+				debug 0 $output
+				debug 1 "Successfully finished dump of mysql database $db"
+			else
+				debug 2 $output
+				debug 2 "Failed to dump mysql databases $db"
+			fi
+		fi
+	done
+	
+	if [ "$compress" == "yes" ]; then
+		output=`$GZIP -f $dumpdir/*.sql 2>&1`
+		debug 0 $output
+	fi
+fi
+
+if [ "$dbusername" != "" ]; then
+	## clean up tmp config file
+	debug 0 "rm $mycnf"
+	rm $mycnf
+	if [ -f "$tmpcnf" ]; then
+		debug 0 "mv $tmpcnf $mycnf"
+		mv $tmpcnf $mycnf
+	fi
+fi
+
+return 0

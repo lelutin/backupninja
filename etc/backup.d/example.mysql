@@ -1,0 +1,47 @@
+dbusername	= root
+dbpassword	= test
+dbhost		= localhost
+databases	= all
+backupdir	= /var/backups/mysql
+hotcopy		= yes
+sqldump		= yes
+compress    = yes
+
+#
+# user = <user>
+# Run mysql commands as 'user'. A valid .my.cnf must exist with a 
+# database username and password in the user's home directory.
+# If this option is not set, use dbusername and dbpassword instead.
+#
+# dbusername = <dbuser>
+# The user must have access to the databases specified later.
+# Use this option if not using the 'user' option.
+#
+# dbpassword = <dbpass>
+# The password. this password will NOT be passed on the command line
+# and is not readable using "ps aux". make sure that this file is not
+# world readable. Use this to specify the password in this config file
+# instead of ~user/.my.cnf.
+#
+# dbhost = <host>
+# only localhost works right now.
+#
+# databases = < all | db1 db2 db3 >
+# which databases to backup. should either be the word 'all' or a 
+# comma seperated list of database names.
+#
+# backupdir = < path/to/destination >
+# where to dump the backups. hotcopy backups will be in a subdirectory 'hotcopy' and
+# sqldump backups will be in a subdirectory 'sqldump'
+#
+# hotcopy = < yes | no >
+# make a backup of the actual database binary files using mysqlhotcopy.
+#
+# sqldump = < yes | no >
+# make a backup using mysqldump. this creates text files with sql commands
+# sufficient to recontruct the database.
+#
+# compress = < yes | no >
+# if yes, compress the sqldump output. 
+#
+

@@ -1,0 +1,6 @@
+/var/log/backupninja.log {
+	rotate 6
+	monthly
+	compress
+	missingok
+}
