@@ -3,7 +3,8 @@ version 0.4.3 -- Jan 20 2005
 	changes to rdiff handler: added "options", and "keep" is not necessarily days now.
 	added dup handler (still pretty beta)
 	added maildir handler (very specialized handler)
-    added --run option (runs the specified action file)
+	added --run option (runs the specified action file)
+	improved sys handler, now uses hwinfo
 
 version 0.4.2 -- Jan 6 2005
 	fixed bug which caused a report email to be sent even if no actions were run.
@@ -18,7 +19,7 @@ version 0.4.1 -- Jan 3 2005
 	
 version 0.4 -- Dec 26 2004
 	added "when" option, so that all configs can specify when
-      they are to be run.
+		they are to be run.
 	added reportsuccess and reportwarning config options
 	added .sys handler (hardware, packages, partitions).
 
