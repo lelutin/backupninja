@@ -14,14 +14,14 @@
 #     (MAKE SURE YOU PARTITION THE CORRECT DISK!!!)
 #
 # (3) hardware information. 
-#     a simple report is generated of the kernel modules, the devices,
-#     and the model of the hardware which 'discover' is able to detect.
+#     write to a text file the important things which hwinfo can discover.
+#
 
 getconf packages yes
 getconf packagesfile /var/backups/dpkg-selections.txt
 
 getconf partitions yes
-getconf partitionsfile /var/backups/partitions.*.txt
+getconf partitionsfile '/var/backups/partitions.*.txt'
 
 getconf hardware yes
 getconf hardwarefile /var/backups/hardware.txt
@@ -38,11 +38,15 @@ if [ "$partitions" == "yes" ]; then
 		warning "can't find sfdisk, skipping partition report."
 		partitions="no"
 	fi
+	if [ ! -x "`which hwinfo`" ]; then
+		warning "can't find hwinfo, skipping partition report."
+		partitions="no"
+	fi
 fi
 
 if [ "$hardware" == "yes" ]; then
-	if [ ! -x "`which discover`" ]; then
-		warning "can't find discover, skipping hardware report."
+	if [ ! -x "`which hwinfo`" ]; then
+		warning "can't find hwinfo, skipping hardware report."
 		hardware="no"
 	fi
 fi
@@ -59,22 +63,17 @@ fi
 
 ## PARTITIONS #############################
 
-#
 # here we use sfdisk to dump a listing of all the partitions. 
 # these files can be used to directly partition a disk of the same size.
-#
 
 if [ "$partitions" == "yes" ]; then
-	for i in `sfdisk -l | grep "^/dev/" | awk '{print $1}'`; do
-		devices=`echo $i | sed 's/[0-9]//'`
-	done
-	devices=`echo $devices | sort | uniq`
+	devices=`hwinfo --disk | grep "Device File" | cut -d\  -f5`
 	for dev in $devices; do
-		# remove leading /dev/
-		label=${devices#/dev/}
-		# replace any remaining '/'
+		[ -b $dev ] || continue
+		label=${dev#/dev/}
 		label=${label//\//-}
 		outputfile=${partitionsfile//__star__/$label}
+		debug "sfdisk -d $dev > $outputfile"
 		sfdisk -d $dev > $outputfile
 	done
 fi
@@ -82,18 +81,19 @@ fi
 ## HARDWARE #############################
 
 #
-# here we use discover to dump a table listing all the
+# here we use hwinfo to dump a table listing all the
 # information we can find on the hardware of this machine
 # 
 
 if [ "$hardware" == "yes" ]; then
-	printf "%15s%15s    %s / %s\n" "kernel module" "device" "vender" "model" > $hardwarefile
-	printf "%15s%15s    %s / %s\n\n" "=============" "======" "======" "=====" >> $hardwarefile
-	oldifs=$IFS
-	IFS=$'\t\n'
-	discover --format="'%m'\t'%d'\t'%V'\t'%M'\n" all | \
-		while read module device vender model
-	    	do printf "%15s%15s    %s / %s\n" "${module//\'/}" "${device//\'/}" "${vender//\'/}" "${model//\'/}" >> $hardwarefile
-		done
-	IFS=$oldifs
+	if [ -f $hardwarefile ]; then
+		rm $hardwarefile
+	fi
+	touch $hardwarefile
+	echo -e "\n\n====================== summary ======================\n" >>  $hardwarefile
+	hwinfo --short --cpu --network --disk --pci  >> $hardwarefile
+	for flag in cpu network disk bios pci; do
+		echo -e "\n\n====================== $flag ======================\n" >>  $hardwarefile
+		hwinfo --$flag >> $hardwarefile
+	done
 fi
