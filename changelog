@@ -1,4 +1,10 @@
-version 0.4.2 -- Jan 6 2003
+version 0.4.3 -- Jan 20 2005
+	results of handlers are now read line by line. 
+	changes to rdiff handler: added "options", and "keep" is not necessarily days now.
+	added dup handler (still pretty beta)
+	added maildir handler (very specialized handler)
+
+version 0.4.2 -- Jan 6 2005
 	fixed bug which caused a report email to be sent even if no actions were run.
 	fixed bug where multiple handler status messages were ignored
 	added status in the subject line of report emails
