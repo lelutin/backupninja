@@ -1,5 +1,7 @@
-version 0.3.4
+version 0.3.4 -- Dec 8 2004
 	fixed numerical variable quoting compatibility with older wc	
+	fixed stderr redirect bug
+	some comments in example.rdiff
 
 version 0.3.3
 	'*' (asterisk) works now in rdiff config files
@@ -33,6 +35,6 @@ version 0.2
 	added support for changing the user/group in rdiff sources.
 	added support for .mysql config files.
 	
-version 0.1
-	initial release Fri Oct  8 17:25:00 PDT 2004
+version 0.1 -- Oct 8 2004
+	initial release 
 
