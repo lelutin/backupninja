@@ -81,7 +81,7 @@ function printmsg() {
 		echo -e "${color}$typestr: $@${endcolor}" >&2
 	fi
 	
-	if [ "$print" -lt "$loglevel" ]; then
+	if [ $print -lt $loglevel ]; then
 		if [ -w "$logfile" ]; then
 			echo -e "${color}$typestr: $@${endcolor}" >> $logfile
 		fi
@@ -293,6 +293,7 @@ function process_action() {
 
 setupcolors
 conffile="/etc/backupninja.conf"
+loglevel=3
 
 ## process command line options
 
