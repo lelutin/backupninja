@@ -44,6 +44,7 @@ file in /etc/backup.d according to the file's suffix:
   .maildir --  this is a configuration to backup maildirs
   .mysql   --  mysql backup configuration
   .ldap    --  ldap backup configuration
+  .sys     --  general system reports
 
 Support for additional configuration types can be added by dropping
 bash scripts with the name of the suffix into /usr/share/backupninja. 
@@ -122,8 +123,11 @@ INSTALLATION
 Requirements:
   apt-get install bash gawk
 
-Suggested:
+Recommended: 
   apt-get install rdiff-backup gzip
+
+Suggested:
+  apt-get install sfdisk discover  
 
 Files:
   /usr/sbin/backupninja        -- main script
