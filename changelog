@@ -1,3 +1,8 @@
+version 0.4.2 -- Jan 6 2003
+	fixed bug which caused a report email to be sent even if no actions were run.
+	fixed bug where multiple handler status messages were ignored
+	added status in the subject line of report emails
+
 version 0.4.1 -- Jan 3 2005
 	added $usecolors and now more conservative about when colors are echoed.
 	fixed major bug, 'when' actually works now.
@@ -15,18 +20,18 @@ version 0.3.4 -- Dec 8 2004
 	fixed stderr redirect bug
 	some comments in example.rdiff
 
-version 0.3.3
+version 0.3.3 -- Nov 10 2004
 	'*' (asterisk) works now in rdiff config files
 	works now with gawk as well as mawk
 	many bug fixes to ldap handler
 	paths to helper scripts can be configured in global config
 	does not require /usr/bin/stat
 
-version 0.3.2
+version 0.3.2 -- Sept 29 2004
 	handler scripts are no longer executable (to comply with debian policy)
 	handler error and warning messages are sent with the notify email
     
-version 0.3.1
+version 0.3.1 -- Sept 5 2004
 	added ldap handler
 	moved sh support to a handler script
 	add test mode, where no action is taken.
@@ -35,13 +40,13 @@ version 0.3.1
 	fixed missing equals symbols in example.rdiff
 	changed backupninja executable to be /usr/sbin rather than /usr/bin
 	
-version 0.3
+version 0.3 -- Oct 20 2004
 	** IMPORTANT ** all config files are now ini style, not apache style
 	rewrote all scripts in bash for portability
 	added drop-in backupninja lib directory (/usr/share/backupninja)
 	all scripts are now run as root
 
-version 0.2
+version 0.2 -- Oct 14 2004
 	move distribution folder ./cron.d to ./etc/cron.d
 	fixed bug: removed printr of excludes (!)
 	added support for changing the user/group in rdiff sources.
