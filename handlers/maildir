@@ -1,0 +1,127 @@
+#!/usr/bin/php4 -q
+<?php
+
+###############################################################
+#
+#  This handler slowly creates a backup of each user's maildir
+#  to a remote server. It is designed to be run with low overhead
+#  in terms of cpu and bandwidth so it runs pretty slow.
+#
+##############################################################
+
+getconf rotate yes
+getconf remove yes
+
+getconf loadlimit 5
+getconf speedlimit 0
+getconf keepdaily 7
+getconf keepweekly 4
+
+getconf srcdir /var/maildir
+getconf destdir
+getconf desthost
+getconf destport 22
+getconf destuser
+
+# used for testing
+getconf letter
+getconf user
+
+[ -d $srcdir ] || fatal "source directory $srcdir doesn't exist"
+
+[ ! $test ] || testflags="--dry-run -v"
+rsyncflags="$testflags -e 'ssh -p $destport'"
+flags_mail="$rsyncflags --archive --ignore-existing --delete --numeric-ids --size-only --bwlimit=$speedlimit"
+flags_folders="$rsyncflags --archive --delete --numeric-ids"
+excludes='--exclude ".Trash/*" --exclude ".Mistakes/*" --exclude ".Spam/*"'
+
+# see if we can login
+debug "ssh -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1'"
+if [ ! $test ]; then
+	result=`ssh -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1' 2>&1`
+	if [ "$result" != "1" ]; then
+		fatal "Can't connect to $desthost as $destuser."
+	fi
+fi
+
+##################################################################
+### FUNCTIONS
+
+function do_letters() {
+	for i in a b c d e f g h i j k l m n o p q r s t u v w x y z; do
+		do_maildirs "$srcdir/$i"
+	done
+}
+
+function do_maildirs() {
+	local dir=$1
+	[ -d $dir ] || fatal "directory $dir not found."
+	for userdir in `ls -1 $dir`; do
+		do_userdir $userdir
+	done
+}
+
+function do_user() {
+	local user=$1
+	local letter=${user:0:1}
+	local dir="$srcdir/$letter/$user"
+	[ -d $dir ] || fatal "maildir $dir not found".
+
+	while 1; do
+		load=`uptime | sed 's/^.*load average: \\([^,]*\\).*$/\\1/'`
+		if [ $load -lt $loadlimit ]; then
+			info "load $load, sleeping..."
+			sleep 600
+		else
+			break
+		fi
+	done
+	
+  	cmd="rsync $maildirrsyncflags $excludes '$dir' '$destuser@$desthost:$destdir/maildir/$letter'"
+  	debug $cmd
+	# ret=`rsync $maildirrsyncflags $excludes '$dir' '$destuser@$desthost:$destdir/maildir/$letter' 2>&1`
+}
+
+# remove any maildirs from backup which might have been deleted
+# and add new ones which have just been created.
+
+function do_remove() {
+	local tmp1=/tmp/maildirtmpfile$$
+	local tmp2=/tmp/maildirtmpfile$$
+	
+	for i in a b c d e f g h i j k l m n o p q r s t u v w x y z; do
+		ls -1 "$srcdir/$i" | sort > $tmp1
+		ssh -p $destport $desthost 'ls -1 '$destdir/maildir/$i' | sort > $tmp2
+		for deluser in `join -v 2 $tmp1 $tmp2`; do
+			cmd="ssh -p $destport $desthost rm -vr '$destdir/maildir/$i/$deluser/'"
+			debug $cmd
+		done
+	done
+	rm $tmp1
+	rm $tmp2	
+}
+
+###
+##################################################################
+
+### ROTATE BACKUPS ###
+
+if [ "$remove" == "yes" ]; then
+
+fi
+
+### REMOVE OLD MAILDIRS ###
+
+if [ "$rotate" == "yes" ]; then
+
+fi
+
+### ROTATE BACKUPS ###
+
+if [ "$letter" != "" ]; then
+
+fi
+
+if [ "$user" != "" ]; then
+
+fi
