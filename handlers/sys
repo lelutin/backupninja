@@ -1,0 +1,99 @@
+#
+# this handler will save various reports of vital system information.
+# by default, all the reports are enabled and are saved in /var/backups.
+#
+# (1) a list of all the packages installed and removed.
+#     this file can be used to restore the state of installed packages
+#     by running "dpkg --set-selections < dpkg-selections.txt
+# 
+# (2) the partition table of all disks. 
+#     this partition table can be used to format another disk of
+#     the same size. this can be handy if using software raid and 
+#     you have a disk go bad. just replace the disk and partition it
+#     by running "sfdisk /dev/sdb < partitions.sdb.txt"
+#     (MAKE SURE YOU PARTITION THE CORRECT DISK!!!)
+#
+# (3) hardware information. 
+#     a simple report is generated of the kernel modules, the devices,
+#     and the model of the hardware which 'discover' is able to detect.
+
+getconf packages yes
+getconf packagesfile /var/backups/dpkg-selections.txt
+
+getconf partitions yes
+getconf partitionsfile /var/backups/partitions.*.txt
+
+getconf hardware yes
+getconf hardwarefile /var/backups/hardware.txt
+
+if [ "$packages" == "yes" ]; then
+	if [ ! -x "`which dpkg`" ]; then
+		debug 2 "can't find dpkg, skipping installed packages report."
+		packages="no"
+	fi
+fi
+
+if [ "$partitions" == "yes" ]; then
+	if [ ! -x "`which sfdisk`" ]; then
+		debug 2 "can't find sfdisk, skipping partition report."
+		partitions="no"
+	fi
+fi
+
+if [ "$hardware" == "yes" ]; then
+	if [ ! -x "`which discover`" ]; then
+		debug 2 "can't find discover, skipping hardware report."
+		hardware="no"
+	fi
+fi
+
+## PACKAGES ##############################
+
+#
+# here we grab a list of the packages installed and removed.
+#
+
+if [ "$packages" == "yes" ]; then
+	dpkg --get-selections > $packagesfile
+fi
+
+## PARTITIONS #############################
+
+#
+# here we use sfdisk to dump a listing of all the partitions. 
+# these files can be used to directly partition a disk of the same size.
+#
+
+if [ "$partitions" == "yes" ]; then
+	for i in `sfdisk -l | grep "^/dev/" | awk '{print $1}'`; do
+		devices=`echo $i | sed 's/[0-9]//'`
+	done
+	devices=`echo $devices | sort | uniq`
+	for dev in $devices; do
+		# remove leading /dev/
+		label=${devices#/dev/}
+		# replace any remaining '/'
+		label=${label//\//-}
+		outputfile=${partitionsfile//__star__/$label}
+		sfdisk -d $dev > $outputfile
+	done
+fi
+
+## HARDWARE #############################
+
+#
+# here we use discover to dump a table listing all the
+# information we can find on the hardware of this machine
+# 
+
+if [ "$hardware" == "yes" ]; then
+	printf "%15s%15s    %s / %s\n" "kernel module" "device" "vender" "model" > $hardwarefile
+	printf "%15s%15s    %s / %s\n\n" "=============" "======" "======" "=====" >> $hardwarefile
+	oldifs=$IFS
+	IFS=$'\t\n'
+	discover --format="'%m'\t'%d'\t'%V'\t'%M'\n" all | \
+		while read module device vender model
+	    	do printf "%15s%15s    %s / %s\n" "${module//\'/}" "${device//\'/}" "${vender//\'/}" "${model//\'/}" >> $hardwarefile
+		done
+	IFS=$oldifs
+fi

@@ -1,0 +1,31 @@
+#
+# this config file will save various reports of vital system information.
+# by default, all the reports are enabled and are saved in /var/backups.
+#
+# (1) a list of all the packages installed and removed.
+#     this file can be used to restore the state of installed packages
+#     by running "dpkg --set-selections < dpkg-selections.txt
+# 
+# (2) the partition table of all disks. 
+#     this partition table can be used to format another disk of
+#     the same size. this can be handy if using software raid and 
+#     you have a disk go bad. just replace the disk and partition it
+#     by running "sfdisk /dev/sdb < partitions.sdb.txt"
+#     (MAKE SURE YOU PARTITION THE CORRECT DISK!!!)
+#
+# (3) hardware information. 
+#     a simple report is generated of the kernel modules, the devices,
+#     and the model of the hardware which 'discover' is able to detect.
+#
+
+# here are the defaults, commented out:
+
+# packages = yes
+# packagesfile = /var/backups/dpkg-selections.txt
+
+# partitions = yes
+# partitionsfile = /var/backups/partitions.*.txt
+
+# hardware = yes
+# hardwarefile = /var/backups/hardware.txt
+
