@@ -3,11 +3,13 @@
 # requires rdiff-backup
 #
 
+getconf options
+
 setsection source
 getconf type; sourcetype=$type
 getconf label
 getconf user root; sourceuser=$user
-getconf keep
+getconf keep 60
 getconf include
 getconf exclude
 
@@ -55,30 +57,32 @@ execstr_clientpart="/"
 	
 ## REMOVE OLD BACKUPS
 
-if [ "$keep" -gt "0" ]; then
-	removestr="rdiff-backup --force --remove-older-than ${keep}D "
-	if [ "$desttype" == "remote" ]; then
-		removestr="${removestr}${destuser}@${desthost}::"
-	fi
-	removestr="${removestr}${destdir}/${label}";
-	
-	debug "su $sourceuser -c '$removestr'"
-	if [ ! $test ]; then
-		output=`su $sourceuser -c "$removestr" 2>&1`
-		code=$?
-		if [ "$code" == "0" ]; then
-			debug $output
-			info "Removing backups older than $keep days succeeded."
-		else
-			warning $output
-			warning "Failed removing backups older than $keep."
-		fi
+if [ "`echo $keep | tr -d 0-9`" == "" ]; then
+	keep="${keep}D"
+fi
+
+removestr="rdiff-backup --force --remove-older-than $keep "
+if [ "$desttype" == "remote" ]; then
+	removestr="${removestr}${destuser}@${desthost}::"
+fi
+removestr="${removestr}${destdir}/${label}";
+
+debug "su $sourceuser -c '$removestr'"
+if [ ! $test ]; then
+	output=`su $sourceuser -c "$removestr" 2>&1`
+	code=$?
+	if [ "$code" == "0" ]; then
+		debug $output
+		info "Removing backups older than $keep days succeeded."
+	else
+		warning $output
+		warning "Failed removing backups older than $keep."
 	fi
 fi
 
 ## EXECUTE ##
 	
-execstr="$RDIFFBACKUP --print-statistics "
+execstr="$RDIFFBACKUP $options --print-statistics "
 
 # TODO: order the includes and excludes
 
