@@ -31,7 +31,7 @@ function setupcolors() {
 }
 
 function colorize() {
-	if [ "$usecolor" == "yes" ]; then
+	if [ "$usecolors" == "yes" ]; then
 		local typestr=`echo "$@" | sed 's/\(^[^:]*\).*$/\1/'`
 		[ "$typestr" == "Debug" ] && type=0
 		[ "$typestr" == "Info" ] && type=1
@@ -58,7 +58,7 @@ function colorize() {
 # used to capture output from handlers
 echo_debug_msg=0
 
-usecolor=yes
+usecolors=yes
 
 function printmsg() {
 	[ ${#@} -gt 1 ] || return
@@ -143,6 +143,7 @@ function getconf() {
 
 	# replace * with %, so that it is not globbed.
 	ret="${ret//\\*/__star__}"
+	ret="${ret//\*/__star__}"
 
 	# this is weird, but single quotes are needed to 
 	# allow for returned values with spaces. $ret is still expanded
@@ -238,6 +239,7 @@ The following options are available:
 -t, --test           Run in test mode, no actions are actually taken.
 -n, --now            Perform actions now, instead of when they
                      might be scheduled.
+    --run FILE       Execute the specified action file and then exit.    
 When using colored output, there are:
 EOF
 	debug=1
@@ -352,11 +354,11 @@ while [ $# -ge 1 ]; do
 			# we shift here to avoid processing the file path 
 			shift
 			;;
-        --run)
+		--run)
+			debug=1
 			if [ -f $2 ]; then
 				singlerun=$2
 				processnow=1
-				debug=1
 			else
 				fatal "--run option must be fallowed by a backupninja action file"
 				usage
@@ -364,12 +366,18 @@ while [ $# -ge 1 ]; do
 			shift
 			;;
 		*)
+			debug=1
 			fatal "Unknown option $1"
 			usage
+			exit
 			;;
 	esac
 	shift
 done																										
+
+#if [ $debug ]; then
+#	usercolors=yes
+#fi
 
 ## Load and confirm basic configuration values
 
@@ -420,11 +428,11 @@ errormsg=""
 if [ "$singlerun" ]; then
 	files=$singlerun
 else
-	files=`ls $configdirectory`
+	files=`find $configdirectory -mindepth 1 `
 fi
 
 for file in $files; do
-	[ -f $file ] || continue;
+	[ -f "$file" ] || continue
 
 	check_perms $file
 	suffix="${file##*.}"
@@ -441,7 +449,7 @@ for file in $files; do
 		msg "*missing handler* -- $file"
 	fi
 done
-	
+
 ## mail the messages to the report address
 
 if [ $actions_run == 0 ]; then doit=0
