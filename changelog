@@ -1,10 +1,13 @@
-version 0.4.3 -- Jan 20 2005
+version 0.4.3 -- ????
 	results of handlers are now read line by line. 
-	changes to rdiff handler: added "options", and "keep" is not necessarily days now.
+	changes to rdiff handler: added "options", and "keep" is
+		not necessarily days now (ie, it will pass straight through to
+		rdiff-backup if the keep has a unit on it, otherwise it adds the 'D').
 	added dup handler (still pretty beta)
 	added maildir handler (very specialized handler)
 	added --run option (runs the specified action file)
 	improved sys handler, now uses hwinfo
+    added PATH to cron.d file, which fixes file not found errors.
 
 version 0.4.2 -- Jan 6 2005
 	fixed bug which caused a report email to be sent even if no actions were run.

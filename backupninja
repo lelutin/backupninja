@@ -143,7 +143,6 @@ function getconf() {
 
 	# replace * with %, so that it is not globbed.
 	ret="${ret//\\*/__star__}"
-	ret="${ret//\*/__star__}"
 
 	# this is weird, but single quotes are needed to 
 	# allow for returned values with spaces. $ret is still expanded

@@ -14,14 +14,14 @@
 #     (MAKE SURE YOU PARTITION THE CORRECT DISK!!!)
 #
 # (3) hardware information. 
-#     write to a text file the important things which hwinfo can discover.
+#     write to a text file the important things which hwinfo can gleen.
 #
 
 getconf packages yes
 getconf packagesfile /var/backups/dpkg-selections.txt
 
 getconf partitions yes
-getconf partitionsfile '/var/backups/partitions.*.txt'
+getconf partitionsfile /var/backups/partitions.__star__.txt
 
 getconf hardware yes
 getconf hardwarefile /var/backups/hardware.txt
@@ -91,6 +91,7 @@ if [ "$hardware" == "yes" ]; then
 	fi
 	touch $hardwarefile
 	echo -e "\n\n====================== summary ======================\n" >>  $hardwarefile
+	debug "hwinfo --short --cpu --network --disk --pci  >> $hardwarefile"
 	hwinfo --short --cpu --network --disk --pci  >> $hardwarefile
 	for flag in cpu network disk bios pci; do
 		echo -e "\n\n====================== $flag ======================\n" >>  $hardwarefile
