@@ -169,10 +169,7 @@ Requirements:
   apt-get install bash gawk
 
 Recommended: 
-  apt-get install rdiff-backup gzip
-
-Suggested:
-  apt-get install discover  
+  apt-get install rdiff-backup gzip hwinfo
 
 Files:
   /usr/sbin/backupninja        -- main script
