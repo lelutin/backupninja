@@ -122,30 +122,32 @@ function do_remove() {
 
 function do_rotate() {
 	backuproot=$destdir
-	now=`date %s`
+
+	ssh -T -o PasswordAuthentication=no $desthost -l $destuser <<EOF
+##### BEGIN REMOTE SCRIPT #####
 	seconds_daily=86400
 	seconds_weekly=604800
 	seconds_monthly=2628000
-
-	ssh -o PasswordAuthentication=no $desthost -l $destuser <<EOF
 	keepdaily=$keepdaily
 	keepweekly=$keepweekly
 	keepmonthly=$keepmonthly
+	now=\`date +%s\`
 
 	for rottype in daily weekly monthly; do
-		seconds=\`echo seconds_\${rottype}\`
+		seconds=\$((seconds_\${rottype}))
 
 		dir="$backuproot/\$rottype"
 		if [ ! -d \$dir.1 ]; then
-			echo "Warning: \$dir.1 does not exist. This backup is missing, so we are skipping the rotation."
-			continue
+			echo "Info: \$dir.1 does not exist. This backup is missing, so we are skipping the rotation."
+			continue 1
 		elif [ ! -f \$dir.1/created ]; then
-			echo "Warning: \$dir.1/created does not exist. This backup may be only partially completed, so we are skipping the rotation."
-			continue
+			echo "Warning: \$dir.1/created does not exist. This backup may be only partially completed. Skipping rotation."
+			continue 1
 		fi
 		
 		# Rotate the current list of backups, if we can.
-		oldest=\`ls -d $\dir.* | sed 's/^.*\.//' | sort -n | tail -1\`
+		oldest=\`ls -d \$dir.* | sed 's/^.*\.//' | sort -n | tail -1\`
+		[ "\$oldest" == "" ] && oldest=0
 		for (( i=\$oldest; i > 0; i-- )); do
 			if [ -d \$dir.\$i ]; then
 				if [ -f \$dir.\$i/rotated ]; then
@@ -154,38 +156,41 @@ function do_rotate() {
 					rotated=0
 				fi
 				cutoff_time=\$(( now - (seconds*i) ))
-				if [ \$rotated -gt \$cutoff_time ]; then
+				if [ \$rotated -lt \$cutoff_time ]; then
 					next=\$(( i + 1 ))
-					echo "mv \$dir.\$i \$dir.\$next"
-					mv \$dir.\$i \$dir.\$next
-					date +%c%n%s > \$dir.\$next/rotated
+					if [ ! -d \$dir.\$next ]; then
+						echo "mv \$dir.\$i \$dir.\$next"
+						mv \$dir.\$i \$dir.\$next
+						date +%c%n%s > \$dir.\$next/rotated
+					else
+						echo "Info: skipping rotation of \$dir.\$i because \$dir.\$next already exists."
+					fi
 				else
-					echo "Info: skipping rotation of \$dir.\$i because it was already rotated within the last " \$((cutoff_time/86400)) " days."
-				fi 
+					echo "Info: skipping rotation of \$dir.\$i because it was rotated" \$(( (now-rotated)/86400)) "days ago ("\$(( (now-cutoff_time)/86400))" needed)."
+				fi
 			fi
 		done
 	done
 
 	max=\$((keepdaily+1))
-	if [ ( \$keepweekly -a -d $backuproot/daily.\$max ) -a ! -d $backuproot/weekly.1 ]; then
+	if [ \( \$keepweekly -gt 0 -a -d $backuproot/daily.\$max \) -a ! -d $backuproot/weekly.1 ]; then
 		echo mv $backuproot/daily.\$max $backuproot/weekly.1
 		mv $backuproot/daily.\$max $backuproot/weekly.1
 		date +%c%n%s > $backuproot/weekly.1/rotated
 	fi
 
 	max=\$((keepweekly+1))
-	if [ ( \$keepmonthly -a -d $backuproot/weekly.\$max ) -a ! -d $backuproot/monthly.1 ]; then
+	if [ \( \$keepmonthly -gt 0 -a -d $backuproot/weekly.\$max \) -a ! -d $backuproot/monthly.1 ]; then
 		echo mv $backuproot/weekly.\$max $backuproot/monthly.1
 		mv $backuproot/weekly.\$max $backuproot/monthly.1
 		date +%c%n%s > $backuproot/monthly.1/rotated
 	fi
 
 	for rottype in daily weekly monthly; do
-		max=\`echo keep\${rottype}\`
-		max=\$((max+1))
+		max=\$((keep\${rottype}+1))
 		dir="$backuproot/\$rottype"
-		oldest=\`ls -d $\dir.* | sed 's/^.*\.//' | sort -n | tail -1\`
-
+		oldest=\`ls -d \$dir.* | sed 's/^.*\.//' | sort -n | tail -1\`
+		[ "\$oldest" == "" ] && oldest=0 
 		# if we've rotated the last backup off the stack, remove it.
 		for (( i=\$oldest; i >= \$max; i-- )); do
 			if [ -d \$dir.\$i ]; then
@@ -194,6 +199,7 @@ function do_rotate() {
 			fi
 		done
 	done
+####### END REMOTE SCRIPT #######
 EOF
 }
 
