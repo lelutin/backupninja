@@ -34,7 +34,7 @@ do
     fi
 done
 
-if [ $error ]; then
+if [ $error -eq 1 ]; then
     echo "Error: because of earlier errors, we are leaving svn backups in $tmp instead of $dest"
 else
     if [ -d $dest -a -d $tmp ]; then
