@@ -3,6 +3,7 @@ version 0.4.3 -- Jan 20 2005
 	changes to rdiff handler: added "options", and "keep" is not necessarily days now.
 	added dup handler (still pretty beta)
 	added maildir handler (very specialized handler)
+    added --run option (runs the specified action file)
 
 version 0.4.2 -- Jan 6 2005
 	fixed bug which caused a report email to be sent even if no actions were run.

@@ -33,7 +33,7 @@ The following options are available:
 -t, --test           Run in test mode, no actions are actually taken.
 -n, --now            Perform actions now, instead of when they
                      might be scheduled.
-
+--run FILE           runs the specified action FILE (e.g. one of the /etc/backup.d/ files)
 
 CONFIGURATION FILES
 ===================
