@@ -352,6 +352,17 @@ while [ $# -ge 1 ]; do
 			# we shift here to avoid processing the file path 
 			shift
 			;;
+        --run)
+			if [ -f $2 ]; then
+				singlerun=$2
+				processnow=1
+				debug=1
+			else
+				fatal "--run option must be fallowed by a backupninja action file"
+				usage
+			fi
+			shift
+			;;
 		*)
 			fatal "Unknown option $1"
 			usage
@@ -406,7 +417,13 @@ warnings=0
 actions_run=0
 errormsg=""
 
-for file in $configdirectory/*; do
+if [ "$singlerun" ]; then
+	files=$singlerun
+else
+	files=`ls $configdirectory`
+fi
+
+for file in $files; do
 	[ -f $file ] || continue;
 
 	check_perms $file
@@ -424,7 +441,7 @@ for file in $configdirectory/*; do
 		msg "*missing handler* -- $file"
 	fi
 done
-
+	
 ## mail the messages to the report address
 
 if [ $actions_run == 0 ]; then doit=0
