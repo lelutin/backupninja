@@ -317,10 +317,12 @@ function process_action() {
 	elif [ $_warnings != 0 ]; then
 		msg "*warning* -- $file"
 		errormsg="$errormsg\n== warnings from $file ==\n\n$ret\n"
-	elif [ $retcode == 0 ]; then
-		msg "success -- $file"
 	else
-		msg "unknown -- $file"
+		msg "success -- $file"
+#	elif [ $retcode == 0 ]; then
+#		msg "success -- $file"
+#	else
+#		msg "unknown -- $file"
 	fi
 
 	let "fatals += _fatals"
