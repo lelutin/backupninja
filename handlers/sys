@@ -28,21 +28,21 @@ getconf hardwarefile /var/backups/hardware.txt
 
 if [ "$packages" == "yes" ]; then
 	if [ ! -x "`which dpkg`" ]; then
-		debug 2 "can't find dpkg, skipping installed packages report."
+		warning "can't find dpkg, skipping installed packages report."
 		packages="no"
 	fi
 fi
 
 if [ "$partitions" == "yes" ]; then
 	if [ ! -x "`which sfdisk`" ]; then
-		debug 2 "can't find sfdisk, skipping partition report."
+		warning "can't find sfdisk, skipping partition report."
 		partitions="no"
 	fi
 fi
 
 if [ "$hardware" == "yes" ]; then
 	if [ ! -x "`which discover`" ]; then
-		debug 2 "can't find discover, skipping hardware report."
+		warning "can't find discover, skipping hardware report."
 		hardware="no"
 	fi
 fi

@@ -17,44 +17,34 @@
 #
 
 #####################################################
-## DEFAULTS
-
-DEBUG=${DEBUG:=0}
-CONFFILE="/etc/backupninja.conf"
-USECOLOURS=1
-
-#####################################################
 ## FUNCTIONS
 
 function setupcolors() {
-	if [  "$USECOLOURS" == 1 ]
-	then
-		BLUE="\033[34;01m"
-		GREEN="\033[32;01m"
-		YELLOW="\033[33;01m"
-		PURPLE="\033[35;01m"
-		RED="\033[31;01m"
-		OFF="\033[0m"
-		CYAN="\033[36;01m"
-	fi
+	BLUE="\033[34;01m"
+	GREEN="\033[32;01m"
+	YELLOW="\033[33;01m"
+	PURPLE="\033[35;01m"
+	RED="\033[31;01m"
+	OFF="\033[0m"
+	CYAN="\033[36;01m"
 }
 
-function run() {
-	RUNERROR=0
-	debug 0 "$@"
-	returnstring=`$@ 2>&1`
-	RUNERROR=$?
-	RUNERRORS=$[RUNERRORS+RUNERROR]
-	if [ "$RUNERROR" != 0 ]; then
-		debug 3 "Exitcode $RUNERROR returned when running: $@"
-		debug 3 "$returnstring"
-	else
-		debug 0 "$returnstring"
-	fi
-	return $RUNERROR
-}
+#function run() {
+#	RUNERROR=0
+#	debug 0 "$@"
+#	returnstring=`$@ 2>&1`
+#	RUNERROR=$?
+#	RUNERRORS=$[RUNERRORS+RUNERROR]
+#	if [ "$RUNERROR" != 0 ]; then
+#		debug 3 "Exitcode $RUNERROR returned when running: $@"
+#		debug 3 "$returnstring"
+#	else
+#		debug 0 "$returnstring"
+#	fi
+#	return $RUNERROR
+#}
 
-# We have the following debug levels:
+# We have the following message levels:
 # 0 - debug - blue
 # 1 - normal messages - green
 # 2 - warnings - yellow
@@ -66,33 +56,52 @@ function run() {
 # used to capture output from handlers
 echo_debug_msg=0
 
-function debug() {
+usecolor=yes
 
+function printmsg() {
 	[ ${#@} -gt 1 ] || return
 	 
-	TYPES=(Debug Info Warning Error Fatal)
-	COLOURS=($BLUE $GREEN $YELLOW $RED $PURPLE)
+	types=(Debug Info Warning Error Fatal)
 	type=$1
-	colour=${COLOURS[$type]}
-	shift
 	print=$[4-type]
-	if [ "$print" -lt "$loglevel" -o "$DEBUG" == 1 ]; then
-		if [ -z "$logfile" ]; then
-			echo -e "${colour}${TYPES[$type]}: $@${OFF}" >&2
-		else
-			if [ "$DEBUG" == 1 -o "$type" == 4 ]; then
-				echo -e "${colour}${TYPES[$type]}: $@${OFF}" >&2
-			fi
-			echo -e "${colour}${TYPES[$type]}: $@${OFF}" >> $logfile
-		fi
+	typestr=${types[$type]}
+	if [ "$usecolor" == "yes" ]; then
+		colors=($BLUE $GREEN $YELLOW $RED $PURPLE)
+		color=${colors[$type]}
+		endcolor=$OFF
 	fi
+	
+	shift
+	
 	if [ "$echo_debug_msg" != "0" -a "$type" -gt "1" ]; then
-		echo -e "${TYPES[$type]}: $@"
+		echo -e "$typestr: $@"
+	fi
+	
+	if [ "$debug" == 1 ]; then
+		echo -e "${color}$typestr: $@${endcolor}" >&2
+	fi
+	
+	if [ "$print" -lt "$loglevel" ]; then
+		if [ -w "$logfile" ]; then
+			echo -e "${color}$typestr: $@${endcolor}" >> $logfile
+		fi
 	fi
 }
 
+function debug() {
+	printmsg 0 "$@"
+}
+function info() {
+	printmsg 1 "$@"
+}
+function warning() {
+	printmsg 2 "$@"
+}
+function error() {
+	printmsg 3 "$@" 
+}
 function fatal() {
-	debug 4 "$@"
+	printmsg 4 "$@"
 	exit 2
 }
 
@@ -205,60 +214,120 @@ function isnow() {
 	return 1
 }
 
+function usage() {
+	cat << EOF
+$0 usage:
+This script allows you to coordinate system backup by dropping a few
+simple configuration files into /etc/backup.d/. Typically, this
+script is run hourly from cron.
+
+The following options are available:
+-h, --help           This usage message
+-d, --debug          Run in debug mode, where all log messages are
+                     output to the current shell.
+-f, --conffile FILE  Use FILE for the main configuration instead
+                     of /etc/backupninja.conf
+-t, --test           Run in test mode, no actions are actually taken.
+-n, --now            Perform actions now, instead of when they
+                     might be scheduled.
+When using colored output, there are:
+EOF
+	debug=1
+	debug   "Debugging info (when run with -d)"
+	info    "Informational messages (verbosity level 4)"
+	warning "Warnings (verbosity level 3 and up)"
+	error   "Errors (verbosity level 2 and up)"
+	fatal   "Fatal, halting errors (always shown)"
+}
+
+function process_action() {
+	local file="$1"
+	local suffix="$2"
+
+	setfile $file
+
+	# skip over this config if "when" option
+	# is not set to the current time.
+	getconf when "$defaultwhen"
+	if [ "$processnow" == 1 ]; then
+		info "running $file because of --now"
+	else
+		IFS=$'\t\n'
+		for w in $when; do
+			IFS=$' \t\n'
+			isnow "$w"
+			ret=$?
+			IFS=$'\t\n'
+			if [ $ret == 0 ]; then
+				debug "skipping $file because it is not $w"
+				return
+			else
+				info "running $file because it is $w"
+			fi
+		done
+		IFS=$' \t\n'
+	fi
+	
+	echo_debug_msg=1
+	# call the handler:
+	ret=`( . $scriptdir/$suffix $file )`
+	retcode="$?"
+	warnings=`echo $ret | grep -e "^Warning: " | wc -l`
+	errors=`echo $ret | grep -e "^Error: \|^Fatal: " | wc -l`
+	if [ $errors != 0 ]; then
+		msg "*failed* -- $file"
+		errormsg="$errormsg\n== errors from $file ==\n\n$ret\n"
+	elif [ $warnings != 0 ]; then
+		msg "*warning* -- $file"
+		errormsg="$errormsg\n== warnings from $file ==\n\n$ret\n"
+	elif [ $retcode == 0 ]; then
+		msg "success -- $file"
+	else
+		msg "unknown -- $file"
+	fi
+	echo_debug_msg=0
+}
+
 #####################################################
 ## MAIN
 
+setupcolors
+conffile="/etc/backupninja.conf"
+
 ## process command line options
 
-if [ "$1" == "--help" ]; then
-	HELP=1;DEBUG=1;loglevel=4
-else
-	while getopts h,f:,d,t option
-	do
-		case "$option" in
-			h) HELP=1;DEBUG=1;loglevel=4;;
-			d) DEBUG=1;loglevel=4;;
-			f) CONFFILE="$OPTARG";;
-			t) test=1;DEBUG=1;;
-		esac
-	done
-fi
-	
-setupcolors
-
-## Print help
-
-if [ "$HELP" == 1 ]; then
-cat << EOF
-$0 usage:
-This script allows you to coordinate system backup by dropping a few
-simple configuration files into /etc/backup.d/. In general, this script
-is run from a cron job late at night. 
-
-The following options are available:
--h         This help message
--d         Run in debug mode, where all log messages are output to the current shell.
--f <file>  Use <file> for the main configuration instead of /etc/backupninja.conf
--t         Run in test mode, no actions are actually taken.
-
-When using colored output, there are:
-EOF
-debug 0 "Debugging info (when run with -d)"
-debug 1 "Informational messages (verbosity level 4)"
-debug 2 "Warnings (verbosity level 3 and up)"
-debug 3 "Errors (verbosity level 2 and up)"
-debug 4 "Fatal, halting errors (always shown)"
-exit 0
-fi
+while [ $# -ge 1 ]; do
+	case $1 in
+		-h|--help) usage;;
+		-d|--debug) debug=1;;
+		-t|--test) test=1;debug=1;;
+		-n|--now) processnow=1;;
+		-f|--conffile)
+			if [ -f $2 ]; then
+				conffile=$2
+			else
+				fatal "-f|--conffile option must be followed by an existing filename"
+				usage
+			fi
+			# we shift here to avoid processing the file path 
+			shift
+			;;
+		*)
+			fatal "Unknown option $1"
+			usage
+			;;
+	esac
+	shift
+done																										
 
 ## Load and confirm basic configuration values
 
 # bootstrap
-[ -r "$CONFFILE" ] || fatal "Configuration file $CONFFILE not found."
-scriptdir=`grep scriptdirectory $CONFFILE | awk '{print $3}'`
-[ -n "$scriptdir" ] || fatal "Cound not find entry 'scriptdirectory' in $CONFFILE."
+[ -r "$conffile" ] || fatal "Configuration file $conffile not found."
+scriptdir=`grep scriptdirectory $conffile | awk '{print $3}'`
+[ -n "$scriptdir" ] || fatal "Cound not find entry 'scriptdirectory' in $conffile"
 [ -d "$scriptdir" ] || fatal "Script directory $scriptdir not found."
-setfile $CONFFILE
+setfile $conffile
 
 # get global config options (second param is the default)
 getconf configdirectory /etc/backup.d
@@ -269,6 +338,7 @@ getconf loglevel 3
 getconf when "Everyday at 01:00"
 defaultwhen=$when
 getconf logfile /var/log/backupninja.log
+getconf usecolors "yes"
 getconf SLAPCAT /usr/sbin/slapcat
 getconf RDIFFBACKUP /usr/bin/rdiff-backup
 getconf MYSQL /usr/bin/mysql
@@ -277,11 +347,15 @@ getconf MYSQLDUMP /usr/bin/mysqldump
 getconf GZIP /bin/gzip
 
 [ -d "$configdirectory" ] || fatal "Configuration directory '$configdirectory' not found."
-[ `id -u` == "0" ] || fatal "Can only be run as root"
+
+if [ "$UID" != "0" ]; then
+	echo "$0 can only be run as root"
+	exit 1
+fi
 
 ## Process each configuration file
 
-debug 1 "====== starting at "`date`" ======"
+info "====== starting at "`date`" ======"
 
 # by default, don't make files which are world or group readable.
 umask 077
@@ -295,54 +369,14 @@ for file in $configdirectory/*; do
 	suffix="${file##*.}"
 	base=`basename $file`
 	if [ "${base:0:1}" == "0" ]; then
-		debug 1 "Skipping $file"
+		info "Skipping $file"
 		continue
-	else
-		debug 1 "Processing $file"
 	fi
 
 	if [ -e "$scriptdir/$suffix" ]; then
-		setfile $file
-
-		# skip over this config if "when" option
-		# is not set to the current time.
-		getconf when "$defaultwhen"
-		IFS=$'\t\n'
-		for w in $when; do
-			IFS=$' \t\n'
-			isnow "$w"
-			ret=$?
-			IFS=$'\t\n'
-			if [ $ret == 0 ]; then
-				debug 0 "skipping $file because it is not $w"
-				continue
-			else
-				debug 0 "running $file because it is $w"
-				continue
-			fi		
-		done
-		IFS=$' \t\n'
-
-		echo_debug_msg=1
-		# call the handler:
-		ret=`( . $scriptdir/$suffix $file )`
-		retcode="$?"
-		warnings=`echo $ret | grep -e "^Warning: " | wc -l`
-		errors=`echo $ret | grep -e "^Error: \|^Fatal: " | wc -l`
-		if [ $errors != 0 ]; then
-			msg "*failed* -- $file"
-			errormsg="$error\n== errors from $file ==\n\n$ret\n"
-		elif [ $warnings != 0 ]; then
-			msg "*warning* -- $file"
-			errormsg="$error\n== warnings from $file ==\n\n$ret\n"
-		elif [ $retcode == 0 ]; then
-			msg "success -- $file"
-		else
-			msg "unknown -- $file"
-		fi
-		echo_debug_msg=0
+		process_action $file $suffix
 	else
-		debug 3 "Can't process file '$file': no handler script for suffix '$suffix'"
+		error "Can't process file '$file': no handler script for suffix '$suffix'"
 		msg "*missing handler* -- $file"
 	fi
 done
@@ -366,6 +400,6 @@ if [ $doit == 1 ]; then
 	} | mail $reportemail -s "backupninja: $hostname"
 fi
 
-debug 1 "====== finished at "`date`" ======"
+info "====== finished at "`date`" ======"
 
 ############################################################

@@ -33,7 +33,7 @@ if [ "$dbusername" != "" ]; then
 	if [ -f $mycnf ]; then
 		# rename temporarily
 		tmpcnf="$home/my.cnf.disable"
-		debug 0 "mv $mycnf $tmpcnf"
+		debug "mv $mycnf $tmpcnf"
 		mv $mycnf $tmpcnf
 	fi
 	oldmask=`umask`
@@ -60,31 +60,31 @@ fi
 if [ "$hotcopy" == "yes" ]; then 
 	if [ "$databases" == "all" ]; then
 		execstr="$MYSQLHOTCOPY --quiet --allowold --regexp /.\*/./.\*/ $hotdir"
-		debug 0 "su $user -c '$execstr'"
+		debug "su $user -c '$execstr'"
 		if [ ! $test ]; then
 			output=`su $user -c "$execstr" 2>&1`
 			code=$?
 			if [ "$code" == "0" ]; then
-				debug 0 $output
-				debug 1 "Successfully finished hotcopy of all mysql databases"
+				debug $output
+				info "Successfully finished hotcopy of all mysql databases"
 			else
-				debug 2 $output
-				debug 2 "Failed to hotcopy all mysql databases"
+				warning $output
+				warning "Failed to hotcopy all mysql databases"
 			fi
 		fi
 	else	
 		for db in $databases; do
 			execstr="$MYSQLHOTCOPY --allowold $db $hotdir"
-			debug 0 "su $user -c '$execstr'"
+			debug "su $user -c '$execstr'"
 			if [ ! $test ]; then
 				output=`su $user -c "$execstr" 2>&1`
 				code=$?
 				if [ "$code" == "0" ]; then
-					debug 0 $output
-					debug 1 "Successfully finished hotcopy of mysql database $db"
+					debug $output
+					info "Successfully finished hotcopy of mysql database $db"
 				else
-					debug 2 $output
-					debug 2 "Failed to hotcopy mysql database $db"
+					warning $output
+					warning "Failed to hotcopy mysql database $db"
 				fi
 			fi
 		done
@@ -100,32 +100,32 @@ if [ "$sqldump" == "yes" ]; then
 
 	for db in $databases; do
 		execstr="$MYSQLDUMP --lock-tables --complete-insert --add-drop-table --quick --quote-names $db > $dumpdir/${db}.sql"
-		debug 0 "su $user -c '$execstr'"
+		debug "su $user -c '$execstr'"
 		if [ ! $test ]; then
 			output=`su $user -c "$execstr" 2>&1`
 			code=$?
 			if [ "$code" == "0" ]; then
-				debug 0 $output
-				debug 1 "Successfully finished dump of mysql database $db"
+				debug $output
+				info "Successfully finished dump of mysql database $db"
 			else
-				debug 2 $output
-				debug 2 "Failed to dump mysql databases $db"
+				warning $output
+				warning "Failed to dump mysql databases $db"
 			fi
 		fi
 	done
 	
 	if [ "$compress" == "yes" ]; then
 		output=`$GZIP -f $dumpdir/*.sql 2>&1`
-		debug 0 $output
+		debug $output
 	fi
 fi
 
 if [ "$dbusername" != "" ]; then
 	## clean up tmp config file
-	debug 0 "rm $mycnf"
+	debug "rm $mycnf"
 	rm $mycnf
 	if [ -f "$tmpcnf" ]; then
-		debug 0 "mv $tmpcnf $mycnf"
+		debug "mv $tmpcnf $mycnf"
 		mv $tmpcnf $mycnf
 	fi
 fi

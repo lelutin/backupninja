@@ -1,3 +1,9 @@
+version 0.4.1 -- Jan 3 2005
+	added $usecolors and now more conservative about when colors are echoed.
+	fixed major bug, 'when' actually works now.
+	replaced debug function with debug, info, warning, error, fatal.
+	added --now option to force all actions to be performed now.
+	
 version 0.4 -- Dec 26 2004
 	added "when" option, so that all configs can specify when
       they are to be run.

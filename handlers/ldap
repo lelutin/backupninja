@@ -47,20 +47,20 @@ if [ "$ldif" == "yes" ]; then
 			fatal "Couldn't create ldif dump file: $dumpdir/$dbsuffix.ldif"
 		fi
 		execstr="$SLAPCAT -f $conf -b $dbsuffix -l $dumpdir/$dbsuffix.ldif"
-		debug 0 "$execstr"
+		debug "$execstr"
 		if [ ! $test ]; then
 			output=`$execstr`
 			code=$?
 			if [ "$code" == "0" ]; then
-				debug 0 $output
-				debug 1 "Successfully finished ldif export of $dbsuffix"
+				debug $output
+				info "Successfully finished ldif export of $dbsuffix"
 			else
-				debug 2 $output
-				debug 2 "Failed ldif export of $dbsuffix"
+				warning $output
+				warning "Failed ldif export of $dbsuffix"
 			fi
 			if [ "$compress" == "yes" ]; then
 				output=`$GZIP -f "$dumpdir/$dbsuffix.ldif" 2>&1`
-				debug 0 $output
+				debug $output
 			fi
 		fi
 	done	
