@@ -308,7 +308,7 @@ function process_action() {
 	_fatals=`cat $bufferfile | grep "^Fatal: " | wc -l`
 	
 	ret=`grep "\(^Warning: \|^Error: \|^Fatal: \)" $bufferfile`
-	#rm $bufferfile
+	rm $bufferfile
 	if [ $_fatals != 0 ]; then
 		msg "*failed* -- $file"
 		errormsg="$errormsg\n== failures from $file ==\n\n$ret\n"
