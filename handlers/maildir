@@ -147,23 +147,23 @@ function do_rotate() {
 		[ "\$oldest" == "" ] && oldest=0
 		for (( i=\$oldest; i > 0; i-- )); do
 			if [ -d \$dir.\$i ]; then
-				if [ -f \$dir.\$i/rotated ]; then
-					rotated=\`tail -1 \$dir.\$i/rotated\`
+				if [ -f \$dir.\$i/created ]; then
+					created=\`tail -1 \$dir.\$i/created\`
 				else
-					rotated=0
+					created=0
 				fi
-				cutoff_time=\$(( now - (seconds*i) ))
-				if [ \$rotated -lt \$cutoff_time ]; then
+				cutoff_time=\$(( now - (seconds*(i-1)) ))
+				if [ ! \$created -gt \$cutoff_time ]; then
 					next=\$(( i + 1 ))
 					if [ ! -d \$dir.\$next ]; then
-						echo "mv \$dir.\$i \$dir.\$next"
+						echo "Debug: mv \$dir.\$i \$dir.\$next"
 						mv \$dir.\$i \$dir.\$next
 						date +%c%n%s > \$dir.\$next/rotated
 					else
 						echo "Info: skipping rotation of \$dir.\$i because \$dir.\$next already exists."
 					fi
 				else
-					echo "Info: skipping rotation of \$dir.\$i because it was rotated" \$(( (now-rotated)/86400)) "days ago ("\$(( (now-cutoff_time)/86400))" needed)."
+					echo "Info: skipping rotation of \$dir.\$i because it was created" \$(( (now-created)/86400)) "days ago ("\$(( (now-cutoff_time)/86400))" needed)."
 				fi
 			fi
 		done
@@ -194,10 +194,9 @@ function do_rotate() {
 				if [ -d $backuproot/rotate.tmp ]; then
 					echo "Info: removing $backuproot/rotate.tmp"
 					rm -rf $backuproot/rotate.tmp
-				else
-					echo "Info: moving \$dir.\$i to $backuproot/rotate.tmp"
-					mv \$dir.\$i $backuproot/rotate.tmp
 				fi
+				echo "Info: moving \$dir.\$i to $backuproot/rotate.tmp"
+				mv \$dir.\$i $backuproot/rotate.tmp
 			fi
 		done
 	done
@@ -236,6 +235,9 @@ function setup_remote_dirs() {
 					echo "Fatal: could not create directory $dir.1 on host $desthost"
 					exit 1
 				fi
+				for i in a b c d e f g h i j k l m n o p q r s t u v w y x z; do
+					mkdir $dir.1/\$i
+				done
 			fi
 			if [ -d $destdir/$backuptype.2 ]; then
 				echo "Info: updating hard links to $dir.1. This may take a while."
