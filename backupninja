@@ -27,22 +27,24 @@ function setupcolors() {
 	RED="\033[31;01m"
 	OFF="\033[0m"
 	CYAN="\033[36;01m"
+	COLORS=($BLUE $GREEN $YELLOW $RED $PURPLE)
 }
 
-#function run() {
-#	RUNERROR=0
-#	debug 0 "$@"
-#	returnstring=`$@ 2>&1`
-#	RUNERROR=$?
-#	RUNERRORS=$[RUNERRORS+RUNERROR]
-#	if [ "$RUNERROR" != 0 ]; then
-#		debug 3 "Exitcode $RUNERROR returned when running: $@"
-#		debug 3 "$returnstring"
-#	else
-#		debug 0 "$returnstring"
-#	fi
-#	return $RUNERROR
-#}
+function colorize() {
+	if [ "$usecolor" == "yes" ]; then
+		local typestr=`echo "$@" | sed 's/\(^[^:]*\).*$/\1/'`
+		[ "$typestr" == "Debug" ] && type=0
+		[ "$typestr" == "Info" ] && type=1
+		[ "$typestr" == "Warning" ] && type=2
+		[ "$typestr" == "Error" ] && type=3
+		[ "$typestr" == "Fatal" ] && type=4
+		color=${COLORS[$type]}
+		endcolor=$OFF
+		echo -e "$color$@$endcolor"
+	else
+		echo -e "$@"
+	fi
+}
 
 # We have the following message levels:
 # 0 - debug - blue
@@ -60,34 +62,40 @@ usecolor=yes
 
 function printmsg() {
 	[ ${#@} -gt 1 ] || return
-	 
-	types=(Debug Info Warning Error Fatal)
+
 	type=$1
-	print=$[4-type]
-	typestr=${types[$type]}
-	if [ "$usecolor" == "yes" ]; then
-		colors=($BLUE $GREEN $YELLOW $RED $PURPLE)
-		color=${colors[$type]}
-		endcolor=$OFF
-	fi
-	
 	shift
-	
-	if [ "$echo_debug_msg" != "0" -a "$type" -gt "1" ]; then
-		echo -e "$typestr: $@"
+	if [ $type == 100 ]; then
+		typestr=`echo "$@" | sed 's/\(^[^:]*\).*$/\1/'`
+		[ "$typestr" == "Debug" ] && type=0
+		[ "$typestr" == "Info" ] && type=1
+		[ "$typestr" == "Warning" ] && type=2
+		[ "$typestr" == "Error" ] && type=3
+		[ "$typestr" == "Fatal" ] && type=4
+		typestr=""
+	else
+		types=(Debug Info Warning Error Fatal)
+		typestr="${types[$type]}: "
 	fi
 	
-	if [ "$debug" == 1 ]; then
-		echo -e "${color}$typestr: $@${endcolor}" >&2
+	print=$[4-type]
+	
+	if [ $echo_debug_msg == 1 ]; then
+		echo -e "$typestr$@" >&2
+	elif [ $debug ]; then
+		colorize "$typestr$@" >&2
 	fi
 	
 	if [ $print -lt $loglevel ]; then
 		if [ -w "$logfile" ]; then
-			echo -e "${color}$typestr: $@${endcolor}" >> $logfile
+			colorize "$typestr$@" >> $logfile
 		fi
 	fi
 }
 
+function passthru() {
+	printmsg 100 "$@"
+}
 function debug() {
 	printmsg 0 "$@"
 }
@@ -276,16 +284,29 @@ function process_action() {
 	fi
 	
 	let "actions_run += 1"
-	echo_debug_msg=1
 
 	# call the handler:
-	ret=`( . $scriptdir/$suffix $file )`
-	retcode="$?"
+	local bufferfile="/tmp/backupninja.buffer.$$"
+	echo "" > $bufferfile
+	echo_debug_msg=1
+	(
+		. $scriptdir/$suffix $file
+	) 2>&1 | (
+		while read a; do
+			echo $a >> $bufferfile
+			[ $debug ] && colorize "$a"
+		done
+	)
+	retcode=$?
+	# ^^^^^^^^ we have a problem! we can't grab the return code "$?". grrr.
+	echo_debug_msg=0
 
-	_warnings=`echo $ret | grep "Warning: " | wc -l`
-	_errors=`echo $ret | grep "Error: " | wc -l`
-	_fatals=`echo $ret | grep "Fatal: " | wc -l`
-
+	_warnings=`cat $bufferfile | grep "^Warning: " | wc -l`
+	_errors=`cat $bufferfile | grep "^Error: " | wc -l`
+	_fatals=`cat $bufferfile | grep "^Fatal: " | wc -l`
+	
+	ret=`grep "\(^Warning: \|^Error: \|^Fatal: \)" $bufferfile`
+	#rm $bufferfile
 	if [ $_fatals != 0 ]; then
 		msg "*failed* -- $file"
 		errormsg="$errormsg\n== failures from $file ==\n\n$ret\n"
@@ -301,10 +322,9 @@ function process_action() {
 		msg "unknown -- $file"
 	fi
 
-	echo_debug_msg=0	
 	let "fatals += _fatals"
 	let "errors += _errors"
-	let "warnings += _warnings"
+	let "warnings += _warnings"	
 }
 
 #####################################################
@@ -365,6 +385,7 @@ getconf MYSQL /usr/bin/mysql
 getconf MYSQLHOTCOPY /usr/bin/mysqlhotcopy
 getconf MYSQLDUMP /usr/bin/mysqldump
 getconf GZIP /bin/gzip
+getconf RSYNC /usr/bin/rsync
 
 [ -d "$configdirectory" ] || fatal "Configuration directory '$configdirectory' not found."
 
