@@ -1,4 +1,4 @@
-version 0.4.4 -- March 15 2005
+version 0.4.4 -- March 18 2005
 	results of handlers are now read line by line. 
 	changes to rdiff handler: added "options", and "keep" is
 		not necessarily days now (ie, it will pass straight through to
@@ -7,6 +7,7 @@ version 0.4.4 -- March 15 2005
 	added maildir handler (very specialized handler)
 	added --run option (runs the specified action file)
 	improved sys handler, now uses hwinfo
+	added subversion hotbackup handler, svn. 
     added PATH to cron.d file, which fixes file not found errors.
 
 version 0.4.2 -- Jan 6 2005
