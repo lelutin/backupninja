@@ -1,12 +1,18 @@
-#!/usr/bin/php4 -q
-<?php
-
 ###############################################################
 #
 #  This handler slowly creates a backup of each user's maildir
 #  to a remote server. It is designed to be run with low overhead
 #  in terms of cpu and bandwidth so it runs pretty slow.
 #
+#  if destdir is /backup/maildir/, then it will contain the files
+#    daily.1
+#    daily.2
+#    daily.3
+#    weekly.1
+#    weekly.2
+#    monthly.1
+#  if keepdaily is 3, keepweekly is 2, and keepmonthly is 1. 
+# 
 ##############################################################
 
 getconf rotate yes
@@ -14,14 +20,19 @@ getconf remove yes
 
 getconf loadlimit 5
 getconf speedlimit 0
-getconf keepdaily 7
-getconf keepweekly 4
+getconf keepdaily 5
+getconf keepweekly 3
+getconf keepmonthly 1
 
 getconf srcdir /var/maildir
 getconf destdir
 getconf desthost
 getconf destport 22
 getconf destuser
+
+# strip trailing /
+destdir=${destdir%/}
+srcdir=${srcdir%/}
 
 # used for testing
 getconf letter
@@ -46,6 +57,14 @@ fi
 
 ##################################################################
 ### FUNCTIONS
+
+# remote run the args remotely
+function rrun() {
+	debug ssh -o PasswordAuthentication=no $desthost -l $destuser $@
+	if [ ! $test ]; then
+		debug ssh -o PasswordAuthentication=no $desthost -l $destuser $@
+	fi
+}
 
 function do_letters() {
 	for i in a b c d e f g h i j k l m n o p q r s t u v w x y z; do
@@ -91,7 +110,7 @@ function do_remove() {
 	
 	for i in a b c d e f g h i j k l m n o p q r s t u v w x y z; do
 		ls -1 "$srcdir/$i" | sort > $tmp1
-		ssh -p $destport $desthost 'ls -1 '$destdir/maildir/$i' | sort > $tmp2
+		ssh -p $destport $desthost ls -1 '$destdir/maildir/$i' | sort > $tmp2
 		for deluser in `join -v 2 $tmp1 $tmp2`; do
 			cmd="ssh -p $destport $desthost rm -vr '$destdir/maildir/$i/$deluser/'"
 			debug $cmd
@@ -101,27 +120,105 @@ function do_remove() {
 	rm $tmp2	
 }
 
+function do_rotate() {
+	backuproot=$destdir
+	now=`date %s`
+	seconds_daily=86400
+	seconds_weekly=604800
+	seconds_monthly=2628000
+
+	ssh -o PasswordAuthentication=no $desthost -l $destuser <<EOF
+	keepdaily=$keepdaily
+	keepweekly=$keepweekly
+	keepmonthly=$keepmonthly
+
+	for rottype in daily weekly monthly; do
+		seconds=\`echo seconds_\${rottype}\`
+
+		dir="$backuproot/\$rottype"
+		if [ ! -d \$dir.1 ]; then
+			echo "Warning: \$dir.1 does not exist. This backup is missing, so we are skipping the rotation."
+			continue
+		elif [ ! -f \$dir.1/created ]; then
+			echo "Warning: \$dir.1/created does not exist. This backup may be only partially completed, so we are skipping the rotation."
+			continue
+		fi
+		
+		# Rotate the current list of backups, if we can.
+		oldest=\`ls -d $\dir.* | sed 's/^.*\.//' | sort -n | tail -1\`
+		for (( i=\$oldest; i > 0; i-- )); do
+			if [ -d \$dir.\$i ]; then
+				if [ -f \$dir.\$i/rotated ]; then
+					rotated=\`tail -1 \$dir.\$i/rotated\`
+				else
+					rotated=0
+				fi
+				cutoff_time=\$(( now - (seconds*i) ))
+				if [ \$rotated -gt \$cutoff_time ]; then
+					next=\$(( i + 1 ))
+					echo "mv \$dir.\$i \$dir.\$next"
+					mv \$dir.\$i \$dir.\$next
+					date +%c%n%s > \$dir.\$next/rotated
+				else
+					echo "Info: skipping rotation of \$dir.\$i because it was already rotated within the last " \$((cutoff_time/86400)) " days."
+				fi 
+			fi
+		done
+	done
+
+	max=\$((keepdaily+1))
+	if [ ( \$keepweekly -a -d $backuproot/daily.\$max ) -a ! -d $backuproot/weekly.1 ]; then
+		echo mv $backuproot/daily.\$max $backuproot/weekly.1
+		mv $backuproot/daily.\$max $backuproot/weekly.1
+		date +%c%n%s > $backuproot/weekly.1/rotated
+	fi
+
+	max=\$((keepweekly+1))
+	if [ ( \$keepmonthly -a -d $backuproot/weekly.\$max ) -a ! -d $backuproot/monthly.1 ]; then
+		echo mv $backuproot/weekly.\$max $backuproot/monthly.1
+		mv $backuproot/weekly.\$max $backuproot/monthly.1
+		date +%c%n%s > $backuproot/monthly.1/rotated
+	fi
+
+	for rottype in daily weekly monthly; do
+		max=\`echo keep\${rottype}\`
+		max=\$((max+1))
+		dir="$backuproot/\$rottype"
+		oldest=\`ls -d $\dir.* | sed 's/^.*\.//' | sort -n | tail -1\`
+
+		# if we've rotated the last backup off the stack, remove it.
+		for (( i=\$oldest; i >= \$max; i-- )); do
+			if [ -d \$dir.\$i ]; then
+				echo "Info: removing \$dir.\$i"
+				rm -rf \$dir.\$i
+			fi
+		done
+	done
+EOF
+}
+
+
 ###
 ##################################################################
 
 ### ROTATE BACKUPS ###
 
-if [ "$remove" == "yes" ]; then
-
+if [ "$rotate" == "yes" ]; then
+	do_rotate
 fi
 
 ### REMOVE OLD MAILDIRS ###
 
-if [ "$rotate" == "yes" ]; then
-
+if [ "$remove" == "yes" ]; then
+	debug remove
 fi
 
 ### ROTATE BACKUPS ###
 
 if [ "$letter" != "" ]; then
-
+	debug letter
 fi
 
 if [ "$user" != "" ]; then
-
+	debug user
 fi
