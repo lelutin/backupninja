@@ -30,21 +30,24 @@ getconf desthost
 getconf destport 22
 getconf destuser
 
+failedcount=0
+
 # strip trailing /
 destdir=${destdir%/}
 srcdir=${srcdir%/}
 
 # used for testing
-getconf letter
-getconf user
+#getconf letter
+#getconf testuser elijah
+getconf backup yes
+#letters=e
+letters="a b c d e f g h i j k l m n o p q r s t u v w x y z"
 
 [ -d $srcdir ] || fatal "source directory $srcdir doesn't exist"
 
 [ ! $test ] || testflags="--dry-run -v"
-rsyncflags="$testflags -e 'ssh -p $destport'"
-flags_mail="$rsyncflags --archive --ignore-existing --delete --numeric-ids --size-only --bwlimit=$speedlimit"
-flags_folders="$rsyncflags --archive --delete --numeric-ids"
-excludes='--exclude ".Trash/*" --exclude ".Mistakes/*" --exclude ".Spam/*"'
+rsyncflags="$testflags -e 'ssh -p $destport' -r -v --ignore-existing --delete --size-only --bwlimit=$speedlimit"
+excludes="--exclude '.Trash/\*' --exclude '.Mistakes/\*' --exclude '.Spam/\*'"
 
 # see if we can login
 debug "ssh -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1'"
@@ -58,47 +61,38 @@ fi
 ##################################################################
 ### FUNCTIONS
 
-# remote run the args remotely
-function rrun() {
-	debug ssh -o PasswordAuthentication=no $desthost -l $destuser $@
-	if [ ! $test ]; then
-		debug ssh -o PasswordAuthentication=no $desthost -l $destuser $@
-	fi
-}
-
-function do_letters() {
-	for i in a b c d e f g h i j k l m n o p q r s t u v w x y z; do
-		do_maildirs "$srcdir/$i"
-	done
-}
-
-function do_maildirs() {
-	local dir=$1
-	[ -d $dir ] || fatal "directory $dir not found."
-	for userdir in `ls -1 $dir`; do
-		do_userdir $userdir
-	done
-}
-
 function do_user() {
 	local user=$1
+	local destdir=$2
 	local letter=${user:0:1}
 	local dir="$srcdir/$letter/$user"
 	[ -d $dir ] || fatal "maildir $dir not found".
 
-	while 1; do
-		load=`uptime | sed 's/^.*load average: \\([^,]*\\).*$/\\1/'`
-		if [ $load -lt $loadlimit ]; then
-			info "load $load, sleeping..."
-			sleep 600
-		else
-			break
-		fi
-	done
+#	while true; do
+#		load=`uptime | sed 's/^.*load average: \\([^,]*\\).*$/\\1/'`
+#		over=`expr $load \> $loadlimit`
+#		if [ $over == 1 ]; then
+#			info "load $load, sleeping..."
+#			sleep 600
+#		else
+#			break
+#		fi
+#	done
 	
-  	cmd="rsync $maildirrsyncflags $excludes '$dir' '$destuser@$desthost:$destdir/maildir/$letter'"
-  	debug $cmd
-	# ret=`rsync $maildirrsyncflags $excludes '$dir' '$destuser@$desthost:$destdir/maildir/$letter' 2>&1`
+  	cmd="$RSYNC $rsyncflags $excludes $dir $destuser@$desthost:$destdir/$letter"
+	ret=`rsync -e "ssh -p $destport" -r \
+--links --ignore-existing --delete --size-only --bwlimit=$speedlimit \
+--exclude '.Trash/*' --exclude '.Mistakes/*' --exclude '.Spam/*' \
+$dir $destuser@$desthost:$destdir/$letter \
+2>&1`
+	if [ $? != 0 ]; then
+		warning "rsync $user failed"
+		warning "  returned: $ret"
+		let "failedcount = failedcount + 1"
+		if [ $failedcount -gt 100 ]; then
+			fatal "100 rsync errors -- something is not working right. bailing out."
+		fi
+	fi
 }
 
 # remove any maildirs from backup which might have been deleted
@@ -123,6 +117,8 @@ function do_remove() {
 function do_rotate() {
 	backuproot=$destdir
 
+(
+	debug Connecting to $desthost
 	ssh -T -o PasswordAuthentication=no $desthost -l $destuser <<EOF
 ##### BEGIN REMOTE SCRIPT #####
 	seconds_daily=86400
@@ -146,7 +142,8 @@ function do_rotate() {
 		fi
 		
 		# Rotate the current list of backups, if we can.
-		oldest=\`ls -d \$dir.* | sed 's/^.*\.//' | sort -n | tail -1\`
+		oldest=\`find $backuproot -type d -maxdepth 1 -name \$rottype'.*' | sed 's/^.*\.//' | sort -n | tail -1\`
+		echo "Debug: oldest \$oldest"
 		[ "\$oldest" == "" ] && oldest=0
 		for (( i=\$oldest; i > 0; i-- )); do
 			if [ -d \$dir.\$i ]; then
@@ -189,20 +186,74 @@ function do_rotate() {
 	for rottype in daily weekly monthly; do
 		max=\$((keep\${rottype}+1))
 		dir="$backuproot/\$rottype"
-		oldest=\`ls -d \$dir.* | sed 's/^.*\.//' | sort -n | tail -1\`
+		oldest=\`find $backuproot -type d -maxdepth 1 -name \$rottype'.*' | sed 's/^.*\.//' | sort -n | tail -1\`
 		[ "\$oldest" == "" ] && oldest=0 
 		# if we've rotated the last backup off the stack, remove it.
 		for (( i=\$oldest; i >= \$max; i-- )); do
 			if [ -d \$dir.\$i ]; then
-				echo "Info: removing \$dir.\$i"
-				rm -rf \$dir.\$i
+				if [ -d $backuproot/rotate.tmp ]; then
+					echo "Info: removing $backuproot/rotate.tmp"
+					rm -rf $backuproot/rotate.tmp
+				else
+					echo "Info: moving \$dir.\$i to $backuproot/rotate.tmp"
+					mv \$dir.\$i $backuproot/rotate.tmp
+				fi
 			fi
 		done
 	done
 ####### END REMOTE SCRIPT #######
 EOF
+) | (while read a; do passthru $a; done)
+
 }
 
+
+function setup_remote_dirs() {
+	local backuptype=$1
+	local dir="$destdir/$backuptype"
+
+(
+	ssh -T -o PasswordAuthentication=no $desthost -l $destuser <<EOF
+		if [ ! -d $destdir ]; then
+			echo "Fatal: Destination directory $destdir does not exist on host $desthost."
+			exit 1
+		elif [ -d $dir.1 ]; then
+			if [ -f $dir.1/created ]; then
+				echo "Warning: $dir.1 already exists. Overwriting contents."
+			else
+				echo "Warning: we seem to be resuming a partially written $dir.1"
+			fi
+		else
+			if [ -d $destdir/rotate.tmp ]; then
+				mv $destdir/rotate.tmp $dir.1
+				if [ \$? == 1 ]; then
+					echo "Fatal: could mv $destdir/rotate.tmp $dir.1 on host $desthost"
+					exit 1
+				fi
+			else
+				mkdir $dir.1
+				if [ \$? == 1 ]; then
+					echo "Fatal: could not create directory $dir.1 on host $desthost"
+					exit 1
+				fi
+			fi
+			if [ -d $destdir/$backuptype.2 ]; then
+				echo "Info: updating hard links to $dir.1. This may take a while."
+				cp -al $destdir/$backuptype.2/. $dir.1
+				if [ \$? == 1 ]; then
+					echo "Fatal: could not create hard links to $dir.1 on host $desthost"
+					exit 1
+				fi
+			fi
+		fi
+		[ -f $dir.1/created ] && rm $dir.1/created
+		[ -f $dir.1/rotated ] && rm $dir.1/rotated
+		exit 0
+EOF
+) | (while read a; do passthru $a; done)
+
+	if [ $? == 1 ]; then exit; fi
+}
 
 ###
 ##################################################################
@@ -219,12 +270,25 @@ if [ "$remove" == "yes" ]; then
 	debug remove
 fi
 
-### ROTATE BACKUPS ###
+### MAKE BACKUPS ###
 
-if [ "$letter" != "" ]; then
-	debug letter
-fi
+if [ "$backup" == "yes" ]; then
+	if [ $keepdaily -gt 0 ]; then btype=daily
+	elif [ $keepweekly -gt 0 ]; then btype=weekly
+	elif [ $keepmonthly -gt 0 ]; then btype=monthly
+	else fatal "keeping no backups"; fi
 
-if [ "$user" != "" ]; then
-	debug user
+	setup_remote_dirs $btype
+	
+	for i in $letters; do
+		[ -d "$srcdir/$i" ] || fatal "directory $srcdir/$i not found."
+		cd "$srcdir/$i"
+		debug $i
+		for user in `ls -1`; do
+			if [ "$testuser" != "" -a "$testuser" != "$user" ]; then continue; fi
+			do_user $user $destdir/$btype.1
+		done
+	done
+
+	ssh -o PasswordAuthentication=no $desthost -l $destuser "date +%c%n%s > $destdir/$btype.1/created"
 fi
