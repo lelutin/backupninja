@@ -172,7 +172,7 @@ Recommended:
   apt-get install rdiff-backup gzip
 
 Suggested:
-  apt-get install sfdisk discover  
+  apt-get install discover  
 
 Files:
   /usr/sbin/backupninja        -- main script
