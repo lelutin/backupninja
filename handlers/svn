@@ -1,0 +1,48 @@
+#
+# this handler will backup subversion repostitories.
+#
+
+getconf src /var/lib/svn
+getconf dest /var/backups/svn
+getconf tmp /var/backups/svn.tmp
+getconf HOTBACKUP /usr/lib/subversion/hot-backup.py
+
+error=0
+cd $src
+for repo in `find . -name svnserve.conf`
+do
+    repo=`dirname $repo`
+    repo=`dirname $repo`
+
+    ret=`mkdir -p $tmp/$repo 2>&1`
+    code=$?
+    if [ "$ret" ]; then
+       debug "$ret"
+    fi
+    if [ $code != 0 ]; then   
+       error "command failed mkdir -p $tmp/$repo"
+    fi
+
+    ret=`$HOTBACKUP $src/$repo $tmp/$repo 2>&1`
+    code=$?
+    if [ "$ret" ]; then
+       debug "$ret"
+    fi
+    if [ $code != 0 ]; then
+       error "command failed -- $HOTBACKUP $src/$repo $tmp/$repo"
+       error=1
+    fi
+done
+
+if [ $error ]; then
+    echo "Error: because of earlier errors, we are leaving svn backups in $tmp instead of $dest"
+else
+    if [ -d $dest -a -d $tmp ]; then
+        rm -rf $dest
+    fi
+    if [ -d $tmp ]; then
+        mv $tmp $dest
+    fi
+fi
+
+exit 0
