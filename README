@@ -20,14 +20,20 @@ Features:
  - backup of ldap databases (via slapcat and ldapsearch).
  - passwords are never sent via the command line to helper programs.
  - you can drop in scripts to handle new types of backups.
-
-The following options are available:
--h         This help message
--d         Run in debug mode, where all log messages are output
-           to the current shell.
--f <file>  Use <file> for the main configuration instead of
-           /etc/backupninja.conf
+ - backup actions can be scheduled
+ - you can choose when status report emails are mailed to you
+   (always, on warning, on error, never).
  
+The following options are available:
+-h, --help           This usage message
+-d, --debug          Run in debug mode, where all log messages are
+                     output to the current shell.
+-f, --conffile FILE  Use FILE for the main configuration instead
+                     of /etc/backupninja.conf
+-t, --test           Run in test mode, no actions are actually taken.
+-n, --now            Perform actions now, instead of when they
+                     might be scheduled.
+
 
 CONFIGURATION FILES
 ===================
