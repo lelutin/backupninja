@@ -85,7 +85,9 @@ function do_user() {
 --exclude '.Trash/*' --exclude '.Mistakes/*' --exclude '.Spam/*' \
 $dir $destuser@$desthost:$destdir/$letter \
 2>&1`
-	if [ $? != 0 ]; then
+	ret=$?
+	# ignore 0 (success) and 24 (file vanished before it could be copied)
+	if [ $ret != 0 -a $ret != 24 ]; then
 		warning "rsync $user failed"
 		warning "  returned: $ret"
 		let "failedcount = failedcount + 1"
@@ -241,11 +243,11 @@ function setup_remote_dirs() {
 			fi
 			if [ -d $destdir/$backuptype.2 ]; then
 				echo "Info: updating hard links to $dir.1. This may take a while."
-				cp -al $destdir/$backuptype.2/. $dir.1
-				if [ \$? == 1 ]; then
-					echo "Fatal: could not create hard links to $dir.1 on host $desthost"
-					exit 1
-				fi
+				cp -alf $destdir/$backuptype.2/. $dir.1
+				#if [ \$? == 1 ]; then
+				#	echo "Fatal: could not create hard links to $dir.1 on host $desthost"
+				#	exit 1
+				#fi
 			fi
 		fi
 		[ -f $dir.1/created ] && rm $dir.1/created
