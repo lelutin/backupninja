@@ -429,7 +429,7 @@ errormsg=""
 if [ "$singlerun" ]; then
 	files=$singlerun
 else
-	files=`find $configdirectory -mindepth 1 `
+	files=`find $configdirectory -mindepth 1 | sort -n`
 fi
 
 for file in $files; do
