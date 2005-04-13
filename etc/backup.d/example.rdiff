@@ -2,6 +2,12 @@
 ## passed directly to rdiff-backup
 # options = --force
 
+## default is 0, but set to 19 if you want to lower the priority.
+# nicelevel = 19
+
+## default is yes. set to no to skip the test if the remote host is alive
+# testconnect = no
+
 ######################################################
 ## source section
 ## (where the files to be backed up are coming from)
@@ -17,6 +23,11 @@ type = local
 # how many days of data to keep
 # (you can also use the time format of rdiff-backup, e.g. 6D5h)
 keep = 60
+
+# a note about includes and excludes:
+# all the excludes come after all the includes. 
+# otherwise, the order is not taken into account.
+# currently, you cannot do "include = /"
 
 # files to include in the backup
 # (supports globbing with '*')
@@ -40,17 +51,18 @@ include = /var/lib/dpkg/status-old
 
 [dest]
 
-# only remote type is currently supported
+# default is remote, if set to 'local' then
+# ignore the 'host' and 'user' options.
 type = remote
-
-# the machine which will receive the backups
-host = backuphost
 
 # put the backups under this directory
 directory = /backups
 
+# the machine which will receive the backups
+host = backuphost
+
 # make the files owned by this user
 # note: you must be able to ssh backupuser@backhost
-# without specifying a password 
+# without specifying a password (if type = remote).
 user = backupuser
 
