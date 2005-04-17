@@ -199,9 +199,9 @@ function isnow() {
 	whendayofweek=$1; at=$2; whentime=$3;
 	whenday=`toint "$whendayofweek"`
 	whendayofweek=`tolower "$whendayofweek"`
-	whentime=`echo "$whentime" | sed 's/:[0-9][0-9]$//'`
+	whentime=`echo "$whentime" | sed 's/:[0-9][0-9]$//' | sed -r 's/^([0-9])$/0\1/'`
 
-	if [ "$whendayofweek" == "everyday" ]; then
+	if [ "$whendayofweek" == "everyday" -o "$whendayofweek" == "daily" ]; then
 		whendayofweek=$nowdayofweek
 	fi
 
