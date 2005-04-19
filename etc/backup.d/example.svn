@@ -1,5 +1,8 @@
 ##
 ## Perform a hot backup of subversion repositories.
+## 
+## REQUIRES: apt-get install subversion-tools
+##
 ## This file can be empty, the defaults are usually good.
 ##
 
