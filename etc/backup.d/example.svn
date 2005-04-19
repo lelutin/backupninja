@@ -1,0 +1,17 @@
+##
+## Perform a hot backup of subversion repositories.
+## This file can be empty, the defaults are usually good.
+##
+
+## where subversion data lives
+# src = /var/lib/svn
+
+## where to save the backups to
+# dest = /var/backups/svn
+
+## where to save temporary backups
+## (if successful, $tmp is moved to $dest)
+# tmp = /var/backups/svn.tmp
+
+## the hotbackup program to use.
+# HOTBACKUP = /usr/lib/subversion/hot-backup.py
