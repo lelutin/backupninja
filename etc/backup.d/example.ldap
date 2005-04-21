@@ -28,6 +28,7 @@
 ## ldapsearch is the safer method to do backups, but is slow, slapcat
 ## is much faster, but should not be done on an ldbm backend unless you have
 ## restart set to yes
+## NOTE: with the ldapsearch method passwordfile and binddn need to be set
 # method = ldapsearch
 
 ## passwordfile (no default): this should be set to the file that contains 
