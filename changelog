@@ -1,3 +1,8 @@
+version 0.x -- xxxxxxxxxxxxx
+    ldap handler has new options: backup method to use (ldapsearch or
+    slapcat), restart, passwordfile and binddn. Default backup method
+    is set to ldapsearch as this is safer
+
 version 0.5 -- April 12 2005
     rdiff handler works when remote sshd has a banner
     rdiff handler supports local dest 

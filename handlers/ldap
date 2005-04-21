@@ -7,9 +7,10 @@ getconf conf /etc/ldap/slapd.conf
 getconf databases all
 getconf compress yes
 getconf ldif yes
-getconf hotcopy no
-
-# hot copy is not yet supported
+getconf restart no
+getconf method ldapsearch
+getconf passwordfile
+getconf binddn
 
 status="ok"
 
@@ -42,18 +43,39 @@ if [ "$ldif" == "yes" ]; then
 		if [ "$dbsuffix" == "" ]; then
 			continue;
 		fi
-		touch $dumpdir/$dbsuffix.ldif
-		if [ ! -f $dumpdir/$dbsuffix.ldif ]; then
-			fatal "Couldn't create ldif dump file: $dumpdir/$dbsuffix.ldif"
+
+		if [ "$method" == "slapcat" ]; then
+			execstr="$SLAPCAT -f $conf -b $dbsuffix"
+			if [ "$restart" == "yes" ]; then
+				debug "Shutting down ldap server..."
+				/etc/init.d/slapd stop
+			fi
+			debug "$execstr"
+		else
+			execstr="$LDAPSEARCH -x -L -b ""$dbsuffix"" -D ""$binddn"" -y $passwordfile"
+			[ -f "$passwordfile" ] || fatal "Password file $passwordfile not found"
+			if [ "$restart" == "yes" ]; then
+				debug "Shutting down ldap server..."
+				/etc/init.d/slapd stop
+			fi
+			debug "$execstr"
 		fi
-		execstr="$SLAPCAT -f $conf -b $dbsuffix -l $dumpdir/$dbsuffix.ldif"
-		debug "$execstr"
 		if [ ! $test ]; then
-			output=`$execstr`
+
+			touch $dumpdir/$dbsuffix.ldif
+			if [ ! -f $dumpdir/$dbsuffix.ldif ]; then
+				fatal "Couldn't create ldif dump file: $dumpdir/$dbsuffix.ldif"
+			fi
+
+			output=`$execstr > $dumpdir/$dbsuffix.ldif`
 			code=$?
 			if [ "$code" == "0" ]; then
 				debug $output
 				info "Successfully finished ldif export of $dbsuffix"
+				if [ "$restart" == "yes" ]; then
+					debug "Starting ldap server..."
+					/etc/init.d/slapd start
+				fi
 			else
 				warning $output
 				warning "Failed ldif export of $dbsuffix"

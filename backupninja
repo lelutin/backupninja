@@ -402,6 +402,7 @@ defaultwhen=$when
 getconf logfile /var/log/backupninja.log
 getconf usecolors "yes"
 getconf SLAPCAT /usr/sbin/slapcat
+getconf LDAPSEARCH /usr/bin/ldapsearch
 getconf RDIFFBACKUP /usr/bin/rdiff-backup
 getconf MYSQL /usr/bin/mysql
 getconf MYSQLHOTCOPY /usr/bin/mysqlhotcopy
