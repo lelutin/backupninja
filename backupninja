@@ -159,9 +159,11 @@ function check_perms() {
 	local perms=`ls -ld $file`
 	perms=${perms:4:6}
 	if [ "$perms" != "------" ]; then
+		echo "Configuration files must not be group or world readable! Dying on file $file"
 		fatal "Configuration files must not be group or world readable! Dying on file $file"
 	fi
 	if [ `ls -ld $file | awk '{print $3}'` != "root" ]; then
+		echo "Configuration files must be owned by root! Dying on file $file"
 		fatal "Configuration files must be owned by root! Dying on file $file"
 	fi
 }
@@ -351,6 +353,7 @@ while [ $# -ge 1 ]; do
 			if [ -f $2 ]; then
 				conffile=$2
 			else
+				echo "-f|--conffile option must be followed by an existing filename"
 				fatal "-f|--conffile option must be followed by an existing filename"
 				usage
 			fi
@@ -363,6 +366,7 @@ while [ $# -ge 1 ]; do
 				singlerun=$2
 				processnow=1
 			else
+				echo "--run option must be fallowed by a backupninja action file"
 				fatal "--run option must be fallowed by a backupninja action file"
 				usage
 			fi
@@ -370,6 +374,7 @@ while [ $# -ge 1 ]; do
 			;;
 		*)
 			debug=1
+			echo "Unknown option $1"
 			fatal "Unknown option $1"
 			usage
 			exit
@@ -385,10 +390,22 @@ done
 ## Load and confirm basic configuration values
 
 # bootstrap
-[ -r "$conffile" ] || fatal "Configuration file $conffile not found."
+if [ ! -r "$conffile" ]; then
+	echo "Configuration file $conffile not found." 
+	fatal "Configuration file $conffile not found."
+fi
+
 scriptdir=`grep scriptdirectory $conffile | awk '{print $3}'`
-[ -n "$scriptdir" ] || fatal "Cound not find entry 'scriptdirectory' in $conffile"
-[ -d "$scriptdir" ] || fatal "Script directory $scriptdir not found."
+if [ ! -n "$scriptdir" ]; then
+	echo "Cound not find entry 'scriptdirectory' in $conffile" 
+	fatal "Cound not find entry 'scriptdirectory' in $conffile"
+fi
+
+if [ ! -d "$scriptdir" ]; then
+	echo "Script directory $scriptdir not found." 
+	fatal "Script directory $scriptdir not found."
+fi
+
 setfile $conffile
 
 # get global config options (second param is the default)
@@ -410,7 +427,11 @@ getconf MYSQLDUMP /usr/bin/mysqldump
 getconf GZIP /bin/gzip
 getconf RSYNC /usr/bin/rsync
 
-[ -d "$configdirectory" ] || fatal "Configuration directory '$configdirectory' not found."
+if [ ! -d "$configdirectory" ]; then
+	echo "Configuration directory '$configdirectory' not found."
+	fatal "Configuration directory '$configdirectory' not found."
+fi
+
 [ -f "$logfile" ] || touch $logfile
 
 if [ "$UID" != "0" ]; then
