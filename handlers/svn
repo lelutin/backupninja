@@ -6,42 +6,69 @@ getconf src /var/lib/svn
 getconf dest /var/backups/svn
 getconf tmp /var/backups/svn.tmp
 getconf HOTBACKUP /usr/lib/subversion/hot-backup.py
+getconf vsname	
 
 error=0
-cd $src
+
+# If vservers are configured, decide if the handler should
+# use them or if it should just operate on the host
+if [ "$VSERVERS" = "yes" ]
+then
+	if [ ! -z $vsname ]
+	then		
+		info "Using vserver '$vsname'"
+		usevserver=1
+	else
+		info "No vserver name specified, actions will be performed on the host"
+	fi
+fi
+
+# Check to make sure that the specified vserver exists
+if [ $usevserver ]
+then
+	vroot="$VROOTDIR/$vsname"
+	[ -d $vroot ] || fatal "vserver '$vsname' does not exist at '$vroot'"
+fi
+
+cd $vroot$src
 for repo in `find . -name svnserve.conf`
 do
     repo=`dirname $repo`
     repo=`dirname $repo`
 
-    ret=`mkdir -p $tmp/$repo 2>&1`
+    ret=`mkdir -p $vroot$tmp/$repo 2>&1`
     code=$?
     if [ "$ret" ]; then
        debug "$ret"
     fi
     if [ $code != 0 ]; then   
-       error "command failed mkdir -p $tmp/$repo"
+       error "command failed mkdir -p $vroot$tmp/$repo"
     fi
 
-    ret=`$HOTBACKUP $src/$repo $tmp/$repo 2>&1`
+    if [ $usevserver ]
+    then
+	ret=`$VSERVER $vsname exec $HOTBACKUP $src/$repo $tmp/$repo 2>&1`
+    else
+	ret=`$HOTBACKUP $src/$repo $tmp/$repo 2>&1`
+    fi
     code=$?
     if [ "$ret" ]; then
        debug "$ret"
     fi
     if [ $code != 0 ]; then
-       error "command failed -- $HOTBACKUP $src/$repo $tmp/$repo"
+       error "command failed -- $HOTBACKUP $vroot$src/$repo $vroot$tmp/$repo"
        error=1
     fi
 done
 
 if [ $error -eq 1 ]; then
-    echo "Error: because of earlier errors, we are leaving svn backups in $tmp instead of $dest"
+    echo "Error: because of earlier errors, we are leaving svn backups in $vroot$tmp instead of $vroot$dest"
 else
-    if [ -d $dest -a -d $tmp ]; then
-        rm -rf $dest
+    if [ -d $vroot$dest -a -d $vroot$tmp ]; then
+        rm -rf $vroot$dest
     fi
-    if [ -d $tmp ]; then
-        mv $tmp $dest
+    if [ -d $vroot$tmp ]; then
+        mv $vroot$tmp $vroot$dest
     fi
 fi
 

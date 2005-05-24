@@ -5,7 +5,7 @@ databases	= all
 backupdir	= /var/backups/mysql
 hotcopy		= yes
 sqldump		= yes
-compress    = yes
+compress    	= yes
 
 #
 # user = <user>
@@ -44,4 +44,7 @@ compress    = yes
 # compress = < yes | no >
 # if yes, compress the sqldump output. 
 #
+# vsname = <vserver>
+# what vserver to operate on, only used if vserver = yes in /etc/backupninja.conf
+# if you do not specify a vsname the host will be operated on
 

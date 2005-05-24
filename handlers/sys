@@ -26,10 +26,40 @@ getconf partitionsfile /var/backups/partitions.__star__.txt
 getconf hardware yes
 getconf hardwarefile /var/backups/hardware.txt
 
+# See if vservers are configured
+if [ "$VSERVERS" = "yes" ]
+then
+	if [ ! -d $VROOTDIR ]
+	then
+		fatal "vservers enabled, but $VROOTDIR does not exist!"
+	else
+		info "vserver method enabled"
+		usevserver=1
+	fi
+fi
+
 if [ "$packages" == "yes" ]; then
-	if [ ! -x "`which dpkg`" ]; then
-		warning "can't find dpkg, skipping installed packages report."
-		packages="no"
+	if [ $usevserver ]
+	then
+		for vserver in `ls $VROOTDIR |grep -v lost+found`
+		do
+			running=`vserver-info $vserver RUNNING`
+			if [ $running = 1]; then
+			    if [ ! -x "`$VSERVER $vserver exec which dpkg`" ]; then
+				warning "can't find dpkg in vserver $vserver, skipping installed packages report."
+				nodpkg="$nodpkg $vserver"
+			    fi
+			else
+			    warning "vserver $vserver is not running, skipping installed packages report."
+			    nodpkg="$nodpkg $vserver"
+			fi
+
+		done
+	else
+		if [ ! -x "`which dpkg`" ]; then
+			warning "can't find dpkg, skipping installed packages report."
+			packages="no"
+		fi
 	fi
 fi
 
@@ -57,9 +87,21 @@ fi
 # here we grab a list of the packages installed and removed.
 #
 
+if [ $usevserver ]
+then
+	for vserver in `ls $VROOTDIR | grep -v $nodpkg | grep -v lost+found`
+	do
+		debug "$VSERVER $vserver exec dpkg --get-selections > $VROOTDIR/$vserver$packagesfile"
+		$VSERVER $vserver exec dpkg --get-selections > $VROOTDIR/$vserver$packagesfile
+	done
+fi
+
+# We want to perform this on the host as well
 if [ "$packages" == "yes" ]; then
+	debug "dpkg --get-selections > $packagesfile"
 	dpkg --get-selections > $packagesfile
 fi
+
 
 ## PARTITIONS #############################
 

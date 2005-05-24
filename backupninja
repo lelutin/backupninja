@@ -426,6 +426,10 @@ getconf MYSQLHOTCOPY /usr/bin/mysqlhotcopy
 getconf MYSQLDUMP /usr/bin/mysqldump
 getconf GZIP /bin/gzip
 getconf RSYNC /usr/bin/rsync
+getconf vservers no
+getconf VSERVERINFO /usr/sbin/vserver-info
+getconf VSERVER /usr/sbin/vserver
+getconf VROOTDIR `$VSERVERINFO info SYSINFO |grep vserver-Rootdir | awk '{print $2}'`
 
 if [ ! -d "$configdirectory" ]; then
 	echo "Configuration directory '$configdirectory' not found."
@@ -437,6 +441,11 @@ fi
 if [ "$UID" != "0" ]; then
 	echo "$0 can only be run as root"
 	exit 1
+fi
+
+if [ "$VSERVERS" = "yes" -a ! -d $VROOTDIR ]; then
+        echo "vservers option set in config, but $VROOTDIR is not a directory!"
+	fatal "vservers option set in config, but $VROOTDIR is not a directory!"
 fi
 
 ## Process each configuration file

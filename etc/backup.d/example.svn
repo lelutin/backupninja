@@ -18,3 +18,6 @@
 
 ## the hotbackup program to use.
 # HOTBACKUP = /usr/lib/subversion/hot-backup.py
+
+## the name of the vserver containing svn, if using vservers
+# vsname =

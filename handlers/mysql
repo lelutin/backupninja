@@ -11,25 +11,53 @@ getconf dbhost localhost
 getconf hotcopy no
 getconf sqldump no
 getconf user root
+getconf vsname
 
-# create backup dirs
+# If vservers are configured, decide if the handler should
+# use them or if it should just operate on the host
+if [ "$VSERVERS" = "yes" ]
+then
+	if [ ! -z $vsname ]
+	then		
+		info "Using vserver '$vsname'"
+		usevserver=1
+	else
+		info "No vserver name specified, actions will be performed on the host"
+	fi
+fi
 
-[ -d $backupdir ] || mkdir -p $backupdir
-[ -d $backupdir ] || fatal "Backup directory '$backupdir'"
+# Check to make sure that the specified vserver exists
+if [ $usevserver ]
+then
+	vroot="$VROOTDIR/$vsname"
+	[ -d $vroot ] || fatal "vserver '$vsname' does not exist at '$vroot'"
+fi
+	
+# create backup dirs, the vroot variable will be empty if no vsname was specified
+# and will proceed to operate on the host
+[ -d $vroot$backupdir ] || mkdir -p $vroot$backupdir
+[ -d $vroot$backupdir ] || fatal "Backup directory '$vroot$backupdir'"
 hotdir="$backupdir/hotcopy"
 dumpdir="$backupdir/sqldump"
-[ "$sqldump" == "no" -o -d $dumpdir ] || mkdir -p $dumpdir
-[ "$hotcopy" == "no" -o -d $hotdir ] || mkdir -p $hotdir
+
+if [ $usevserver ]
+then
+	[ "$sqldump" == "no" -o -d $vroot$dumpdir ] || $VSERVER $vsname exec mkdir -p $dumpdir
+	[ "$hotcopy" == "no" -o -d $vroot$hotdir ] || $VSERVER $vsname exec mkdir -p $hotdir
+else
+	[ "$sqldump" == "no" -o -d $dumpdir ] || mkdir -p $dumpdir
+	[ "$hotcopy" == "no" -o -d $hotdir ] || mkdir -p $hotdir
+fi
 
 # create .my.cnf
- # (we do this because we don't want to have to specify the password on the command line
- # because then anyone would be able to see it with a 'ps aux'. instead, we create a 
- # temporary ~/.my.cnf in root's home directory).
+# (we do this because we don't want to have to specify the password on the command line
+# because then anyone would be able to see it with a 'ps aux'. instead, we create a 
+# temporary ~/.my.cnf in root's home directory).
 
 if [ "$dbusername" != "" ]; then
-	home=`grep '^root:' /etc/passwd | awk -F: '{print $6}'`
+	home=`grep '^root:' $vroot/etc/passwd | awk -F: '{print $6}'`
 	[ -d $home ] || fatal "Can't find root's home directory ($home)."
-	mycnf="$home/.my.cnf"
+	mycnf="$vroot$home/.my.cnf"
 	if [ -f $mycnf ]; then
 		# rename temporarily
 		tmpcnf="$home/my.cnf.disable"
@@ -59,7 +87,12 @@ fi
 
 if [ "$hotcopy" == "yes" ]; then 
 	if [ "$databases" == "all" ]; then
-		execstr="$MYSQLHOTCOPY --quiet --allowold --regexp /.\*/./.\*/ $hotdir"
+		if [ $usevserver ]
+		then
+			execstr="$VSERVER $vsname exec $MYSQLHOTCOPY --quiet --allowold --regexp /.\*/./.\*/ $hotdir"
+		else
+			execstr="$MYSQLHOTCOPY --quiet --allowold --regexp /.\*/./.\*/ $hotdir"
+		fi
 		debug "su $user -c '$execstr'"
 		if [ ! $test ]; then
 			output=`su $user -c "$execstr" 2>&1`
@@ -74,7 +107,12 @@ if [ "$hotcopy" == "yes" ]; then
 		fi
 	else	
 		for db in $databases; do
-			execstr="$MYSQLHOTCOPY --allowold $db $hotdir"
+			if [ $usevserver ]
+			then
+				execstr="$VSERVER $vsname exec $MYSQLHOTCOPY --allowold $db $hotdir"
+			else
+				execstr="$MYSQLHOTCOPY --allowold $db $hotdir"
+			fi
 			debug "su $user -c '$execstr'"
 			if [ ! $test ]; then
 				output=`su $user -c "$execstr" 2>&1`
@@ -95,11 +133,21 @@ fi
 
 if [ "$sqldump" == "yes" ]; then
 	if [ "$databases" == "all" ]; then
-		databases=`echo 'show databases' | su $user -c "$MYSQL" | grep -v Database`
+		if [ $usevserver ]
+		then
+			databases=`echo 'show databases' | $VSERVER $vsname exec su $user -c "$MYSQL" | grep -v Database`
+		else
+			databases=`echo 'show databases' | su $user -c "$MYSQL" | grep -v Database`
+		fi
 	fi
 
 	for db in $databases; do
-		execstr="$MYSQLDUMP --lock-tables --complete-insert --add-drop-table --quick --quote-names $db > $dumpdir/${db}.sql"
+		if [ $usevserver ]
+		then
+			execstr="$VSERVER $vsname exec $MYSQLDUMP --lock-tables --complete-insert --add-drop-table --quick --quote-names $db > $vroot$dumpdir/${db}.sql"
+		else
+			execstr="$MYSQLDUMP --lock-tables --complete-insert --add-drop-table --quick --quote-names $db > $dumpdir/${db}.sql"
+		fi
 		debug "su $user -c '$execstr'"
 		if [ ! $test ]; then
 			output=`su $user -c "$execstr" 2>&1`
@@ -115,7 +163,7 @@ if [ "$sqldump" == "yes" ]; then
 	done
 	
 	if [ "$compress" == "yes" ]; then
-		output=`$GZIP -f $dumpdir/*.sql 2>&1`
+		output=`$GZIP -f $vroot$dumpdir/*.sql 2>&1`
 		debug $output
 	fi
 fi

@@ -12,6 +12,7 @@ getconf type; sourcetype=$type
 getconf label
 getconf keep 60
 getconf include
+getconf vsinclude
 getconf exclude
 
 ### DESTINATION ###
@@ -23,6 +24,18 @@ destdir=${destdir%/}
 getconf type; desttype=$type
 getconf user; destuser=$user
 getconf host; desthost=$host
+
+# See if vservers are configured
+if [ "$VSERVERS" = "yes" ]
+then
+	if [ ! -d $VROOTDIR ]
+	then
+		fatal "vservers enabled, but $VROOTDIR does not exist!"
+	else
+		info "vserver method enabled"
+		usevserver=1
+	fi
+fi
 
 [ "$destdir" != "" ] || fatal "Destination directory not set"
 
@@ -54,7 +67,8 @@ fi
 
 [ "$label" != "" ] || fatal "Source missing label"
 [ "$sourcetype" == "local" ] || fatal "Only local source type supported"
-[ "$include" != "" ] || fatal "No source includes specified"
+[ "$include" != "" -o "$vsinclude" != "" ] || fatal "No source includes specified"
+#TODO should I test for vsinclude if usevservers=1?
 
 execstr_clientpart="/"
 	
@@ -100,6 +114,19 @@ for i in $include; do
 	str="${i//__star__/*}"
 	execstr="${execstr}--include '$str' "
 done
+
+# vsinclude
+if [ $usevserver ] 
+then
+	for vserver in `ls $VROOTDIR|grep -v lost+found`
+	do
+		for vi in $vsinclude
+		do
+			str="${vi//__star__/*}"
+			execstr="${execstr}--include '$VROOTDIR/$vserver$str' "
+		done
+	done
+fi
 
 # exclude everything else
 execstr="${execstr}--exclude '/*' "

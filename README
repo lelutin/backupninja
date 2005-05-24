@@ -23,6 +23,7 @@ Features:
  - backup actions can be scheduled
  - you can choose when status report emails are mailed to you
    (always, on warning, on error, never).
+ - works with linux-vservers
  
 The following options are available:
 -h, --help           This usage message
