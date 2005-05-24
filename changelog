@@ -1,11 +1,11 @@
 version 0.x -- xxxxxxxxxxxxx
     ldap handler has new options: backup method to use (ldapsearch or
-    slapcat), restart, passwordfile and binddn. Default backup method
-    is set to ldapsearch as this is safer
+             slapcat), restart, passwordfile and binddn. Default backup method
+	     is set to ldapsearch as this is safer
     implemented fix so that the main script will echo fatal errors rather
-    than being silent about them, this means an error message every hour
-    if there is a major configuration problem (not a handler problem)
-    
+             than being silent about them, this means an error message every hour
+	     if there is a major configuration problem (not a handler problem)
+    added vserver support to main script and to the handlers: mysql, svn, sys, rdiff
 
 version 0.5 -- April 12 2005
     rdiff handler works when remote sshd has a banner
