@@ -1,12 +1,12 @@
 version 0.x -- xxxxxxxxxxxxx
-    ldap handler has new options: backup method to use (ldapsearch or
-             slapcat), restart, passwordfile and binddn. Default backup method
-	     is set to ldapsearch as this is safer
-    implemented fix so that the main script will echo fatal errors rather
-             than being silent about them, this means an error message every hour
-	     if there is a major configuration problem (not a handler problem)
-    added vserver support to main script and to the handlers: mysql, svn, sys, rdiff
-    changes to duplicity handler :
+	ldap handler has new options: backup method to use (ldapsearch or
+		slapcat), restart, passwordfile and binddn. Default backup method
+		is set to ldapsearch as this is safer
+	implemented fix so that the main script will echo fatal errors rather
+		than being silent about them, this means an error message every hour
+		if there is a major configuration problem (not a handler problem)
+	added vserver support to main script and to the handlers: mysql, svn, sys, rdiff
+	changes to duplicity handler (thanks intrigeri!):
 		"keep = yes" now disables file cleaning on desthost
 		added "sign" option for backups signing
 		added "encryptkey" option to specify the gpg key to use
@@ -14,17 +14,18 @@ version 0.x -- xxxxxxxxxxxxx
 		added "nicelevel" option
 		added "testconnect" option
 		added "sshoptions" option (will be passed to ssh/scp)
-    example.dup example config file for duplicity handler
+	example.dup example config file for duplicity handler 
+	added trac (http://trac.edgewall.com/) environment handler (thanks Charles Lepple!)
 
 version 0.5 -- April 12 2005
-    rdiff handler works when remote sshd has a banner
-    rdiff handler supports local dest 
-    logfile is created if it doesn't exist
-    added "when = hourly" 
-    added optional 'nicelevel' to rdiff handler
-    fixed bug where actions were not run in numeric order.
-    improved 'when' parsing.
-        
+	rdiff handler works when remote sshd has a banner
+	rdiff handler supports local dest 
+	logfile is created if it doesn't exist
+	added "when = hourly" 
+	added optional 'nicelevel' to rdiff handler
+	fixed bug where actions were not run in numeric order.
+	improved 'when' parsing.
+
 version 0.4.4 -- March 18 2005
 	results of handlers are now read line by line. 
 	changes to rdiff handler: added "options", and "keep" is
@@ -35,7 +36,7 @@ version 0.4.4 -- March 18 2005
 	added --run option (runs the specified action file)
 	improved sys handler, now uses hwinfo
 	added subversion hotbackup handler, svn. 
-    added PATH to cron.d file, which fixes file not found errors.
+	added PATH to cron.d file, which fixes file not found errors.
 
 version 0.4.2 -- Jan 6 2005
 	fixed bug which caused a report email to be sent even if no actions were run.
