@@ -6,6 +6,15 @@ version 0.x -- xxxxxxxxxxxxx
              than being silent about them, this means an error message every hour
 	     if there is a major configuration problem (not a handler problem)
     added vserver support to main script and to the handlers: mysql, svn, sys, rdiff
+    changes to duplicity handler :
+		"keep = yes" now disables file cleaning on desthost
+		added "sign" option for backups signing
+		added "encryptkey" option to specify the gpg key to use
+		split config into [source], [gpg] and [dest] sections
+		added "nicelevel" option
+		added "testconnect" option
+		added "sshoptions" option (will be passed to ssh/scp)
+    example.dup example config file for duplicity handler
 
 version 0.5 -- April 12 2005
     rdiff handler works when remote sshd has a banner
