@@ -3,11 +3,22 @@
 # requires duplicity
 #
 
-getconf password
 getconf options
-getconf keep 60
+getconf testconnect yes
+getconf nicelevel 0
+
+setsection gpg
+getconf password
+getconf sign no
+getconf encryptkey
+
+setsection source
 getconf include
 getconf exclude
+
+setsection dest
+getconf keep 60
+getconf sshoptions
 getconf desthost
 getconf destdir
 getconf destuser
@@ -18,21 +29,40 @@ destdir=${destdir%/}
 [ "$password" != "" ] || fatal "No password specified"
 
 # see if we can login
-debug "ssh -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1'"
-if [ ! $test ]; then
-	result=`ssh -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1' 2>&1`
+if [ "$testconnect" == "yes" ]; then
+    debug "ssh $sshoptions -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1'"
+    if [ ! $test ]; then
+	result=`ssh $sshoptions -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1' 2>&1`
 	if [ "$result" != "1" ]; then
-		fatal "Can't connect to $desthost as $destuser."
+	    fatal "Can't connect to $desthost as $destuser."
+	else
+	    debug "Connected to $desthost as $destuser successfully"
 	fi
+    fi
 fi
 
-if [ "`echo $keep | tr -d 0-9`" == "" ]; then
+### COMMAND-LINE MANGLING ###
+
+execstr="$options --no-print-statistics --scp-command 'scp $sshoptions' --ssh-command 'ssh $sshoptions' "
+
+if [ "$encryptkey" == "" ]; then
+    [ "$sign" != "yes" ] || fatal "encryptkey option must be set when signing."
+else
+    execstr="${execstr}--encrypt-key $encryptkey "
+    [ "$sign" != "yes" ] || execstr="${execstr}--sign-key $encryptkey "
+fi
+
+if [ "$keep" != "yes" ]; then
+    if [ "`echo $keep | tr -d 0-9`" == "" ]; then
 	keep="${keep}D"
+    fi
+    execstr="${execstr}--remove-older-than $keep "
 fi
 
 execstr_serverpart="scp://$destuser@$desthost/$destdir"
 execstr_clientpart="/"
-execstr="$options --no-print-statistics --remove-older-than $keep "
+
+### SOURCE ###
 
 # excludes
 for i in $exclude; do
@@ -46,6 +76,8 @@ for i in $include; do
 	execstr="${execstr}--include $str "
 done
 
+### EXECUTE ###
+
 # exclude everything else, start with root
 #execstr="${execstr}--exclude '**' / "
 		
@@ -56,9 +88,10 @@ execstr=${execstr//\\*/\\\\\\*}
 
 debug "duplicity $execstr --exclude '**' / $execstr_serverpart"
 if [ ! $test ]; then
-	PASSPHRASE=$password
-	export PASSPHRASE
-	output=`duplicity $execstr --exclude '**' / $execstr_serverpart 2>&1`
+	output=`nice -n $nicelevel \
+                  su -c \
+                    "export PASSPHRASE=$password \
+                     && duplicity $execstr --exclude '**' / $execstr_serverpart 2>&1"`
 	code=$?
 	if [ "$code" == "0" ]; then
 		debug $output

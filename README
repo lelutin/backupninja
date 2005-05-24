@@ -49,6 +49,7 @@ file in /etc/backup.d according to the file's suffix:
   .sh      --  run this file as a shell script.
   .rdiff   --  this is a configuration for rdiff-backup
   .maildir --  this is a configuration to backup maildirs
+  .dup     --  this is a configuration for duplicity
   .mysql   --  mysql backup configuration
   .ldap    --  ldap backup configuration
   .sys     --  general system reports
