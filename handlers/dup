@@ -19,6 +19,7 @@ getconf exclude
 setsection dest
 getconf keep 60
 getconf sshoptions
+getconf bandwidthlimit 0
 getconf desthost
 getconf destdir
 getconf destuser
@@ -43,7 +44,10 @@ fi
 
 ### COMMAND-LINE MANGLING ###
 
-execstr="$options --no-print-statistics --scp-command 'scp $sshoptions' --ssh-command 'ssh $sshoptions' "
+scpoptions="$sshoptions"
+[ "$bandwidthlimit" == 0 ] || scpoptions="$scpoptions -l $bandwidthlimit"
+
+execstr="$options --no-print-statistics --scp-command 'scp $scpoptions' --ssh-command 'ssh $sshoptions' "
 
 if [ "$encryptkey" == "" ]; then
     [ "$sign" != "yes" ] || fatal "encryptkey option must be set when signing."

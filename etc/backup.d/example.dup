@@ -75,7 +75,10 @@ exclude = /home/*/.gnupg
 #keep = 60
 #keep = yes
 
-## passed directly to ssh/scp
+# bandwith limit, in kbit/s ; default is 0, i.e. no limit
+#bandwidthlimit = 128
+
+# passed directly to ssh and scp
 sshoptions = -i /root/.ssh/id_dsa_duplicity
 
 # put the backups under this directory
