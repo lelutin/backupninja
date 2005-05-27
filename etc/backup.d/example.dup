@@ -1,0 +1,91 @@
+
+# passed directly to duplicity
+#options = --verbosity 8
+
+# default is 0, but set to 19 if you want to lower the priority.
+nicelevel = 19
+
+# default is yes. set to no to skip the test if the remote host is alive
+#testconnect = no
+
+######################################################
+## gpg section
+## (how to encrypt and optionnally sign the backups)
+
+[gpg]
+
+# passphrase needed to unlock the GnuPG key
+password = "a_very_complicated_passphrase"
+
+# default is no, for backward compatibility with backupninja <= 0.5.
+# when set to yes, encryptkey option must be set bellow.
+sign = yes
+
+# key ID used for data encryption and, optionnally, signing.
+# if not set, local root's default gpg key is used.
+encryptkey = 04D9EA79
+
+######################################################
+## source section
+## (where the files to be backed up are coming from)
+
+[source]
+
+# files to include in the backup
+# (supports globbing with '*')
+# BIG FAT WARNING
+# Symlinks are not dereferenced. Moreover, an include line whose path
+# contains, at any level, a symlink to a directory, will only have the
+# symlink backed-up, not the target directory's content. Yes, you have
+# to dereference yourself the symlinks, or to use 'mount --bind'
+# instead.
+# EXAMPLE
+# Let's say /home is a symlink to /mnt/crypt/home ; the following line
+# will only backup a "/home" symlink ; neither /home/user nor
+# /home/user/Mail will be backed-up :
+#   include = /home/user/Mail
+# A workaround is to 'mount --bind /mnt/crypt/home /home' ; another
+# one is to write :
+#   include = /mnt/crypt/home/user/Mail
+
+include = /var/spool/cron/crontabs
+include = /var/backups
+include = /etc
+include = /root
+include = /home
+include = /usr/local/bin
+include = /usr/local/sbin
+include = /var/lib/dpkg/status
+include = /var/lib/dpkg/status-old
+
+# rdiff-backup specific comment, TO ADAPT
+# files to exclude from the backup
+# (supports globbing with '*')
+exclude = /home/*/.gnupg
+
+######################################################
+## destination section
+## (where the files are copied to)
+
+[dest]
+
+# how many days of data to keep ; default is 60 days.
+# (you can also use the time format of duplicity)
+# 'keep = yes' means : do not delete old data, the remote host will take care of this
+#keep = 60
+#keep = yes
+
+## passed directly to ssh/scp
+sshoptions = -i /root/.ssh/id_dsa_duplicity
+
+# put the backups under this directory
+destdir = /backups
+
+# the machine which will receive the backups
+desthost = backuphost
+
+# make the files owned by this user
+# note: you must be able to ssh backupuser@backhost
+# without specifying a password (if type = remote).
+destuser = backupuser
+
