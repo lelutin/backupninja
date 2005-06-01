@@ -3,18 +3,20 @@
 #
 
 getconf backupdir /var/backups/mysql
+getconf configfile /etc/mysql/debian.cnf
 getconf databases all
 getconf compress yes
 getconf dbusername
 getconf dbpassword
 getconf dbhost localhost
-getconf hotcopy no
+getconf hotcopy yes
 getconf sqldump no
 getconf user root
 getconf vsname
 
 # If vservers are configured, decide if the handler should
 # use them or if it should just operate on the host
+
 if [ "$VSERVERS" = "yes" ]
 then
 	if [ ! -z $vsname ]
@@ -50,19 +52,16 @@ else
 fi
 
 # create .my.cnf
-# (we do this because we don't want to have to specify the password on the command line
-# because then anyone would be able to see it with a 'ps aux'. instead, we create a 
-# temporary ~/.my.cnf in root's home directory).
+# only if dbusername and dbpassword specified.
+# we create a tmp file because we don't want to have to
+# specify the password on the command line.
 
-if [ "$dbusername" != "" ]; then
-	home=`grep '^root:' $vroot/etc/passwd | awk -F: '{print $6}'`
-	[ -d $home ] || fatal "Can't find root's home directory ($home)."
-	mycnf="$vroot$home/.my.cnf"
+defaultsfile=""
+if [ "$dbusername" != "" -a "$dbpassword" != "" ]; then
+	mycnf="/tmp/backupninja.$$.my.cnf"
 	if [ -f $mycnf ]; then
-		# rename temporarily
-		tmpcnf="$home/my.cnf.disable"
-		debug "mv $mycnf $tmpcnf"
-		mv $mycnf $tmpcnf
+		debug "rm $mycnf"
+		rm $mycnf
 	fi
 	oldmask=`umask`
 	umask 077
@@ -81,17 +80,21 @@ user=$dbusername
 password=$dbpassword
 EOF
 	umask $oldmask
+	defaultsfile="--defaults-file $mycnf"
+else
+	# otherwise, use $configfile
+	defaultsfile="--defaults-file $configfile"
 fi
-	
+
 ## HOT COPY
 
 if [ "$hotcopy" == "yes" ]; then 
 	if [ "$databases" == "all" ]; then
 		if [ $usevserver ]
 		then
-			execstr="$VSERVER $vsname exec $MYSQLHOTCOPY --quiet --allowold --regexp /.\*/./.\*/ $hotdir"
+			execstr="$VSERVER $vsname exec $MYSQLHOTCOPY $defaultsfile --quiet --allowold --regexp /.\*/./.\*/ $hotdir"
 		else
-			execstr="$MYSQLHOTCOPY --quiet --allowold --regexp /.\*/./.\*/ $hotdir"
+			execstr="$MYSQLHOTCOPY $defaultsfile --quiet --allowold --regexp /.\*/./.\*/ $hotdir"
 		fi
 		debug "su $user -c '$execstr'"
 		if [ ! $test ]; then
@@ -109,9 +112,9 @@ if [ "$hotcopy" == "yes" ]; then
 		for db in $databases; do
 			if [ $usevserver ]
 			then
-				execstr="$VSERVER $vsname exec $MYSQLHOTCOPY --allowold $db $hotdir"
+				execstr="$VSERVER $vsname exec $MYSQLHOTCOPY $defaultsfile --allowold $db $hotdir"
 			else
-				execstr="$MYSQLHOTCOPY --allowold $db $hotdir"
+				execstr="$MYSQLHOTCOPY $defaultsfile --allowold $db $hotdir"
 			fi
 			debug "su $user -c '$execstr'"
 			if [ ! $test ]; then
@@ -135,18 +138,18 @@ if [ "$sqldump" == "yes" ]; then
 	if [ "$databases" == "all" ]; then
 		if [ $usevserver ]
 		then
-			databases=`echo 'show databases' | $VSERVER $vsname exec su $user -c "$MYSQL" | grep -v Database`
+			databases=`echo 'show databases' | $VSERVER $vsname exec su $user -c "$MYSQL $defaultsfile" | grep -v Database`
 		else
-			databases=`echo 'show databases' | su $user -c "$MYSQL" | grep -v Database`
+			databases=`echo 'show databases' | su $user -c "$MYSQL $defaultsfile" | grep -v Database`
 		fi
 	fi
 
 	for db in $databases; do
 		if [ $usevserver ]
 		then
-			execstr="$VSERVER $vsname exec $MYSQLDUMP --lock-tables --complete-insert --add-drop-table --quick --quote-names $db > $vroot$dumpdir/${db}.sql"
+			execstr="$VSERVER $vsname exec $MYSQLDUMP $defaultsfile --lock-tables --complete-insert --add-drop-table --quick --quote-names $db > $vroot$dumpdir/${db}.sql"
 		else
-			execstr="$MYSQLDUMP --lock-tables --complete-insert --add-drop-table --quick --quote-names $db > $dumpdir/${db}.sql"
+			execstr="$MYSQLDUMP $defaultsfile --lock-tables --complete-insert --add-drop-table --quick --quote-names $db > $dumpdir/${db}.sql"
 		fi
 		debug "su $user -c '$execstr'"
 		if [ ! $test ]; then
@@ -168,14 +171,10 @@ if [ "$sqldump" == "yes" ]; then
 	fi
 fi
 
-if [ "$dbusername" != "" ]; then
-	## clean up tmp config file
+# clean up tmp config file
+if [ -f "$mycnf" ]; then
 	debug "rm $mycnf"
 	rm $mycnf
-	if [ -f "$tmpcnf" ]; then
-		debug "mv $tmpcnf $mycnf"
-		mv $tmpcnf $mycnf
-	fi
 fi
 
 return 0

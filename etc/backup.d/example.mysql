@@ -1,50 +1,66 @@
-dbusername	= root
-dbpassword	= test
-dbhost		= localhost
-databases	= all
-backupdir	= /var/backups/mysql
-hotcopy		= yes
-sqldump		= yes
-compress    	= yes
+## backupninja mysql config file ##
 
+dbhost      = localhost
+databases   = all
+backupdir   = /var/backups/mysql
+hotcopy     = yes
+sqldump     = no
+compress    = yes
+
+## authentication ##
+
+configfile = /etc/mysql/debian.cnf
+
+# or...
+# dbusername  = <dbuser>
+# dbpassword  = <dbpassword>
+
+# or...
+# user = root
+
+## notes ##
+
+# configfile = < path/to/file > (default = /etc/mysql/debian.cnf)
+# The config file is passed to mysql with --defaults-file.
+# On debian, this default will allow backupninja to make backups
+# of mysql without configuring any additional options. 
+# (this option is not compatible with "user" or "dbusername").
 #
-# user = <user>
+# user = <user> (default = root)
 # Run mysql commands as 'user'. A valid .my.cnf must exist with a 
 # database username and password in the user's home directory.
-# If this option is not set, use dbusername and dbpassword instead.
+# (this option is not compatible with "configfile" or "dbusername").
 #
-# dbusername = <dbuser>
+# dbusername = <dbuser> (no default)
 # The user must have access to the databases specified later.
-# Use this option if not using the 'user' option.
+# (this option is not compatible with "configfile" or "user").
 #
-# dbpassword = <dbpass>
-# The password. this password will NOT be passed on the command line
-# and is not readable using "ps aux". make sure that this file is not
-# world readable. Use this to specify the password in this config file
-# instead of ~user/.my.cnf.
+# dbpassword = <dbpass> (no default)
+# The password used with dbusername. this password will NOT be passed 
+# on the command line and is not readable using "ps aux".
 #
-# dbhost = <host>
+# dbhost = <host> (default = localhost)
 # only localhost works right now.
 #
-# databases = < all | db1 db2 db3 >
+# databases = < all | db1 db2 db3 > (default = all)
 # which databases to backup. should either be the word 'all' or a 
-# comma seperated list of database names.
+# space separated list of database names.
 #
-# backupdir = < path/to/destination >
+# backupdir = < path/to/destination > (default = /var/backups/mysql)
 # where to dump the backups. hotcopy backups will be in a subdirectory 'hotcopy' and
 # sqldump backups will be in a subdirectory 'sqldump'
 #
-# hotcopy = < yes | no >
+# hotcopy = < yes | no > (default = yes)
 # make a backup of the actual database binary files using mysqlhotcopy.
 #
-# sqldump = < yes | no >
+# sqldump = < yes | no > (default = no)
 # make a backup using mysqldump. this creates text files with sql commands
 # sufficient to recontruct the database.
 #
-# compress = < yes | no >
+# compress = < yes | no > (default = yes)
 # if yes, compress the sqldump output. 
 #
-# vsname = <vserver>
+# vsname = <vserver> (no default)
 # what vserver to operate on, only used if vserver = yes in /etc/backupninja.conf
 # if you do not specify a vsname the host will be operated on
 
