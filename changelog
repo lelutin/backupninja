@@ -17,6 +17,9 @@ version 0.x -- xxxxxxxxxxxxx
 		added "bandwidthlimit" option
 	example.dup example config file for duplicity handler 
 	added trac (http://trac.edgewall.com/) environment handler (thanks Charles Lepple!)
+	added configfile option to mysql handler (thanks bonniot!)
+		uses /etc/mysql/debian.cnf by default
+	    now, an empty /etc/backup.d/01.mysql file is all you need
 
 version 0.5 -- April 12 2005
 	rdiff handler works when remote sshd has a banner
