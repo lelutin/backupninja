@@ -3,7 +3,7 @@
 # B A C K U P N I N J A   /()/
 #                         `\|
 #
-# Copyright (C) 2004 riseup.net -- property is theft.
+# Copyright (C) 2004-05 riseup.net -- property is theft.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -429,7 +429,7 @@ getconf RSYNC /usr/bin/rsync
 getconf vservers no
 getconf VSERVERINFO /usr/sbin/vserver-info
 getconf VSERVER /usr/sbin/vserver
-getconf VROOTDIR `$VSERVERINFO info SYSINFO |grep vserver-Rootdir | awk '{print $2}'`
+getconf VROOTDIR `if [ -f "$VSERVERINFO" ]; then $VSERVERINFO info SYSINFO |grep vserver-Rootdir | awk '{print $2}'; fi`
 
 if [ ! -d "$configdirectory" ]; then
 	echo "Configuration directory '$configdirectory' not found."
@@ -443,8 +443,8 @@ if [ "$UID" != "0" ]; then
 	exit 1
 fi
 
-if [ "$VSERVERS" = "yes" -a ! -d $VROOTDIR ]; then
-        echo "vservers option set in config, but $VROOTDIR is not a directory!"
+if [ "$vservers" == "yes" -a ! -d "$VROOTDIR" ]; then
+	echo "vservers option set in config, but $VROOTDIR is not a directory!"
 	fatal "vservers option set in config, but $VROOTDIR is not a directory!"
 fi
 

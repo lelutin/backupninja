@@ -3,16 +3,27 @@
 #
 
 getconf backupdir /var/backups/mysql
-getconf configfile /etc/mysql/debian.cnf
 getconf databases all
+getconf dbhost localhost
+getconf hotcopy no
+getconf sqldump no
 getconf compress yes
+getconf vsname
+
+# authentication:
+getconf user
 getconf dbusername
 getconf dbpassword
-getconf dbhost localhost
-getconf hotcopy yes
-getconf sqldump no
-getconf user root
-getconf vsname
+getconf configfile /etc/mysql/debian.cnf
+
+if [ "$user" == "" ]; then
+	userset=false;
+	user=root;
+else
+	userset=true;
+	userhome=`grep "^$user:" /etc/passwd | awk -F: '{print $6}'`
+	[ -f $userhome/.my.cnf ] || fatal "Can't find config file in $userhome/.my.cnf"
+fi
 
 # If vservers are configured, decide if the handler should
 # use them or if it should just operate on the host
@@ -51,17 +62,33 @@ else
 	[ "$hotcopy" == "no" -o -d $hotdir ] || mkdir -p $hotdir
 fi
 
+#######################################################################
+## AUTHENTICATION
+
+#
+# one of three authentication methods:
+# 1. setting the user, so that /home/user/.my.cnf is used.
+# 2. specifying the user and password in the handler config,
+#    which generates a temporary .my.cnf in /root/.my.cnf
+# 3. specify the config file with --defaults-file
+#    (this option DOESN'T WORK WITH MYSQLHOTCOPY)
+#
+
 # create .my.cnf
 # only if dbusername and dbpassword specified.
-# we create a tmp file because we don't want to have to
+# we create a tmp file because we don't want to
 # specify the password on the command line.
 
 defaultsfile=""
 if [ "$dbusername" != "" -a "$dbpassword" != "" ]; then
-	mycnf="/tmp/backupninja.$$.my.cnf"
+	home=`grep '^root:' /etc/passwd | awk -F: '{print $6}'`
+	[ -d $home ] || fatal "Can't find root's home directory ($home)."
+	mycnf="$home/.my.cnf"
 	if [ -f $mycnf ]; then
-		debug "rm $mycnf"
-		rm $mycnf
+		# rename temporarily
+		tmpcnf="$home/my.cnf.disable"
+		debug "mv $mycnf $tmpcnf"
+		mv $mycnf $tmpcnf
 	fi
 	oldmask=`umask`
 	umask 077
@@ -80,21 +107,22 @@ user=$dbusername
 password=$dbpassword
 EOF
 	umask $oldmask
-	defaultsfile="--defaults-file $mycnf"
-else
-	# otherwise, use $configfile
-	defaultsfile="--defaults-file $configfile"
+	defaultsfile="--defaults-file=$mycnf"
+elif [ "$userset" == "false" ]; then
+	# if user is set, don't use $configfile
+	defaultsfile="--defaults-file=$configfile"
 fi
 
+#######################################################################
 ## HOT COPY
 
 if [ "$hotcopy" == "yes" ]; then 
 	if [ "$databases" == "all" ]; then
 		if [ $usevserver ]
 		then
-			execstr="$VSERVER $vsname exec $MYSQLHOTCOPY $defaultsfile --quiet --allowold --regexp /.\*/./.\*/ $hotdir"
+			execstr="$VSERVER $vsname exec $MYSQLHOTCOPY --quiet --allowold --regexp /.\*/./.\*/ $hotdir"
 		else
-			execstr="$MYSQLHOTCOPY $defaultsfile --quiet --allowold --regexp /.\*/./.\*/ $hotdir"
+			execstr="$MYSQLHOTCOPY --quiet --allowold --regexp /.\*/./.\*/ $hotdir"
 		fi
 		debug "su $user -c '$execstr'"
 		if [ ! $test ]; then
@@ -112,9 +140,9 @@ if [ "$hotcopy" == "yes" ]; then
 		for db in $databases; do
 			if [ $usevserver ]
 			then
-				execstr="$VSERVER $vsname exec $MYSQLHOTCOPY $defaultsfile --allowold $db $hotdir"
+				execstr="$VSERVER $vsname exec $MYSQLHOTCOPY --allowold $db $hotdir"
 			else
-				execstr="$MYSQLHOTCOPY $defaultsfile --allowold $db $hotdir"
+				execstr="$MYSQLHOTCOPY --allowold $db $hotdir"
 			fi
 			debug "su $user -c '$execstr'"
 			if [ ! $test ]; then
@@ -131,7 +159,8 @@ if [ "$hotcopy" == "yes" ]; then
 		done
 	fi
 fi
-	
+
+##########################################################################
 ## SQL DUMP
 
 if [ "$sqldump" == "yes" ]; then
@@ -172,9 +201,14 @@ if [ "$sqldump" == "yes" ]; then
 fi
 
 # clean up tmp config file
-if [ -f "$mycnf" ]; then
+if [ "$dbusername" != "" ]; then
+	## clean up tmp config file
 	debug "rm $mycnf"
 	rm $mycnf
+	if [ -f "$tmpcnf" ]; then
+		debug "mv $tmpcnf $mycnf"
+		mv $tmpcnf $mycnf
+	fi
 fi
 
 return 0

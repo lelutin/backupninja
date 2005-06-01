@@ -1,24 +1,31 @@
-## backupninja mysql config file ##
+### backupninja mysql config file ###
 
-dbhost      = localhost
 databases   = all
 backupdir   = /var/backups/mysql
-hotcopy     = yes
-sqldump     = no
+hotcopy     = no
+sqldump     = yes
 compress    = yes
 
-## authentication ##
+### authentication ###
 
-configfile = /etc/mysql/debian.cnf
+# three authentication methods:
+#
+# 1. setting the user, so that /home/user/.my.cnf is used.
+# user = some-unix-user
+#
+# 2. specifying the mysql dbuser and dbpassword,
+#    which generates a temporary .my.cnf in /root/.my.cnf
+# dbusername  = <some-mysql-user>
+# dbpassword  = <password>
+#
+# 3. specify which config file to use with configfile
+#    (this option does not work with hotcopy)
+# configfile = /etc/mysql/debian.cnf
+#
+# if user and dbusername are not specified, the default is to use
+# /etc/mysql/debian.cnf for configfile.
 
-# or...
-# dbusername  = <dbuser>
-# dbpassword  = <dbpassword>
-
-# or...
-# user = root
-
-## notes ##
+### all options ###
 
 # configfile = < path/to/file > (default = /etc/mysql/debian.cnf)
 # The config file is passed to mysql with --defaults-file.
@@ -50,7 +57,7 @@ configfile = /etc/mysql/debian.cnf
 # where to dump the backups. hotcopy backups will be in a subdirectory 'hotcopy' and
 # sqldump backups will be in a subdirectory 'sqldump'
 #
-# hotcopy = < yes | no > (default = yes)
+# hotcopy = < yes | no > (default = no)
 # make a backup of the actual database binary files using mysqlhotcopy.
 #
 # sqldump = < yes | no > (default = no)
