@@ -54,6 +54,7 @@ file in /etc/backup.d according to the file's suffix:
   .mysql   --  mysql backup configuration
   .ldap    --  ldap backup configuration
   .sys     --  general system reports
+  .svn     --  subversion repository backups
 
 Support for additional configuration types can be added by dropping
 bash scripts with the name of the suffix into /usr/share/backupninja. 
