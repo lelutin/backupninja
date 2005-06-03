@@ -18,7 +18,7 @@ version 0.x -- xxxxxxxxxxxxx
 	example.dup example config file for duplicity handler 
 	added trac (http://trac.edgewall.com/) environment handler (thanks Charles Lepple!)
 	added configfile option to mysql handler
-        the default is /etc/mysql/debian.cnf. with this, 
+		the default is /etc/mysql/debian.cnf. with this, 
 		sqldump doesn't need dbusername. (hotcopy still does).
 
 version 0.5 -- April 12 2005
