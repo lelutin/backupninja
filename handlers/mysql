@@ -96,15 +96,15 @@ if [ "$dbusername" != "" -a "$dbpassword" != "" ]; then
 # auto generated backupninja mysql conf
 [mysql]
 user=$dbusername
-password=$dbpassword
+password="$dbpassword"
 
 [mysqldump]
 user=$dbusername
-password=$dbpassword
+password="$dbpassword"
 
 [mysqlhotcopy]
 user=$dbusername
-password=$dbpassword
+password="$dbpassword"
 EOF
 	umask $oldmask
 	defaultsfile="--defaults-file=$mycnf"

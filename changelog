@@ -20,7 +20,9 @@ version 0.x -- xxxxxxxxxxxxx
 	added configfile option to mysql handler
 		the default is /etc/mysql/debian.cnf. with this, 
 		sqldump doesn't need dbusername. (hotcopy still does).
-
+    fixed bug in mysql handler which caused some passwords to not work.
+        (.my.cnf files now have double quotes around password)
+    
 version 0.5 -- April 12 2005
 	rdiff handler works when remote sshd has a banner
 	rdiff handler supports local dest 
