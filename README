@@ -23,7 +23,7 @@ Features:
  - backup actions can be scheduled
  - you can choose when status report emails are mailed to you
    (always, on warning, on error, never).
- - works with linux-vservers
+ - works with Linux-Vservers (http://linux-vserver.org/)
  
 The following options are available:
 -h, --help           This usage message
@@ -194,3 +194,21 @@ Installation:
   # mkdir /etc/backup.d/
   # mv etc/backupninja.conf /etc/backupninja.conf
   # mv handlers /usr/share/backupninja
+
+
+VSERVERS
+========
+
+If you are using Linux-Vservers (http://linux-vserver.org/) there are some
+special capabilities that different handlers have to make vserver backups easier.
+Set the variable "vservers" to be "yes" in /etc/backupninja.conf and see the
+example configuration files for each handler to configure the vserver specific
+variables.
+
+Additional vserver variables that can be configured in /etc/backupninja.conf. but
+probably don't need to be changed:
+
+VSERVERINFO (default: /usr/sbin/vserver-info)
+VSERVER (default: /usr/sbin/vserver)
+VROOTDIR (default: `$VSERVERINFO info SYSINFO |grep vserver-Rootdir | awk '{print $2}'; fi`)
+

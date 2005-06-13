@@ -12,7 +12,7 @@ error=0
 
 # If vservers are configured, decide if the handler should
 # use them or if it should just operate on the host
-if [ "$VSERVERS" = "yes" ]
+if [ "$vservers" = "yes" ]
 then
 	if [ ! -z $vsname ]
 	then		

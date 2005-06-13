@@ -26,7 +26,7 @@ getconf user; destuser=$user
 getconf host; desthost=$host
 
 # See if vservers are configured
-if [ "$VSERVERS" = "yes" ]
+if [ "$vservers" = "yes" ]
 then
 	if [ ! -d $VROOTDIR ]
 	then

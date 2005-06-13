@@ -70,4 +70,6 @@ compress    = yes
 # vsname = <vserver> (no default)
 # what vserver to operate on, only used if vserver = yes in /etc/backupninja.conf
 # if you do not specify a vsname the host will be operated on
-
+# 
+# NB: databases = all doesn't seem to work with hotcopy = yes when vsname is specified
+# I would like to know how to fix this.

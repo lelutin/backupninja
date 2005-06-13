@@ -41,6 +41,17 @@ include = /usr/local/sbin
 include = /var/lib/dpkg/status
 include = /var/lib/dpkg/status-old
 
+# If vservers = yes in /etc/backupninja.conf then the following variable can be used:
+# vsinclude = <path>
+# Any path specified in vsinclude is added to the include list for each vserver
+# on the system.
+# e.g. vsinclude = /home will backup the /home partition in every vserver
+# on the system. If you have /vservers/foo, /vservers/bar and /vservers/baz
+# this vsinclude will add to the include list /vservers/foo/home, 
+# /vservers/bar/home and /vservers/baz/home
+# Included vservers are derived from listing all vservers in $VROOTDIR (suggestions
+# for improving this are encouraged).
+
 # files to exclude from the backup
 # (supports globbing with '*')
 #exclude = /home/*/.gnupg

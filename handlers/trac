@@ -1,0 +1,51 @@
+#
+# this handler will backup trac environments (based on the svn handler)
+#
+# http://trac.edgewall.com/
+#
+
+getconf src /var/lib/trac
+getconf dest /var/backups/trac
+getconf tmp /var/backups/trac.tmp
+
+error=0
+cd $src
+for repo in `find . -name VERSION`
+do
+    repo=`dirname $repo`
+
+    # Just make the $tmp dir, not $tmp/$repo
+    ret=`mkdir -p $tmp 2>&1`
+    code=$?
+    if [ "$ret" ]; then
+       debug "$ret"
+    fi
+    if [ $code != 0 ]; then
+       error "command failed mkdir -p $tmp"
+    fi
+
+    ret=`trac-admin $src/$repo hotcopy $tmp/$repo 2>&1`
+    code=$?
+    if [ "$ret" ]; then
+       debug "$ret"
+    fi
+    if [ $code != 0 ]; then
+       error "command failed -- trac-admin $src/$repo hotcopy $tmp/$repo"
+       error=1
+    fi
+done
+
+if [ $error -eq 1 ]; then
+    echo "Error: because of earlier errors, we are leaving trac backups in $tmp instead of $dest"
+else
+    if [ -d $dest -a -d $tmp ]; then
+        rm -rf $dest
+    fi
+    if [ -d $tmp ]; then
+        mv $tmp $dest
+    fi
+fi
+
+exit 0
+
+# vim: filetype=sh
