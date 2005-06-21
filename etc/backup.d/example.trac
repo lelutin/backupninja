@@ -1,0 +1,16 @@
+##
+## Perform backups of trac environment
+## 
+## REQUIRES: apt-get install trac
+##
+## This file can be empty, the defaults are usually good.
+##
+
+## where one or more Trac environments live
+src = /var/lib/trac
+
+## where to save the backups to
+dest = /var/backups/trac
+
+## where to save temporary backups
+tmp = /var/backups/trac.tmp
