@@ -46,21 +46,17 @@ if [ "$ldif" == "yes" ]; then
 
 		if [ "$method" == "slapcat" ]; then
 			execstr="$SLAPCAT -f $conf -b $dbsuffix"
-			if [ "$restart" == "yes" ]; then
-				debug "Shutting down ldap server..."
-				/etc/init.d/slapd stop
-			fi
 			debug "$execstr"
 		else
 			execstr="$LDAPSEARCH -x -L -b ""$dbsuffix"" -D ""$binddn"" -y $passwordfile"
-			[ -f "$passwordfile" ] || fatal "Password file $passwordfile not found"
+			[ -f "$passwordfile" ] || fatal "Password file $passwordfile not found. When method is set to ldapsearch, you must also specify a password file."
+			debug "$execstr"
+		fi
+		if [ ! $test ]; then
 			if [ "$restart" == "yes" ]; then
 				debug "Shutting down ldap server..."
 				/etc/init.d/slapd stop
 			fi
-			debug "$execstr"
-		fi
-		if [ ! $test ]; then
 
 			touch $dumpdir/$dbsuffix.ldif
 			if [ ! -f $dumpdir/$dbsuffix.ldif ]; then
@@ -72,10 +68,6 @@ if [ "$ldif" == "yes" ]; then
 			if [ "$code" == "0" ]; then
 				debug $output
 				info "Successfully finished ldif export of $dbsuffix"
-				if [ "$restart" == "yes" ]; then
-					debug "Starting ldap server..."
-					/etc/init.d/slapd start
-				fi
 			else
 				warning $output
 				warning "Failed ldif export of $dbsuffix"
@@ -83,6 +75,11 @@ if [ "$ldif" == "yes" ]; then
 			if [ "$compress" == "yes" ]; then
 				output=`$GZIP -f "$dumpdir/$dbsuffix.ldif" 2>&1`
 				debug $output
+			fi
+
+			if [ "$restart" == "yes" ]; then
+				debug "Starting ldap server..."
+				/etc/init.d/slapd start
 			fi
 		fi
 	done	
