@@ -87,9 +87,13 @@ function printmsg() {
 	fi
 	
 	if [ $print -lt $loglevel ]; then
-		if [ -w "$logfile" ]; then
-			colorize "$typestr$@" >> $logfile
-		fi
+		logmsg "$typestr$@"
+	fi
+}
+
+function logmsg() {
+	if [ -w "$logfile" ]; then
+		echo -e `date "+%h %d %H:%M:%S"` "$@" >> $logfile
 	fi
 }
 
@@ -268,9 +272,9 @@ function process_action() {
 	# is not set to the current time.
 	getconf when "$defaultwhen"
 	if [ "$processnow" == 1 ]; then
-		info "running $file because of --now"
+		info ">>>> starting action $file (because of --now)"
 	elif [ "$when" == "hourly" ]; then
-		debug "running $file because 'when = hourly'"
+		info ">>>> starting action $file (because 'when = hourly')"
 	else
 		IFS=$'\t\n'
 		for w in $when; do
@@ -282,7 +286,7 @@ function process_action() {
 				debug "skipping $file because it is not $w"
 				return
 			else
-				info "running $file because it is $w"
+				info ">>>> starting action $file (because it is $w)"
 			fi
 		done
 		IFS=$' \t\n'
@@ -314,19 +318,18 @@ function process_action() {
 	rm $bufferfile
 	if [ $_fatals != 0 ]; then
 		msg "*failed* -- $file"
-		errormsg="$errormsg\n== failures from $file ==\n\n$ret\n"
+		passthru "Fatal: <<<< finished action $file: FAILED"
 	elif [ $_errors != 0 ]; then
 		msg "*error* -- $file"
 		errormsg="$errormsg\n== errors from $file ==\n\n$ret\n"
+		error "<<<< finished action $file: ERROR"
 	elif [ $_warnings != 0 ]; then
 		msg "*warning* -- $file"
 		errormsg="$errormsg\n== warnings from $file ==\n\n$ret\n"
+		warning "<<<< finished action $file: WARNING"
 	else
 		msg "success -- $file"
-#	elif [ $retcode == 0 ]; then
-#		msg "success -- $file"
-#	else
-#		msg "unknown -- $file"
+		info "<<<< finished action $file: SUCCESS"
 	fi
 
 	let "fatals += _fatals"
@@ -511,3 +514,6 @@ if [ $doit == 1 ]; then
 	} | mail $reportemail -s "backupninja: $hostname $subject"
 fi
 
+if [ $actions_run != 0 ]; then
+	info "FINISHED: $actions_run actions run. $fatals fatal. $errors error. $warnings warning."
+fi
