@@ -1,9 +1,10 @@
 ##
 ## configuration file for openldap backups 
 ##
-## The LDIFs generated are suitable for use with slapadd. As the 
-## entries are in database order, not superior first order, they
-## cannot be loaded with ldapadd without being reordered.
+## If the method is set to "slapcat", the LDIFs generated are
+## suitable for use with slapadd. As the entries are in database
+## order, not superior first order, they cannot be loaded with
+## ldapadd without being reordered.
 ##
 
 ## backupdir (default /var/backups/ldap): the destination for the backups
@@ -19,9 +20,9 @@
 ## compress (default yes): if set to yes, ldif exports are gzipped.
 # compress = yes
 
-## restart (default no): if set to yes, slapd is restarted before backups are
+## restart (default no): if set to yes, slapd is stopped before backups are
 ## performed, and then started again after they have finished, this is necessary
-## if your backend is ldbm and your method is slapcat, but unnecessary otherwise
+## if your backend is ldbm and your method is slapcat, but unnecessary otherwise.
 # restart = no
 
 ## method (default ldapsearch): either 'ldapsearch' or 'slapcat' 
