@@ -2,10 +2,10 @@ version 0.x -- xxxxxxxxxxxxx
 	ldap handler has new options: backup method to use (ldapsearch or
 		slapcat), restart, passwordfile and binddn. Default backup method
 		is set to ldapsearch as this is safer
-	**********************
+	******************************************************************
 	NOTE: to get the previous default behavior with the ldap handler, 
 	you must set "method = slapcat". The new default is ldapsearch.
-	**********************
+	******************************************************************
 	implemented fix so that the main script will echo fatal errors rather
 		than being silent about them, this means an error message every hour
 		if there is a major configuration problem (not a handler problem)
@@ -27,7 +27,8 @@ version 0.x -- xxxxxxxxxxxxx
     fixed bug in mysql handler which caused some passwords to not work.
         (.my.cnf files now have double quotes around password)
     considerably improved and changed the log file output.
-        
+    can now pass options to hwinfo and sfdisk in sys handler.
+
 version 0.5 -- April 12 2005
 	rdiff handler works when remote sshd has a banner
 	rdiff handler supports local dest 
