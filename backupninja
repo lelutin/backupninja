@@ -318,6 +318,7 @@ function process_action() {
 	rm $bufferfile
 	if [ $_fatals != 0 ]; then
 		msg "*failed* -- $file"
+		errormsg="$errormsg\n== fatal errors from $file ==\n\n$ret\n"
 		passthru "Fatal: <<<< finished action $file: FAILED"
 	elif [ $_errors != 0 ]; then
 		msg "*error* -- $file"
