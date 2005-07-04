@@ -1,4 +1,8 @@
-version 0.x -- xxxxxxxxxxxxx
+version 0.7 -- July 3 2005
+    added ninjahelper: a dialog based wizard for creating backupninja configs.
+    considerably improved and changed the log file output.
+        
+version 0.6 -- June 16 2005
 	ldap handler has new options: backup method to use (ldapsearch or
 		slapcat), restart, passwordfile and binddn. Default backup method
 		is set to ldapsearch as this is safer
@@ -26,7 +30,6 @@ version 0.x -- xxxxxxxxxxxxx
 		sqldump doesn't need dbusername. (hotcopy still does).
     fixed bug in mysql handler which caused some passwords to not work.
         (.my.cnf files now have double quotes around password)
-    considerably improved and changed the log file output.
     can now pass options to hwinfo and sfdisk in sys handler.
 
 version 0.5 -- April 12 2005
