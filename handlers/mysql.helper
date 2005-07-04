@@ -1,0 +1,109 @@
+
+do_mysql_user() {
+  inputBox "mysql action wizard" "specify a system user:"
+  do_mysql_final "user = $REPLY"
+}
+
+do_mysql_password() {
+  inputBox "mysql action wizard" "specify a mysql user:"
+  user=$REPLY
+  inputBox "mysql action wizard" "specify the mysql user's password:"
+  password=$REPLY
+  do_mysql_final "dbusername = $user\ndbpassword = $password"
+}
+
+do_mysql_debian() {
+  _DISABLE_HOTCOPY=yes
+  do_mysql_final "configfile = /etc/mysql/debian.cnf"
+}
+
+do_mysql_user() {
+  inputBox "mysql action wizard" "what system user does mysql backup use?"
+  do_mysql_final "user = $REPLY"
+}
+
+do_mysql_final() {
+   if [ -z "$_DISABLE_HOTCOPY" ]; then
+      checkBox "mysql action wizard" "check options" \
+         "sqldump" "create a backup using mysqldump (more compat)." off \
+         "hotcopy" "create a backup using mysqlhotcopy (faster)." on \
+         "compress" "compress the sql output files" on
+      status=$?
+      sqldump="sqldump = off"
+      hotcopy="hotcopy = off"
+   else
+      checkBox "mysql action wizard" "check options" \
+         "compress" "compress the sql output files" on
+      status=$?
+      sqldump="sqldump = on"
+      hotcopy="hotcopy = off"
+   fi
+
+   [ $status = 1 ] && return;    
+   result="$REPLY"
+   compress="compress = off"
+   for opt in $result; do
+      case $opt in
+        '"sqldump"') sqldump="sqldump = on";;
+        '"hotcopy"') hotcopy="hotcopy = on";;
+        '"compress"') compress="compress = on";;
+      esac
+   done
+   get_next_filename $configdirectory/20.mysql
+   echo -e $@ > $next_filename
+   cat >> $next_filename <<EOF
+$sqldump
+$hotcopy
+$compress
+# databases   = all
+# backupdir   = /var/backups/mysql
+# dbhost      = localhost
+EOF
+   chmod 000 $next_filename
+}
+
+mysql_wizard() {
+   while true; do
+      _DISABLE_HOTCOPY=
+      menuBoxHelpFile "mysql action wizard" "choose a mysql authentication method:" \
+        user "change to a linux user first." \
+        password "manually specify mysql user and password." \
+        debian "use default mysql user debian-sys-maint." 
+      status=$?
+      if [ $status = 2 ]; then
+	       # show help.
+          helptmp="/tmp/backupninja.help.$$"
+          cat > $helptmp <<EOF
+To connect to mysql, backupninja must authenticate.
+There are three possible authentication methods:
+
+USER
+With this method, you specify a system user. Backupninja  will
+then become this user before running mysqldump or mysqlhotcopy.
+The result is that ~/.my.cnf is used for authentication.
+
+PASSWORD
+With this method, you manually specify a mysql user and
+password in the backup action configuration.
+
+DEBIAN
+With this method, we use the debian-sys-maint user which is
+already defined in /etc/mysql/debian.cnf. If you are running
+debian, this is recommended, because no further configuration
+is needed. The drawback is that this is incompatible with 
+mysqlhotcopy: you must use mysqldump.
+EOF
+          dialog --textbox $helptmp 0 0
+          rm $helptmp
+      fi
+
+      [ $status = 1 ] && return;
+      result="$REPLY"
+      case "$result" in
+         "user") do_mysql_user;return;;
+         "password") do_mysql_password;return;;
+         "debian") do_mysql_debian;return;;
+      esac
+   done
+}
+

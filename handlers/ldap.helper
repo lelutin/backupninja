@@ -1,0 +1,75 @@
+
+ldap_create_file() {
+while true; do
+      checkBox "ldap action wizard" "check options (slapcat OR ldapsearch)" \
+         "slapcat" "export ldif using slapcat" on \
+         "ldapsearch" "export ldif using ldapsearch" off \
+         "compress" "compress the ldif output files" on
+      status=$?
+      compress="compress = off"
+      method="method = <unset>"
+      restart="restart = no"
+      binddn=""
+      passwordfile=""
+      [ $status = 1 ] && return;
+      result="$REPLY"
+      for opt in $result; do
+         case $opt in
+           '"compress"') compress="compress = on";;
+           '"slapcat"')
+              method="method = slapcat"
+              [ "$_RESTART" == "yes" ] && restart="restart = yes"
+              ;;
+           '"ldapsearch"')
+              method="method = ldapsearch"
+              inputBox "ldap action wizard" "ldapsearch requires authentication. Specify here what password file to use. It must have the password with no trailing return and it should not be world readable."
+              [ $? = 1 ] && return
+              passwordfile="passwordfile = $REPLY"
+              inputBox "ldap action wizard" "ldapsearch requires authentication. Specify here what DN to bind as:"
+              [ $? = 1 ] && return
+              binddn="binddn = $REPLY"
+              require_packages ldap-utils
+              ;;
+         esac
+      done
+      get_next_filename $configdirectory/30.ldap
+      cat > $next_filename <<EOF
+$method
+$compress
+$restart
+$binddn
+$passwordfile
+# backupdir = /var/backups/ldap
+# conf = /etc/ldap/slapd.conf
+# databases = all
+EOF
+     chmod 000 $next_filename
+     return
+done
+}
+
+ldap_wizard() {
+   bdb=no
+   ldbm=no
+   for backend in `grep -e "^backend" /etc/ldap/slapd.conf | awk '{print $2}'`; do
+      if [ "$backend" == "bdb" -a "$bdb" == "no" ]; then
+         bdb=yes
+      elif [ "$backend" == "ldbm" -a "$ldbm" == "no" ]; then
+         ldbm=yes
+      fi
+   done    
+
+   if [ "$bdb" == "yes" -a "$ldbm" == "no" ]; then
+     msgBox "ldap action wizard" "It looks like the backend in your slapd.conf is set to BDB. If this is not the case, exit this wizard! From this point on, we will assume BDB backend, which might have disasterious consequences if this is incorrect."
+     _RESTART=no
+     ldap_create_file
+   elif [ "$ldbm" == "yes" ]; then
+     msgBox "ldap action wizard" "It looks like the backend in your slapd.conf is set to LDBM. Because of this, you will have less options (because it is not safe to use slapcat while slapd is running LDBM)." 
+     _RESTART=yes
+     ldap_create_file
+   else
+     msgBox "ldap action wizard" "I couldn't find any backends in your slapd.conf. Bailing out." 
+     return
+   fi
+}
+

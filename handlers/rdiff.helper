@@ -1,0 +1,69 @@
+
+rdiff_wizard() {
+   require_packages rdiff-backup
+   startForm "rdiff action wizard"
+     formItem "keep" "60D"
+     formItem "dest_directory" "/backups/mybackup"
+     formItem "dest_host" "backuphost"
+     formItem "dest_user" "backupuser"
+   displayForm
+
+   [ $? = 1 ] && return;
+       
+   set -- $REPLY
+	keep=$1
+	directory=$2
+	host=$3
+	user=$4
+	
+   startForm "rdiff action wizard: includes"
+     formItem include /var/spool/cron/crontabs
+     formItem include /var/backups
+     formItem include /etc
+     formItem include /root
+     formItem include /home
+     formItem include /usr/local/__star__bin
+     formItem include /var/lib/dpkg/status__star__
+     formItem include 
+     formItem include 
+     formItem include 
+   displayForm
+
+   [ $? = 1 ] && return;
+
+   includes=   
+   for i in $REPLY; do
+      [ "$i" != "_empty_" ] && includes="$includes\ninclude = $i"
+   done
+   
+   startForm "rdiff action wizard: excludes" 
+     formItem exclude /home/__star__/.gnupg
+     formItem exclude 
+     formItem exclude 
+   displayForm
+
+   [ $? = 1 ] && return;
+
+   excludes=
+   for i in $REPLY; do
+      [ "$i" != "_empty_" ] && excludes="$excludes\nexclude = $i"
+   done
+   
+   get_next_filename $configdirectory/90.rdiff
+   cat > $next_filename <<EOF
+[source]
+type = local
+keep = $keep
+EOF
+   echo -e $includes >> $next_filename
+   echo -e $excludes >> $next_filename
+   cat >> $next_filename <<EOF
+
+[dest]
+type = remote
+directory = $directory
+host = $host
+user = $user
+EOF
+   chmod 000 $next_filename
+}

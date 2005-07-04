@@ -1,0 +1,31 @@
+
+sys_wizard() {
+   require_packages hwinfo
+   checkBox "new sys action" "check options" \
+       "packages" "list of all installed packages." on \
+       "partitions" "the partition table of all disks." on  \
+       "hardware" "detailed hardware information" on
+   [ $? = 1 ] && return;    
+   result="$REPLY"
+   packages="packages = off"
+   partitions="partitions = off"
+   hardware="hardware = off"
+   for opt in $result; do
+      case $opt in
+        '"packages"') packages="packages = on";;
+        '"partitions"') partitions="partitions = on";;
+        '"hardware"') hardware="hardware = on";;
+      esac
+   done
+   get_next_filename $configdirectory/10.sys
+   cat > $next_filename <<EOF
+$packages
+$partitions
+$hardware
+# databases   = all
+# backupdir   = /var/backups/mysql
+# dbhost      = localhost
+EOF
+   chmod 000 $next_filename
+}
+
