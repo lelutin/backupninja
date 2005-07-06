@@ -13,28 +13,38 @@ coordinate many different backup utilities.
 
 Features:
  - easy to read ini style configuration files.
+ - you can drop in scripts to handle new types of backups.
+ - backup actions can be scheduled
+ - you can choose when status report emails are mailed to you
+   (always, on warning, on error, never).
+ - console-based wizard (ninjahelper) makes it easy to create
+   backup action configuration files.
+ - passwords are never sent via the command line to helper programs.
+ - works with Linux-Vservers (http://linux-vserver.org/)
+ 
+Backup types:
  - secure, remote, incremental filesytem backup (via rdiff-backup).
    incremental data is compressed. permissions are retained even
    with an unpriviledged backup user.
  - backup of mysql databases (via mysqlhotcopy and mysqldump).
  - backup of ldap databases (via slapcat and ldapsearch).
- - passwords are never sent via the command line to helper programs.
- - you can drop in scripts to handle new types of backups.
- - backup actions can be scheduled
- - you can choose when status report emails are mailed to you
-   (always, on warning, on error, never).
- - works with Linux-Vservers (http://linux-vserver.org/)
- 
+ - basic system and hardware info
+ - encrypted remote backups (via duplicity).    
+ - backup of subversion repositories.
+
 The following options are available:
 -h, --help           This usage message
 -d, --debug          Run in debug mode, where all log messages are
                      output to the current shell.
 -f, --conffile FILE  Use FILE for the main configuration instead
                      of /etc/backupninja.conf
--t, --test           Run in test mode, no actions are actually taken.
--n, --now            Perform actions now, instead of when they
-                     might be scheduled.
---run FILE           runs the specified action FILE (e.g. one of the /etc/backup.d/ files)
+-t, --test           Test run mode. This will test if the backup could run, without actually
+                     preforming any backups. For example, it will attempt to authenticate
+                     or test that ssh keys are set correctly.
+-n, --now            Perform actions now, instead of when they might be scheduled.
+                     No output will be created unless also run with -d.
+--run FILE           Runs the specified action FILE (e.g. one of the /etc/backup.d/ files).
+                     Also puts backupninja in debug mode.
 
 CONFIGURATION FILES
 ===================

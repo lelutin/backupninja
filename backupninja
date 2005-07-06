@@ -241,11 +241,17 @@ The following options are available:
                      output to the current shell.
 -f, --conffile FILE  Use FILE for the main configuration instead
                      of /etc/backupninja.conf
--t, --test           Run in test mode, no actions are actually taken.
--n, --now            Perform actions now, instead of when they
-                     might be scheduled.
+-t, --test           Test run mode. This will test if the backup
+                     could run, without actually preforming any
+                     backups. For example, it will attempt to authenticate
+                     or test that ssh keys are set correctly.
+-n, --now            Perform actions now, instead of when they might
+                     be scheduled. No output will be created unless also
+                     run with -d.
     --run FILE       Execute the specified action file and then exit.    
-When using colored output, there are:
+                     Also puts backupninja in debug mode.
+                     
+When in debug mode, output to the console will be colored:
 EOF
 	debug=1
 	debug   "Debugging info (when run with -d)"
