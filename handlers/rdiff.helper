@@ -22,22 +22,23 @@ rdiff_wizard() {
      formItem include /etc
      formItem include /root
      formItem include /home
-     formItem include /usr/local/__star__bin
-     formItem include /var/lib/dpkg/status__star__
+     formItem include '/usr/local/*bin'
+     formItem include '/var/lib/dpkg/status*'
      formItem include 
      formItem include 
      formItem include 
    displayForm
 
    [ $? = 1 ] && return;
-
    includes=   
+   set -o noglob
    for i in $REPLY; do
       [ "$i" != "_empty_" ] && includes="$includes\ninclude = $i"
    done
+   set +o noglob
    
    startForm "rdiff action wizard: excludes" 
-     formItem exclude /home/__star__/.gnupg
+     formItem exclude '/home/*/.gnupg'
      formItem exclude 
      formItem exclude 
    displayForm
@@ -45,18 +46,20 @@ rdiff_wizard() {
    [ $? = 1 ] && return;
 
    excludes=
+   set -o noglob
    for i in $REPLY; do
       [ "$i" != "_empty_" ] && excludes="$excludes\nexclude = $i"
    done
-   
+   set +o noglob
+      
    get_next_filename $configdirectory/90.rdiff
    cat > $next_filename <<EOF
 [source]
 type = local
 keep = $keep
 EOF
-   echo -e $includes >> $next_filename
-   echo -e $excludes >> $next_filename
+   echo -e "$includes" >> $next_filename
+   echo -e "$excludes" >> $next_filename
    cat >> $next_filename <<EOF
 
 [dest]

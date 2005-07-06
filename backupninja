@@ -476,7 +476,7 @@ for file in $files; do
 	check_perms $file
 	suffix="${file##*.}"
 	base=`basename $file`
-	if [ "${base:0:1}" == "0" ]; then
+	if [ "${base:0:1}" == "0" -o "$suffix" == "disabled" ]; then
 		info "Skipping $file"
 		continue
 	fi

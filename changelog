@@ -1,7 +1,8 @@
 version 0.7 -- July 3 2005
     added ninjahelper: a dialog based wizard for creating backupninja configs.
     considerably improved and changed the log file output.
-        
+    you can now disable actions with .disabled (this is new preferred method).
+            
 version 0.6 -- June 16 2005
 	ldap handler has new options: backup method to use (ldapsearch or
 		slapcat), restart, passwordfile and binddn. Default backup method

@@ -90,15 +90,11 @@ do_run_test() {
 }
 
 do_disable() {
-  dir=`dirname $1`
-  base=`basename $1`
-  mv $dir/$base $dir/0-$base
+  mv $1 $1.disabled
 }
 
 do_enable() {
-  dir=`dirname $1`
-  base=`basename $1`
-  mv $dir/$base $dir/${base:2}
+  mv $1 ${1%.*}
 }
 
 do_rename() {
@@ -111,7 +107,7 @@ do_rename() {
 doaction() {
   action=$1
   base=`basename $action`
-  if [ "${base:0:2}" == "0-" ]; then
+  if [ "${base##*.}" == "disabled" ]; then
      enable="enable";
   else
      enable="disable";

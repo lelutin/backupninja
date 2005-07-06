@@ -164,19 +164,20 @@ displayForm() {
     
    local form=
    local xpos=1
-   for ((i=0; i < $_form_items ; i++)); do
-      label=${_form_labels[$i]}
-      text=${_form_text[$i]}
-      if [ "$text" == "" ]; then
-         text='_empty_'
-      fi
-      form=`echo -e "$form $label $xpos 1" $text "$xpos $max_length 30 30"`
-      let "xpos += _form_gap"
-   done
-
-   $DIALOG --form "$_form_title" 0 0 20 $form 2> $temp
+   (
+      echo -n -e "--form '$_form_title' 0 0 20"
+      for ((i=0; i < $_form_items ; i++)); do
+        label=${_form_labels[$i]}
+        text=${_form_text[$i]}
+        if [ "$text" == "" ]; then
+           text='_empty_'
+        fi
+        echo -n -e "$form $label $xpos 1 '$text' $xpos $max_length 30 30"
+        let "xpos += _form_gap"
+      done
+   ) | xargs $DIALOG 2> $temp
    local status=$?
-   [ $status = 0 ] && REPLY=$(cat $temp)
+   [ $status = 0 ] && REPLY=`cat $temp`
    rm -f $temp
    return $status
 }
