@@ -43,8 +43,8 @@ if [ "$desttype" == "remote" ]; then
 	# see if we can login
 	if [ "$testconnect" == "yes" ]; then
 		hostalive=0
-	    debug "ssh -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1'"
-		ret=`ssh -o PasswordAuthentication=no $desthost -l $destuser 'echo -n host is alive'`
+	    debug "ssh -o -o PreferredAuthentications=publickey $desthost -l $destuser 'echo -n 1'"
+		ret=`ssh -o -o PreferredAuthentications=publickey $desthost -l $destuser 'echo -n host is alive'`
 		if echo $ret | grep "host is alive"; then
 			debug "Connected to $desthost as $destuser successfully"
 		else
@@ -52,8 +52,8 @@ if [ "$desttype" == "remote" ]; then
 		fi
 	fi
 	# see that rdiff-backup has the same version as here
-	debug "ssh $desthost -l $destuser '$RDIFFBACKUP -V'\""
-	remoteversion=`ssh $desthost -l $destuser "$RDIFFBACKUP -V | grep rdiff-backup"`
+	debug "ssh -o PreferredAuthentications=publickey $desthost -l $destuser '$RDIFFBACKUP -V'\""
+	remoteversion=`ssh -o PreferredAuthentications=publickey $desthost -l $destuser "$RDIFFBACKUP -V | grep rdiff-backup"`
 	localversion=`$RDIFFBACKUP -V`
 	if [ "$remoteversion" != "$localversion" ]; then
 		fatal "rdiff-backup does not have the same version on this computer and the backup server."

@@ -1,21 +1,23 @@
-
-rdiff_wizard() {
-   require_packages rdiff-backup
+do_rdiff_dest() {
    startForm "rdiff action wizard"
-     formItem "keep" "60D"
-     formItem "dest_directory" "/backups/mybackup"
-     formItem "dest_host" "backuphost"
-     formItem "dest_user" "backupuser"
+     formItem "keep" "$rdiff_keep"
+     formItem "dest_directory" "$rdiff_directory"
+     formItem "dest_host" "$rdiff_host"
+     formItem "dest_user" "$rdiff_user"
    displayForm
-
    [ $? = 1 ] && return;
        
    set -- $REPLY
-	keep=$1
-	directory=$2
-	host=$3
-	user=$4
-	
+	rdiff_keep=$1
+	rdiff_directory=$2
+	rdiff_host=$3
+	rdiff_user=$4
+
+  _dest_done="(DONE)"
+  setDefault conn
+}
+
+do_rdiff_src() {
    startForm "rdiff action wizard: includes"
      formItem include /var/spool/cron/crontabs
      formItem include /var/backups
@@ -28,45 +30,132 @@ rdiff_wizard() {
      formItem include 
      formItem include 
    displayForm
-
    [ $? = 1 ] && return;
-   includes=   
+
+   rdiff_includes=   
    set -o noglob
    for i in $REPLY; do
-      [ "$i" != "_empty_" ] && includes="$includes\ninclude = $i"
+      [ "$i" != "" ] && rdiff_includes="$rdiff_includes\ninclude = $i"
    done
    set +o noglob
-   
+
    startForm "rdiff action wizard: excludes" 
      formItem exclude '/home/*/.gnupg'
      formItem exclude 
      formItem exclude 
    displayForm
-
    [ $? = 1 ] && return;
 
-   excludes=
+   rdiff_excludes=
    set -o noglob
    for i in $REPLY; do
-      [ "$i" != "_empty_" ] && excludes="$excludes\nexclude = $i"
+      [ "$i" != "" ] && rdiff_excludes="$rdiff_excludes\nexclude = $i"
    done
    set +o noglob
-      
+   
+   _src_done="(DONE)"
+   setDefault dest
+}
+
+do_rdiff_con() {
+  if [ "$_dest_done" = "" ]; then
+    msgBox "rdiff action wizard: error" "You must first configure the destination"
+    return
+  else
+    booleanBox "rdiff action wizard" "This step will create a ssh key for the local root user with no passphrase (if one does not already exist), and attempt to copy root's public ssh key to authorized_keys file of $rdiff_user@$rdiff_host. This will allow the local root to make unattended backups to $rdiff_user@$rdiff_host. Are you sure you want to continue?"
+    [ $? = 1 ] && return
+  fi
+
+  if [ ! -f /root/.ssh/id_dsa.pub -a ! -f /root/.ssh/id_rsa.pub ]; then
+    echo "Creating local root's ssh key"
+    ssh-keygen -t dsa -f /root/.ssh/id_dsa -N ""
+    echo "Done. hit return to continue"
+    read
+  fi
+  
+  ssh -o PreferredAuthentications=publickey $rdiff_host -l $rdiff_user "exit" 2> /dev/null
+  if [ $? -ne 0 ]; then
+    echo "Copying root's public ssh key to authorized_keys of $rdiff_user@$rdiff_host. Specify the password for user $rdiff_user@$rdiff_host."
+    ssh-copy-id -i /root/.ssh/id_[rd]sa.pub $rdiff_user@$rdiff_host
+    if [ $? -ne 0 ]; then
+      msgBox "rdiff action wizard: error" "Failed to connect to $rdiff_user@$rdiff_host. Make sure you have the username and password correct."
+      return
+    else
+      echo "Done. hit return to continue"
+      read
+    fi
+  else
+    echo "root@localhost is already in authorized_keys of $rdiff_user@$rdiff_host. hit return to continue"
+    read
+  fi
+  _con_done="(DONE)"
+  setDefault finish
+}
+
+do_rdiff_finish() {
    get_next_filename $configdirectory/90.rdiff
    cat > $next_filename <<EOF
+# options = --force
+# when = everyday at 02
+
 [source]
 type = local
-keep = $keep
+keep = $rdiff_keep
 EOF
-   echo -e "$includes" >> $next_filename
-   echo -e "$excludes" >> $next_filename
+   echo -n -e "$rdiff_includes" >> $next_filename
+   echo -e "$rdiff_excludes" >> $next_filename
    cat >> $next_filename <<EOF
-
+  
 [dest]
 type = remote
-directory = $directory
-host = $host
-user = $user
+directory = $rdiff_directory
+host = $rdiff_host
+user = $rdiff_user
 EOF
    chmod 000 $next_filename
 }
+
+rdiff_main_menu() {
+  while true; do
+    srcitem="choose files to include & exclude $_src_done"
+    destitem="configure backup destination $_dest_done"
+    conitem="set up ssh keys and test remote connection $_con_done"
+    advitem="edit advanced settings $_adv_done"
+    menuBox "rdiff action wizard" "choose a step:" \
+        src "$srcitem" \
+        dest "$destitem" \
+        conn "$conitem" \
+        finish "finish and create config file"
+    [ $? = 1 ] && return;
+    result="$REPLY"
+    case "$result" in
+       "src") do_rdiff_src;;
+       "dest") do_rdiff_dest;;
+       "conn") do_rdiff_con;;
+       "adv") do_rdiff_adv;;
+       "finish")
+          if [[ "$_con_done$_dest_done$_src_done" != "(DONE)(DONE)(DONE)" ]]; then
+            msgBox "rdiff action wizard" "You cannot create the configuration file until the other steps are completed."
+          else
+            do_rdiff_finish
+            return
+          fi
+          ;;
+    esac
+    
+  done
+}
+
+rdiff_wizard() {
+#   require_packages rdiff-backup
+  _src_done=
+  _dest_done=
+  _con_done=
+  _adv_done=
+  rdiff_keep=60D
+  rdiff_directory=/backup/`hostname`
+  rdiff_user=
+  rdiff_host=
+  rdiff_main_menu
+}
+

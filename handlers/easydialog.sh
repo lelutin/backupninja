@@ -81,13 +81,18 @@ _genericListBox() {
     local temp=$(mktemp -t) || exit 1
     trap "rm -f $temp" 0
     REPLY=
-    $DIALOG $HELP --backtitle "$BACKTITLE" --title "$title" \
+    $DIALOG $HELP $_DEFAULT --backtitle "$BACKTITLE" --title "$title" \
         $box "$text" $HEIGHT $WIDTH 10 \
 	"$@" 2> $temp
     local status=$?
     [ $status = 0 ] && REPLY=$(_listReplyHook $temp $box)
     rm -f $temp
+    _DEFAULT=
     return $status
+}
+
+setDefault() {
+  _DEFAULT="--default-item $1"
 }
 
 menuBox() {
@@ -169,9 +174,9 @@ displayForm() {
       for ((i=0; i < $_form_items ; i++)); do
         label=${_form_labels[$i]}
         text=${_form_text[$i]}
-        if [ "$text" == "" ]; then
-           text='_empty_'
-        fi
+#        if [ "$text" == "" ]; then
+#           text='_empty_'
+#        fi
         echo -n -e "$form $label $xpos 1 '$text' $xpos $max_length 30 30"
         let "xpos += _form_gap"
       done
