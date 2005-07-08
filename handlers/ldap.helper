@@ -1,3 +1,4 @@
+HELPERS="$HELPERS ldap:ldap_database_backup"
 
 ldap_create_file() {
 while true; do

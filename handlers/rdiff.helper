@@ -1,10 +1,13 @@
+
+HELPERS="$HELPERS rdiff:incremental_remote_filesystem_backup"
+
 do_rdiff_dest() {
-   startForm "rdiff action wizard"
+   formBegin "rdiff action wizard"
      formItem "keep" "$rdiff_keep"
      formItem "dest_directory" "$rdiff_directory"
      formItem "dest_host" "$rdiff_host"
      formItem "dest_user" "$rdiff_user"
-   displayForm
+   formDisplay
    [ $? = 1 ] && return;
        
    set -- $REPLY
@@ -18,7 +21,7 @@ do_rdiff_dest() {
 }
 
 do_rdiff_src() {
-   startForm "rdiff action wizard: includes"
+   formBegin "rdiff action wizard: includes"
      formItem include /var/spool/cron/crontabs
      formItem include /var/backups
      formItem include /etc
@@ -29,7 +32,7 @@ do_rdiff_src() {
      formItem include 
      formItem include 
      formItem include 
-   displayForm
+   formDisplay
    [ $? = 1 ] && return;
 
    rdiff_includes=   
@@ -39,11 +42,11 @@ do_rdiff_src() {
    done
    set +o noglob
 
-   startForm "rdiff action wizard: excludes" 
+   formBegin "rdiff action wizard: excludes" 
      formItem exclude '/home/*/.gnupg'
      formItem exclude 
      formItem exclude 
-   displayForm
+   formDisplay
    [ $? = 1 ] && return;
 
    rdiff_excludes=

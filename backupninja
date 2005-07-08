@@ -163,8 +163,8 @@ function check_perms() {
 	local perms=`ls -ld $file`
 	perms=${perms:4:6}
 	if [ "$perms" != "------" ]; then
-		echo "Configuration files must not be group or world readable! Dying on file $file"
-		fatal "Configuration files must not be group or world readable! Dying on file $file"
+		echo "Configuration files must not be group or world writable/readable! Dying on file $file"
+		fatal "Configuration files must not be group or world writable/readable! Dying on file $file"
 	fi
 	if [ `ls -ld $file | awk '{print $3}'` != "root" ]; then
 		echo "Configuration files must be owned by root! Dying on file $file"

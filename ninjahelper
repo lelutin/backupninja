@@ -3,6 +3,22 @@
 ####################################################
 ## Functions
 
+function check_perms() {
+	local file=$1
+	local perms=`ls -ld $file`
+	perms=${perms:4:6}
+	if [[ "$perms" != "------" && "$perms" != "r--r--" ]]; then
+	    echo $perms
+		echo "helper scripts must not be group or world writable! Dying on file $file"
+		exit
+	fi
+	if [ `ls -ld $file | awk '{print $3}'` != "root" ]; then
+		echo "helper scripts must be owned by root! Dying on file $file"
+		exit
+	fi
+}
+
+
 ##
 ## returns the next available file name given a file
 ## in the form /etc/backup.d/10.sys
@@ -37,37 +53,25 @@ require_packages() {
     done
 }
 
-doradiobox() {
-	defaultchoice="red is.pretty on"
-	choices="green is_nice_too off blue i_love_blue off yellow is.bright off orange make.me.hungry off"
-	radioBox "radio title" "choose one color" $defaultchoice $choices
-	case $? in
-	   0) ;;
-	   1) echo "color choice cancelled..."; sleep 1;;
-	   255) echo "something went wrong, exiting..."
-	      exit 1 ;;
-	esac
-	result="$REPLY"
-	msgBox "message title" "you said $result."
-}
-
+##
+## menu for the wizards
+##
 donew() {
-    menuBox "new action menu" "select an action to create"  \
-      return "return to main menu" \
-      sys "general hardware and system info" \
-      mysql "mysql database backup" \
-      ldap "ldap database backup" \
-      rdiff "incremental filesystem backup"
-  
-    [ $? = 1 ] && return;
-    result="$REPLY"
-  	case "$result" in
-	   "sys") sys_wizard;; 
-	   "mysql") mysql_wizard;;
-	   "ldap") ldap_wizard;;
-   	   "rdiff") rdiff_wizard;;
-	   "return") return;;
-	esac
+  listBegin "new action menu" "select an action to create"
+  listItem return "return to main menu"
+  for data in $HELPERS; do
+    data=${data//_/ }
+    helper_function=${data%%:*}
+    helper_info=${data##*:}
+    listItem $helper_function "$helper_info"
+  done
+  listDisplay menu
+    
+  [ $? = 1 ] && return
+  result="$REPLY"
+  [ "$result" = "return" ] && return
+  result=${result}_wizard
+  $result
 }
 
 do_rm_action() {
@@ -172,7 +176,10 @@ if [ "$UID" != "0" ]; then
 	exit 1
 fi
 
+# load all the helpers
+HELPERS=""
 for file in `find $scriptdir -follow -name '*.helper'`; do
+   check_perms $file
    . $file
 done
 

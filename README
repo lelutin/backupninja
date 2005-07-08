@@ -222,3 +222,27 @@ VSERVERINFO (default: /usr/sbin/vserver-info)
 VSERVER (default: /usr/sbin/vserver)
 VROOTDIR (default: `$VSERVERINFO info SYSINFO |grep vserver-Rootdir | awk '{print $2}'; fi`)
 
+NINJAHELPER
+===========
+
+Ninjahelper is an additional script which will walk you through the process of
+configuring backupninja. Ninjahelper has a menu driven curses based interface
+(using dialog). 
+
+To add an additional 'wizard' to ninjahelper, follow these steps:
+
+(1) to add a helper for the handler "blue", create the file
+    blue.helper in the directory where the handlers live.
+    (ie /usr/share/backupninja).
+
+(2) next, you need to add your helper to the global HELPERS variable
+    and define the main function for your helper (the function name
+    is always <helper>_wizard). for example, blue.helper:
+       HELPERS="$HELPERS blue:description_of_this_helper
+       blue_wizard() {
+         ... do work here ...
+       }
+
+(3) check the examples of the included helpers to see how they are
+    written. The dialog functions are defined in easydialog.sh.
+

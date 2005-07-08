@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # copyright 2002 lmoore@tump.com under the terms of the GNU LGPL.
+# additions 2005 collective@riseup.net
 
 # whiptail has trouble being called in the foo=$(whiptail ...) fashion for
 # some reason.  this is very annoying.  this means that we need to use
@@ -22,7 +23,7 @@ setApplicationTitle() {
 }
 
 setHelp() {
-  HELP="$@"
+    HELP="$@"
 }
 
 setDimension() {
@@ -99,6 +100,8 @@ menuBox() {
     _genericListBox --menu "$@"
 }
 
+## a menu box with additional help info displayed
+## at the bottom of the window when an item is selected
 menuBoxHelp() {
 	HELP="--item-help"
 	_genericListBox --menu "$@"
@@ -107,6 +110,7 @@ menuBoxHelp() {
 	return $status
 }
 
+## a menu box with an addition button 'help'
 menuBoxHelpFile() {
 	HELP="--help-button"
 	_genericListBox --menu "$@"
@@ -114,7 +118,6 @@ menuBoxHelpFile() {
 	HELP=
 	return $status
 }
-
 
 checkBox() {
     _genericListBox --checklist "$@"
@@ -140,8 +143,64 @@ passwordBox() {
     return $status
 }
 
+
+#########################################################
+## begin-item-display style lists
+## 
+## these lists are built by calling fuctions multiple times.
+## this can make it easier to build your list in a loop
+##
+
+listBegin() {
+   _menu_title=$1
+   _menu_msg=$2
+   _menu_items=0
+   _menu_text=
+   _menu_labels=
+}
+
+listItem() {
+   _menu_labels[$_menu_items]=$1
+   _menu_text[$_menu_items]=$2
+   let "_menu_items += 1"
+}
+
+
+##
+## takes one of:
+## menu, checklist, radiolist
+##
+listDisplay() {
+   boxtype=$1
+   local temp=$(mktemp -t) || exit 1
+   trap "rm -f $temp" 0
+   
+   (
+      echo -ne " $HELP $_DEFAULT "
+      echo -ne " --backtitle '$BACKTITLE' "
+      echo -ne " --title '$_menu_title' "
+      echo -ne " --$boxtype '$_menu_msg' "
+      echo -ne " $HEIGHT $WIDTH 10 "
+      for ((i=0; i < $_menu_items ; i++)); do
+        label=${_menu_labels[$i]}
+        text=${_menu_text[$i]}
+        echo -ne " $label '$text' "
+      done
+   ) | xargs $DIALOG 2> $temp
+   
+   local status=$?
+   REPLY=""
+   [ $status = 0 ] && REPLY=`cat $temp`
+   rm -f $temp
+   _DEFAULT=
+   return $status
+}
+
+####################################################
+## FORM
+
 _form_gap=2
-startForm() {
+formBegin() {
    _form_title=$1
    _form_items=0
    _form_labels=
@@ -154,7 +213,7 @@ formItem() {
    let "_form_items += 1"
 }
     
-displayForm() {
+formDisplay() {
    local temp=$(mktemp -t) || exit 1
    
    max_length=0
@@ -167,17 +226,13 @@ displayForm() {
    done
    let "max_length += 2"
     
-   local form=
    local xpos=1
    (
       echo -n -e "--form '$_form_title' 0 0 20"
       for ((i=0; i < $_form_items ; i++)); do
         label=${_form_labels[$i]}
         text=${_form_text[$i]}
-#        if [ "$text" == "" ]; then
-#           text='_empty_'
-#        fi
-        echo -n -e "$form $label $xpos 1 '$text' $xpos $max_length 30 30"
+        echo -n -e " $label $xpos 1 '$text' $xpos $max_length 30 30"
         let "xpos += _form_gap"
       done
    ) | xargs $DIALOG 2> $temp

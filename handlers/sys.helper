@@ -1,3 +1,4 @@
+HELPERS="$HELPERS sys:general_hardware_and_system_info"
 
 sys_wizard() {
    require_packages hwinfo

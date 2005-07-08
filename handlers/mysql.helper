@@ -1,3 +1,4 @@
+HELPERS="$HELPERS mysql:mysql_database_backup"
 
 do_mysql_user() {
   inputBox "mysql action wizard" "specify a system user:"
