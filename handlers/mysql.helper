@@ -2,13 +2,16 @@ HELPERS="$HELPERS mysql:mysql_database_backup"
 
 do_mysql_user() {
   inputBox "mysql action wizard" "specify a system user:"
+  [ $? = 1 ] && return
   do_mysql_final "user = $REPLY"
 }
 
 do_mysql_password() {
   inputBox "mysql action wizard" "specify a mysql user:"
+  [ $? = 1 ] && return
   user=$REPLY
   inputBox "mysql action wizard" "specify the mysql user's password:"
+  [ $? = 1 ] && return
   password=$REPLY
   do_mysql_final "dbusername = $user\ndbpassword = $password"
 }
@@ -20,6 +23,7 @@ do_mysql_debian() {
 
 do_mysql_user() {
   inputBox "mysql action wizard" "what system user does mysql backup use?"
+  [ $? = 1 ] && return
   do_mysql_final "user = $REPLY"
 }
 
