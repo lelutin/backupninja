@@ -1,0 +1,31 @@
+
+# TYP is cd or dvd AS WELL AS the disk inside!!
+burnertype = cd
+
+# system (yes) or directory/files (no)
+# this function not yet implemented
+#system = yes
+
+# location for image file
+backupdir = /var/backups/makecd
+
+# image filename
+imagefile = example.iso
+
+# iso or burn to cd/dvd?
+isoonly = no
+
+# cd/dvd burner device
+device=/dev/hdc
+
+# base directory to include in the backup
+target = /
+
+# files or directories to be excluded
+exclude = /proc
+exclude = /lost+found
+exclude = /tmp
+
+# backupninja will perfrom this at gvien date/time
+when = wednesday at 02:00
+

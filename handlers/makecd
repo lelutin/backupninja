@@ -1,0 +1,86 @@
+#
+# burncd handler script for backupninja
+#
+getconf backupdir /var/backups/makecd
+getconf exclude
+getconf target
+getconf burnertype cd
+getconf system no
+getconf isoonly yes
+getconf imagefile backup.iso
+getconf device
+
+# define needed executables:
+MKISOFS="/usr/bin/mkisofs"
+GROWISOFS="/usr/bin/growisofs"
+#CDRECORD="/usr/bin/cdrecord"
+CDRECORD="/usr/bin/cdrecord.mmap"
+CDRDAO="/usr/bin/cdrdao"
+DVDINFO="/usr/bin/dvd+rw-mediainfo"
+
+# create backup dirs and check existence of progs.
+
+[ -d $backupdir ] || mkdir -p $backupdir
+[ -d $backupdir ] || fatal "Backup directory '$backupdir'"
+[ -e "$target" ]  || fatal "target does not exist "
+
+[ -x "$MKISOFS" ]   || debug 3 "echo executable mkisofs not present"
+[ -x "$GROWISOFS" ] || debug 3 "echo executable growisofs not present"
+[ -x "$CDRECORD" ]  || debug 3 "echo executable cdrecord not present"
+[ -x "$CDRDAO" ]    || debug 3 "echo executable cdrdao not present"
+
+if [ "$isoonly" == "no" ]; then
+	[ -e $device ] || fatal "No Burner device available"
+fi
+
+outputfile="$backupdir/$imagefile"
+execstr="$MKISOFS --quiet -R -o $outputfile "
+
+str=""
+# excludes
+for i in $exclude; do
+	str=" -x ${i}$str"
+done
+
+debug 0 "echo $str "
+execstr="${execstr} $str $target "
+debug 0 "echo $execstr "
+
+output=` $execstr 2>&1 `
+code=$?
+if [ "$code" == "0" ]; then
+	debug $output
+	info "Successfully finished creation of iso"
+else
+	warning $output
+	warning "Failed to create iso"
+fi
+
+if [ "$isoonly" == "no" ]; then
+
+	if [ "$burnertype" == "cd" ]; then 
+		# burning iso to CD
+		$CDRECORD -v gracetime=2 dev=$device speed=8 -dao -data $outputfile 
+		code=$?
+		if [ "$code" == "0" ]; then
+			debug $output
+			info "Successfully burned CD"
+		else
+			warning $output
+			warning "Failed to create CD"
+		fi
+	fi
+	if [ "$burnertype" == "dvd" ]; then 
+		# burning iso dvd
+		$GROWISOFS -speed=2 -Z $device=$outputfile -use-the-force-luke=notray -use-the-force-luke=tty
+		code=$?
+		if [ "$code" == "0" ]; then
+			debug $output
+			info "Successfully burned DVD"
+		else
+			warning $output
+			warning "Failed to create DVD"
+		fi
+	fi
+fi
+return 0
