@@ -1,8 +1,8 @@
 version 0.7 -- July 3 2005
-    added ninjahelper: a dialog based wizard for creating backupninja configs.
-    considerably improved and changed the log file output.
-    you can now disable actions with .disabled (this is new preferred method).
-            
+	added ninjahelper: a dialog based wizard for creating backupninja configs.
+	considerably improved and changed the log file output.
+	you can now disable actions with .disabled (this is new preferred method).
+
 version 0.6 -- June 16 2005
 	ldap handler has new options: backup method to use (ldapsearch or
 		slapcat), restart, passwordfile and binddn. Default backup method
@@ -29,10 +29,11 @@ version 0.6 -- June 16 2005
 	added configfile option to mysql handler
 		the default is /etc/mysql/debian.cnf. with this, 
 		sqldump doesn't need dbusername. (hotcopy still does).
-    fixed bug in mysql handler which caused some passwords to not work.
-        (.my.cnf files now have double quotes around password)
-    can now pass options to hwinfo and sfdisk in sys handler.
+	fixed bug in mysql handler which caused some passwords to not work.
+	 	(.my.cnf files now have double quotes around password)
+	can now pass options to hwinfo and sfdisk in sys handler.
 
+>>>>>>> .r129
 version 0.5 -- April 12 2005
 	rdiff handler works when remote sshd has a banner
 	rdiff handler supports local dest 
