@@ -58,13 +58,13 @@ To preform the actual backup, backupninja processes each configuration
 file in /etc/backup.d according to the file's suffix:
  
   .sh      --  run this file as a shell script.
-  .rdiff   --  this is a configuration for rdiff-backup
-  .maildir --  this is a configuration to backup maildirs
-  .dup     --  this is a configuration for duplicity
-  .mysql   --  mysql backup configuration
-  .ldap    --  ldap backup configuration
-  .sys     --  general system reports
-  .svn     --  subversion repository backups
+  .rdiff   --  filesystem backup (using rdiff-backup)
+  .dup     --  filesystem backup (using duplicity)
+  .mysql   --  backup mysql databases
+  .ldap    --  backup ldap databases
+  .sys     --  general hardware, partition, and system reports.
+  .svn     --  backup subversion repositories
+  .maildir --  incrementally backup maildirs (very specialized)
 
 Support for additional configuration types can be added by dropping
 bash scripts with the name of the suffix into /usr/share/backupninja. 
@@ -121,6 +121,9 @@ If two configurations files are scheduled close to one another in
 time, it is possible to have multiple copies of backupninja running if
 the first instance is not finished before the next one starts.
 
+Make sure that you put the "when" option before any sections in your
+configuration file.
+
 These values for 'when' are equivalent:
 
   when = tuesday at 05:30
@@ -136,7 +139,7 @@ These values for 'when' are invalid:
 REAL WORLD USAGE
 ================
 
-Backupninja can be used to impliment whatever backup strategy you
+Backupninja can be used to implement whatever backup strategy you
 choose. It is intended, however, to be used like so:
 
 (1) First, databases are safely copied or exported to /var/backups.
@@ -174,6 +177,8 @@ user 'backup' on desthost without specifying a password.
 Note: when prompted for a password by ssh-keygen, just leave it
 blank by hitting return.
 
+The included helper program "ninjahelper" will walk you through creating
+an rdiff-backup configuration, and will set up the ssh keys for you.
 
 INSTALLATION
 ============
@@ -238,7 +243,7 @@ To add an additional 'wizard' to ninjahelper, follow these steps:
 (2) next, you need to add your helper to the global HELPERS variable
     and define the main function for your helper (the function name
     is always <helper>_wizard). for example, blue.helper:
-       HELPERS="$HELPERS blue:description_of_this_helper
+       HELPERS="$HELPERS blue:description_of_this_helper"
        blue_wizard() {
          ... do work here ...
        }
