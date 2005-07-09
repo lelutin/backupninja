@@ -23,9 +23,9 @@ sys_wizard() {
 $packages
 $partitions
 $hardware
-# databases   = all
-# backupdir   = /var/backups/mysql
-# dbhost      = localhost
+# packagesfile = /var/backups/dpkg-selections.txt
+# partitionsfile = /var/backups/partitions.__star__.txt
+# hardwarefile = /var/backups/hardware.txt
 EOF
    chmod 000 $next_filename
 }
