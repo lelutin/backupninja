@@ -43,8 +43,8 @@ if [ "$desttype" == "remote" ]; then
 	# see if we can login
 	if [ "$testconnect" == "yes" ]; then
 		hostalive=0
-	    debug "ssh -o -o PreferredAuthentications=publickey $desthost -l $destuser 'echo -n 1'"
-		ret=`ssh -o -o PreferredAuthentications=publickey $desthost -l $destuser 'echo -n host is alive'`
+	    debug "ssh -o PreferredAuthentications=publickey $desthost -l $destuser 'echo -n 1'"
+		ret=`ssh -o PreferredAuthentications=publickey $desthost -l $destuser 'echo -n host is alive'`
 		if echo $ret | grep "host is alive"; then
 			debug "Connected to $desthost as $destuser successfully"
 		else
