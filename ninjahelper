@@ -145,6 +145,23 @@ doaction() {
 #####################################################
 ## begin program
 
+if [ ! -x "`which dialog`" ]; then
+	echo "ninjahelper is a menu based wizard for backupninja."
+	echo "It requires 'dialog' in order to run. Do you want to install dialog now?"
+	while true; do
+	  echo -n "(yes/no): "
+	  read install
+	  if [ "$install" == "yes" ]; then
+	     apt-get install dialog
+	     break
+	  elif [ "$install" == "no" ]; then
+	     exit
+	  else
+	     echo "You must answer 'yes' or 'no'"
+	  fi
+    done
+fi
+
 conffile="/etc/backupninja.conf"
 if [ ! -r "$conffile" ]; then
 	echo "Configuration file $conffile not found." 
