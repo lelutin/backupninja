@@ -46,8 +46,11 @@ fi
 if [ "$packages" == "yes" ]; then
 	if [ $usevserver ]
 	then
-		for vserver in `ls $VROOTDIR |grep -v lost+found`
+		nodpkg="lost+found"
+		info "vserver root directory set to: $VROOTDIR"
+		for vserver in `ls $VROOTDIR |grep -v $nodpkg`
 		do
+			info "examining vserver: $vserver"
 			running=`vserver-info $vserver RUNNING`
 			if [ $running = 1 ]; then
 			    if [ ! -x "`$VSERVER $vserver exec which dpkg`" ]; then
