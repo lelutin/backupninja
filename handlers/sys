@@ -49,7 +49,7 @@ if [ "$packages" == "yes" ]; then
 		for vserver in `ls $VROOTDIR |grep -v lost+found`
 		do
 			running=`vserver-info $vserver RUNNING`
-			if [ $running = 1]; then
+			if [ $running = 1 ]; then
 			    if [ ! -x "`$VSERVER $vserver exec which dpkg`" ]; then
 				warning "can't find dpkg in vserver $vserver, skipping installed packages report."
 				nodpkg="$nodpkg $vserver"
