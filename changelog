@@ -3,7 +3,7 @@ version 0.7 -- July 26 2005
 	considerably improved and changed the log file output.
 	you can now disable actions with .disabled (this is new preferred method).
 	added makecd handler and example.makecd for backing up to cd/dvd (thanks stef).
-    fixed bug when specifying multiple 'when' options.
+	fixed bug when specifying multiple 'when' options.
     
 version 0.6 -- June 16 2005
 	ldap handler has new options: backup method to use (ldapsearch or
