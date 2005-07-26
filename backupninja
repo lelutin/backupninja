@@ -271,7 +271,7 @@ EOF
 function process_action() {
 	local file="$1"
 	local suffix="$2"
-
+	local run="no"
 	setfile $file
 
 	# skip over this config if "when" option
@@ -290,13 +290,14 @@ function process_action() {
 			IFS=$'\t\n'
 			if [ $ret == 0 ]; then
 				debug "skipping $file because it is not $w"
-				return
 			else
 				info ">>>> starting action $file (because it is $w)"
+				run="yes"
 			fi
 		done
 		IFS=$' \t\n'
 	fi
+	[ "$run" == "no" ] && return
 	
 	let "actions_run += 1"
 
