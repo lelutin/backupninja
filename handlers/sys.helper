@@ -8,14 +8,14 @@ sys_wizard() {
        "hardware" "detailed hardware information" on
    [ $? = 1 ] && return;    
    result="$REPLY"
-   packages="packages = off"
-   partitions="partitions = off"
-   hardware="hardware = off"
+   packages="packages = no"
+   partitions="partitions = no"
+   hardware="hardware = no"
    for opt in $result; do
       case $opt in
-        '"packages"') packages="packages = on";;
-        '"partitions"') partitions="partitions = on";;
-        '"hardware"') hardware="hardware = on";;
+        '"packages"') packages="packages = yes";;
+        '"partitions"') partitions="partitions = yes";;
+        '"hardware"') hardware="hardware = yes";;
       esac
    done
    get_next_filename $configdirectory/10.sys
