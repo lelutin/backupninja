@@ -279,8 +279,10 @@ function process_action() {
 	getconf when "$defaultwhen"
 	if [ "$processnow" == 1 ]; then
 		info ">>>> starting action $file (because of --now)"
+		run="yes"
 	elif [ "$when" == "hourly" ]; then
 		info ">>>> starting action $file (because 'when = hourly')"
+		run="yes"
 	else
 		IFS=$'\t\n'
 		for w in $when; do
@@ -297,6 +299,7 @@ function process_action() {
 		done
 		IFS=$' \t\n'
 	fi
+	debug $run
 	[ "$run" == "no" ] && return
 	
 	let "actions_run += 1"
