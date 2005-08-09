@@ -1,0 +1,89 @@
+HELPERS="$HELPERS pgsql:postgresql_database_backup"
+
+do_pgsql_vserver() {
+   inputBox "$pgsql_title" "Specify a vserver name:"
+   [ $? = 1 ] && return;
+   pgsql_vsname="vsname = $REPLY"
+}
+
+do_pgsql_databases() {
+   formBegin "$pgsql_title: databases"
+     formItem "Database:"
+     formItem "Database:"
+     formItem "Database:"
+     formItem "Database:"
+     formItem "Database:"
+     formItem "Database:"
+     formItem "Database:"
+     formItem "Database:"
+     formItem "Database:"
+     formItem "Database:"
+   formDisplay
+   [ $? = 1 ] && return
+   
+   pgsql_databases="databases = "
+   for i in $REPLY; do
+      [ "$i" != "" ] && pgsql_databases="$pgsql_databases $i"
+   done
+}
+
+pgsql_wizard() {
+
+    # constants
+   pgsql_title="PostgreSQL action wizard"
+
+   # vserver support
+   booleanBox "$pgsql_title" "Do you want to operate on a vserver? If not, the host will be operated on."
+   [ $? = 0 ] && do_pgsql_vserver
+
+   # backupdir
+   inputBox "$pgsql_title" "Directory where to store the backups:`[ -z \"$pgsql_vsname\" ] || echo \"\n(In respect to chosen vserver's root directory)\"`" "/var/backups/postgres"
+   [ $? = 1 ] && return
+   pgsql_backupdir="backupdir = $REPLY"
+
+   # databases
+   booleanBox "$pgsql_title" "Do you want to backup the whole cluster? If not, you'll be offered to choose the databases to backup."
+   if [ $? = 0 ]; then
+      pgsql_databases="databases = all"
+   else
+      do_pgsql_databases
+   fi
+
+   # compress
+   booleanBox "$pgsql_title" "Do you want to compress the backups?"
+   if [ $? = 0 ]; then
+      pgsql_compress="compress = yes"
+   else
+      pgsql_compress="compress = no"
+   fi
+
+   # write config file
+   get_next_filename $configdirectory/20.pgsql
+   cat >> $next_filename <<EOF
+### backupninja PostgreSQL config file ###
+
+# vsname = <vserver> (no default)
+# what vserver to operate on, only used if vserver = yes in /etc/backupninja.conf
+# if you do not specify a vsname the host will be operated on
+# Note: if operating on a vserver, $VROOTDIR will be prepended to backupdir.
+$pgsql_vsname
+
+# backupdir = <dir> (default: /var/backups/postgres)
+# where to dump the backups
+$pgsql_backupdir
+
+# databases = < all | db1 db2 db3 > (default = all)
+# which databases to backup. should either be the word 'all' or a 
+# space separated list of database names.
+# Note: when using 'all', pg_dumpall is used instead of pg_dump, which means
+# that cluster-wide data (such as users and groups) are saved.
+$pgsql_databases
+
+# compress = < yes | no > (default = yes)
+# if yes, compress the pg_dump/pg_dumpall output. 
+$pgsql_compress
+
+EOF
+   chmod 000 $next_filename
+
+}

@@ -1,10 +1,10 @@
 version XX -- ...
 
-	added pgsql (PostgreSQL) handler, with vservers support
+	added pgsql (PostgreSQL) handler, with vservers support.
 	added vservers support to duplicity handler
 	        Note: the configuration is a bit different of rdiff
-	        handler's one, but the default behavior is the same: have
-	        a look to example.dup.
+		        handler's one, but the default behavior is the same:
+			have a look to example.dup.
 	improved README
 	        documented .disabled method.
 		corrected VROOTDIR default value.
@@ -26,6 +26,7 @@ version XX -- ...
 		        must not be group or world writable!" error msg).
 		xedit action now tries $EDITOR, then /etc/alternatives/editor,
 			then nano, vim and vi, and aborts if none of these exists.
+	added helper for pgsql handler.
 	
 version 0.7 -- July 26 2005
 	added ninjahelper: a dialog based wizard for creating backupninja configs.
