@@ -39,7 +39,7 @@ if [ "$vservers" == "yes" ]; then
     [ -d "$VROOTDIR" ] || fatal "vservers enabled, but $VROOTDIR does not exist!"
     if [ "$vsnames" == "all" ]; then
 	vsnames=""
-    	for vserver in `ls $VROOTDIR | grep -v lost+found | grep -v ARCHIVES`; do
+    	for vserver in `ls $VROOTDIR | grep -E -v "lost+found|ARCHIVES"`; do
 	    vsnames="$vserver $vsnames"
 	done
     else

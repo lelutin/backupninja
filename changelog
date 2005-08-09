@@ -9,6 +9,13 @@ version XX -- ...
 	        documented .disabled method.
 		corrected VROOTDIR default value.
 		added ninjahelper to the install instructions.
+	improved rdiff, dup and sys handlers' vservers support
+	        prevent vserver-debiantools' $VROOTDIR/ARCHIVES directory
+		to be seen as a vserver
+	changes to sys handler
+	        make use of configurable $VSERVERINFO instead of hard-coded vserver-info.
+		fixed dpkg existence test inside vserver.
+		fixed $nodpkg use.
 	
 version 0.7 -- July 26 2005
 	added ninjahelper: a dialog based wizard for creating backupninja configs.

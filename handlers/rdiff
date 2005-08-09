@@ -118,7 +118,7 @@ done
 # vsinclude
 if [ $usevserver ] 
 then
-	for vserver in `ls $VROOTDIR|grep -v lost+found`
+	for vserver in `ls $VROOTDIR | grep -E -v "lost+found|ARCHIVES"`
 	do
 		for vi in $vsinclude
 		do
