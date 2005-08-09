@@ -6,11 +6,12 @@
 function check_perms() {
 	local file=$1
 	local perms=`ls -ld $file`
-	perms=${perms:4:6}
-	if [[ "$perms" != "------" && "$perms" != "r--r--" ]]; then
+	group_w_perm=${perms:5:1}
+	world_w_perm=${perms:8:1}
+	if [ "$group_w_perm" == "w" -o "$world_w_perm" == "w" ]; then
 	    echo $perms
-		echo "helper scripts must not be group or world writable! Dying on file $file"
-		exit
+	    echo "helper scripts must not be group or world writable! Dying on file $file"
+	    exit
 	fi
 	if [ `ls -ld $file | awk '{print $3}'` != "root" ]; then
 		echo "helper scripts must be owned by root! Dying on file $file"
@@ -87,6 +88,25 @@ do_run() {
    read
 }
 
+do_xedit() {
+   if [ -z "$EDITOR" -o ! -x "`which $EDITOR`" ]; then
+      if [ -h /etc/alternatives/editor -a -x "`readlink /etc/alternatives/editor`" ]; then
+	 EDITOR="`readlink /etc/alternatives/editor`"
+      elif [ -x "`which nano`" ]; then
+	 EDITOR="`which nano`"
+      elif [ -x "`which vim`" ]; then
+	 EDITOR="`which vim`"
+      elif [ -x "`which vi`" ]; then
+	 EDITOR="`which vi`"
+      else
+	 echo "No suitable editor found."
+	 echo "Please define $EDITOR or configure /etc/alternatives/editor."
+	 exit
+      fi
+   fi
+   $EDITOR $1
+}
+
 do_run_test() {
   backupninja --test --run $1
   echo "Hit return to continue..."
@@ -130,7 +150,7 @@ doaction() {
     result="$REPLY"
   	case "$result" in
 	   "view") dialog --textbox $action 0 0;; 
-	   "xedit") $EDITOR $action;;
+	   "xedit") do_xedit $action;;
 	   "disable") do_disable $action; return;;
    	   "enable") do_enable $action; return;;
    	   "name") do_rename $action; return;;

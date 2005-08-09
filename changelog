@@ -20,6 +20,12 @@ version XX -- ...
 	        now checks if the specified vserver is running.
 		now checks if $PGSQLDUMP/$PGSQLDUMPALL are available where needed.
 		now checks if "postgres" user exists on the host/vserver.
+	changes to ninjahelper
+	        check_perms() does not die anymore on group/world readable
+		        helper scripts (now consistent with the "helper scripts
+		        must not be group or world writable!" error msg).
+		xedit action now tries $EDITOR, then /etc/alternatives/editor,
+			then nano, vim and vi, and aborts if none of these exists.
 	
 version 0.7 -- July 26 2005
 	added ninjahelper: a dialog based wizard for creating backupninja configs.
