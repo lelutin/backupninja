@@ -1,33 +1,33 @@
-version XX -- ...
+version 0.8 -- 
+    added pgsql (PostgreSQL) handler, with vservers support.
+    added vservers support to duplicity handler
+        Note: the configuration is a bit different of rdiff
+          handler's one, but the default behavior is the same:
+          have a look to example.dup.
+    improved README
+        documented .disabled method.
+        corrected VROOTDIR default value.
+        added ninjahelper to the install instructions.
+    improved rdiff, dup and sys handlers' vservers support
+        prevent vserver-debiantools' $VROOTDIR/ARCHIVES directory
+        to be seen as a vserver
+    changes to sys handler
+        make use of configurable $VSERVERINFO instead of hard-coded vserver-info.
+        fixed dpkg existence test inside vserver.
+        fixed $nodpkg use.
+    changes to pgsql handler
+        now checks if the specified vserver is running.
+        now checks if $PGSQLDUMP/$PGSQLDUMPALL are available where needed.
+        now checks if "postgres" user exists on the host/vserver.
+    changes to ninjahelper
+        check_perms() does not die anymore on group/world readable
+        helper scripts (now consistent with the "helper scripts
+           must not be group or world writable!" error msg).
+        xedit action now tries $EDITOR, then /etc/alternatives/editor,
+          then nano, vim and vi, and aborts if none of these exists.
+    added helper for pgsql handler.
+    rdiff handler now does not require 'label'
 
-	added pgsql (PostgreSQL) handler, with vservers support.
-	added vservers support to duplicity handler
-	        Note: the configuration is a bit different of rdiff
-		        handler's one, but the default behavior is the same:
-			have a look to example.dup.
-	improved README
-	        documented .disabled method.
-		corrected VROOTDIR default value.
-		added ninjahelper to the install instructions.
-	improved rdiff, dup and sys handlers' vservers support
-	        prevent vserver-debiantools' $VROOTDIR/ARCHIVES directory
-		to be seen as a vserver
-	changes to sys handler
-	        make use of configurable $VSERVERINFO instead of hard-coded vserver-info.
-		fixed dpkg existence test inside vserver.
-		fixed $nodpkg use.
-	changes to pgsql handler
-	        now checks if the specified vserver is running.
-		now checks if $PGSQLDUMP/$PGSQLDUMPALL are available where needed.
-		now checks if "postgres" user exists on the host/vserver.
-	changes to ninjahelper
-	        check_perms() does not die anymore on group/world readable
-		        helper scripts (now consistent with the "helper scripts
-		        must not be group or world writable!" error msg).
-		xedit action now tries $EDITOR, then /etc/alternatives/editor,
-			then nano, vim and vi, and aborts if none of these exists.
-	added helper for pgsql handler.
-	
 version 0.7 -- July 26 2005
 	added ninjahelper: a dialog based wizard for creating backupninja configs.
 	considerably improved and changed the log file output.
