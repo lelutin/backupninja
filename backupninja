@@ -438,6 +438,8 @@ getconf RDIFFBACKUP /usr/bin/rdiff-backup
 getconf MYSQL /usr/bin/mysql
 getconf MYSQLHOTCOPY /usr/bin/mysqlhotcopy
 getconf MYSQLDUMP /usr/bin/mysqldump
+getconf PGSQLDUMP /usr/bin/pg_dump
+getconf PGSQLDUMPALL /usr/bin/pg_dumpall
 getconf GZIP /bin/gzip
 getconf RSYNC /usr/bin/rsync
 getconf vservers no

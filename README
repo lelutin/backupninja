@@ -62,6 +62,7 @@ file in /etc/backup.d according to the file's suffix:
   .dup     --  filesystem backup (using duplicity)
   .mysql   --  backup mysql databases
   .ldap    --  backup ldap databases
+  .pgsql   --  backup PostgreSQL databases
   .sys     --  general hardware, partition, and system reports.
   .svn     --  backup subversion repositories
   .maildir --  incrementally backup maildirs (very specialized)

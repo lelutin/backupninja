@@ -1,0 +1,96 @@
+#
+# PostgreSQL handler script for backupninja
+#
+
+getconf backupdir /var/backups/postgres
+getconf databases all
+getconf compress yes
+getconf vsname
+
+localhost=`hostname`
+
+# If vservers are configured, decide if the handler should
+# use them or if it should just operate on the host
+
+if [ "$vservers" == "yes" ]
+    then
+    if [ ! -z $vsname ]
+	then		
+	info "Using vserver '$vsname'"
+	usevserver=1
+    else
+	info "No vserver name specified, actions will be performed on the host"
+    fi
+fi
+
+# Check to make sure that the specified vserver exists
+if [ $usevserver ]
+    then
+    vroot="$VROOTDIR/$vsname"
+    [ -d $vroot ] || fatal "vserver '$vsname' does not exist at '$vroot'"
+fi
+
+# create backup dir, the vroot variable will be empty if no vsname was specified
+# and will proceed to operate on the host
+[ -d $vroot$backupdir ] || mkdir -p $vroot$backupdir
+[ -d $vroot$backupdir ] || fatal "Backup directory '$vroot$backupdir'"
+
+# give backup dir the good uid and permissions
+# (in respect to the vserver, if $usevserver)
+pguid=`grep '^postgres:' $vroot/etc/passwd | awk -F: '{print $3}'`
+debug "chown $pguid $vroot$backupdir"
+chown $pguid $vroot$backupdir
+debug "chmod 700 $vroot$backupdir"
+chmod 700 $vroot$backupdir
+
+# if $databases = all, use pg_dumpall
+if [ "$databases" == "all" ]; then
+    if [ $usevserver ]; then
+	execstr="$VSERVER $vsname exec su - postgres -c $PGSQLDUMPALL > $vroot$backupdir/${vsname}.sql"
+    else
+	execstr="su - postgres -c $PGSQLDUMPALL > $backupdir/${localhost}-all.sql"
+    fi
+    debug "$execstr"
+    if [ ! $test ]; then
+	output=`$execstr 2>&1`
+	code=$?
+	if [ "$code" == "0" ]; then
+	    debug $output
+	    info "Successfully finished dump of pgsql cluster"
+	else
+	    warning $output
+	    warning "Failed to dump pgsql cluster"
+	fi
+    fi
+    
+# else use pg_dump on each specified database
+else
+    for db in $databases; do
+	if [ $usevserver ]
+	    then
+	    execstr="$VSERVER $vsname exec su - postgres -c $PGSQLDUMP $db > $vroot$backupdir/${db}.sql"
+	else
+	    execstr="su - postgres -c $PGSQLDUMP $db > $backupdir/${db}.sql"
+	fi
+	debug "$execstr"
+	if [ ! $test ]; then
+	    output=`$execstr 2>&1`
+	    code=$?
+	    if [ "$code" == "0" ]; then
+		debug $output
+		info "Successfully finished dump of pgsql database ${db}"
+	    else
+		warning $output
+		warning "Failed to dump pgsql database ${db}"
+	    fi
+	fi
+    done
+fi
+
+if [ "$compress" == "yes" ]; then
+    output=`$GZIP -f $vroot$backupdir/*.sql 2>&1`
+    debug $output
+fi
+
+return 0
+

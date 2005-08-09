@@ -1,3 +1,7 @@
+version XX -- ...
+
+	added pgsql (PostgreSQL) handler, with vservers support
+
 version 0.7 -- July 26 2005
 	added ninjahelper: a dialog based wizard for creating backupninja configs.
 	considerably improved and changed the log file output.
