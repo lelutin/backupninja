@@ -11,33 +11,56 @@ localhost=`hostname`
 
 # If vservers are configured, decide if the handler should
 # use them or if it should just operate on the host
-
-if [ "$vservers" == "yes" ]
-    then
-    if [ ! -z $vsname ]
-	then		
-	info "Using vserver '$vsname'"
+if [ "$vservers" == "yes" ]; then
+    if [ ! -z $vsname ]; then		
+	info "using vserver '$vsname'"
 	usevserver=1
     else
-	info "No vserver name specified, actions will be performed on the host"
+	info "no vserver name specified, actions will be performed on the host"
     fi
 fi
 
-# Check to make sure that the specified vserver exists
-if [ $usevserver ]
-    then
+# As needed, make sure that :
+#   * the specified vserver exists and is running
+#   * the specified vserver or host has the needed executables
+if [ $usevserver ]; then
+    info "examining vserver '$vsname'"
+    # does it exist ?
     vroot="$VROOTDIR/$vsname"
     [ -d $vroot ] || fatal "vserver '$vsname' does not exist at '$vroot'"
+    # is it running ?
+    running=`$VSERVERINFO $vsname RUNNING`
+    if [ $running = 1 ]; then
+	if [ "$databases" == "all" ]; then
+	    [ -x "$vroot`$VSERVER $vsname exec which $PGSQLDUMPALL`" ] || \
+		fatal "Can't find $PGSQLDUMPALL in vserver $vsname."
+	else
+	    [ -x "$vroot`$VSERVER $vsname exec which $PGSQLDUMP`" ] || \
+		fatal "Can't find $PGSQLDUMP in vserver $vsname."
+	fi
+    else
+	fatal "vserver $vsname is not running."
+    fi
+else
+    if [ "$databases" == "all" ]; then
+	[ -x "`which $PGSQLDUMPALL`" ] || \
+	    fatal "Can't find $PGSQLDUMPALL."
+    else
+	[ -x "`which $PGSQLDUMP`" ] || \
+	    fatal "Can't find $PGSQLDUMP."
+    fi
 fi
 
 # create backup dir, the vroot variable will be empty if no vsname was specified
 # and will proceed to operate on the host
-[ -d $vroot$backupdir ] || mkdir -p $vroot$backupdir
+[ -d $vroot$backupdir ] || (debug "mkdir -p $vroot$backupdir"; mkdir -p $vroot$backupdir)
 [ -d $vroot$backupdir ] || fatal "Backup directory '$vroot$backupdir'"
 
 # give backup dir the good uid and permissions
 # (in respect to the vserver, if $usevserver)
 pguid=`grep '^postgres:' $vroot/etc/passwd | awk -F: '{print $3}'`
+[ -n "$pguid" ] || \
+    fatal "No user called postgres`[ $usevserver != 1 ] || echo \" on vserver $vsname\"`."
 debug "chown $pguid $vroot$backupdir"
 chown $pguid $vroot$backupdir
 debug "chmod 700 $vroot$backupdir"

@@ -16,6 +16,10 @@ version XX -- ...
 	        make use of configurable $VSERVERINFO instead of hard-coded vserver-info.
 		fixed dpkg existence test inside vserver.
 		fixed $nodpkg use.
+	changes to pgsql handler
+	        now checks if the specified vserver is running.
+		now checks if $PGSQLDUMP/$PGSQLDUMPALL are available where needed.
+		now checks if "postgres" user exists on the host/vserver.
 	
 version 0.7 -- July 26 2005
 	added ninjahelper: a dialog based wizard for creating backupninja configs.
