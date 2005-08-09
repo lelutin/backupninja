@@ -1,7 +1,11 @@
 version XX -- ...
 
 	added pgsql (PostgreSQL) handler, with vservers support
-
+	added vservers support to duplicity handler
+	        Note: the configuration is a bit different of rdiff
+	        handler's one, but the default behavior is the same: have
+	        a look to example.dup.
+	
 version 0.7 -- July 26 2005
 	added ninjahelper: a dialog based wizard for creating backupninja configs.
 	considerably improved and changed the log file output.

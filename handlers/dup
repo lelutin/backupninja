@@ -14,6 +14,8 @@ getconf encryptkey
 
 setsection source
 getconf include
+getconf vsnames all
+getconf vsinclude
 getconf exclude
 
 setsection dest
@@ -29,7 +31,34 @@ destdir=${destdir%/}
 [ "$include" != "" ] || fatal "No source includes specified"
 [ "$password" != "" ] || fatal "No password specified"
 
-# see if we can login
+### vservers stuff ###
+
+# See if vservers are configured.
+# If so, check that the ones listed in $vsnames do exist.
+if [ "$vservers" == "yes" ]; then
+    [ -d "$VROOTDIR" ] || fatal "vservers enabled, but $VROOTDIR does not exist!"
+    if [ "$vsnames" == "all" ]; then
+	vsnames=""
+    	for vserver in `ls $VROOTDIR | grep -v lost+found | grep -v ARCHIVES`; do
+	    vsnames="$vserver $vsnames"
+	done
+    else
+	for vserver in "$vsnames"; do
+	    [ -d "$VROOTDIR/$vserver" ] || fatal "vserver '$vserver' does not exist."
+	done
+    fi
+    if [ -n "$vsnames" ]; then
+	if [ -n "$vsinclude" ]; then
+	    info "Using vservers '$vsnames'"
+	    usevserver=1
+	fi
+    else
+	[ -z "$vsinclude" ] || warning 'vsnames is empty, vsinclude configuration lines will be ignored'
+    fi
+fi
+
+### see if we can login ###
+
 if [ "$testconnect" == "yes" ]; then
     debug "ssh $sshoptions -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1'"
     if [ ! $test ]; then
@@ -79,6 +108,16 @@ for i in $include; do
 	str="${i//__star__/*}"
 	execstr="${execstr}--include $str "
 done
+
+# vsincludes
+if [ $usevserver ]; then
+    for vserver in $vsnames; do
+	for vi in $vsinclude; do
+	    str="${vi//__star__/*}"
+	    execstr="${execstr}--include '$VROOTDIR/$vserver$str' "
+	done
+    done
+fi
 
 ### EXECUTE ###
 
