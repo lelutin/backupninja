@@ -80,8 +80,9 @@ For example:
 	90-runthislast.rdiff
 
 Typically, you will put a '.rdiff' config file last, so that any
-database dumps you make are included in the filesystem backup. 
-Configurations files which begin with 0 (zero) are skipped.
+database dumps you make are included in the filesystem backup.
+Configurations files with names beginning with 0 (zero) or ending with
+.disabled (preferred method) are skipped.
 
 Unless otherwise specified, the config file format is "ini style."
 
@@ -205,6 +206,7 @@ Installation:
   # tar xvzf backupninja.tar.gz
   # cd backupninja
   # mv backupninja /usr/sbin/backupninja
+  # mv ninjahelper /usr/sbin/ninjahelper
   # mv etc/logrotate.d/backupninja /etc/logrotate.d/backupninja
   # mv etc/cron.d/backupninja /etc/cron.d/backupninja
   # mkdir /etc/backup.d/
@@ -226,7 +228,7 @@ probably don't need to be changed:
 
 VSERVERINFO (default: /usr/sbin/vserver-info)
 VSERVER (default: /usr/sbin/vserver)
-VROOTDIR (default: `$VSERVERINFO info SYSINFO |grep vserver-Rootdir | awk '{print $2}'; fi`)
+VROOTDIR (default: `$VSERVERINFO info SYSINFO |grep vserver-Rootdir | awk '{print $2}'`)
 
 NINJAHELPER
 ===========

@@ -5,6 +5,10 @@ version XX -- ...
 	        Note: the configuration is a bit different of rdiff
 	        handler's one, but the default behavior is the same: have
 	        a look to example.dup.
+	improved README
+	        documented .disabled method.
+		corrected VROOTDIR default value.
+		added ninjahelper to the install instructions.
 	
 version 0.7 -- July 26 2005
 	added ninjahelper: a dialog based wizard for creating backupninja configs.
