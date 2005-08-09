@@ -65,7 +65,6 @@ fi
 
 ### SOURCE ###
 
-[ "$label" != "" ] || fatal "Source missing label"
 [ "$sourcetype" == "local" ] || fatal "Only local source type supported"
 [ "$include" != "" -o "$vsinclude" != "" ] || fatal "No source includes specified"
 #TODO should I test for vsinclude if usevservers=1?
@@ -140,10 +139,10 @@ if [ ! $test ]; then
 	code=$?
 	if [ "$code" == "0" ]; then
 		debug $output
-		info "Successfully finished backing up source '$label'"
+		info "Successfully finished backing up source $label"
 	else
 		warning $output
-		warning "Failed backup up source '$label'"
+		warning "Failed backup up source $label"
 	fi
 fi	
 
