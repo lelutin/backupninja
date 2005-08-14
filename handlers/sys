@@ -95,21 +95,22 @@ fi
 # here we grab a list of the packages installed and removed.
 #
 
-if [ $usevserver ]
-then
-	for vserver in `ls $VROOTDIR | grep -E -v $nodpkg`
-	do
-		debug "$VSERVER $vserver exec dpkg --get-selections > $VROOTDIR/$vserver$packagesfile"
-		$VSERVER $vserver exec dpkg --get-selections > $VROOTDIR/$vserver$packagesfile
-	done
-fi
-
-# We want to perform this on the host as well
 if [ "$packages" == "yes" ]; then
-	debug "dpkg --get-selections > $packagesfile"
-	dpkg --get-selections > $packagesfile
+   if [ $usevserver ]
+   then
+      for vserver in `ls $VROOTDIR | grep -E -v $nodpkg`
+      do
+	 debug "$VSERVER $vserver exec dpkg --get-selections > $VROOTDIR/$vserver$packagesfile"
+	 $VSERVER $vserver exec dpkg --get-selections > $VROOTDIR/$vserver$packagesfile
+      done
+   fi
+   
+# We want to perform this on the host as well
+   if [ "$packages" == "yes" ]; then
+      debug "dpkg --get-selections > $packagesfile"
+      dpkg --get-selections > $packagesfile
+   fi
 fi
-
 
 ## PARTITIONS #############################
 
