@@ -69,14 +69,14 @@ chmod 700 $vroot$backupdir
 # if $databases = all, use pg_dumpall
 if [ "$databases" == "all" ]; then
     if [ $usevserver ]; then
-	execstr="$VSERVER $vsname exec su - postgres -c $PGSQLDUMPALL > $vroot$backupdir/${vsname}.sql"
+	execstr="$VSERVER $vsname exec su - postgres -c $PGSQLDUMPALL > $backupdir/${vsname}.sql"
     else
 	execstr="su - postgres -c $PGSQLDUMPALL > $backupdir/${localhost}-all.sql"
     fi
     debug "$execstr"
     if [ ! $test ]; then
-	output=`$execstr 2>&1`
-	code=$?
+       output=`$execstr 2>&1`
+       code=$?
 	if [ "$code" == "0" ]; then
 	    debug $output
 	    info "Successfully finished dump of pgsql cluster"
@@ -91,7 +91,7 @@ else
     for db in $databases; do
 	if [ $usevserver ]
 	    then
-	    execstr="$VSERVER $vsname exec su - postgres -c $PGSQLDUMP $db > $vroot$backupdir/${db}.sql"
+	    execstr="$VSERVER $vsname exec su - postgres -c $PGSQLDUMP $db > $backupdir/${db}.sql"
 	else
 	    execstr="su - postgres -c $PGSQLDUMP $db > $backupdir/${db}.sql"
 	fi
