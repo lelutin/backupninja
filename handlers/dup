@@ -62,7 +62,7 @@ fi
 if [ "$testconnect" == "yes" ]; then
     debug "ssh $sshoptions -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1'"
     if [ ! $test ]; then
-	result=`ssh $sshoptions -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1' 2>&1`
+	result=`ssh $sshoptions -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1'`
 	if [ "$result" != "1" ]; then
 	    fatal "Can't connect to $desthost as $destuser."
 	else
