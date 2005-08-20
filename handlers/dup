@@ -131,17 +131,17 @@ execstr=${execstr//\\*/\\\\\\*}
 
 debug "duplicity $execstr --exclude '**' / $execstr_serverpart"
 if [ ! $test ]; then
+        export PASSPHRASE=$password
 	output=`nice -n $nicelevel \
                   su -c \
-                    "export PASSPHRASE=$password \
-                     && duplicity $execstr --exclude '**' / $execstr_serverpart 2>&1"`
+                    "duplicity $execstr --exclude '**' / $execstr_serverpart 2>&1"`
 	code=$?
-	if [ "$code" == "0" ]; then
+	if [ $code -eq 0 ]; then
 		debug $output
 		info "Duplicity finished successfully."
 	else
-		warning $output
-		warning "Duplicity failed."
+		debug $output
+		fatal "Duplicity failed."
 	fi
 fi	
 

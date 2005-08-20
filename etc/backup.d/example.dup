@@ -15,7 +15,8 @@ nicelevel = 19
 [gpg]
 
 # passphrase needed to unlock the GnuPG key
-password = "a_very_complicated_passphrase"
+# NB: do not quote it, and it should not contain any quote
+password = a_very_complicated_passphrase
 
 # default is no, for backward compatibility with backupninja <= 0.5.
 # when set to yes, encryptkey option must be set below.
