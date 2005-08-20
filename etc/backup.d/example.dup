@@ -82,6 +82,10 @@ exclude = /home/*/.gnupg
 
 [dest]
 
+# perform an incremental backup? (default = yes)
+# if incremental = no, perform a full backup in order to start a new backup set
+#incremental = yes
+
 # how many days of data to keep ; default is 60 days.
 # (you can also use the time format of duplicity)
 # 'keep = yes' means : do not delete old data, the remote host will take care of this

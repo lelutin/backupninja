@@ -19,6 +19,7 @@ getconf vsinclude
 getconf exclude
 
 setsection dest
+getconf incremental yes
 getconf keep 60
 getconf sshoptions
 getconf bandwidthlimit 0
@@ -90,6 +91,10 @@ if [ "$keep" != "yes" ]; then
 	keep="${keep}D"
     fi
     execstr="${execstr}--remove-older-than $keep "
+fi
+
+if [ "$incremental" == "no" ]; then
+    execstr="${execstr}--full "
 fi
 
 execstr_serverpart="scp://$destuser@$desthost/$destdir"
