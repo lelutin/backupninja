@@ -1,3 +1,4 @@
+#! /bin/sh
 #
 # PostgreSQL handler script for backupninja
 #

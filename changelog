@@ -27,6 +27,8 @@ version 0.8 --
           then nano, vim and vi, and aborts if none of these exists.
     added helper for pgsql handler.
     rdiff handler now does not require 'label'
+    changes to mysql and svn handlers' vservers support
+        these handlers now check if the source vserver is running
 
 version 0.7 -- July 26 2005
 	added ninjahelper: a dialog based wizard for creating backupninja configs.

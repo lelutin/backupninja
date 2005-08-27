@@ -39,11 +39,16 @@ then
 	fi
 fi
 
-# Check to make sure that the specified vserver exists
+# If needed, make sure that the specified vserver exists and is running.
 if [ $usevserver ]
 then
+        info "examining vserver '$vsname'"
+        # does it exist ?
 	vroot="$VROOTDIR/$vsname"
 	[ -d $vroot ] || fatal "vserver '$vsname' does not exist at '$vroot'"
+        # is it running ?
+        running=`$VSERVERINFO $vsname RUNNING`
+        [ $running = 1 ] || fatal "vserver $vsname is not running."
 fi
 	
 # create backup dirs, the vroot variable will be empty if no vsname was specified
