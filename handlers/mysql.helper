@@ -30,28 +30,28 @@ do_mysql_user() {
 do_mysql_final() {
    if [ -z "$_DISABLE_HOTCOPY" ]; then
       checkBox "mysql action wizard" "check options" \
-         "sqldump" "create a backup using mysqldump (more compat)." off \
-         "hotcopy" "create a backup using mysqlhotcopy (faster)." on \
-         "compress" "compress the sql output files" on
+         "sqldump" "create a backup using mysqldump (more compat)." no \
+         "hotcopy" "create a backup using mysqlhotcopy (faster)." yes \
+         "compress" "compress the sql output files" yes
       status=$?
-      sqldump="sqldump = off"
-      hotcopy="hotcopy = off"
+      sqldump="sqldump = no"
+      hotcopy="hotcopy = no"
    else
       checkBox "mysql action wizard" "check options" \
-         "compress" "compress the sql output files" on
+         "compress" "compress the sql output files" yes
       status=$?
-      sqldump="sqldump = on"
-      hotcopy="hotcopy = off"
+      sqldump="sqldump = yes"
+      hotcopy="hotcopy = no"
    fi
 
    [ $status = 1 ] && return;    
    result="$REPLY"
-   compress="compress = off"
+   compress="compress = no"
    for opt in $result; do
       case $opt in
-        '"sqldump"') sqldump="sqldump = on";;
-        '"hotcopy"') hotcopy="hotcopy = on";;
-        '"compress"') compress="compress = on";;
+        '"sqldump"') sqldump="sqldump = yes";;
+        '"hotcopy"') hotcopy="hotcopy = yes";;
+        '"compress"') compress="compress = yes";;
       esac
    done
    get_next_filename $configdirectory/20.mysql
