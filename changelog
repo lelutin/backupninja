@@ -29,6 +29,8 @@ version 0.8 --
     rdiff handler now does not require 'label'
     changes to mysql and svn handlers' vservers support
         these handlers now check if the source vserver is running
+    added 'ignores' for mysql handler. (thanks Daniel.Bonniot@inria.fr)
+
 
 version 0.7 -- July 26 2005
 	added ninjahelper: a dialog based wizard for creating backupninja configs.
