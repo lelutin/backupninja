@@ -1,36 +1,35 @@
 version 0.8 -- September 15 2005
-    added pgsql (PostgreSQL) handler, with vservers support.
-    added vservers support to duplicity handler
-        Note: the configuration is a bit different of rdiff
-          handler's one, but the default behavior is the same:
-          have a look to example.dup.
-    improved README
-        documented .disabled method.
-        corrected VROOTDIR default value.
-        added ninjahelper to the install instructions.
-    improved rdiff, dup and sys handlers' vservers support
-        prevent vserver-debiantools' $VROOTDIR/ARCHIVES directory
-        to be seen as a vserver
-    changes to sys handler
-        make use of configurable $VSERVERINFO instead of hard-coded vserver-info.
-        fixed dpkg existence test inside vserver.
-        fixed $nodpkg use.
-    changes to pgsql handler
-        now checks if the specified vserver is running.
-        now checks if $PGSQLDUMP/$PGSQLDUMPALL are available where needed.
-        now checks if "postgres" user exists on the host/vserver.
-    changes to ninjahelper
-        check_perms() does not die anymore on group/world readable
-        helper scripts (now consistent with the "helper scripts
-           must not be group or world writable!" error msg).
-        xedit action now tries $EDITOR, then /etc/alternatives/editor,
-          then nano, vim and vi, and aborts if none of these exists.
-    added helper for pgsql handler.
-    rdiff handler now does not require 'label'
-    changes to mysql and svn handlers' vservers support
-        these handlers now check if the source vserver is running
-    added 'ignores' for mysql handler. (thanks Daniel.Bonniot@inria.fr)
-
+	added pgsql (PostgreSQL) handler, with vservers support.
+	added vservers support to duplicity handler
+		Note: the configuration is a bit different than the rdiff
+		handler's one, but the default behavior is the same:
+		have a look at example.dup.
+	improved README
+	documented .disabled method.
+	corrected VROOTDIR default value.
+	added ninjahelper to the install instructions.
+	improved rdiff, dup and sys handlers' vservers support
+		prevent vserver-debiantools' $VROOTDIR/ARCHIVES directory
+		to be seen as a vserver
+	changes to sys handler
+		make use of configurable $VSERVERINFO instead of hard-coded vserver-info.
+		fixed dpkg existence test inside vserver.
+		fixed $nodpkg use.
+	changes to pgsql handler
+		now checks if the specified vserver is running.
+		now checks if $PGSQLDUMP/$PGSQLDUMPALL are available where needed.
+		now checks if "postgres" user exists on the host/vserver.
+	changes to ninjahelper
+		check_perms() does not die anymore on group/world readable
+	helper scripts (now consistent with the "helper scripts
+		must not be group or world writable!" error msg).
+	xedit action now tries $EDITOR, then /etc/alternatives/editor,
+		then nano, vim and vi, and aborts if none of these exists.
+	added helper for pgsql handler.
+	rdiff handler now does not require 'label'
+	changes to mysql and svn handlers' vservers support
+		these handlers now check if the source vserver is running
+	added 'ignores' for mysql handler. (thanks Daniel.Bonniot@inria.fr)
 
 version 0.7 -- July 26 2005
 	added ninjahelper: a dialog based wizard for creating backupninja configs.
@@ -38,7 +37,7 @@ version 0.7 -- July 26 2005
 	you can now disable actions with .disabled (this is new preferred method).
 	added makecd handler and example.makecd for backing up to cd/dvd (thanks stef).
 	fixed bug when specifying multiple 'when' options.
-    
+
 version 0.6 -- June 16 2005
 	ldap handler has new options: backup method to use (ldapsearch or
 		slapcat), restart, passwordfile and binddn. Default backup method
@@ -66,7 +65,7 @@ version 0.6 -- June 16 2005
 		the default is /etc/mysql/debian.cnf. with this, 
 		sqldump doesn't need dbusername. (hotcopy still does).
 	fixed bug in mysql handler which caused some passwords to not work.
-	 	(.my.cnf files now have double quotes around password)
+		(.my.cnf files now have double quotes around password)
 	can now pass options to hwinfo and sfdisk in sys handler.
 
 version 0.5 -- April 12 2005
@@ -122,7 +121,7 @@ version 0.3.3 -- Nov 10 2004
 version 0.3.2 -- Sept 29 2004
 	handler scripts are no longer executable (to comply with debian policy)
 	handler error and warning messages are sent with the notify email
-    
+
 version 0.3.1 -- Sept 5 2004
 	added ldap handler
 	moved sh support to a handler script
