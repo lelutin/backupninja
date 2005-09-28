@@ -305,7 +305,7 @@ function process_action() {
 	let "actions_run += 1"
 
 	# call the handler:
-	[ if -x /bin/mktemp ]
+	if [ -x /bin/mktemp ]
 	then
 		local bufferfile=`mktemp /tmp/backupninja.buffer.XXXXXXXX`
 	else
