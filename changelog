@@ -1,6 +1,8 @@
+version 0.9 -- unreleased
 	removed erroneous magic file marker in pgsql handler
 	fixed insecure temporary file creation
 	fixed incorrect find positional
+	
 version 0.8 -- September 15 2005
 	added pgsql (PostgreSQL) handler, with vservers support.
 	added vservers support to duplicity handler

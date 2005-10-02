@@ -131,6 +131,23 @@ function setsection() {
 	CURRENT_SECTION=$1
 }
 
+
+#
+# create a temporary file in a secure way.
+#
+function maketemp() {
+	if [ -x /bin/mktemp ]
+	then
+		local tempfile=`mktemp /tmp/$1.XXXXXXXX`
+	else
+		DATE=`date`
+		sectmp=`echo $DATE | /usr/bin/md5sum | cut -d- -f1`
+		local tempfile=/tmp/$1.$sectmp
+	fi
+	echo $tempfile
+}
+
+
 #
 # sets a global var with name equal to $1
 # to the value of the configuration parameter $1
@@ -305,14 +322,7 @@ function process_action() {
 	let "actions_run += 1"
 
 	# call the handler:
-	if [ -x /bin/mktemp ]
-	then
-		local bufferfile=`mktemp /tmp/backupninja.buffer.XXXXXXXX`
-	else
-		DATE=`date`
-		sectmp=`echo $DATE | /usr/bin/md5sum | cut -d- -f1`
-		local bufferfile=/tmp/backupninja.buffer.$sectmp
-	fi
+	local bufferfile=`maketemp backupninja.buffer`
 	echo "" > $bufferfile
 	echo_debug_msg=1
 	(

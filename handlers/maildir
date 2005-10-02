@@ -12,7 +12,17 @@
 #    weekly.2
 #    monthly.1
 #  if keepdaily is 3, keepweekly is 2, and keepmonthly is 1. 
-# 
+#
+#  The basic algorithm is to rsync each maildir individually,
+#  and to use hard links for retaining historical data.
+#
+#  We rsync each maildir individually because it becomes very
+#  unweldy to start a single rsync of many hundreds of thousands
+#  of files. 
+#
+#  For the backup rotation to work, destuser must be able to run 
+#  arbitrary bash commands on the desthost.
+#
 ##############################################################
 
 getconf rotate yes
@@ -101,8 +111,8 @@ $dir $destuser@$desthost:$destdir/$letter \
 # and add new ones which have just been created.
 
 function do_remove() {
-	local tmp1=/tmp/maildirtmpfile$$
-	local tmp2=/tmp/maildirtmpfile$$
+	local tmp1=`maketemp maildir-tmp-file`
+	local tmp2=`maketemp maildir-tmp-file`
 	
 	for i in a b c d e f g h i j k l m n o p q r s t u v w x y z; do
 		ls -1 "$srcdir/$i" | sort > $tmp1
