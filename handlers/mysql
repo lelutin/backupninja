@@ -22,7 +22,7 @@ if [ "$user" == "" ]; then
 	user=root;
 else
 	userset=true;
-	userhome=`grep "^$user:" /etc/passwd | awk -F: '{print $6}'`
+	userhome=`getent passwd "$user" | awk -F: '{print $6}'`
 	[ -f $userhome/.my.cnf ] || fatal "Can't find config file in $userhome/.my.cnf"
 fi
 
