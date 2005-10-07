@@ -81,7 +81,14 @@ do_rdiff_con() {
     echo "Copying root's public ssh key to authorized_keys of $rdiff_user@$rdiff_host. Specify the password for user $rdiff_user@$rdiff_host."
     ssh-copy-id -i /root/.ssh/id_[rd]sa.pub $rdiff_user@$rdiff_host
     if [ $? -ne 0 ]; then
-      msgBox "rdiff action wizard: error" "Failed to connect to $rdiff_user@$rdiff_host. Make sure you have the username and password correct."
+      echo "Couldn't copy root's public ssh key to authorized_keys of $rdiff_user@$rdiff_host. This time, testing whether directory is writable."
+      ssh $rdiff_user@$rdiff_host 'test -w .ssh || test -w .'
+      case $? in
+        0 )   msgBox "rdiff action wizard: error" "Directories are writable: Probably just a typo the first time." ;;
+        1 )   msgBox "rdiff action wizard: error" "Connected successfully to $rdiff_user@$rdiff_host, but unable to write. Check ownership and modes of ~$rdiff_user on $rdiff_host." ;;
+        255 ) msgBox "rdiff action wizard: error" "Failed to connect to $rdiff_user@$rdiff_host. Check hostname, username, and password." ;;
+        * )   msgBox "rdiff action wizard: error" "Unexpected error." ;;
+      esac 
       return
     else
       echo "Done. hit return to continue"

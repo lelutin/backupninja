@@ -1,8 +1,13 @@
 version 0.9 -- unreleased
+	*** IMPORTANT CHANGE, UPGRADE AT ONCE ***
+	 fixed insecure temporary file creation 
+	*****************************************
 	removed erroneous magic file marker in pgsql handler
-	fixed insecure temporary file creation
 	fixed incorrect find positional
-	
+	changed direct grep of /etc/passwd to getent passwd.
+	rdiff helper has much better information on failed ssh attempt
+		(patch from cmccallum@thecsl.org).
+    	
 version 0.8 -- September 15 2005
 	added pgsql (PostgreSQL) handler, with vservers support.
 	added vservers support to duplicity handler

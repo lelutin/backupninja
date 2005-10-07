@@ -95,7 +95,7 @@ fi
 
 defaultsfile=""
 if [ "$dbusername" != "" -a "$dbpassword" != "" ]; then
-	home=`grep '^root:' /etc/passwd | awk -F: '{print $6}'`
+	home=`getent passwd "root" | awk -F: '{print $6}'`
 	[ -d $home ] || fatal "Can't find root's home directory ($home)."
 	mycnf="$home/.my.cnf"
 	if [ -f $mycnf ]; then
