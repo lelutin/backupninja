@@ -1,3 +1,8 @@
+##
+## This is an example rdiff-backup configuration file.
+## The defaults are useful in most cases, just make sure
+## to configure the destination host and user.
+##
 
 ## passed directly to rdiff-backup
 # options = --force
@@ -17,17 +22,23 @@
 # an optional subdirectory below 'directory' (see [dest])
 label = thishostname
 
-# only local type is currently supported
+# type can be "local" or "remote"
 type = local
+
+# only use if '[source] type = remote'
+#host = srchost
+#user = srcuser
 
 # how many days of data to keep
 # (you can also use the time format of rdiff-backup, e.g. 6D5h)
 keep = 60
 
 # a note about includes and excludes:
-# all the excludes come after all the includes. 
-# otherwise, the order is not taken into account.
-# currently, you cannot do "include = /"
+# All the excludes come after all the includes. The order is
+# not otherwise taken into account. Symlinks are backed up as
+# symlinks, they are not followed! This means you must specify
+# the real canonical path of a directory for it to actually
+# get included.
 
 # files to include in the backup
 # (supports globbing with '*')
@@ -41,16 +52,11 @@ include = /usr/local/sbin
 include = /var/lib/dpkg/status
 include = /var/lib/dpkg/status-old
 
-# If vservers = yes in /etc/backupninja.conf then the following variable can be used:
-# vsinclude = <path>
-# Any path specified in vsinclude is added to the include list for each vserver
-# on the system.
-# e.g. vsinclude = /home will backup the /home partition in every vserver
-# on the system. If you have /vservers/foo, /vservers/bar and /vservers/baz
-# this vsinclude will add to the include list /vservers/foo/home, 
-# /vservers/bar/home and /vservers/baz/home
-# Included vservers are derived from listing all vservers in $VROOTDIR (suggestions
-# for improving this are encouraged).
+# If vservers = yes in /etc/backupninja.conf then vsinclude
+# may be used. Any path specified in vsinclude is added to
+# the include list for each vserver on the system. e.g.
+# vsinclude = /home will backup /vservers/v1/home,
+# /vservers/v2/home, etc.
 
 # files to exclude from the backup
 # (supports globbing with '*')
@@ -62,18 +68,18 @@ include = /var/lib/dpkg/status-old
 
 [dest]
 
-# default is remote, if set to 'local' then
-# ignore the 'host' and 'user' options.
+# type can be "local" or "remote"
 type = remote
 
 # put the backups under this directory
 directory = /backups
 
-# the machine which will receive the backups
+# the machine which will receive the backups.
+# only use if "[dest] type = remote"
 host = backuphost
 
-# make the files owned by this user
-# note: you must be able to ssh backupuser@backhost
-# without specifying a password (if type = remote).
+# make the files owned by this user. you must be able to
+# `su -c ssh backupuser@backhost` without specifying a password.
+# only use if "[dest] type = remote"
 user = backupuser
 
