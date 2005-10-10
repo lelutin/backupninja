@@ -2,7 +2,7 @@
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.TH BACKUPNINJA 1 "January 2, 2005" "riseup" "backupninja package"
+.TH BACKUPNINJA 1 "October 10, 2005" "riseup" "backupninja package"
 .\" Please adjust this date whenever revising the manpage.
 .\"
 .\" Some roff macros, for reference:
@@ -21,7 +21,7 @@ BACKUPNINJA \- A lightweight, extensible meta-backup system
 .I
 "a silent flower blossom death strike to lost data."
 .SH SYNOPSIS
-.B "backupninja [ \-h ] [ \-d ] [ \-f filename]"
+.B "backupninja [ \-h ] [ \-d ] [ \-n ] [ \-t ] [ \-f filename ] [ \-\-run filename ]"
 .br
 .SH DESCRIPTION
 .B Backupninja 
@@ -33,17 +33,34 @@ coordinate many different backup utilities.
 .PP
 
 .SH FEATURES
- - easy to read ini style configuration files.
- - secure, remote, incremental filesytem backup (via rdiff-backup).
-   incremental data is compressed. permissions are retained even
-   with an unprivileged backup user.
- - backup of mysql databases (via mysqlhotcopy and mysqldump).
- - backup of ldap databases (via slapcat and ldapsearch).
- - passwords are never sent via the command line to helper programs.
- - you can drop in scripts to handle new types of backups.
- - backup actions can be scheduled
- - you can choose when status report emails are mailed to you
-   (always, on warning, on error, never).
+.IP - 2
+easy to read ini style configuration files.
+.IP -
+you can drop in scripts to handle new types of backups.
+.IP -
+backup actions can be scheduled.
+.IP -
+you can choose when status report emails are mailed to you (always, on warning, on error, never).
+.IP -
+console-based wizard (ninjahelper) makes it easy to create backup action configuration files.
+.IP -
+passwords are never sent via the command line to helper programs.
+.IP -
+in order to backup a db or sql database, you cannot simply copy database files. backupninja helps you safely export the data to a format which you can backup.
+.IP -
+works with Linux-Vservers. 
+
+.B Backup types include:
+.IP - 2
+secure, remote, incremental filesytem backup (via rdiff-backup). incremental data is compressed. permissions are retained even with an unpriviledged backup user.
+.IP -
+basic system and hardware information.
+.IP -
+encrypted remote backups (via duplicity).
+.IP -
+safe backup of MySQL, PostgreSQL, OpenLDAP, and subversion databases.
+.IP -
+burn CD/DVDs or create ISOs. 
 	 
 .\" TeX users may be more comfortable with the \fB<whatever>\fP and
 .\" \fI<whatever>\fP escape sequences to invoke bold face and italics, 
@@ -57,16 +74,27 @@ Show summary of options
 .B \-d, \-\-debug          
 Run in debug mode, where all log messages are output to the current shell.
 .TP
-.B \-f, \-\-conffile FILE  
-Use FILE for the main configuration instead of /etc/backupninja.conf
+.B \-f, \-\-conffile CONF_FILE  
+Use CONF_FILE for the main configuration instead of /etc/backupninja.conf
 .TP
 .B \-t, \-\-test           
 Run in test mode, no actions are actually taken.
 .TP
 .B \-n, \-\-now            
-Perform actions now, instead of when they  might be scheduled.
+Perform actions now, instead of when they might be scheduled.
+.TP
+.B \-\-run ACTION_FILE
+Runs the action configuration ACTION_FILE and exits.
 
-.SH EXAMPLES
+.SH CONFIGURATION
+
+General settings are configured in /etc/backupninja.conf. In this file you
+can set the log level and change the default directory locations. See \fBbackupnina.conf(5)\fP.
+
+To preform the actual backup actions, backupninja processes each action configuration file in
+/etc/backup.d according to the file's suffix. See \fBbackup.d(5)\fP.
+
+.SH EXAMPLE USAGE
 .TP
 Backupninja can be used to impliment whatever backup strategy you choose. It is intended, however, to be used like so:
 .TP
@@ -74,22 +102,13 @@ First, databases are safely copied or exported to /var/backups.  Often, you cann
 .TP
 Then, vital parts of the file system, including /var/backups, are nightly pushed to a remote, off-site, hard disk (using rdiff-backup). The local user is root, but the remote user is not privileged. Hopefully, the remote filesystem is encrypted.
 .TP
-There are many different backup strategies out there, including "pull style", magnetic tape, rsync + hard links, etc. We believe that the strategy outlined above is the way to go because: (1) hard disks are very cheap these days, (2) pull style backups are no good, because then the backup server must have root on the production server, and (3) rdiff-backup is more space efficient and featureful than using rsync + hard links.
-
-.SH SSH KEYS
-.TP
-In order for rdiff-backup to sync files over ssh unattended, you must create ssh keys on the source server and copy the public key to the remote user's authorized keys file. For example:
-
+In order for this to work (ie for diff-backup to run unattended), you must create ssh keys on the source server and copy the public key to the remote user's authorized keys file. For example:
 .br
 root@srchost# ssh-keygen -t dsa
 .br
 root@srchost# ssh-copy-id -i /root/.ssh/id_dsa.pub backup@desthost
-
 .TP
-Now, you should be able to ssh from user 'root' on srchost to user 'backup' on desthost without specifying a password.
-
-.TP
-Note: when prompted for a password by ssh-keygen, just leave it blank by hitting return.
+Now, you should be able to ssh from user 'root' on srchost to user 'backup' on desthost without specifying a password. When prompted for a password by ssh-keygen, just leave it blank by hitting return. The "wizard" \fBninjahelper(1)\fP will walk you through these steps.
 
 .SH FILES
 .PD 0
@@ -97,7 +116,7 @@ Note: when prompted for a password by ssh-keygen, just leave it blank by hitting
 .br
 \fB/etc/backupninja.conf\fP        main configuration file; general options
 .br
-\fB/etc/cron.d/backupninja\fP      runs main script nightly
+\fB/etc/cron.d/backupninja\fP      runs main script hourly
 .br
 \fB/etc/logrotate.d/backupninja\fP rotates backupninja.log
 .br
@@ -105,14 +124,14 @@ Note: when prompted for a password by ssh-keygen, just leave it blank by hitting
 .br
 \fB/usr/share/backupninja\fP       directory for handler scripts
 .br
+\fB/usr/share/doc/backupninja/examples\fP       example action configuration files.
+.br
 .PD
 
 .SH SEE ALSO
+.BR ninjahelper (1), 
 .BR backupninja.conf (5), 
+.BR backup.d (5), 
 .br
 .SH AUTHOR
-BACKUPNINJA was written by <elijah@riseup.net>.
-.br 
-BACKUPNINJA was packaged by <micah@riseup.net>.
-.PP
-This manual page was written by stefani <stefani@riseup.net>.
+BACKUPNINJA was written by the riseup.net collective.

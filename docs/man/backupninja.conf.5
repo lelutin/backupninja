@@ -2,7 +2,7 @@
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.TH BACKUPNINJA.CONF 5 "January 2, 2005" "riseup" "backupninja package"
+.TH BACKUPNINJA.CONF 5 "October 10, 2005" "riseup" "backupninja package"
 .SH NAME 
 BACKUPNINJA.CONF \- Configuration file(s) for \fBbackupninja (1)\fP.
 
@@ -22,98 +22,76 @@ BACKUPNINJA.CONF \- Configuration file(s) for \fBbackupninja (1)\fP.
 .SH SYNOPSIS
 .B "/etc/backupninja.conf "
 .br
-.B "/etc/backup.d/* "
-.br
 .SH DESCRIPTION
 .B backupninja.conf
 is the general configuration file. In this file you can set the log level and change the default directory locations.  You can force a different general configuration file with "backupninja -f /path/to/conf".
 
+.SH OPTIONS
+
 .TP
-To perform the actual backup, backupninja processes each configuration file in /etc/backup.d according to the file's suffix:
+.B loglevel
+How verbose to make the logs. 
 .br
-  .sh      --  run this file as a shell script.
-  .rdiff   --  this is a configuration for rdiff-backup
-  .maildir --  this is a configuration to backup maildirs
-  .mysql   --  mysql backup configuration
-  .ldap    --  ldap backup configuration
-  .sys     --  general system reports
-
-.TP
-Support for additional configuration types can be added by dropping bash scripts with the name of the suffix into /usr/share/backupninja.
-
-.TP
-The configuration files are processed in alphabetical order. However, it is suggested that you name the config files in "sysvinit style."
-
-.TP
-For example:
-  00-disabled.ldap
-  10-runthisfirst.sh
-  20-runthisnext.mysql
-  90-runthislast.rdiff
-
-.TP
-Typically, you will put a '.rdiff' config file last, so that any database dumps you make are included in the filesystem backup.  Configurations files which begin with 0 (zero) are skipped.
-
-.TP
-Unless otherwise specified, the config file format is "ini style."
-
-.TP
-For example:
-
- # this is a comment
-
- [fishes]
- fish = red
- fish = blue
-
- [fruit]
- apple = yes
- pear = no thanks \
- i will not have a pear.
-
-
-.PP
-
-.SH SCHEDULING
+5 = Debugging messages
 .br
-By default, each configuration file is processed everyday at 01:00 (1
-AM). This can be changed by specifying the 'when' in a config file.
-
-For example:
-
-  when = sundays at 02:00
-  when = 30th at 22
-  when = 30 at 22:00
-  when = everyday at 01            <-- the default
-  when = Tuesday at 05:00
-
-A configuration file will be processed at the time(s) specified by the
-"when" option. If multiple "when" options are present, then they all
-apply. If two configurations files are scheduled to run in the same
-hour, then we fall back on the alphabetical ordering specified above.
-If two configurations files are scheduled close to one another in
-time, it is possible to have multiple copies of backupninja running if
-the first instance is not finished before the next one starts.
-
-These values for 'when' are equivalent:
-
-  when = tuesday at 05:30
-  when = TUESDAYS at 05
-
-These values for 'when' are invalid:
-  
-  when = tuesday at 2am
-  when = tuesday at 2
-  when = tues at 02
+4 = Informational messages
 .br
+3 = Warnings
+.br
+2 = Errors
+.br
+1 = Fatal errors 
+
+.TP
+.B reportemail
+Send a summary of the backup status to this email address
+
+.TP
+.B reportsuccess
+If set to 'yes', a report email will be generated even if all modules reported success.
+
+.TP
+.B reportwarning
+If set to 'yes', a report email will be generated even if there was no error.
+
+.TP
+.B logfile
+The path of the logfile.
+
+.TP
+.B configdirectory
+The directory where all the backup action configuration files live.
+
+.TP 
+.B scriptdirectory 
+Where backupninja handler scripts are found
+
+.TP
+.B usecolors
+If set to 'yes', use colors in the log file and debug output.
+
+.SH DEFAULTS
+
+loglevel = 4
+.br
+reportemail = root
+.br
+reportsuccess = yes
+.br
+reportwarning = yes
+.br
+logfile = /var/log/backupninja.log
+.br
+configdirectory = /etc/backup.d
+.br
+scriptdirectory = /usr/share/backupninja
+.br
+usecolors = yes 
 
 .SH SEE ALSO
 .BR backupninja (1), 
+.BR ninjahelper (1), 
+.BR backup.d (5), 
 .br
 .SH AUTHOR
-BACKUPNINJA was written by <elijah@riseup.net>.
-.br
-BACKUPNINJA was packaged by <micah@riseup.net>.
-.br
-.PP
-This manual page was written by  <stefani@riseup.net>.
+BACKUPNINJA was written by the riseup.net collective.

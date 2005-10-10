@@ -1,0 +1,106 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH BACKUP.D 5 "October 10, 2005" "riseup" "backupninja package"
+.SH NAME 
+BACKUP.D \- Action configuration files for \fBbackupninja(1)\fP.
+
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.br
+.SH SYNOPSIS
+.B "/etc/backup.d/* "
+.br
+.SH DESCRIPTION
+
+To preform the actual backup actions, backupninja processes each action configuration file in
+/etc/backup.d according to the file's suffix.
+
+.IP .sh 10
+run this file as a shell script.
+.IP .rdiff
+backup action for rdiff-backup.
+.IP .dup
+backup action for duplicity.
+.IP .maildir
+backup action for slow, incremental rsyncs of tens of thousands of maildirs.
+.IP .mysql
+backup action for safe MySQL dumps.
+.IP .pgsql
+backup action for safe PostgreSQL dumps.
+.IP .ldap
+backup action for safe OpenLdap dumps.
+.IP .sys
+backup action for general system reports and hardware information.
+.IP .svn
+backup action for safe backups of subversion repositories.
+.IP .trac
+backup action for safe backups of trac repositories.
+.IP .makecd
+backup action for burning backups to CD/DVD or creating ISOs.
+
+.TP
+These files must be owned by root and must not be world or group readable/writable. Support for additional configuration types can be added by dropping bash scripts with the name of the suffix into /usr/share/backupninja. 
+.TP
+The configuration files are processed in alphabetical order. However, it is suggested that you name the config files in "sysvinit style." 
+.TP
+For example:
+ 10-disabled.ldap.disabled
+ 15-runthisfirst.sh
+ 20-runthisnext.mysql
+ 90-runthislast.rdiff
+.TP
+Typically, you will put a '.rdiff' config file last, so that any database dumps you make are included in the filesystem backup. Action configurations which begin end with .disabled are skipped.
+.TP
+Example templates for the action configuration files can be found in /usr/share/doc/backupninja/examples. You can also use \fBninjahelper(1)\fP, a console based "wizard" for creating backup actions.
+
+.SH SCHEDULING
+
+By default, each configuration file is processed everyday at 01:00 (1 AM). This can be changed by specifying the 'when' option in a backup action's config file or in the global configuration file. 
+
+For example:
+  when = sundays at 02:00
+  when = 30th at 22
+  when = 30 at 22:00
+  when = everyday at 01
+  when = Tuesday at 05:00
+  when = hourly
+
+These values for "when" are invalid:
+  when = tuesday at 2am
+  when = tuesday at 2
+  when = tues at 02
+
+A configuration file will be processed at the time(s) specified by the "when" option. If multiple "when" options are present, then they all apply. If two configurations files are scheduled to run in the same hour, then we fall back on the alphabetical ordering specified above. The "when" must occur before any sections in the action configuration file. 
+
+.SH FILE FORMAT
+
+The file format of the action configuration files is "ini style." Sections are created by using square bracket. Long lines are connected with a backslash. For example:
+
+   # this is a comment
+   [fishes]
+   fish = red
+   fish = blue
+   [fruit]
+   apple = yes
+   pear = no thanks \\
+   i will not have a pear.
+
+.SH SEE ALSO
+.BR backupninja (1), 
+.BR ninjahelper (1), 
+.BR backupninja.conf (5), 
+.br
+.SH AUTHOR
+BACKUPNINJA was written by the riseup.net collective.
