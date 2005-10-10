@@ -7,9 +7,9 @@ version 0.9 -- unreleased
 	changed direct grep of /etc/passwd to getent passwd.
 	rdiff helper has much better information on failed ssh attempt
 		(patch from cmccallum@thecsl.org).
-    rdiff handler now supports remote source and local dest. 
-    	(patch from cmccallum@thecsl.org).
-    man pages are greatly improved.
+	rdiff handler now supports remote source and local dest. 
+		(patch from cmccallum@thecsl.org).
+	man pages are greatly improved.
 
 version 0.8 -- September 15 2005
 	added pgsql (PostgreSQL) handler, with vservers support.
