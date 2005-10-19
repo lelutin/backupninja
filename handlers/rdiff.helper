@@ -1,68 +1,78 @@
 
 HELPERS="$HELPERS rdiff:incremental_remote_filesystem_backup"
 
+declare -a rdiff_includes
+declare -a rdiff_excludes
+
 do_rdiff_dest() {
-   formBegin "rdiff action wizard"
-     formItem "keep" "$rdiff_keep"
-     formItem "dest_directory" "$rdiff_directory"
-     formItem "dest_host" "$rdiff_host"
-     formItem "dest_user" "$rdiff_user"
-   formDisplay
-   [ $? = 1 ] && return;
-       
-   set -- $REPLY
-	rdiff_keep=$1
-	rdiff_directory=$2
-	rdiff_host=$3
-	rdiff_user=$4
+  set -o noglob
+  formBegin "rdiff action wizard"
+    formItem "keep" "$rdiff_keep"
+    formItem "dest_directory" "$rdiff_directory"
+    formItem "dest_host" "$rdiff_host"
+    formItem "dest_user" "$rdiff_user"
+  formDisplay
+  [ $? = 1 ] && return;
+
+  IFS=$''
+  replyconverted=`echo $REPLY | tr '\n' :`
+  IFS=$':'
+  thereply=($replyconverted)
+  IFS=$' \t\n'
+  
+  rdiff_keep=${thereply[0]}
+  rdiff_directory=${thereply[1]}
+  rdiff_host=${thereply[2]}
+  rdiff_user=${thereply[3]}
 
   _dest_done="(DONE)"
   setDefault conn
+  set +o noglob
 }
 
 do_rdiff_src() {
-   formBegin "rdiff action wizard: includes"
-     formItem include /var/spool/cron/crontabs
-     formItem include /var/backups
-     formItem include /etc
-     formItem include /root
-     formItem include /home
-     formItem include '/usr/local/*bin'
-     formItem include '/var/lib/dpkg/status*'
-     formItem include 
-     formItem include 
-     formItem include 
-   formDisplay
-   [ $? = 1 ] && return;
+  #echo ${rdiff_includes[@]}
+  set -o noglob
+  formBegin "rdiff action wizard: includes"
+    for ((i=0; i < ${#rdiff_includes[@]} ; i++)); do
+       formItem include ${rdiff_includes[$i]}
+    done
+    formItem include 
+    formItem include 
+    formItem include 
+  formDisplay
+  [ $? = 1 ] && return;
 
-   rdiff_includes=   
-   set -o noglob
-   for i in $REPLY; do
-      [ "$i" != "" ] && rdiff_includes="$rdiff_includes\ninclude = $i"
-   done
-   set +o noglob
+  unset rdiff_includes
+  rdiff_includes=($REPLY)
 
-   formBegin "rdiff action wizard: excludes" 
-     formItem exclude '/home/*/.gnupg'
-     formItem exclude 
-     formItem exclude 
-   formDisplay
-   [ $? = 1 ] && return;
+  formBegin "rdiff action wizard: excludes" 
+    for ((i=0; i < ${#rdiff_excludes[@]} ; i++)); do
+       formItem exclude ${rdiff_excludes[$i]}
+    done
+    formItem exclude 
+    formItem exclude 
+  formDisplay
+  [ $? = 1 ] && return;
 
-   rdiff_excludes=
-   set -o noglob
-   for i in $REPLY; do
-      [ "$i" != "" ] && rdiff_excludes="$rdiff_excludes\nexclude = $i"
-   done
-   set +o noglob
+  unset rdiff_excludes
+  rdiff_excludes=($REPLY)
    
-   _src_done="(DONE)"
-   setDefault dest
+  _src_done="(DONE)"
+  setDefault dest
+  set +o noglob
 }
 
 do_rdiff_con() {
+  IFS=$' \t\n'
   if [ "$_dest_done" = "" ]; then
-    msgBox "rdiff action wizard: error" "You must first configure the destination"
+    msgBox "rdiff action wizard: error" "You must first configure the destination."
+    return
+  elif [ "$rdiff_user" = "" ]; then
+    msgBox "rdiff action wizard: error" "You must first configure the destination user."
+    return
+  elif [ "$rdiff_host" = "" ]; then
+    msgBox "rdiff action wizard: error" "You must first configure the destination host."
     return
   else
     booleanBox "rdiff action wizard" "This step will create a ssh key for the local root user with no passphrase (if one does not already exist), and attempt to copy root's public ssh key to authorized_keys file of $rdiff_user@$rdiff_host. This will allow the local root to make unattended backups to $rdiff_user@$rdiff_host. Are you sure you want to continue?"
@@ -78,15 +88,18 @@ do_rdiff_con() {
   
   ssh -o PreferredAuthentications=publickey $rdiff_host -l $rdiff_user "exit" 2> /dev/null
   if [ $? -ne 0 ]; then
-    echo "Copying root's public ssh key to authorized_keys of $rdiff_user@$rdiff_host. Specify the password for user $rdiff_user@$rdiff_host."
+    echo "Copying root's public ssh key to authorized_keys of $rdiff_user@$rdiff_host. When prompted, specify the password for user $rdiff_user@$rdiff_host."
     ssh-copy-id -i /root/.ssh/id_[rd]sa.pub $rdiff_user@$rdiff_host
     if [ $? -ne 0 ]; then
-      echo "Couldn't copy root's public ssh key to authorized_keys of $rdiff_user@$rdiff_host. This time, testing whether directory is writable."
+      echo "FAILED: Couldn't copy root's public ssh key to authorized_keys of $rdiff_user@$rdiff_host."
       ssh $rdiff_user@$rdiff_host 'test -w .ssh || test -w .'
-      case $? in
+      result=$?
+      echo "Hit return to continue."
+      read
+      case $result in
         0 )   msgBox "rdiff action wizard: error" "Directories are writable: Probably just a typo the first time." ;;
         1 )   msgBox "rdiff action wizard: error" "Connected successfully to $rdiff_user@$rdiff_host, but unable to write. Check ownership and modes of ~$rdiff_user on $rdiff_host." ;;
-        255 ) msgBox "rdiff action wizard: error" "Failed to connect to $rdiff_user@$rdiff_host. Check hostname, username, and password." ;;
+        255 ) msgBox "rdiff action wizard: error" "Failed to connect to $rdiff_user@$rdiff_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host." ;;
         * )   msgBox "rdiff action wizard: error" "Unexpected error." ;;
       esac 
       return
@@ -112,9 +125,15 @@ do_rdiff_finish() {
 type = local
 keep = $rdiff_keep
 EOF
-   echo -n -e "$rdiff_includes" >> $next_filename
-   echo -e "$rdiff_excludes" >> $next_filename
-   cat >> $next_filename <<EOF
+    set -o noglob
+    for ((i=0; i < ${#rdiff_includes[@]} ; i++)); do
+        echo include = ${rdiff_includes[$i]}
+    done
+    for ((i=0; i < ${#rdiff_includes[@]} ; i++)); do
+        echo exclude = ${rdiff_excludes[$i]}
+    done
+    set +o noglob
+    cat >> $next_filename <<EOF
   
 [dest]
 type = remote
@@ -126,6 +145,7 @@ EOF
 }
 
 rdiff_main_menu() {
+
   while true; do
     srcitem="choose files to include & exclude $_src_done"
     destitem="configure backup destination $_dest_done"
@@ -138,6 +158,7 @@ rdiff_main_menu() {
         finish "finish and create config file"
     [ $? = 1 ] && return;
     result="$REPLY"
+
     case "$result" in
        "src") do_rdiff_src;;
        "dest") do_rdiff_dest;;
@@ -152,12 +173,12 @@ rdiff_main_menu() {
           fi
           ;;
     esac
-    
+
   done
 }
 
 rdiff_wizard() {
-#   require_packages rdiff-backup
+  require_packages rdiff-backup
   _src_done=
   _dest_done=
   _con_done=
@@ -166,6 +187,8 @@ rdiff_wizard() {
   rdiff_directory=/backup/`hostname`
   rdiff_user=
   rdiff_host=
+  rdiff_includes=(/var/spool/cron/crontabs /var/backups /etc /root /home /usr/local/*bin /var/lib/dpkg/status*)
+  rdiff_excludes=(/home/*/.gnupg)
   rdiff_main_menu
 }
 

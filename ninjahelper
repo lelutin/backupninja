@@ -144,7 +144,7 @@ doaction() {
       $enable "$enable action" \
       name "change the filename" \
       run "run this action now" \
-      test "do a test run" \
+      test "test connections and passwords only" \
       kill "remove this action" 
     [ $? = 1 ] && return;
     result="$REPLY"
@@ -237,7 +237,7 @@ for file in `find $conf/etc/backup.d/ -type f | sort -n`; do
   let "i += 1"
 done
 
-menuBox "main menu" "select an action to edit" $menulist \
+menuBox "main menu" "Select a backup action for more options, or create a new action:" $menulist \
   new "create a new backup action" \
   quit "leave ninjahelper" 
 

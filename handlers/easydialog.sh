@@ -237,7 +237,12 @@ formDisplay() {
       done
    ) | xargs $DIALOG 2> $temp
    local status=$?
-   [ $status = 0 ] && REPLY=`cat $temp`
+   
+   if [ $status = 0 ]; then
+      IFS=$''
+      REPLY=`cat $temp`
+      IFS=$' \t\n'
+   fi
    rm -f $temp
    return $status
 }

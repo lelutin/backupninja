@@ -3,19 +3,82 @@
 # requires rdiff-backup
 #
 
+### FUNCTIONS ###
+
+function test_connection() {
+	# given a user and host,
+	# tests the connection.
+	# if user or host is missing, returns 0
+	# (ie, assume it's a local connection).
+	if [ $# -lt 2 ]; then
+		debug "(local is assumed to be a good connection)"
+		return 0
+	fi
+	local user=$1
+	local host=$2
+	debug "ssh -o PasswordAuthentication=no $host -l $user 'echo -n 1'"
+	local ret=`ssh -o PasswordAuthentication=no $host -l $user 'echo -n host is alive'`
+	if echo $ret | grep "host is alive"; then
+		debug "Connected to $host as $user successfully"
+	else
+		fatal "Can't connect to $host as $user."
+	fi
+}
+
+function get_version() {
+	# given no arguments, returns the local version.
+	# given a user and host, returns the remote version.
+	# if user or host is missing, returns the local version.
+	if [ "$#" -lt 2 ]; then
+		debug "$RDIFFBACKUP -V"
+		echo `$RDIFFBACKUP -V`
+	else
+		local user=$1
+		local host=$2
+		debug "ssh $host -l $user '$RDIFFBACKUP -V'"
+		echo `ssh $host -l $user "$RDIFFBACKUP -V | grep rdiff-backup"`
+	fi
+}
+
+function check_consistency() {
+	local section=$1
+	local type=$2
+	local user=$3
+	local host=$4
+	if [ "$type" == "local" ]; then
+		if [ "$user" != "" ]; then
+			warning "User should not be specified for local $section."
+		fi
+		if [ "$host" != "" ]; then
+			warning "Host should not be specified for local $section."
+		fi
+	fi
+	if [ "$type" == "remote" ]; then
+		if [ "$user" == "" ]; then
+			fatal "User must be specified for remote $section."
+		fi
+		if [ "host" == "" ]; then
+			fatal "Host must be specifed for remote $section."
+		fi
+	fi
+}
+
+### GET CONFIG ###
+
 getconf options
 getconf testconnect yes
 getconf nicelevel 0
 
 setsection source
 getconf type; sourcetype=$type
+getconf user; sourceuser=$user
+getconf host; sourcehost=$host
+check_consistency "source" "$type" "$user" "$host"
 getconf label
 getconf keep 60
 getconf include
 getconf vsinclude
 getconf exclude
-
-### DESTINATION ###
 
 setsection dest
 getconf directory; destdir=$directory
@@ -24,6 +87,9 @@ destdir=${destdir%/}
 getconf type; desttype=$type
 getconf user; destuser=$user
 getconf host; desthost=$host
+check_consistency "destination" "$type" "$user" "$host"
+
+### CHECK CONFIG ###
 
 # See if vservers are configured
 if [ "$vservers" = "yes" ]
@@ -37,47 +103,44 @@ then
 	fi
 fi
 
-[ "$destdir" != "" ] || fatal "Destination directory not set"
-
-if [ "$desttype" == "remote" ]; then
-	# see if we can login
-	if [ "$testconnect" == "yes" ]; then
-		hostalive=0
-	    debug "ssh -o PreferredAuthentications=publickey $desthost -l $destuser 'echo -n 1'"
-		ret=`ssh -o PreferredAuthentications=publickey $desthost -l $destuser 'echo -n host is alive'`
-		if echo $ret | grep "host is alive"; then
-			debug "Connected to $desthost as $destuser successfully"
-		else
-			fatal "Can't connect to $desthost as $destuser."
-		fi
-	fi
-	# see that rdiff-backup has the same version as here
-	debug "ssh -o PreferredAuthentications=publickey $desthost -l $destuser '$RDIFFBACKUP -V'\""
-	remoteversion=`ssh -o PreferredAuthentications=publickey $desthost -l $destuser "$RDIFFBACKUP -V | grep rdiff-backup"`
-	localversion=`$RDIFFBACKUP -V`
-	if [ "$remoteversion" != "$localversion" ]; then
-		fatal "rdiff-backup does not have the same version on this computer and the backup server."
-	fi
-	execstr_serverpart="$destuser@$desthost::$destdir/$label"
-else
-	execstr_serverpart="$destdir/$label"
+# check the connection at the source and destination
+if [ "$testconnect" == "yes" -o $test ]; then
+	test_connection $sourceuser $sourcehost
+	test_connection $destuser $desthost
 fi
 
-### SOURCE ###
+# see that rdiff-backup has the same version at the source and destination
+sourceversion=`get_version $sourceuser $sourcehost`
+destversion=`get_version $destuser $desthost`
+if [ "$sourceversion" != "$destversion" ]; then
+	fatal "rdiff-backup does not have the same version at the source and at the destination."
+fi
 
-[ "$sourcetype" == "local" ] || fatal "Only local source type supported"
+# source specific checks
 [ "$include" != "" -o "$vsinclude" != "" ] || fatal "No source includes specified"
 #TODO should I test for vsinclude if usevservers=1?
+case $sourcetype in 
+	remote ) execstr_sourcepart="$sourceuser@$sourcehost::/" ;;
+	local  ) execstr_sourcepart="/" ;;
+	*      ) fatal "sourcetype '$sourcetype' is neither local nor remote" ;;
+esac
 
-execstr_clientpart="/"
+# destination specific checks
+[ "$destdir" != "" ] || fatal "Destination directory not set"
+case $desttype in 
+	remote ) execstr_destpart="$destuser@$desthost::$destdir/$label" ;;
+	local  ) execstr_destpart="$destdir/$label" ;;
+	*      ) fatal "desttype '$desttype' is neither local nor remote" ;;
+esac
 	
-## REMOVE OLD BACKUPS
+### REMOVE OLD BACKUPS ###
 
 if [ "`echo $keep | tr -d 0-9`" == "" ]; then
+	# add D if no other date unit is specified
 	keep="${keep}D"
 fi
 
-removestr="rdiff-backup --force --remove-older-than $keep "
+removestr="$RDIFFBACKUP --force --remove-older-than $keep "
 if [ "$desttype" == "remote" ]; then
 	removestr="${removestr}${destuser}@${desthost}::"
 fi
@@ -86,8 +149,7 @@ removestr="${removestr}${destdir}/${label}";
 debug "$removestr"
 if [ ! $test ]; then
 	output=`$removestr 2>&1`
-	code=$?
-	if [ "$code" == "0" ]; then
+	if [ $? = 0 ]; then
 		debug $output
 		info "Removing backups older than $keep days succeeded."
 	else
@@ -96,31 +158,27 @@ if [ ! $test ]; then
 	fi
 fi
 
-## EXECUTE ##
+### EXECUTE ###
 
 execstr="$RDIFFBACKUP $options --print-statistics "
 
 # TODO: order the includes and excludes
-
 # excludes
 for i in $exclude; do
 	str="${i//__star__/*}"
 	execstr="${execstr}--exclude '$str' "
 done
-	
 # includes 
 for i in $include; do
+	[ "$i" != "/" ] || fatal "Sorry, you cannot use 'include = /'"
 	str="${i//__star__/*}"
 	execstr="${execstr}--include '$str' "
 done
 
 # vsinclude
-if [ $usevserver ] 
-then
-	for vserver in `ls $VROOTDIR | grep -E -v "lost+found|ARCHIVES"`
-	do
-		for vi in $vsinclude
-		do
+if [ $usevserver ]; then
+	for vserver in `ls $VROOTDIR|grep -v lost+found`; do
+		for vi in $vsinclude; do
 			str="${vi//__star__/*}"
 			execstr="${execstr}--include '$VROOTDIR/$vserver$str' "
 		done
@@ -131,13 +189,12 @@ fi
 execstr="${execstr}--exclude '/*' "
 		
 # include client-part and server-part
-execstr="${execstr}$execstr_clientpart $execstr_serverpart"
+execstr="${execstr}$execstr_sourcepart $execstr_destpart"
 
 debug "$execstr"
 if [ ! $test ]; then
 	output=`nice -n $nicelevel su -c "$execstr" 2>&1`
-	code=$?
-	if [ "$code" == "0" ]; then
+	if [ $? = 0 ]; then
 		debug $output
 		info "Successfully finished backing up source $label"
 	else
