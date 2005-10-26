@@ -1,3 +1,7 @@
+version 0.9.1
+	fixed many bugs in rdiff helper
+	rdiff handler does not require 'label'
+
 version 0.9 -- October 19 2005
 	*** IMPORTANT CHANGE, UPGRADE AT ONCE ***
 	 fixed insecure temporary file creation 
@@ -10,8 +14,6 @@ version 0.9 -- October 19 2005
 	rdiff handler now supports remote source and local dest. 
 		(patch from cmccallum@thecsl.org).
 	man pages are greatly improved.
-	fixed many bugs in rdiff helper.
-	rdiff handler does not require 'label'
 
 version 0.8 -- September 15 2005
 	added pgsql (PostgreSQL) handler, with vservers support.
