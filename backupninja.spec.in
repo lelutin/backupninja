@@ -1,0 +1,59 @@
+%define name    @PACKAGE_NAME@
+%define version @PACKAGE_VERSION@
+
+Summary:    Backupninja backup tool
+Name:       %{name}
+Version:    %{version}
+Release:    1
+License:    GPL
+Group:      Applications/System
+URL:        http://dev.riseup.net/backupninja/
+Source:     %{name}-%{version}.tar.gz
+Requires:   bash, gawk, rdiff-backup, gzip
+Provides:   %{name}
+Packager:   Petr Klima <Petr.Klima@madeta-group.cz>
+BuildRoot:  %{_tmppath}/%{name}-%{version}
+Prefix:     %{_prefix}
+
+%description
+Modular rdiff.backup tool
+
+%prep
+#rm -rf ${buildroot}
+%setup -q
+
+%build
+%configure
+# this is necessary MAKEINSTALL rewrites @sysconfigdir@ atc.
+%{__make}
+
+%install
+%makeinstall
+mkdir -p "%{buildroot}%{_sysconfdir}/backup.d"
+mkdir -p "%{buildroot}%{_localstatedir}/backups"
+mkdir -p "%{buildroot}%{_localstatedir}/log"
+touch "%{buildroot}%{_localstatedir}/log/backupninja.log"
+
+%clean
+#rm -fr %{buildroot}
+
+%files
+%defattr(0750,root,root)
+%{_sbindir}/*
+%{_datadir}/backupninja/*
+%{_sysconfdir}/cron.d/backupninja
+%{_sysconfdir}/logrotate.d/backupninja
+
+%defattr(0600,root,root)
+%config(noreplace) %{_sysconfdir}/backupninja.conf
+%dir %{_sysconfdir}/backup.d
+%dir %{_localstatedir}/backups
+%ghost %{_localstatedir}/log/backupninja.log
+
+%defattr(0644,root,root)
+%doc AUTHORS COPYING ChangeLog INSTALL NEWS README
+%{_mandir}/*
+
+%changelog
+* Mon Apr 29 2002 Petr Klima <Petr.Klima@madeta-group.cz> 0.7.0
+- first RPM release

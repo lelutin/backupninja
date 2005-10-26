@@ -1,0 +1,256 @@
+
+                                          |\_
+                 B A C K U P N I N J A   /()/
+                                         `\|
+                         
+      a silent flower blossom death strike to lost data.
+
+Backupninja allows you to coordinate system backup by dropping a few
+simple configuration files into /etc/backup.d/. Most programs you
+might use for making backups don't have their own configuration file
+format. Backupninja provides a centralized way to configure and
+coordinate many different backup utilities. 
+
+Features:
+ - easy to read ini style configuration files.
+ - you can drop in scripts to handle new types of backups.
+ - backup actions can be scheduled
+ - you can choose when status report emails are mailed to you
+   (always, on warning, on error, never).
+ - console-based wizard (ninjahelper) makes it easy to create
+   backup action configuration files.
+ - passwords are never sent via the command line to helper programs.
+ - works with Linux-Vservers (http://linux-vserver.org/)
+ 
+Backup types:
+ - secure, remote, incremental filesytem backup (via rdiff-backup).
+   incremental data is compressed. permissions are retained even
+   with an unpriviledged backup user.
+ - backup of mysql databases (via mysqlhotcopy and mysqldump).
+ - backup of ldap databases (via slapcat and ldapsearch).
+ - basic system and hardware info
+ - encrypted remote backups (via duplicity).    
+ - backup of subversion repositories.
+
+The following options are available:
+-h, --help           This usage message
+-d, --debug          Run in debug mode, where all log messages are
+                     output to the current shell.
+-f, --conffile FILE  Use FILE for the main configuration instead
+                     of /etc/backupninja.conf
+-t, --test           Test run mode. This will test if the backup could run, without actually
+                     preforming any backups. For example, it will attempt to authenticate
+                     or test that ssh keys are set correctly.
+-n, --now            Perform actions now, instead of when they might be scheduled.
+                     No output will be created unless also run with -d.
+--run FILE           Runs the specified action FILE (e.g. one of the /etc/backup.d/ files).
+                     Also puts backupninja in debug mode.
+
+CONFIGURATION FILES
+===================
+
+The general configuration file is /etc/backupninja.conf. In this file
+you can set the log level and change the default directory locations.
+You can force a different general configuration file with "backupninja
+-f /path/to/conf".
+
+To preform the actual backup, backupninja processes each configuration
+file in /etc/backup.d according to the file's suffix:
+ 
+  .sh      --  run this file as a shell script.
+  .rdiff   --  filesystem backup (using rdiff-backup)
+  .dup     --  filesystem backup (using duplicity)
+  .mysql   --  backup mysql databases
+  .ldap    --  backup ldap databases
+  .pgsql   --  backup PostgreSQL databases
+  .sys     --  general hardware, partition, and system reports.
+  .svn     --  backup subversion repositories
+  .maildir --  incrementally backup maildirs (very specialized)
+
+Support for additional configuration types can be added by dropping
+bash scripts with the name of the suffix into /usr/share/backupninja. 
+
+The configuration files are processed in alphabetical order. However,
+it is suggested that you name the config files in "sysvinit style." 
+
+For example:
+	00-disabled.ldap
+	10-runthisfirst.sh
+	20-runthisnext.mysql
+	90-runthislast.rdiff
+
+Typically, you will put a '.rdiff' config file last, so that any
+database dumps you make are included in the filesystem backup.
+Configurations files with names beginning with 0 (zero) or ending with
+.disabled (preferred method) are skipped.
+
+Unless otherwise specified, the config file format is "ini style."
+
+For example:
+
+   # this is a comment
+   
+   [fishes]
+   fish = red
+   fish = blue
+
+   [fruit]
+   apple = yes
+   pear = no thanks \
+   i will not have a pear.
+
+
+SCHEDULING
+==========
+
+By default, each configuration file is processed everyday at 01:00 (1
+AM). This can be changed by specifying the 'when' option in a config
+file.
+
+For example:
+
+  when = sundays at 02:00
+  when = 30th at 22
+  when = 30 at 22:00
+  when = everyday at 01            <-- the default
+  when = Tuesday at 05:00
+
+A configuration file will be processed at the time(s) specified by the
+"when" option. If multiple "when" options are present, then they all
+apply. If two configurations files are scheduled to run in the same
+hour, then we fall back on the alphabetical ordering specified above.
+If two configurations files are scheduled close to one another in
+time, it is possible to have multiple copies of backupninja running if
+the first instance is not finished before the next one starts.
+
+Make sure that you put the "when" option before any sections in your
+configuration file.
+
+These values for 'when' are equivalent:
+
+  when = tuesday at 05:30
+  when = TUESDAYS at 05
+
+These values for 'when' are invalid:
+  
+  when = tuesday at 2am
+  when = tuesday at 2
+  when = tues at 02
+
+
+REAL WORLD USAGE
+================
+
+Backupninja can be used to implement whatever backup strategy you
+choose. It is intended, however, to be used like so:
+
+(1) First, databases are safely copied or exported to /var/backups.
+    Typically, you cannot make a file backup of a database while it
+    is in use, hence the need to use special tools to make a safe copy
+    or export into /var/backups.
+     
+(2) Then, vital parts of the file system, including /var/backups, are
+    nightly pushed to a remote, off-site, hard disk (using
+    rdiff-backup). The local user is root, but the remote user is not
+    priviledged. Hopefully, the remote filesystem is encrypted. 
+
+There are many different backup strategies out there, including "pull
+style", magnetic tape, rsync + hard links, etc. We believe that the
+strategy outlined above is the way to go because: (1) hard disks are
+very cheap these days, (2) pull style backups are no good, because then
+the backup server must have root on the production server, and (3)
+rdiff-backup is more space efficient and featureful than using rsync +
+hard links. 
+
+
+SSH KEYS
+========
+
+In order for rdiff-backup to sync files over ssh unattended, you must
+create ssh keys on the source server and copy the public key to the
+remote user's authorized keys file. For example:
+
+  root@srchost# ssh-keygen -t dsa
+  root@srchost# ssh-copy-id -i /root/.ssh/id_dsa.pub backup@desthost 
+
+Now, you should be able to ssh from user 'root' on srchost to
+user 'backup' on desthost without specifying a password.
+
+Note: when prompted for a password by ssh-keygen, just leave it
+blank by hitting return.
+
+The included helper program "ninjahelper" will walk you through creating
+an rdiff-backup configuration, and will set up the ssh keys for you.
+
+INSTALLATION
+============
+   
+Requirements:
+  apt-get install bash gawk
+
+Recommended: 
+  apt-get install rdiff-backup gzip hwinfo
+
+Files:
+  /usr/sbin/backupninja        -- main script
+  /etc/cron.d/backupninja      -- runs main script nightly
+  /etc/logrotate.d/backupninja -- rotates backupninja.log
+  /etc/backup.d/               -- directory for configuration files
+  /etc/backupninja.conf        -- general options 
+  /usr/share/backupninja       -- handler scripts which do the actual work
+
+Installation:
+  There is no install script, but you just need to move files to the
+  correct locations. All files should be owned by root.
+ 
+  # tar xvzf backupninja.tar.gz
+  # cd backupninja
+  # mv backupninja /usr/sbin/backupninja
+  # mv ninjahelper /usr/sbin/ninjahelper
+  # mv etc/logrotate.d/backupninja /etc/logrotate.d/backupninja
+  # mv etc/cron.d/backupninja /etc/cron.d/backupninja
+  # mkdir /etc/backup.d/
+  # mv etc/backupninja.conf /etc/backupninja.conf
+  # mv handlers /usr/share/backupninja
+
+
+VSERVERS
+========
+
+If you are using Linux-Vservers (http://linux-vserver.org/) there are some
+special capabilities that different handlers have to make vserver backups easier.
+Set the variable "vservers" to be "yes" in /etc/backupninja.conf and see the
+example configuration files for each handler to configure the vserver specific
+variables.
+
+Additional vserver variables that can be configured in /etc/backupninja.conf. but
+probably don't need to be changed:
+
+VSERVERINFO (default: /usr/sbin/vserver-info)
+VSERVER (default: /usr/sbin/vserver)
+VROOTDIR (default: `$VSERVERINFO info SYSINFO |grep vserver-Rootdir | awk '{print $2}'`)
+
+NINJAHELPER
+===========
+
+Ninjahelper is an additional script which will walk you through the process of
+configuring backupninja. Ninjahelper has a menu driven curses based interface
+(using dialog). 
+
+To add an additional 'wizard' to ninjahelper, follow these steps:
+
+(1) to add a helper for the handler "blue", create the file
+    blue.helper in the directory where the handlers live.
+    (ie /usr/share/backupninja).
+
+(2) next, you need to add your helper to the global HELPERS variable
+    and define the main function for your helper (the function name
+    is always <helper>_wizard). for example, blue.helper:
+       HELPERS="$HELPERS blue:description_of_this_helper"
+       blue_wizard() {
+         ... do work here ...
+       }
+
+(3) check the examples of the included helpers to see how they are
+    written. The dialog functions are defined in easydialog.sh.
+
