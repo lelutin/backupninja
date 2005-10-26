@@ -1,0 +1,261 @@
+#!/bin/bash
+
+####################################################
+## Functions
+
+function check_perms() {
+	local file=$1
+	local perms=`ls -ld $file`
+	group_w_perm=${perms:5:1}
+	world_w_perm=${perms:8:1}
+	if [ "$group_w_perm" == "w" -o "$world_w_perm" == "w" ]; then
+	    echo $perms
+	    echo "helper scripts must not be group or world writable! Dying on file $file"
+	    exit
+	fi
+	if [ `ls -ld $file | awk '{print $3}'` != "root" ]; then
+		echo "helper scripts must be owned by root! Dying on file $file"
+		exit
+	fi
+}
+
+
+##
+## returns the next available file name given a file
+## in the form @CFGDIR@/backup.d/10.sys
+## sets variable $returned_filename
+##
+get_next_filename() {
+  next_filename=$1
+  dir=`dirname $next_filename`
+  file=`basename $next_filename`
+  number=${file:0:2}
+  suffix=${file:3}
+  while [ -f $next_filename ]; do
+    let "number += 1"
+    next_filename="$dir/$number.$suffix"
+  done
+}
+
+##
+## installs packages (passed in as $@) if not present
+##
+require_packages() {
+	for pkg in "$@"; do
+	   installed=`dpkg -s $pkg | grep 'ok installed'`
+       if [ -z "$installed" ]; then 
+           booleanBox "install $pkg?" "This backup action requires package $pkg. Do you want to install it now?"
+           if [ $? = 0 ]; then
+              apt-get install $pkg
+              echo "hit return to continue...."
+              read
+           fi
+       fi
+    done
+}
+
+##
+## menu for the wizards
+##
+donew() {
+  listBegin "new action menu" "select an action to create"
+  listItem return "return to main menu"
+  for data in $HELPERS; do
+    data=${data//_/ }
+    helper_function=${data%%:*}
+    helper_info=${data##*:}
+    listItem $helper_function "$helper_info"
+  done
+  listDisplay menu
+    
+  [ $? = 1 ] && return
+  result="$REPLY"
+  [ "$result" = "return" ] && return
+  result=${result}_wizard
+  $result
+}
+
+do_rm_action() {
+   booleanBox "remove action" "Are you sure you want to remove action file $1?"
+   if [ $? = 0 ]; then
+     rm $1;
+   fi
+}
+
+do_run() {
+   backupninja --run $1
+   echo "Hit return to continue..."
+   read
+}
+
+do_xedit() {
+   if [ -z "$EDITOR" -o ! -x "`which $EDITOR`" ]; then
+      if [ -h /etc/alternatives/editor -a -x "`readlink /etc/alternatives/editor`" ]; then
+	 EDITOR="`readlink /etc/alternatives/editor`"
+      elif [ -x "`which nano`" ]; then
+	 EDITOR="`which nano`"
+      elif [ -x "`which vim`" ]; then
+	 EDITOR="`which vim`"
+      elif [ -x "`which vi`" ]; then
+	 EDITOR="`which vi`"
+      else
+	 echo "No suitable editor found."
+	 echo "Please define $EDITOR or configure /etc/alternatives/editor."
+	 exit
+      fi
+   fi
+   $EDITOR $1
+}
+
+do_run_test() {
+  backupninja --test --run $1
+  echo "Hit return to continue..."
+  read
+}
+
+do_disable() {
+  mv $1 $1.disabled
+}
+
+do_enable() {
+  mv $1 ${1%.*}
+}
+
+do_rename() {
+  dir=`dirname $1`
+  filename=`basename $1`
+  inputBox "rename action" "enter a new filename" $filename
+  mv $dir/$filename $dir/$REPLY
+}
+
+doaction() {
+  action=$1
+  base=`basename $action`
+  if [ "${base##*.}" == "disabled" ]; then
+     enable="enable";
+  else
+     enable="disable";
+  fi
+  while true; do
+    menuBox "action menu" "$action $first" \
+      main "return to main menu" \
+      view "view configuration" \
+      xedit "launch external editor" \
+      $enable "$enable action" \
+      name "change the filename" \
+      run "run this action now" \
+      test "do a test run" \
+      kill "remove this action" 
+    [ $? = 1 ] && return;
+    result="$REPLY"
+  	case "$result" in
+	   "view") dialog --textbox $action 0 0;; 
+	   "xedit") do_xedit $action;;
+	   "disable") do_disable $action; return;;
+   	   "enable") do_enable $action; return;;
+   	   "name") do_rename $action; return;;
+	   "run") do_run $action;;
+	   "test") do_run_test $action;; 
+	   "kill") do_rm_action $action; return;;
+	   "main") return;;
+	esac
+  done
+}
+
+#####################################################
+## begin program
+
+if [ ! -x "`which dialog`" ]; then
+	echo "ninjahelper is a menu based wizard for backupninja."
+	echo "It requires 'dialog' in order to run. Do you want to install dialog now?"
+	while true; do
+	  echo -n "(yes/no): "
+	  read install
+	  if [ "$install" == "yes" ]; then
+	     apt-get install dialog
+	     break
+	  elif [ "$install" == "no" ]; then
+	     exit
+	  else
+	     echo "You must answer 'yes' or 'no'"
+	  fi
+    done
+fi
+
+conffile="@CFGDIR@/backupninja.conf"
+if [ ! -r "$conffile" ]; then
+	echo "Configuration file $conffile not found." 
+	exit 1
+fi
+scriptdir=`grep scriptdirectory $conffile | awk '{print $3}'`
+if [ ! -n "$scriptdir" ]; then
+	echo "Cound not find entry 'scriptdirectory' in $conffile" 
+	exit 1
+fi
+if [ ! -d "$scriptdir" ]; then
+	echo "Script directory $scriptdir not found." 
+	exit 1
+fi
+configdirectory=`grep configdirectory $conffile | awk '{print $3}'`
+if [ ! -n "$configdirectory" ]; then
+	echo "Cound not find entry 'configdirectory' in $conffile" 
+	exit 1
+fi
+if [ ! -d "$configdirectory" ]; then
+	echo "Configuration directory $configdirectory not found." 
+	exit 1
+fi
+
+. $scriptdir/easydialog.sh
+
+if [ "$UID" != "0" ]; then
+	msgBox "warning" "ninjahelper must be run by root!"
+	exit 1
+fi
+
+# load all the helpers
+HELPERS=""
+for file in `find $scriptdir -follow -name '*.helper'`; do
+   check_perms $file
+   . $file
+done
+
+setApplicationTitle "ninjahelper"
+setDimension 75 19
+
+#####################################################
+## main event loop
+
+while true; do
+
+menulist=
+action=
+let "i = 1"
+for file in `find $conf/etc/backup.d/ -type f | sort -n`; do
+  menulist="$menulist $i $file"
+  actions[$i]=$file
+  let "i += 1"
+done
+
+menuBox "main menu" "Select a backup action for more options, or create a new action:" $menulist \
+  new "create a new backup action" \
+  quit "leave ninjahelper" 
+
+[ $? = 1 -o $? = 255 ] && exit 0;
+
+choice="$REPLY"
+if [ "$choice" == "new" ]; then
+  donew;
+elif [ "$choice" == "quit" ]; then
+  exit 0;
+else
+  action=${actions[$choice]};
+  if [ -f "$action" ]; then
+     doaction $action
+  else
+     msgBox "error" "error: cannot find the file '$action'"
+  fi
+fi
+
+
+done
