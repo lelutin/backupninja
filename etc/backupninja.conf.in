@@ -30,13 +30,13 @@ reportwarning = yes
 #######################################################
 
 # where to log:
-logfile = /var/log/backupninja.log
+logfile = @localstatedir@/log/backupninja.log
 
 # directory where all the backup configuration files live
-configdirectory = /etc/backup.d
+configdirectory = @CFGDIR@/backup.d
 
 # where backupninja helper scripts are found
-scriptdirectory = /usr/share/backupninja
+scriptdirectory = @pkgdatadir@
 
 # whether to use colors in the log file
 usecolors = yes
