@@ -1,4 +1,6 @@
-version 0.9.1
+version 0.9.1 -- unreleased
+	rearranged source so that it is relocatable with autotools
+		(thanks to Petr Klíma petr.klima@madeta-group.cz)
 	fixed many bugs in rdiff helper
 	rdiff handler does not require 'label'
 
