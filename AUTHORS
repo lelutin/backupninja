@@ -1,0 +1,16 @@
+BACKUPNINJA was written by the Riseup Collective: intellectual property is theft.
+
+Contributors: 
+
+elijah@riseup.net  -- original code
+micah@riseup.net   -- debian package, vserver support
+stefani@riseup.net -- makecd handler
+                   -- pgsql handler
+intrigeri          -- dup handler
+Charles Lepple     -- trac handler
+
+Patches: 
+
+petr.klima@madeta-group.cz
+cmccallum@thecsl.org
+Daniel.Bonniot@inria.fr
