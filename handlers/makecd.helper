@@ -9,12 +9,6 @@ makecd_wizard() {
   [ $? = 1 ] && return
   burnertype="burnertype = $REPLY"
 
-  #checkBox "makecd action wizard" "check options" \
-  #  "isoonly" "only create iso image do not burn" yes
-  #status=$?
-  #[ $status = 1 ] && return;    
-  #isoonly="isoonly = $REPLY"
-
   booleanBox "$wizardname" "Make iso image only? or burn"
   if [ $? = 0 ]; then
      isoonly="isoonly = yes"
