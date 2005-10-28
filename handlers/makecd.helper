@@ -1,0 +1,101 @@
+HELPERS="$HELPERS makecd:makecd_backup"
+wizardname="makecd action wizard"
+
+declare -a makecd_excludes
+
+makecd_wizard() {
+
+  inputBox "$wizardname" "specify a burner type cd or dvd:"
+  [ $? = 1 ] && return
+  burnertype="burnertype = $REPLY"
+
+  #checkBox "makecd action wizard" "check options" \
+  #  "isoonly" "only create iso image do not burn" yes
+  #status=$?
+  #[ $status = 1 ] && return;    
+  #isoonly="isoonly = $REPLY"
+
+  booleanBox "$wizardname" "Make iso image only? or burn"
+  if [ $? = 0 ]; then
+     isoonly="isoonly = yes"
+  else
+     isoonly="isoonly = no"
+  fi
+
+  # backupdir
+  inputBox "$wizardname" "Directory where to store the backups:"
+  [ $? = 1 ] && return
+  backupdir="backupdir = $REPLY"
+
+  inputBox "$wizardname" "what name to give to the image file?"
+  [ $? = 1 ] && return
+  imagefile="imagefile = $REPLY"
+
+  inputBox "$wizardname" "specify a burner device:"
+  [ $? = 1 ] && return
+  device="device = $REPLY"
+
+  # target - root of system to be included
+  inputBox "$wizardname" "root of filesystem for burn:"
+  [ $? = 1 ] && return
+  target="target = $REPLY"
+
+
+   # excludes
+
+  formBegin "$wizardname: excludes" 
+    for ((i=0; i < ${#makecd_excludes[@]} ; i++)); do
+       formItem exclude ${makecd_excludes[$i]}
+    done
+    formItem exclude 
+    formItem exclude 
+    formItem exclude 
+    formItem exclude 
+    formItem exclude 
+    formItem exclude 
+    formItem exclude 
+    formItem exclude 
+    formItem exclude 
+  formDisplay
+  [ $? = 1 ] && return;
+
+  unset makecd_excludes
+  makecd_excludes=($REPLY)
+
+  get_next_filename $configdirectory/20.makecd
+  cat >> $next_filename <<EOF
+
+# TYP is cd or dvd AS WELL AS the disk inside!!
+$burnertype
+
+# not yet supported
+system = no
+
+# iso or burn to cd/dvd?
+$isoonly
+
+# location for image file
+$backupdir
+
+# image filename
+$imagefile
+
+# cd/dvd burner device
+$device
+
+# dirs/files to include in the backup
+$target
+
+# directories/files to be excluded
+# exclude = /proc
+# exclude = /sys
+# exclude = /dev
+EOF
+
+  for ((j=0; j < ${#makecd_excludes[@]} ; j++)); do
+    echo "exclude = ${makecd_excludes[$j]}" >> $next_filename
+  done
+   
+   chmod 600 $next_filename
+}
+
