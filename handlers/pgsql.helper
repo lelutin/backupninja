@@ -84,6 +84,6 @@ $pgsql_databases
 $pgsql_compress
 
 EOF
-   chmod 000 $next_filename
+   chmod 600 $next_filename
 
 }

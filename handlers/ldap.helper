@@ -44,7 +44,7 @@ $passwordfile
 # conf = /etc/ldap/slapd.conf
 # databases = all
 EOF
-     chmod 000 $next_filename
+     chmod 600 $next_filename
      return
 done
 }

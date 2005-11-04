@@ -27,6 +27,6 @@ $hardware
 # partitionsfile = /var/backups/partitions.__star__.txt
 # hardwarefile = /var/backups/hardware.txt
 EOF
-   chmod 000 $next_filename
+   chmod 600 $next_filename
 }
 

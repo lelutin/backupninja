@@ -141,7 +141,7 @@ directory = $rdiff_directory
 host = $rdiff_host
 user = $rdiff_user
 EOF
-   chmod 000 $next_filename
+   chmod 600 $next_filename
 }
 
 rdiff_main_menu() {

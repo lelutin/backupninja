@@ -64,7 +64,7 @@ $compress
 # backupdir   = /var/backups/mysql
 # dbhost      = localhost
 EOF
-   chmod 000 $next_filename
+   chmod 600 $next_filename
 }
 
 mysql_wizard() {
