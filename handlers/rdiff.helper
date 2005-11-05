@@ -189,10 +189,10 @@ keep = $rdiff_keep
 EOF
     set -o noglob
     for ((i=0; i < ${#rdiff_includes[@]} ; i++)); do
-        echo include = ${rdiff_includes[$i]}
+        echo "include = ${rdiff_includes[$i]}" >> $next_filename
     done
-    for ((i=0; i < ${#rdiff_includes[@]} ; i++)); do
-        echo exclude = ${rdiff_excludes[$i]}
+    for ((i=0; i < ${#rdiff_excludes[@]} ; i++)); do
+        echo exclude = ${rdiff_excludes[$i]} >> $next_filename
     done
     set +o noglob
     cat >> $next_filename <<EOF
