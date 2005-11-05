@@ -104,7 +104,7 @@ then
 fi
 
 # check the connection at the source and destination
-if [ "$testconnect" == "yes" -o $test ]; then
+if [ "$testconnect" = "yes" ] || [ "${test}" -eq 1 ]; then
 	test_connection $sourceuser $sourcehost
 	test_connection $destuser $desthost
 fi

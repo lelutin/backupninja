@@ -1,4 +1,3 @@
-
 HELPERS="$HELPERS rdiff:incremental_remote_filesystem_backup"
 
 declare -a rdiff_includes
@@ -112,12 +111,58 @@ do_ssh_con() {
     echo "Hit return to continue."
     read
   fi
-do_rdiff_con
+  # test to see if the remote rdiff backup directory exists and is writable
+  echo "Testing to see if remote rdiff backup directory exists and is writable"
+  ssh $rdiff_user@$rdiff_host "test -d ${rdiff_directory}"
+  if [ $? -eq 0 ]
+  then
+  	ssh $rdiff_user@$rdiff_host "test -w $rdiff_directory"
+  	if [ $? -ne 0 ]
+ 	then
+		msgBox "destination directory is not writable!" "The remote destination directory is not writable by the user you specified. Please fix the permissions on the directory and then try again."
+		remote_status=1
+	else
+		remote_status=0
+  	fi
+  else
+	booleanBox "Remote directory does not exist" "The destination backup directory does not exist, do you want me to create it for you?"
+	if [ $? = 0 ]
+  	then
+		ssh $rdiff_user@$rdiff_host "mkdir -p ${rdiff_directory}"
+		result=$?
+		echo "Hit return to continue."
+		read
+		case $result in
+			0)   
+				msgBox "rdiff action wizard: success" "Creation of the remote destination directory was a success!" 
+				remote_status=0
+			;;
+			1)   
+				msgBox "rdiff action wizard: error" "Connected successfully to $rdiff_user@$rdiff_host, but was unable to create the destination directory, check the directory permissions." 
+				remote_status=1
+			;;
+			255) 
+				msgBox "rdiff action wizard: error" "Failed to connect to $rdiff_user@$rdiff_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host." 
+				remote_status=1
+			;;
+			*)   
+				msgBox "rdiff action wizard: error" "Unexpected error." 
+				remote_status=1
+			;;
+			esac 
+			return
+	  fi
+  fi
+  
+  if [ $remote_status -ne 1 ]
+  then
+	do_rdiff_con
+  fi
 }
 
 do_rdiff_con() {
   echo "Testing to make sure destination has rdiff-backup installed and is compatible."
-  remote_result=`rdiff-backup --test-server $rdiff_user@$rdiff_host::/ 2>&1 >&-`
+  remote_result=`/usr/bin/rdiff-backup --test-server $rdiff_user@$rdiff_host::/ 2>&1 >&-`
   if [ $? -ne 0 ]
   then
   	echo $remote_result | grep -q "command not found"
