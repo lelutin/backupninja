@@ -17,6 +17,9 @@
 # tmp = /var/backups/svn.tmp
 
 ## the hotbackup program to use.
+## svnadmin hotcopy now exists, the following script is located
+## in /usr/share/doc/subversion/examples now if you wish to use
+## it instead
 # HOTBACKUP = /usr/lib/subversion/hot-backup.py
 
 ## the name of the vserver containing svn, if using vservers

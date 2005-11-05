@@ -6,6 +6,8 @@ version 0.9.1 -- unreleased
 	added makecd ninjahelper
 		(thanks to Stefani stefani@riseup.net)
 	made ninjahelper create files with mode 600 rather than 000
+	changed subversion handler to use svnadmin hotcopy instead of
+	        the unsupported hot-copy.py script, which was moved in Debian
 
 version 0.9 -- October 19 2005
 	*** IMPORTANT CHANGE, UPGRADE AT ONCE ***
