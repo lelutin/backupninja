@@ -63,7 +63,7 @@ do_rdiff_src() {
   set +o noglob
 }
 
-do_rdiff_con() {
+do_ssh_con() {
   IFS=$' \t\n'
   if [ "$_dest_done" = "" ]; then
     msgBox "rdiff action wizard: error" "You must first configure the destination."
@@ -75,7 +75,7 @@ do_rdiff_con() {
     msgBox "rdiff action wizard: error" "You must first configure the destination host."
     return
   else
-    booleanBox "rdiff action wizard" "This step will create a ssh key for the local root user with no passphrase (if one does not already exist), and attempt to copy root's public ssh key to authorized_keys file of $rdiff_user@$rdiff_host. This will allow the local root to make unattended backups to $rdiff_user@$rdiff_host. Are you sure you want to continue?"
+    booleanBox "rdiff action wizard" "This step will create a ssh key for the local root user with no passphrase (if one does not already exist), and attempt to copy root's public ssh key to authorized_keys file of $rdiff_user@$rdiff_host. This will allow the local root to make unattended backups to $rdiff_user@$rdiff_host.\n\n\nAre you sure you want to continue?"
     [ $? = 1 ] && return
   fi
 
@@ -108,9 +108,71 @@ do_rdiff_con() {
       read
     fi
   else
-    echo "root@localhost is already in authorized_keys of $rdiff_user@$rdiff_host. hit return to continue"
+    echo "root@localhost is already in authorized_keys of $rdiff_user@$rdiff_host."
+    echo "Hit return to continue."
     read
   fi
+do_rdiff_con
+}
+
+do_rdiff_con() {
+  echo "Testing to make sure destination has rdiff-backup installed and is compatible."
+  remote_result=`rdiff-backup --test-server $rdiff_user@$rdiff_host::/ 2>&1 >&-`
+  if [ $? -ne 0 ]
+  then
+  	echo $remote_result | grep -q "command not found"
+	if [ $? -eq 0 ]
+	then
+		if [ "$rdiff_user" = "root" ]
+		then
+			booleanBox "install rdiff-backup?" "It seems like the remote machine does not have rdiff-backup installed, I can attempt to install rdiff-backup on the remote machine.\n\n\nDo you want me to attempt this now?"
+    			if [ $? = 0 ] 
+			then
+       				ssh $rdiff_user@$rdiff_host 'apt-get install rdiff-backup'
+ 				result=$?
+				echo "Hit return to continue."
+				read
+				case $result in
+					0)   
+						msgBox "rdiff action wizard: success" "Installation of rdiff-backup was a success!" 
+						do_rdiff_con
+					;;
+					1)   
+						msgBox "rdiff action wizard: error" "Connected successfully to $rdiff_user@$rdiff_host, but was unable to install the package for some reason." 
+					;;
+					255) 
+						msgBox "rdiff action wizard: error" "Failed to connect to $rdiff_user@$rdiff_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host." 
+					;;
+					*)   
+						msgBox "rdiff action wizard: error" "Unexpected error." 
+					;;
+				esac 
+				return
+     			fi
+		else
+			booleanBox "install rdiff-backup" "Please install rdiff-backup on the remote machine, this cannot be done automatically, as the remote user in your configuration is not root. \n\nIf you have installed rdiff-backup on the remote machine and you are getting this error, then there is a version incompatibility between that version and the local version.\n\nPlease resolve this problem and then try connecting again.\n\n\n\nTry connecting again?"
+			if [ $? = 0 ]
+			then
+				do_rdiff_con
+			else
+				return
+			fi
+		fi
+	else
+		msgBox "incompatible versions of rdiff-backup" "It looks like rdiff-backup is installed on the remote machine, but it may be an incompatible version with the one installed locally, or something else is amiss.\n\nPlease resolve this problem and then try connecting again.\n\n\nTry connecting again?"
+		if [ $? = 0 ]
+		then
+			do_rdiff_con
+		else
+			return
+		fi
+    	fi
+   else
+ 	echo "SUCCESS: Everything looks good!"
+	echo "Hit return to continue."
+	read
+   fi
+
   _con_done="(DONE)"
   setDefault finish
 }
@@ -162,7 +224,7 @@ rdiff_main_menu() {
     case "$result" in
        "src") do_rdiff_src;;
        "dest") do_rdiff_dest;;
-       "conn") do_rdiff_con;;
+       "conn") do_ssh_con;;
        "adv") do_rdiff_adv;;
        "finish")
           if [[ "$_con_done$_dest_done$_src_done" != "(DONE)(DONE)(DONE)" ]]; then
