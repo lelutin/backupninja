@@ -50,8 +50,8 @@ function colorize() {
 # 0 - debug - blue
 # 1 - normal messages - green
 # 2 - warnings - yellow
-# 3 - errors - orange
-# 4 - fatal - red
+# 3 - errors - red
+# 4 - fatal - purple
 # First variable passed is the error level, all others are printed
 
 # if 1, echo out all warnings, errors, or fatal
