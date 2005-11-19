@@ -19,7 +19,7 @@
 #####################################################
 ## FUNCTIONS
 
-function setupcolors() {
+setupcolors () {
 	BLUE="\033[34;01m"
 	GREEN="\033[32;01m"
 	YELLOW="\033[33;01m"
@@ -27,20 +27,18 @@ function setupcolors() {
 	RED="\033[31;01m"
 	OFF="\033[0m"
 	CYAN="\033[36;01m"
-	COLORS=($BLUE $GREEN $YELLOW $RED $PURPLE)
 }
 
-function colorize() {
+colorize () {
 	if [ "$usecolors" == "yes" ]; then
 		local typestr=`echo "$@" | sed 's/\(^[^:]*\).*$/\1/'`
-		[ "$typestr" == "Debug" ] && type=0
-		[ "$typestr" == "Info" ] && type=1
-		[ "$typestr" == "Warning" ] && type=2
-		[ "$typestr" == "Error" ] && type=3
-		[ "$typestr" == "Fatal" ] && type=4
-		color=${COLORS[$type]}
+		[ "$typestr" == "Debug" ] && COLOR=$BLUE
+		[ "$typestr" == "Info" ] && COLOR=$GREEN
+		[ "$typestr" == "Warning" ] && COLOR=$YELLOW
+		[ "$typestr" == "Error" ] && COLOR=$RED
+		[ "$typestr" == "Fatal" ] && COLOR=$PURPLE
 		endcolor=$OFF
-		echo -e "$color$@$endcolor"
+		echo -e "$COLOR$@$endcolor"
 	else
 		echo -e "$@"
 	fi
