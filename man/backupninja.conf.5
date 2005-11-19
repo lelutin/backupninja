@@ -2,7 +2,7 @@
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.TH BACKUPNINJA.CONF 5 "October 10, 2005" "riseup" "backupninja package"
+.TH BACKUPNINJA.CONF 5 "November 19, 2005" "riseup" "backupninja package"
 .SH NAME 
 BACKUPNINJA.CONF \- Configuration file(s) for \fBbackupninja (1)\fP.
 
@@ -70,6 +70,39 @@ Where backupninja handler scripts are found
 .B usecolors
 If set to 'yes', use colors in the log file and debug output.
 
+.TP
+.B when
+When to process each configuration file. The value used here will
+be applied for each configuration file. It is possibile to override
+this "when" in each each configuration file, see also section 
+"Scheduling" in backup.d(5).
+
+For example:
+
+  when = sundays at 02:00
+  when = 30th at 22
+  when = 30 at 22:00
+  when = everyday at 01            <-- the default
+  when = Tuesday at 05:00
+
+These values for 'when' are equivalent:
+
+  when = tuesday at 05:30
+  when = TUESDAYS at 05
+
+These values for 'when' are invalid:
+  
+  when = tuesday at 2am
+  when = tuesday at 2
+  when = tues at 02
+
+.TP
+.B vservers
+If you are using Linux-Vservers (http://linux-vserver.org), there are some
+special capabilities that different handlers have to make vserver backups easier.
+See the example configuration files for each handler to configure the vserver specific
+variables.
+
 .SH DEFAULTS
 
 loglevel = 4
@@ -87,6 +120,10 @@ configdirectory = /etc/backup.d
 scriptdirectory = /usr/share/backupninja
 .br
 usecolors = yes 
+.br
+when = everyday at 01:00
+.br
+vservers = no
 
 .SH SEE ALSO
 .BR backupninja (1), 
