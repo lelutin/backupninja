@@ -62,7 +62,7 @@ do_rdiff_src() {
   set +o noglob
 }
 
-do_ssh_con() {
+do_rdiff_conn() {
   IFS=$' \t\n'
   if [ "$_dest_done" = "" ]; then
     msgBox "rdiff action wizard: error" "You must first configure the destination."
@@ -269,7 +269,7 @@ rdiff_main_menu() {
     case "$result" in
        "src") do_rdiff_src;;
        "dest") do_rdiff_dest;;
-       "conn") do_ssh_con;;
+       "conn") do_rdiff_conn;;
        "adv") do_rdiff_adv;;
        "finish")
           if [[ "$_con_done$_dest_done$_src_done" != "(DONE)(DONE)(DONE)" ]]; then
