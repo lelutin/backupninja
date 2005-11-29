@@ -7,7 +7,10 @@ version 0.9.2 -- unreleased
 		moved to lib/ some code that has to be shared between
 		backupninja and ninjahelper
 	added duplicity ninjahelper
-	a bunch of Vserver-related functions for ninjahelper in lib/vservers.in
+	a bunch of Vserver-related functions for ninjahelper in lib/vservers.in,
+		used only in dup.helper and pgsql.helper yet
+	pgsql ninjahelper bugfixes:
+		forbid the user to choose an empty database set to backup
 
 version 0.9.1 -- November 05 2005
 	rearranged source so that it is relocatable with autotools

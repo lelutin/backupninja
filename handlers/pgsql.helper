@@ -7,23 +7,25 @@ do_pgsql_vserver() {
 }
 
 do_pgsql_databases() {
-   formBegin "$pgsql_title: databases"
-     formItem "Database:"
-     formItem "Database:"
-     formItem "Database:"
-     formItem "Database:"
-     formItem "Database:"
-     formItem "Database:"
-     formItem "Database:"
-     formItem "Database:"
-     formItem "Database:"
-     formItem "Database:"
-   formDisplay
-   [ $? = 1 ] && return
-   
-   pgsql_databases="databases = "
-   for i in $REPLY; do
-      [ "$i" != "" ] && pgsql_databases="$pgsql_databases $i"
+   REPLY=
+   while [ -z "$REPLY" ]; do
+      formBegin "$pgsql_title: databases"
+         formItem "Database:"
+	 formItem "Database:"
+	 formItem "Database:"
+	 formItem "Database:"
+	 formItem "Database:"
+	 formItem "Database:"
+	 formItem "Database:"
+	 formItem "Database:"
+	 formItem "Database:"
+	 formItem "Database:"
+      formDisplay
+      [ $? = 0 ] || return 1
+      pgsql_databases="databases = "
+      for i in $REPLY; do
+	 [ -n "$i" ] && pgsql_databases="$pgsql_databases $i"
+      done
    done
 }
 
