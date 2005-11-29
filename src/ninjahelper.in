@@ -23,7 +23,7 @@ function check_perms() {
 ##
 ## returns the next available file name given a file
 ## in the form @CFGDIR@/backup.d/10.sys
-## sets variable $returned_filename
+## sets variable $next_filename
 ##
 get_next_filename() {
   next_filename=$1
@@ -41,7 +41,7 @@ get_next_filename() {
 ## installs packages (passed in as $@) if not present
 ##
 require_packages() {
-	for pkg in "$@"; do
+       for pkg in "$@"; do
 	   installed=`dpkg -s $pkg | grep 'ok installed'`
        if [ -z "$installed" ]; then 
            booleanBox "install $pkg?" "This backup action requires package $pkg. Do you want to install it now?"
