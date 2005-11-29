@@ -27,6 +27,7 @@ AC_CONFIG_FILES([Makefile
                 etc/Makefile
                 examples/Makefile
                 handlers/Makefile
+                lib/Makefile
                 man/Makefile
                 src/Makefile])
 

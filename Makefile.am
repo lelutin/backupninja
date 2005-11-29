@@ -4,4 +4,4 @@
 EXTRA_DIST = README COPYING AUTHORS INSTALL NEWS ChangeLog \
              backupninja.spec backupninja.spec.in autogen.sh
 
-SUBDIRS = etc examples handlers man src
+SUBDIRS = etc examples handlers lib man src

@@ -1,5 +1,6 @@
 
-HANDLERS = dup maildir mysql.helper rdiff sys easydialog.sh makecd makecd.helper \
+HANDLERS = dup dup.helper maildir mysql.helper rdiff sys \
+		makecd makecd.helper \
 		parseini rdiff.helper sys.helper ldap pgsql sh trac \
 		ldap.helper mysql pgsql.helper svn
 

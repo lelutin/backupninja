@@ -196,6 +196,15 @@ if [ ! -d "$scriptdir" ]; then
 	echo "Script directory $scriptdir not found." 
 	exit 1
 fi
+libdir=`grep libdirectory $conffile | awk '{print $3}'`
+if [ ! -n "$libdir" ]; then
+	echo "Cound not find entry 'libdirectory' in $conffile" 
+	exit 1
+fi
+if [ ! -d "$libdir" ]; then
+	echo "Script directory $libdir not found." 
+	exit 1
+fi
 configdirectory=`grep configdirectory $conffile | awk '{print $3}'`
 if [ ! -n "$configdirectory" ]; then
 	echo "Cound not find entry 'configdirectory' in $conffile" 
@@ -206,7 +215,7 @@ if [ ! -d "$configdirectory" ]; then
 	exit 1
 fi
 
-. $scriptdir/easydialog.sh
+. $libdir/easydialog.sh
 
 if [ "$UID" != "0" ]; then
 	msgBox "warning" "ninjahelper must be run by root!"

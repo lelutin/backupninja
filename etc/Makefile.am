@@ -14,6 +14,7 @@ edit = sed \
     -e "s,@sysconfdir\@,$(sysconfdir),g" \
     -e "s,@localstatedir\@,$(localstatedir),g" \
     -e "s,@pkgdatadir\@,$(pkgdatadir),g" \
+    -e "s,@pkglibdir\@,$(pkglibdir),g" \
     -e "s,@sbindir\@,$(sbindir),g" \
     -e "s,@exec_prefix\@,$(exec_prefix),g" \
     -e "s,@prefix\@,$(prefix),g"

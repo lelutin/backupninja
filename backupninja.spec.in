@@ -41,6 +41,7 @@ touch "%{buildroot}%{_localstatedir}/log/backupninja.log"
 %defattr(0750,root,root)
 %{_sbindir}/*
 %{_datadir}/backupninja/*
+%{_libdir}/backupninja/*
 %{_sysconfdir}/cron.d/backupninja
 %{_sysconfdir}/logrotate.d/backupninja
 

@@ -38,6 +38,9 @@ configdirectory = @CFGDIR@/backup.d
 # where backupninja helper scripts are found
 scriptdirectory = @pkgdatadir@
 
+# where backupninja libs are found
+libdirectory = @pkglibdir@
+
 # whether to use colors in the log file
 usecolors = yes
 
