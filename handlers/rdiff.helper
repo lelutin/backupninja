@@ -11,7 +11,7 @@ do_rdiff_dest() {
     formItem "dest_host" "$rdiff_host"
     formItem "dest_user" "$rdiff_user"
   formDisplay
-  [ $? = 1 ] && return;
+  [ $? = 0 ] || return
 
   IFS=$''
   replyconverted=`echo $REPLY | tr '\n' :`
@@ -40,7 +40,7 @@ do_rdiff_src() {
     formItem include 
     formItem include 
   formDisplay
-  [ $? = 1 ] && return;
+  [ $? = 0 ] || return
 
   unset rdiff_includes
   rdiff_includes=($REPLY)
@@ -52,7 +52,7 @@ do_rdiff_src() {
     formItem exclude 
     formItem exclude 
   formDisplay
-  [ $? = 1 ] && return;
+  [ $? = 0 ] || return
 
   unset rdiff_excludes
   rdiff_excludes=($REPLY)
@@ -75,7 +75,7 @@ do_ssh_con() {
     return
   else
     booleanBox "rdiff action wizard" "This step will create a ssh key for the local root user with no passphrase (if one does not already exist), and attempt to copy root's public ssh key to authorized_keys file of $rdiff_user@$rdiff_host. This will allow the local root to make unattended backups to $rdiff_user@$rdiff_host.\n\n\nAre you sure you want to continue?"
-    [ $? = 1 ] && return
+    [ $? = 0 ] || return
   fi
 
   if [ ! -f /root/.ssh/id_dsa.pub -a ! -f /root/.ssh/id_rsa.pub ]; then
@@ -263,7 +263,7 @@ rdiff_main_menu() {
         dest "$destitem" \
         conn "$conitem" \
         finish "finish and create config file"
-    [ $? = 1 ] && return;
+    [ $? = 0 ] || return
     result="$REPLY"
 
     case "$result" in
