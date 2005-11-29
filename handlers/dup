@@ -105,13 +105,13 @@ execstr_clientpart="/"
 # excludes
 for i in $exclude; do
 	str="${i//__star__/*}"
-	execstr="${execstr}--exclude $str "
+	execstr="${execstr}--exclude '$str' "
 done
 	
 # includes 
 for i in $include; do
 	str="${i//__star__/*}"
-	execstr="${execstr}--include $str "
+	execstr="${execstr}--include '$str' "
 done
 
 # vsincludes
