@@ -58,8 +58,10 @@ require_packages() {
 ## menu for the wizards
 ##
 donew() {
+  # reset some variables
   unset host_or_vservers
   unset vservers_chooser_vsnames
+  # menu
   listBegin "new action menu" "select an action to create"
   listItem return "return to main menu"
   for data in $HELPERS; do
