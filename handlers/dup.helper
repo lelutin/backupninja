@@ -8,7 +8,8 @@ do_dup_host_includes() {
    REPLY=
    while [ -z "$REPLY" ]; do
       formBegin "$dup_title - host system: includes"
-         for i in $dup_default_includes; do
+         [ -z "$dup_includes" ] && dup_includes="$dup_default_includes"
+         for i in $dup_includes; do
             formItem include "$i"
 	 done
 	 formItem include ""
@@ -31,7 +32,8 @@ do_dup_vserver() {
    REPLY=
    while [ -z "$REPLY" ]; do
       formBegin "$dup_title - vservers: includes"
-         for i in $dup_default_includes; do
+         [ -z "$dup_vsincludes" ] && dup_vsincludes="$dup_default_includes"
+         for i in $dup_vsincludes; do
             formItem include "$i"
 	 done
 	 formItem include ""
@@ -47,7 +49,8 @@ do_dup_vserver() {
 do_dup_excludes() {
    set -o noglob
    formBegin "$dup_title: excludes"
-     for i in $dup_default_excludes; do
+     [ -z "$dup_excludes" ] && dup_excludes="$dup_default_excludes"
+     for i in $dup_excludes; do
         formItem exclude "$i"
      done
      formItem exclude ""
@@ -402,11 +405,9 @@ dup_wizard() {
    _con_done=
    _gpg_done=
    _adv_done=
-   declare -a dup_default_includes
-   declare -a dup_default_excludes
-   declare -a dup_includes
-   declare -a dup_excludes
-   declare -a dup_vsincludes
+   dup_includes=
+   dup_excludes=
+   dup_vsincludes=
    dup_incremental=yes
    dup_keep=60
    dup_bandwidth=
