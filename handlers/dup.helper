@@ -61,7 +61,7 @@ do_dup_excludes() {
 }
 
 do_dup_src() {
-   host_or_vservers_chooser
+   host_or_vservers_chooser "$dup_title"
    [ $? = 0 ] || return 1
    case $host_or_vservers in
       'host')

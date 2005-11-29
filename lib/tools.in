@@ -1,5 +1,9 @@
 #!@BASH@
 
+# This file contains functions shared between ninjahelper and backupninja.
+
+#####################################################
+## MISC FUNCTIONS
 
 #
 # create a temporary file in a secure way.
@@ -16,4 +20,35 @@ function maketemp() {
 	echo $tempfile
 }
 
+#####################################################
+## CONFIG-FILE RELATED FUNCTIONS
 
+function setfile() {
+	CURRENT_CONF_FILE=$1
+}
+
+function setsection() {
+	CURRENT_SECTION=$1
+}
+
+#
+# sets a global var with name equal to $1
+# to the value of the configuration parameter $1
+# $2 is the default.
+# 
+function getconf() {
+	CURRENT_PARAM=$1
+	ret=`awk -f $libdirectory/parseini S=$CURRENT_SECTION P=$CURRENT_PARAM $CURRENT_CONF_FILE`
+	# if nothing is returned, set the default
+	if [ "$ret" == "" -a "$2" != "" ]; then
+		ret="$2"
+	fi
+
+	# replace * with %, so that it is not globbed.
+	ret="${ret//\\*/__star__}"
+
+	# this is weird, but single quotes are needed to 
+	# allow for returned values with spaces. $ret is still expanded
+	# because it is in an 'eval' statement.
+	eval $1='$ret'
+}

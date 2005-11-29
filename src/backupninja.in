@@ -121,38 +121,6 @@ function msg {
 	let "msgcount += 1"
 }
 
-function setfile() {
-	CURRENT_CONF_FILE=$1
-}
-
-function setsection() {
-	CURRENT_SECTION=$1
-}
-
-
-#
-# sets a global var with name equal to $1
-# to the value of the configuration parameter $1
-# $2 is the default.
-# 
-
-function getconf() {
-	CURRENT_PARAM=$1
-	ret=`awk -f $scriptdir/parseini S=$CURRENT_SECTION P=$CURRENT_PARAM $CURRENT_CONF_FILE`
-	# if nothing is returned, set the default
-	if [ "$ret" == "" -a "$2" != "" ]; then
-		ret="$2"
-	fi
-
-	# replace * with %, so that it is not globbed.
-	ret="${ret//\\*/__star__}"
-
-	# this is weird, but single quotes are needed to 
-	# allow for returned values with spaces. $ret is still expanded
-	# because it is in an 'eval' statement.
-	eval $1='$ret'
-}
-
 #
 # enforces very strict permissions on configuration file $file.
 #
@@ -308,7 +276,7 @@ function process_action() {
 	echo "" > $bufferfile
 	echo_debug_msg=1
 	(
-		. $scriptdir/$suffix $file
+		. $scriptdirectory/$suffix $file
 	) 2>&1 | (
 		while read a; do
 			echo $a >> $bufferfile
@@ -408,42 +376,30 @@ if [ ! -r "$conffile" ]; then
 	fatal "Configuration file $conffile not found."
 fi
 
-# find $scriptdir
-scriptdir=`grep scriptdirectory $conffile | awk '{print $3}'`
-if [ -z "$scriptdir" ]; then
-        if [ -d "@datadir@" ]; then
-	   scriptdir="@datadir@"
-	else
-	   echo "Could not find entry 'scriptdirectory' in $conffile" 
-	   fatal "Could not find entry 'scriptdirectory' in $conffile" 
-	fi
-else
-        if [ ! -d "$scriptdir" ]; then
-	   echo "Script directory $scriptdir not found."
-	   fatal "Script directory $scriptdir not found."
-	fi	   
-fi
-
-# find $libdir
-libdir=`grep libdirectory $conffile | awk '{print $3}'`
-if [ -z "$libdir" ]; then
+# find $libdirectory
+libdirectory=`grep '^libdirectory' $conffile | awk '{print $3}'`
+if [ -z "$libdirectory" ]; then
         if [ -d "@libdir@" ]; then
-	   libdir="@libdir@"
+	   libdirectory="@libdir@"
 	else
 	   echo "Could not find entry 'libdirectory' in $conffile." 
 	   fatal "Could not find entry 'libdirectory' in $conffile." 
 	fi
 else
-        if [ ! -d "$libdir" ]; then
-	   echo "Lib directory $libdir not found." 
-	   fatal "Lib directory $libdir not found." 
+        if [ ! -d "$libdirectory" ]; then
+	   echo "Lib directory $libdirectory not found." 
+	   fatal "Lib directory $libdirectory not found." 
 	fi
 fi
+
+# include shared functions
+. $libdirectory/tools
 
 setfile $conffile
 
 # get global config options (second param is the default)
 getconf configdirectory @CFGDIR@/backup.d
+getconf scriptdirectory @datadir@
 getconf reportemail
 getconf reportsuccess yes
 getconf reportwarning yes
@@ -471,9 +427,6 @@ if [ ! -d "$configdirectory" ]; then
 	echo "Configuration directory '$configdirectory' not found."
 	fatal "Configuration directory '$configdirectory' not found."
 fi
-
-# include shared functions
-. $libdir/tools
 
 [ -f "$logfile" ] || touch $logfile
 
@@ -516,7 +469,7 @@ for file in $files; do
 		continue
 	fi
 
-	if [ -e "$scriptdir/$suffix" ]; then
+	if [ -e "$scriptdirectory/$suffix" ]; then
 		process_action $file $suffix
 	else
 		error "Can't process file '$file': no handler script for suffix '$suffix'"

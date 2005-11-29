@@ -1,15 +1,22 @@
-EXTRALIBS = easydialog tools
-CLEANFILES = $(EXTRALIBS)
-dist_pkglib_DATA = $(EXTRALIBS)
-EXTRA_DIST = easydialog.in tools.in
+EXTRA_DIST = easydialog.in parseini.in tools.in
+
+GENERATED_FILES = easydialog parseini tools
+
+dist_pkglib_DATA = $(GENERATED_FILES)
+
+CLEANFILES = $(GENERATED_FILES)
 
 edit = sed \
     -e "s,@BASH\@,$(BASH),g"
 
-easydialog: easydialog.in
+easydialog: #easydialog.in
 	rm -f easydialog
 	$(edit) easydialog.in > easydialog
 
-tools: tools.in
+parseini: #parseini.in
+	rm -f parseini
+	$(edit) parseini.in > parseini
+
+tools: #tools.in
 	rm -f tools
 	$(edit) tools.in > tools

@@ -112,9 +112,8 @@ sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 HANDLERS = dup dup.helper maildir mysql.helper rdiff sys \
-		makecd makecd.helper \
-		parseini rdiff.helper sys.helper ldap pgsql sh trac \
-		ldap.helper mysql pgsql.helper svn
+		makecd makecd.helper rdiff.helper sys.helper \
+		ldap pgsql sh trac ldap.helper mysql pgsql.helper svn
 
 EXTRA_DIST = Makefile.am $(HANDLERS)
 dist_pkgdata_DATA = $(HANDLERS)
