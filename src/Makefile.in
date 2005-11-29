@@ -115,6 +115,7 @@ edit = sed \
     -e "s,@CFGDIR\@,$(CFGDIR),g" \
     -e "s,@BASH\@,$(BASH),g" \
     -e 's,@datadir\@,$(pkgdatadir),g' \
+    -e "s,@libdir\@,$(pkglibdir),g" \
     -e 's,@localstatedir\@,$(localstatedir),g' \
 	-e 's,@prefix\@,$(prefix),g'
 

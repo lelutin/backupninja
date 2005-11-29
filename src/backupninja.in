@@ -424,15 +424,36 @@ if [ ! -r "$conffile" ]; then
 	fatal "Configuration file $conffile not found."
 fi
 
+# find $scriptdir
 scriptdir=`grep scriptdirectory $conffile | awk '{print $3}'`
-if [ ! -n "$scriptdir" ]; then
-	echo "Cound not find entry 'scriptdirectory' in $conffile" 
-	fatal "Cound not find entry 'scriptdirectory' in $conffile"
+if [ -z "$scriptdir" ]; then
+        if [ -d "@datadir@" ]; then
+	   scriptdir="@datadir@"
+	else
+	   echo "Could not find entry 'scriptdirectory' in $conffile" 
+	   fatal "Could not find entry 'scriptdirectory' in $conffile" 
+	fi
+else
+        if [ ! -d "$scriptdir" ]; then
+	   echo "Script directory $scriptdir not found."
+	   fatal "Script directory $scriptdir not found."
+	fi	   
 fi
 
-if [ ! -d "$scriptdir" ]; then
-	echo "Script directory $scriptdir not found." 
-	fatal "Script directory $scriptdir not found."
+# find $libdir
+libdir=`grep libdirectory $conffile | awk '{print $3}'`
+if [ -z "$libdir" ]; then
+        if [ -d "@libdir@" ]; then
+	   libdir="@libdir@"
+	else
+	   echo "Could not find entry 'libdirectory' in $conffile." 
+	   fatal "Could not find entry 'libdirectory' in $conffile." 
+	fi
+else
+        if [ ! -d "$libdir" ]; then
+	   echo "Lib directory $libdir not found." 
+	   fatal "Lib directory $libdir not found." 
+	fi
 fi
 
 setfile $conffile
