@@ -131,22 +131,6 @@ function setsection() {
 
 
 #
-# create a temporary file in a secure way.
-#
-function maketemp() {
-	if [ -x /bin/mktemp ]
-	then
-		local tempfile=`mktemp /tmp/$1.XXXXXXXX`
-	else
-		DATE=`date`
-		sectmp=`echo $DATE | /usr/bin/md5sum | cut -d- -f1`
-		local tempfile=/tmp/$1.$sectmp
-	fi
-	echo $tempfile
-}
-
-
-#
 # sets a global var with name equal to $1
 # to the value of the configuration parameter $1
 # $2 is the default.
@@ -487,6 +471,9 @@ if [ ! -d "$configdirectory" ]; then
 	echo "Configuration directory '$configdirectory' not found."
 	fatal "Configuration directory '$configdirectory' not found."
 fi
+
+# include shared functions
+. $libdir/tools
 
 [ -f "$logfile" ] || touch $logfile
 

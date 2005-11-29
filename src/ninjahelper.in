@@ -187,6 +187,7 @@ if [ ! -r "$conffile" ]; then
 	echo "Configuration file $conffile not found." 
 	exit 1
 fi
+
 # find $scriptdir
 scriptdir=`grep scriptdirectory $conffile | awk '{print $3}'`
 if [ -z "$scriptdir" ]; then
@@ -202,6 +203,7 @@ else
 	   exit 1
 	fi	   
 fi
+
 # find $libdir
 libdir=`grep libdirectory $conffile | awk '{print $3}'`
 if [ -z "$libdir" ]; then
