@@ -8,15 +8,15 @@ do_dup_host_includes() {
    REPLY=
    while [ -z "$REPLY" ]; do
       formBegin "$dup_title - host system: includes"
-         for ((i=0; i < ${#dup_default_includes[@]} ; i++)); do
-            formItem include ${dup_default_includes[$i]}
+         for i in $dup_default_includes; do
+            formItem include "$i"
 	 done
 	 formItem include ""
 	 formItem include ""
 	 formItem include ""
 	 formDisplay
       [ $? = 0 ] || return 1
-      dup_includes=($REPLY)
+      dup_includes="$REPLY"
    done
    set +o noglob
 }
@@ -31,15 +31,15 @@ do_dup_vserver() {
    REPLY=
    while [ -z "$REPLY" ]; do
       formBegin "$dup_title - vservers: includes"
-         for ((i=0; i < ${#dup_default_includes[@]} ; i++)); do
-            formItem include ${dup_default_includes[$i]}
+         for i in $dup_default_includes; do
+            formItem include "$i"
 	 done
 	 formItem include ""
 	 formItem include ""
 	 formItem include ""
       formDisplay
       [ $? = 0 ] || return 1
-      dup_vsincludes=($REPLY)
+      dup_vsincludes="$REPLY"
    done
    set +o noglob
 }
@@ -47,15 +47,15 @@ do_dup_vserver() {
 do_dup_excludes() {
    set -o noglob
    formBegin "$dup_title: excludes"
-     for ((i=0; i < ${#dup_default_excludes[@]} ; i++)); do
-        formItem exclude ${dup_default_excludes[$i]}
+     for i in $dup_default_excludes; do
+        formItem exclude "$i"
      done
      formItem exclude ""
      formItem exclude ""
      formItem exclude ""
    formDisplay
    [ $? = 0 ] || return 1
-   dup_excludes=($REPLY)
+   dup_excludes="$REPLY"
    set +o noglob
 }
 
@@ -260,8 +260,8 @@ EOF
 
    if [ "$host_or_vservers" == host -o "$host_or_vservers" == both ]; then
       set -o noglob
-      for ((i=0; i < ${#dup_includes[@]} ; i++)); do
-	 echo "include = ${dup_includes[$i]}" >> $next_filename
+      for i in $dup_includes; do
+	 echo "include = $i" >> $next_filename
       done
       set +o noglob
    fi
@@ -285,8 +285,8 @@ EOF
    if [ "$host_or_vservers" == vservers -o "$host_or_vservers" == both ]; then
       set -o noglob
       echo -e "vsnames = \"$selected_vservers\"\n" >> $next_filename
-      for ((i=0; i < ${#dup_vsincludes[@]} ; i++)); do
-         echo "vsinclude = ${dup_vsincludes[$i]}" >> $next_filename
+      for i in $dup_vsincludes; do
+         echo "vsinclude = $i" >> $next_filename
       done
       set +o noglob
    fi
@@ -299,8 +299,8 @@ EOF
 # (supports globbing with '*')
 EOF
     set -o noglob
-    for ((i=0; i < ${#dup_excludes[@]} ; i++)); do
-        echo exclude = ${dup_excludes[$i]} >> $next_filename
+    for i in $dup_excludes; do
+        echo "exclude = $i" >> $next_filename
     done
     set +o noglob
 
@@ -423,8 +423,8 @@ dup_wizard() {
 
    # Global variables whose '*' shall not be expanded
    set -o noglob
-   dup_default_includes=(/var/spool/cron/crontabs /var/backups /etc /root /home /usr/local/*bin /var/lib/dpkg/status*)
-   dup_default_excludes=(/home/*/.gnupg)
+   dup_default_includes="/var/spool/cron/crontabs /var/backups /etc /root /home /usr/local/*bin /var/lib/dpkg/status*"
+   dup_default_excludes="/home/*/.gnupg"
    set +o noglob
 
    dup_main_menu
