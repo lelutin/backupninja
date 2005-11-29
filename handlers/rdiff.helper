@@ -294,8 +294,10 @@ rdiff_wizard() {
   rdiff_directory=/backup/`hostname`
   rdiff_user=
   rdiff_host=
+  set -o noglob
   rdiff_includes=(/var/spool/cron/crontabs /var/backups /etc /root /home /usr/local/*bin /var/lib/dpkg/status*)
   rdiff_excludes=(/home/*/.gnupg)
+  set +o noglob
   rdiff_main_menu
 }
 

@@ -1,5 +1,7 @@
 version 0.9.2 -- unreleased 
 	fixed missing makecd.helper in Makefile.am/.in
+	rdiff ninjahelper bugfixed:
+		used to expand '*' in default source directories
 
 version 0.9.1 -- November 05 2005
 	rearranged source so that it is relocatable with autotools
@@ -52,7 +54,7 @@ version 0.8 -- September 15 2005
 		now checks if "postgres" user exists on the host/vserver.
 	changes to ninjahelper
 		check_perms() does not die anymore on group/world readable
-	helper scripts (now consistent with the "helper scripts
+		helper scripts (now consistent with the "helper scripts
 		must not be group or world writable!" error msg).
 	xedit action now tries $EDITOR, then /etc/alternatives/editor,
 		then nano, vim and vi, and aborts if none of these exists.
