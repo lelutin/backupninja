@@ -159,9 +159,12 @@ do_dup_gpg() {
 
    set +o noglob
    _gpg_done="(DONE)"
-   setDefault conn
+   setDefault adv
+   # TODO: replace the above line by the following when do_dup_conn is written
+   # setDefault conn
 }
 
+# TODO: share rdiff.helper code in some lib, and use it here
 do_dup_conn() {
    _con_done="(DONE)"
    setDefault adv
@@ -354,11 +357,12 @@ dup_main_menu() {
      gpgitem="configure GnuPG encryption/signing $_gpg_done"
      conitem="set up ssh keys and test remote connection $_con_done"
      advitem="edit advanced settings $_adv_done"
+     # TODO: add the following to the menu when do_dup_conn is written
+     # conn "$conitem" \
      menuBox "$dup_title" "choose a step:" \
         src "$srcitem" \
         dest "$destitem" \
         gpg "$gpgitem" \
-        conn "$conitem" \
 	adv "$advitem" \
         finish "finish and create config file"
      [ $? = 0 ] || return 1
@@ -368,10 +372,13 @@ dup_main_menu() {
 	"src") do_dup_src;;
 	"dest") do_dup_dest;;
 	"gpg") do_dup_gpg;;
-	"conn") do_dup_conn;;
+	# TODO: enable the following when do_dup_conn is written
+	# "conn") do_dup_conn;;
 	"adv") do_dup_adv;;
 	"finish")
-           if [[ "$_con_done$_dest_done$_gpg_done$_src_done" != "(DONE)(DONE)(DONE)(DONE)" ]]; then
+           if [[ "$_dest_done$_gpg_done$_src_done" != "(DONE)(DONE)(DONE)" ]]; then
+	   # TODO: replace the previous test by the following when do_dup_conn is written
+           # if [[ "$_con_done$_dest_done$_gpg_done$_src_done" != "(DONE)(DONE)(DONE)(DONE)" ]]; then
               msgBox "$dup_title" "You cannot create the configuration file until the four first steps are completed."
            else
               do_dup_finish
