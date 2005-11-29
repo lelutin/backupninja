@@ -5,7 +5,7 @@ Ninjas:
 elijah@riseup.net  -- original code, bug fixes, man pages
 micah@riseup.net   -- debian package, vserver support, bug fixes
 stefani@riseup.net -- makecd handler, man pages
-intrigeri          -- dup handler, pgsql handler, vserver support, bug fixes
+intrigeri@boum.org -- dup handler, pgsql handler, vserver support, bug fixes
 Charles Lepple     -- trac handler
 Petr Klíma	   -- autotools support
 
