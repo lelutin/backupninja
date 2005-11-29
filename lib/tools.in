@@ -1,0 +1,19 @@
+#!@BASH@
+
+
+#
+# create a temporary file in a secure way.
+#
+function maketemp() {
+	if [ -x /bin/mktemp ]
+	then
+		local tempfile=`mktemp /tmp/$1.XXXXXXXX`
+	else
+		DATE=`date`
+		sectmp=`echo $DATE | /usr/bin/md5sum | cut -d- -f1`
+		local tempfile=/tmp/$1.$sectmp
+	fi
+	echo $tempfile
+}
+
+

@@ -1,6 +1,14 @@
+EXTRALIBS = easydialog tools
+dist_pkglib_DATA = $(EXTRALIBS)
+EXTRA_DIST = easydialog.in tools.in
 
-EXTRALIBRARIES = easydialog.sh
+edit = sed \
+    -e "s,@BASH\@,$(BASH),g"
 
-EXTRA_DIST = Makefile.am $(EXTRALIBRARIES)
+easydialog: easydialog.in
+	rm -f easydialog
+	$(edit) easydialog.in > easydialog
 
-dist_pkglib_DATA = $(EXTRALIBRARIES)
+tools: tools.in
+	rm -f tools
+	$(edit) tools.in > tools

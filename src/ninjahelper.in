@@ -215,7 +215,7 @@ if [ ! -d "$configdirectory" ]; then
 	exit 1
 fi
 
-. $libdir/easydialog.sh
+. $libdir/easydialog
 
 if [ "$UID" != "0" ]; then
 	msgBox "warning" "ninjahelper must be run by root!"

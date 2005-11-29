@@ -111,9 +111,12 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-EXTRALIBRARIES = easydialog.sh
-EXTRA_DIST = Makefile.am $(EXTRALIBRARIES)
-dist_pkglib_DATA = $(EXTRALIBRARIES)
+EXTRALIBS = easydialog tools
+dist_pkglib_DATA = $(EXTRALIBS)
+EXTRA_DIST = easydialog.in tools.in
+edit = sed \
+    -e "s,@BASH\@,$(BASH),g"
+
 all: all-am
 
 .SUFFIXES:
@@ -285,6 +288,14 @@ uninstall-am: uninstall-dist_pkglibDATA uninstall-info-am
 	pdf-am ps ps-am uninstall uninstall-am \
 	uninstall-dist_pkglibDATA uninstall-info-am
 
+
+easydialog: easydialog.in
+	rm -f easydialog
+	$(edit) easydialog.in > easydialog
+
+tools: tools.in
+	rm -f tools
+	$(edit) tools.in > tools
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
