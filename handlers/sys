@@ -52,7 +52,7 @@ if [ "$packages" == "yes" ]; then
 		do
 			info "examining vserver: $vserver"
 			running=`$VSERVERINFO $vserver RUNNING`
-			if [ $running = 1 ]; then
+			if [ "$running" = "1" ]; then
 			    if [ ! -x "$VROOTDIR/$vserver`$VSERVER $vserver exec which dpkg`" ]; then
 				warning "can't find dpkg in vserver $vserver, skipping installed packages report."
 				nodpkg="$nodpkg|$vserver"

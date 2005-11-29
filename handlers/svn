@@ -32,7 +32,7 @@ then
 	[ -d $vroot ] || fatal "vserver '$vsname' does not exist at '$vroot'"
         # is it running ?
 	running=`$VSERVERINFO $vsname RUNNING`
-	[ $running = 1 ] || fatal "vserver $vsname is not running."
+	[ "$running" = "1" ] || fatal "vserver $vsname is not running."
 fi
 
 cd $vroot$src

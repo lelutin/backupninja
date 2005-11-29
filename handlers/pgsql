@@ -30,7 +30,7 @@ if [ $usevserver ]; then
     [ -d $vroot ] || fatal "vserver '$vsname' does not exist at '$vroot'"
     # is it running ?
     running=`$VSERVERINFO $vsname RUNNING`
-    if [ $running = 1 ]; then
+    if [ "$running" = "1" ]; then
 	if [ "$databases" == "all" ]; then
 	    [ -x "$vroot`$VSERVER $vsname exec which $PGSQLDUMPALL`" ] || \
 		fatal "Can't find $PGSQLDUMPALL in vserver $vsname."
