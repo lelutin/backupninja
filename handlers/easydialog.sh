@@ -33,7 +33,7 @@ setDimension() {
 
 booleanBox() {
     $DIALOG --backtitle "$BACKTITLE" --title "$1" \
-        --yesno "$2" $HEIGHT $WIDTH
+        `[ "$3" == no ] && echo '--defaultno'` --yesno "$2" $HEIGHT $WIDTH
 }
 
 msgBox() {
