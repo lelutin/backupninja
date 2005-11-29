@@ -244,6 +244,7 @@ formDisplay() {
    ) | xargs $DIALOG 2> $temp
    local status=$?
    
+   REPLY=
    if [ $status = 0 ]; then
       IFS=$''
       REPLY=`cat $temp`
