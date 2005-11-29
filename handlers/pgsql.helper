@@ -1,8 +1,8 @@
 HELPERS="$HELPERS pgsql:postgresql_database_backup"
 
 do_pgsql_vserver() {
-   inputBox "$pgsql_title" "Specify a vserver name:"
-   [ $? = 1 ] && return;
+   choose_one_vserver "$pgsql_title"
+   [ $? = 0 ] || return 1
    pgsql_vsname="vsname = $REPLY"
 }
 
@@ -32,9 +32,13 @@ pgsql_wizard() {
     # constants
    pgsql_title="PostgreSQL action wizard"
 
-   # vserver support
-   booleanBox "$pgsql_title" "Do you want to operate on a vserver? If not, the host will be operated on."
-   [ $? = 0 ] && do_pgsql_vserver
+   # backup the host system or a Vserver?
+   choose_host_or_one_vserver "$pgsql_title"
+   [ $? = 0 ] || return 1
+   if [ $host_or_vservers == vservers ]; then
+      do_pgsql_vserver
+      [ $? = 0 ] || return 1
+   fi
 
    # backupdir
    inputBox "$pgsql_title" "Directory where to store the backups:`[ -z \"$pgsql_vsname\" ] || echo \"\n(In respect to chosen vserver's root directory)\"`" "/var/backups/postgres"
@@ -47,6 +51,7 @@ pgsql_wizard() {
       pgsql_databases="databases = all"
    else
       do_pgsql_databases
+      [ $? = 0 ] || return 1
    fi
 
    # compress
@@ -66,8 +71,12 @@ pgsql_wizard() {
 # what vserver to operate on, only used if vserver = yes in /etc/backupninja.conf
 # if you do not specify a vsname the host will be operated on
 # Note: if operating on a vserver, $VROOTDIR will be prepended to backupdir.
-$pgsql_vsname
+EOF
+   if [ $host_or_vservers == vservers ]; then
+      echo -e "$pgsql_vsname\n" >> $next_filename
+   fi
 
+   cat >> $next_filename <<EOF
 # backupdir = <dir> (default: /var/backups/postgres)
 # where to dump the backups
 $pgsql_backupdir

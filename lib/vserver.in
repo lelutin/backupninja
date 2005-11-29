@@ -1,0 +1,178 @@
+#####################################################
+## VSERVERS RELATED FUNCTIONS FOR NINJAHELPER
+##
+## Depends on:
+##    - easydialog library
+##    - $conffile
+##
+## Global variables used and modified here:
+##    - $vservers_are_available (yes/no)
+##    - $found_vservers (list)
+##    - $selected_vservers (list)
+##    - $host_or_vservers (host/vservers/both)
+##
+
+##
+## Get vservers-related variables.
+## Then, if Vservers are enabled, check that:
+##   - VROOTDIR is valid;
+##   - at least one vserver can be found.
+## If, and only if, the above conditions are all true:
+##   - set $vservers_are_available to 'yes';
+##   - set $found_vservers to the list of all vservers found on the system.
+## This function has to be run once before a new helper is run.
+##
+init_vservers() {
+   # get global variables from the conffile
+   setfile $conffile
+   getconf vservers no
+   getconf VSERVERINFO /usr/sbin/vserver-info
+   getconf VSERVER /usr/sbin/vserver
+   getconf VROOTDIR `if [ -f "$VSERVERINFO" ]; then $VSERVERINFO info SYSINFO |grep vserver-Rootdir | awk '{print $2}'; fi`
+   # init this library's global variables
+   vservers_are_available=no
+   found_vservers=
+   selected_vservers=
+   host_or_vservers=host
+   # check vservers real availability
+   if [ $vservers == yes ]; then
+      [ -n "$VROOTDIR" ] || (msgBox "warning" "VROOTDIR is not set in $conffile and could not be guessed."; return)
+      [ -d "$VROOTDIR" ] || (msgBox "warning" "VROOTDIR ($VROOTDIR) does not exist."; return)
+      found_vservers=`ls $VROOTDIR | grep -E -v "lost+found|ARCHIVES" | tr "\n" " "`
+      [ -n "$found_vservers" ] || return
+      vservers_are_available=yes
+   fi
+}
+
+##
+## If the argument is the name of a vserver selected use by the current helper,
+## echoes 'on' and returns 0.
+## Else, echoes 'off' and returns 1.
+##
+vserver_is_selected() {
+   local vserver=$1
+   local vserver_is_selected=1
+   local i
+   for i in $selected_vservers ; do
+      [ "$vserver" == "$i" ] && vserver_is_selected=0
+   done
+   if [ $vserver_is_selected = 0 ]; then
+      echo on
+   else
+      echo off
+   fi
+   return $vserver_is_selected
+}
+
+##
+## Have the user choose one Vserver among the existing ones.
+## Set $selected_vservers to the chosen one's name.
+## Returns 1 if cancelled or if Vservers are not available.
+##
+choose_one_vserver() {
+   [ "$vservers_are_available" == "yes" ] || return 1
+   local title=$1
+   local i=
+   local vserver=
+   REPLY=
+   while [ -z "$REPLY" ]; do
+      [ -n "$selected_vservers" ] && setDefault $selected_vservers
+      listBegin "$title" "Choose at least one Linux-Vserver to backup:"
+            for vserver in $found_vservers; do
+	       listItem "$vserver" "Backup $vserver vserver"
+	    done
+      listDisplay menu
+      [ $? = 0 ] || return 1
+   done
+   selected_vservers=$REPLY
+}
+
+##
+## If Vservers are not enabled, exit silently.
+## Else, have the user choose if he/she wants to perform the backup on the host
+## system or on one Vserver.
+## Set, respectively, $host_or_vservers to 'host' or 'vservers'.
+## Returns 1 if cancelled.
+##
+choose_host_or_one_vserver() {
+   [ "$vservers_are_available" == "yes" ] || return
+   local title=$1
+   # if there is one, set the previously chosen item as the default
+   [ -n "$host_or_vservers" ] && setDefault $host_or_vservers
+   menuBox "$title - src" "Do you want to operate on the host system and/or on vservers?" \
+      "host" "Host system" \
+      "vserver" "One Vserver"
+   [ $? = 0 ] || return 1
+   case $REPLY in
+      "host")
+	 host_or_vservers='host'
+	 ;;
+      "vserver")
+	 host_or_vservers='vservers'
+	 ;;
+   esac
+}
+
+##
+## If Vservers are not enabled, exit silently.
+## Else, have the user choose the target he/she wants to perform the backup on:
+##   - host system only;
+##   - some vservers only;
+##   - both the host system and some vservers.
+## Set, respectively, $host_or_vservers to 'host', 'vservers', or 'both'
+## Returns 1 if cancelled.
+##
+choose_host_or_vservers_or_both() {
+   [ "$vservers_are_available" == "yes" ] || return
+   local title=$1
+   # if there is one, set the previously chosen item as the default
+   [ -n "$host_or_vservers" ] && setDefault $host_or_vservers
+   menuBox "$title - src" "Do you want to operate on the host system and/or on vservers?" \
+      "host" "Host system only" \
+      "vservers" "Vservers only" \
+      "both" "Host system and Vservers"
+   [ $? = 0 ] || return 1
+   case $REPLY in
+      "host")
+	 host_or_vservers='host'
+	 ;;
+      "vservers")
+	 host_or_vservers='vservers'
+	 ;;
+      "both")
+	 host_or_vservers='both'
+	 ;;
+   esac
+}
+
+##
+## Have the user choose among "all vservers" and a not-empty subset of these.
+## Set $selected_vservers to 'all' or to a space-separated name list.
+## Returns 1 if cancelled or if Vservers are not available.
+##
+choose_one_or_more_vservers() {
+   [ "$vservers_are_available" == "yes" ] || return 1
+   local title=$1
+   local i=
+   # UI
+   booleanBox "$title" "Do you want to backup all vservers?" ` [ -z "$selected_vservers" -o "$selected_vservers" == "all" ] || echo no`
+   if [ $? = 0 ]; then
+      selected_vservers="all"
+   else
+      # choose among the existing vservers
+      local vserver=
+      local vserver_was_selected=
+      REPLY=
+      while [ -z "$REPLY" ]; do
+	 listBegin "$title" "Choose at least one Linux-Vserver to backup:"
+	    # list existing vservers, preselecting the previously selected ones
+	    for vserver in $found_vservers; do
+	       listItem "$vserver" "Backup $vserver vserver" `vserver_is_selected $vserver`
+	    done
+	 listDisplay checklist
+	 [ $? = 0 ] || return 1
+      done
+      # remove quotes around each vserver name
+      selected_vservers=`echo $REPLY | tr -d '"'`
+   fi
+}

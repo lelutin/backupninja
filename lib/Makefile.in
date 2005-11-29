@@ -111,8 +111,8 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-EXTRA_DIST = easydialog.in parseini.in tools.in
-GENERATED_FILES = easydialog parseini tools
+EXTRA_DIST = easydialog.in parseini.in tools.in vserver.in
+GENERATED_FILES = easydialog parseini tools vserver
 dist_pkglib_DATA = $(GENERATED_FILES)
 CLEANFILES = $(GENERATED_FILES)
 edit = sed \
@@ -291,17 +291,21 @@ uninstall-am: uninstall-dist_pkglibDATA uninstall-info-am
 	uninstall-dist_pkglibDATA uninstall-info-am
 
 
-easydialog: #easydialog.in
+easydialog:
 	rm -f easydialog
 	$(edit) easydialog.in > easydialog
 
-parseini: #parseini.in
+parseini:
 	rm -f parseini
 	$(edit) parseini.in > parseini
 
-tools: #tools.in
+tools:
 	rm -f tools
 	$(edit) tools.in > tools
+
+vserver:
+	rm -f vserver
+	$(edit) vserver.in > vserver
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

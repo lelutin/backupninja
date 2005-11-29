@@ -58,9 +58,8 @@ require_packages() {
 ## menu for the wizards
 ##
 donew() {
-  # reset some variables
-  unset host_or_vservers
-  unset vservers_chooser_vsnames
+  # (re-)initialize vservers support
+  init_vservers
   # menu
   listBegin "new action menu" "select an action to create"
   listItem return "return to main menu"
@@ -167,102 +166,6 @@ doaction() {
 }
 
 #####################################################
-## VSERVERS RELATED FUNCTIONS
-
-##
-## If vservers are not enabled, exit silently and set host_or_vservers to 'host'.
-## Else, have the user choose the target he/she wants to perform the backup on:
-##   - host system only
-##   - some vservers only
-##   - both the host system and some vservers
-## Sets, respectively, $host_or_vservers to 'host', 'vservers', or 'both'
-## $host_or_vservers is unset when a new helper is run.
-## Returns 1 if cancelled.
-##
-host_or_vservers_chooser() {
-   local title=$1
-   # exit silently if vservers are not enabled
-   if [ "$vservers" != "yes" ]; then
-      host_or_vservers='host'
-      return
-   fi
-   # if there is one, set the previously chosen item as the default
-   [ -n "$host_or_vservers" ] && setDefault $host_or_vservers
-   menuBox "$title - src" "Do you want to operate on the host system and/or on vservers?" \
-      "host" "Host system only" \
-      "vservers" "Vservers only" \
-      "both" "Host system and Vservers"
-   [ $? = 0 ] || return 1
-   case $REPLY in
-      "host")
-	 host_or_vservers='host'
-	 ;;
-      "vservers")
-	 host_or_vservers='vservers'
-	 ;;
-      "both")
-	 host_or_vservers='both'
-	 ;;
-   esac
-}
-
-##
-## If the argument is the name of a vserver selected for backup (in
-## $vservers_chooser_vsnames), echoes 'on' and returns 0.
-## Else, echoes 'off' and returns 1.
-##
-vserver_is_selected() {
-   local vserver=$1
-   local vserver_is_selected=1
-   local i
-   for i in $vservers_chooser_vsnames ; do
-      [ "$vserver" == "$i" ] && vserver_is_selected=0
-   done
-   if [ $vserver_is_selected = 0 ]; then
-      echo on
-   else
-      echo off
-   fi
-   return $vserver_is_selected
-}
-
-##
-## Have the user choose among "all vservers" and a not-empty subset of these.
-## Sets global $vservers_chooser_vsnames variable to "all" or to a
-## space-separated name list.
-## Depends on host_or_vservers() to have already run.
-## $vservers_chooser_vsnames is unset when a new helper is run.
-## Returns 1 if cancelled.
-##
-vservers_chooser() {
-   local title=$1
-   local i=
-   [ -n "$VROOTDIR" ] || (msgBox "warning" "VROOTDIR is not set in $conffile and could not be guessed."; return 1)
-   [ -d "$VROOTDIR" ] || (msgBox "warning" "VROOTDIR ($VROOTDIR) does not exist."; return 1)
-
-   booleanBox "$title" "Do you want to backup all vservers?" ` [ -z "$vservers_chooser_vsnames" -o "$vservers_chooser_vsnames" == "all" ] || echo no`
-   if [ $? = 0 ]; then
-      vservers_chooser_vsnames="all"
-   else
-      # choose among the existing vservers
-      local vserver=
-      local vserver_was_selected=
-      REPLY=
-      while [ -z "$REPLY" ]; do
-	 listBegin "$title" "Choose at least one Linux-Vserver to backup:"
-	    # list existing vservers, preselecting the previously selected ones
-	    for vserver in `ls $VROOTDIR | grep -E -v "lost+found|ARCHIVES"`; do
-	       listItem "$vserver" "Backup $vserver vserver" `vserver_is_selected $vserver`
-	    done
-	 listDisplay checklist
-	 [ $? = 0 ] || return 1
-      done
-      # remove quotes around each vserver name
-      vservers_chooser_vsnames=`echo $REPLY | tr -d '"'`
-   fi
-}
-
-#####################################################
 ## begin program
 
 if [ ! -x "`which dialog`" ]; then
@@ -308,6 +211,7 @@ fi
 # include shared functions
 . $libdirectory/easydialog
 . $libdirectory/tools
+. $libdirectory/vserver
 
 # am I running as root?
 if [ "$UID" != "0" ]; then
@@ -319,10 +223,6 @@ fi
 setfile $conffile
 getconf configdirectory @CFGDIR@/backup.d
 getconf scriptdirectory @datadir@
-getconf vservers no
-getconf VSERVERINFO /usr/sbin/vserver-info
-getconf VSERVER /usr/sbin/vserver
-getconf VROOTDIR `if [ -f "$VSERVERINFO" ]; then $VSERVERINFO info SYSINFO |grep vserver-Rootdir | awk '{print $2}'; fi`
 
 # load all the helpers
 HELPERS=""

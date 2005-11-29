@@ -22,10 +22,9 @@ do_dup_host_includes() {
 }
 
 do_dup_vserver() {
-   # choose the vservers to backup
-   vservers_chooser "$dup_title"
+   # choose the vservers to backup (into $selected_vservers)
+   choose_one_or_more_vservers "$dup_title"
    [ $? = 0 ] || return 1
-   dup_vsnames="$vservers_chooser_vsnames"
 
    set -o noglob
    # choose the files to backup
@@ -61,7 +60,7 @@ do_dup_excludes() {
 }
 
 do_dup_src() {
-   host_or_vservers_chooser "$dup_title"
+   choose_host_or_vservers_or_both "$dup_title"
    [ $? = 0 ] || return 1
    case $host_or_vservers in
       'host')
@@ -259,7 +258,7 @@ encryptkey = $dup_gpg_encryptkey
 #   include = /mnt/crypt/home/user/Mail
 EOF
 
-   if [ "$host_or_vservers" == 'host' -o "$host_or_vservers" == 'both' ]; then
+   if [ "$host_or_vservers" == host -o "$host_or_vservers" == both ]; then
       set -o noglob
       for ((i=0; i < ${#dup_includes[@]} ; i++)); do
 	 echo "include = ${dup_includes[$i]}" >> $next_filename
@@ -283,9 +282,9 @@ EOF
 
 EOF
 
-   if [ "$host_or_vservers" == 'vservers' -o "$host_or_vservers" == 'both' ]; then
+   if [ "$host_or_vservers" == vservers -o "$host_or_vservers" == both ]; then
       set -o noglob
-      echo "vsnames = \"$dup_vsnames\"\n" >> $next_filename
+      echo -e "vsnames = \"$selected_vservers\"\n" >> $next_filename
       for ((i=0; i < ${#dup_vsincludes[@]} ; i++)); do
          echo "vsinclude = ${dup_vsincludes[$i]}" >> $next_filename
       done
@@ -408,7 +407,6 @@ dup_wizard() {
    declare -a dup_includes
    declare -a dup_excludes
    declare -a dup_vsincludes
-   dup_vsnames=
    dup_incremental=yes
    dup_keep=60
    dup_bandwidth=
