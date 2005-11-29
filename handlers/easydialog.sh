@@ -157,11 +157,13 @@ listBegin() {
    _menu_items=0
    _menu_text=
    _menu_labels=
+   _menu_status=
 }
 
 listItem() {
    _menu_labels[$_menu_items]=$1
    _menu_text[$_menu_items]=$2
+   _menu_status[$_menu_items]=$3 # available only for checklist
    let "_menu_items += 1"
 }
 
@@ -175,6 +177,9 @@ listDisplay() {
    local temp=$(mktemp -t) || exit 1
    trap "rm -f $temp" 0
    
+   local label
+   local text
+   local status
    (
       echo -ne " $HELP $_DEFAULT "
       echo -ne " --backtitle '$BACKTITLE' "
@@ -184,7 +189,8 @@ listDisplay() {
       for ((i=0; i < $_menu_items ; i++)); do
         label=${_menu_labels[$i]}
         text=${_menu_text[$i]}
-        echo -ne " $label '$text' "
+	status=${_menu_status[$i]}
+        echo -ne " $label '$text' $status "
       done
    ) | xargs $DIALOG 2> $temp
    
