@@ -112,6 +112,7 @@ sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 EXTRALIBS = easydialog tools
+CLEANFILES = $(EXTRALIBS)
 dist_pkglib_DATA = $(EXTRALIBS)
 EXTRA_DIST = easydialog.in tools.in
 edit = sed \
@@ -225,6 +226,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)

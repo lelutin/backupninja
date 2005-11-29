@@ -1,4 +1,5 @@
 EXTRALIBS = easydialog tools
+CLEANFILES = $(EXTRALIBS)
 dist_pkglib_DATA = $(EXTRALIBS)
 EXTRA_DIST = easydialog.in tools.in
 
