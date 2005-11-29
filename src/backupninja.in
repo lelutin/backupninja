@@ -431,7 +431,7 @@ fi
 [ -f "$logfile" ] || touch $logfile
 
 if [ "$UID" != "0" ]; then
-	echo "$0 can only be run as root"
+	echo "`basename $0` can only be run as root"
 	exit 1
 fi
 
