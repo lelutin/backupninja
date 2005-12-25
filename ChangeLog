@@ -1,4 +1,5 @@
 version 0.9.2 -- unreleased 
+	fixed duplicity globbing support in include and exclude options 
 	trac handler mkdir subdirectory problem fixed
 	fixed broken toint() causing backups not to run when set to "everyday"
 	update backupninja.conf.5 man page to include "when" and "vservers"
