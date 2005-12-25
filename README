@@ -218,13 +218,15 @@ VSERVERS
 ========
 
 If you are using Linux-Vservers (http://linux-vserver.org/) there are some
-special capabilities that different handlers have to make vserver backups easier.
+special capabilities that different handlers have to make vserver 
+backups easier.
+
 Set the variable "vservers" to be "yes" in /etc/backupninja.conf and see the
 example configuration files for each handler to configure the vserver specific
 variables.
 
-Additional vserver variables that can be configured in /etc/backupninja.conf. but
-probably don't need to be changed:
+Additional vserver variables that can be configured in /etc/backupninja.conf, 
+but they probably don't need to be changed:
 
 VSERVERINFO (default: /usr/sbin/vserver-info)
 VSERVER (default: /usr/sbin/vserver)
