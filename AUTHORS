@@ -7,9 +7,10 @@ micah@riseup.net   -- debian package, vserver support, bug fixes
 stefani@riseup.net -- makecd handler, man pages
 intrigeri@boum.org -- dup handler, pgsql handler, vserver support, bug fixes
 Charles Lepple     -- trac handler
-Petr Klíma	   -- autotools support
+Petr Klíma	   -- autotools and RPM support
 
 Patches: 
 
 cmccallum@thecsl.org
 Daniel.Bonniot@inria.fr
+Brad Fritz <brad@fritzfam.com> -- trac patch
