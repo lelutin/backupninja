@@ -1,0 +1,62 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH NINJAHELPER 1 "December 24, 2005" "riseup" "backupninja package"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+NINJAHELPER \- A menu driven curses-based interface to walk you through
+backupninja configuration.
+.br
+.SH SYNOPSIS
+.B "ninjahelper"
+.br
+.SH DESCRIPTION
+.B Ninjahelper
+is an helper script to walk you through configuration of the backup
+tasks for backupninja. It is a curses based "wizard" with an intuitive 
+menu-driven interface.
+.PP
+.SH ADDING NEW HELPERS
+.br
+To add an additional 'wizard' to ninjahelper, follow these steps:
+.IP (1)
+create a file in the handlers directory (eg. /usr/share/backupninja) using
+the .helper extention. For example, if you wish to create a helper for the
+handler "blue", create the file /usr/share/backupninja/blue.helper.
+.IP (2)
+next, add your helper to the global HELPERS variable and define the main
+function for your helper (the function name is always <helper>_wizard). To
+use the blue.helper as an example: 
+HELPERS="$HELPERS blue:description_of_this_helper"
+       blue_wizard() {
+         ... do work here ...
+       }
+.IP (3)
+look at the existing helpers to see how they are written. Try to re-use
+functions, such as the dialog functions that are defined in easydialog.sh,
+or the vserver functions defined in lib/vserver
+.IP (4)
+test, re-test, and test again. Try to break the helper by going backwards,
+try to think like someone who has no idea how to configure your handler
+would think, try to make your helper as simple as possible. Walk like a cat,
+become your shadow, don't let your senses betray you.
+
+.SH SEE ALSO
+.BR backupninja (1), 
+.BR backupninja.conf (5), 
+.BR backup.d (5), 
+.br
+.SH AUTHOR
+BACKUPNINJA was written by the riseup.net collective.
