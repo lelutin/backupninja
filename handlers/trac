@@ -14,14 +14,15 @@ for repo in `find . -name VERSION`
 do
     repo=`dirname $repo`
 
-    # Just make the $tmp dir, not $tmp/$repo
-    ret=`mkdir -p $tmp 2>&1`
+    # Just make the parent directory for $tmp/$repo
+    parentdir=`dirname $tmp/$repo`
+    ret=`mkdir -p $parentdir 2>&1`
     code=$?
     if [ "$ret" ]; then
        debug "$ret"
     fi
     if [ $code != 0 ]; then
-       error "command failed mkdir -p $tmp"
+       error "command failed mkdir -p $parentdir"
     fi
 
     ret=`trac-admin $src/$repo hotcopy $tmp/$repo 2>&1`
