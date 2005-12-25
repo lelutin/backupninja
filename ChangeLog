@@ -18,6 +18,7 @@ version 0.9.2 -- unreleased
 	added duplicity ninjahelper, including:
 		a nice menu to choose the Vservers to backup (thanks to
 		lib/vserver)
+	added man/ninjahelper.1 man page
 	
 version 0.9.1 -- November 05 2005
 	rearranged source so that it is relocatable with autotools
