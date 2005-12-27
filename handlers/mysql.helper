@@ -1,16 +1,39 @@
 HELPERS="$HELPERS mysql:mysql_database_backup"
 
-do_mysql_user() {
-  inputBox "mysql action wizard" "specify a system user:"
-  [ $? = 1 ] && return
-  do_mysql_final "user = $REPLY"
+do_mysql_vserver() {
+   choose_one_vserver "$mysql_title"
+   [ $? = 0 ] || return 1
+   mysql_vsname="vsname = $REPLY"
+}
+
+do_mysql_databases() {
+   REPLY=
+   while [ -z "$REPLY" ]; do
+      formBegin "$mysql_title: databases"
+         formItem "Database:"
+	 formItem "Database:"
+	 formItem "Database:"
+	 formItem "Database:"
+	 formItem "Database:"
+	 formItem "Database:"
+	 formItem "Database:"
+	 formItem "Database:"
+	 formItem "Database:"
+	 formItem "Database:"
+      formDisplay
+      [ $? = 0 ] || return 1
+      mysql_databases="databases = "
+      for i in $REPLY; do
+	 [ -n "$i" ] && mysql_databases="$mysql_databases $i"
+      done
+   done
 }
 
 do_mysql_password() {
-  inputBox "mysql action wizard" "specify a mysql user:"
+  inputBox "$mysql_title" "specify a mysql user:"
   [ $? = 1 ] && return
   user=$REPLY
-  inputBox "mysql action wizard" "specify the mysql user's password:"
+  inputBox "$mysql_title" "specify the mysql user's password:"
   [ $? = 1 ] && return
   password=$REPLY
   do_mysql_final "dbusername = $user\ndbpassword = $password"
@@ -22,14 +45,14 @@ do_mysql_debian() {
 }
 
 do_mysql_user() {
-  inputBox "mysql action wizard" "what system user does mysql backup use?"
+  inputBox "$mysql_title" "what system user does mysql backup use?"
   [ $? = 1 ] && return
   do_mysql_final "user = $REPLY"
 }
 
 do_mysql_final() {
    if [ -z "$_DISABLE_HOTCOPY" ]; then
-      checkBox "mysql action wizard" "check options" \
+      checkBox "$mysql_title" "check options" \
          "sqldump" "create a backup using mysqldump (more compat)." no \
          "hotcopy" "create a backup using mysqlhotcopy (faster)." yes \
          "compress" "compress the sql output files" yes
@@ -37,7 +60,7 @@ do_mysql_final() {
       sqldump="sqldump = no"
       hotcopy="hotcopy = no"
    else
-      checkBox "mysql action wizard" "check options" \
+      checkBox "$mysql_title" "check options" \
          "compress" "compress the sql output files" yes
       status=$?
       sqldump="sqldump = yes"
@@ -55,22 +78,96 @@ do_mysql_final() {
       esac
    done
    get_next_filename $configdirectory/20.mysql
-   echo -e $@ > $next_filename
+   
    cat >> $next_filename <<EOF
-$sqldump
+### backupninja MySQL config file ###
+
+# hotcopy = < yes | no > (default = no)
+# make a backup of the actual database binary files using mysqlhotcopy.
 $hotcopy
+
+# sqldump = < yes | no > (default = no)
+# make a backup using mysqldump. this creates text files with sql commands
+# sufficient to recontruct the database.
+#
+$sqldump
+
+# compress = < yes | no > (default = yes)
+# if yes, compress the sqldump output.
 $compress
-# databases   = all
-# backupdir   = /var/backups/mysql
-# dbhost      = localhost
+
+# dbhost      = <host> (default = localhost)
+
 EOF
+   cat >> $next_filename <<EOF
+
+# backupdir = <dir> (default: /var/backups/mysql)
+# where to dump the backups. hotcopy backups will be in a subdirectory
+# 'hotcopy' and sqldump backups will be in a subdirectory 'sqldump'
+$mysql_backupdir
+
+# databases = <all | db1 db2 db3 > (default = all)
+# which databases to backup. should either be the word 'all' or a 
+# space separated list of database names.
+$mysql_databases
+
+EOF
+
+if [ $host_or_vservers == vservers ]
+   then
+       cat >> $next_filename <<EOF
+#
+# vsname = <vserver> (no default)
+# vsname indicates which vserver to operate on, this is only used if 
+# vserver is set to yes in /etc/backupninja.conf
+# NOTE: if you do not specify a vsname the host will be operated on
+# alsoNOTE: if operating on a vserver, $VROOTDIR will be 
+# prepended to backupdir.
+EOF
+   echo -e "$mysql_vsname\n" >> $next_filename
+fi
+
+   echo -e $@ >> $next_filename
+   
    chmod 600 $next_filename
 }
 
 mysql_wizard() {
+   
+   # Global variables
+   mysql_title="MySQL action wizard"
+   
+   # backup the host system or a Vserver?
+   choose_host_or_one_vserver "$mysql_title"
+   [ $? = 0 ] || return 1
+   if [ $host_or_vservers == vservers ]
+   then
+       do_mysql_vserver
+       [ $? = 0 ] || return 1
+   fi
+      
+   # backupdir
+   if [ $host_or_vservers == vservers ]
+   then
+       inputBox "$mysql_title" "Directory where to store the backups:`echo \"\n(Relative to chosen vserver's root directory)\"`" "/var/backups/mysql"
+   else
+       inputBox "$mysql_title" "Directory where to store the backups" "/var/backups/mysql"
+   fi
+   [ $? = 1 ] && return
+   mysql_backupdir="backupdir = $REPLY"
+
+   # databases
+   booleanBox "$mysql_title" "Do you want to backup all of the databases? `echo \"\n\nIf not, you'll be offered to choose individual databases to backup.\"`"
+   if [ $? = 0 ]; then
+      mysql_databases="databases = all"
+   else
+      do_mysql_databases
+      [ $? = 0 ] || return 1
+   fi
+   
    while true; do
       _DISABLE_HOTCOPY=
-      menuBoxHelpFile "mysql action wizard" "choose a mysql authentication method:" \
+      menuBoxHelpFile "$mysql_title" "choose a mysql authentication method:" \
         user "change to a linux user first." \
         password "manually specify mysql user and password." \
         debian "use default mysql user debian-sys-maint." 
@@ -109,6 +206,5 @@ EOF
          "password") do_mysql_password;return;;
          "debian") do_mysql_debian;return;;
       esac
-   done
+   done   
 }
-
