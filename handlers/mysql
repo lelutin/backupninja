@@ -161,72 +161,84 @@ fi
 #######################################################################
 ## HOT COPY
 
-if [ "$hotcopy" == "yes" ]; then 
-	if [ "$databases" == "all" ]; then
+if [ "$hotcopy" == "yes" ]
+then
+    info "Initializing hotcopy method"
+    if [ "$databases" == "all" ]
+    then
+	if [ $usevserver ]
+	then
+		execstr="$VSERVER $vsname exec $MYSQLHOTCOPY --quiet --allowold --regexp /.\*/./.\*/ $hotdir"
+	else
+		execstr="$MYSQLHOTCOPY --quiet --allowold --regexp /.\*/./.\*/ $hotdir"
+	fi
+	debug "su $user -c '$execstr'"
+	if [ ! $test ]
+	then
+		output=`su $user -c "$execstr" 2>&1`
+		code=$?
+		if [ "$code" == "0" ]
+		then
+			debug $output
+			info "Successfully finished hotcopy of all mysql databases"
+		else
+			warning $output
+			warning "Failed to hotcopy all mysql databases"
+		fi
+	fi
+    else	
+	for db in $databases
+	do
 		if [ $usevserver ]
 		then
-			execstr="$VSERVER $vsname exec $MYSQLHOTCOPY --quiet --allowold --regexp /.\*/./.\*/ $hotdir"
+			execstr="$VSERVER $vsname exec $MYSQLHOTCOPY --allowold $db $hotdir"
 		else
-			execstr="$MYSQLHOTCOPY --quiet --allowold --regexp /.\*/./.\*/ $hotdir"
+			execstr="$MYSQLHOTCOPY --allowold $db $hotdir"
 		fi
 		debug "su $user -c '$execstr'"
-		if [ ! $test ]; then
+		if [ ! $test ]
+		then
 			output=`su $user -c "$execstr" 2>&1`
 			code=$?
-			if [ "$code" == "0" ]; then
+			if [ "$code" == "0" ]
+			then
 				debug $output
-				info "Successfully finished hotcopy of all mysql databases"
+				info "Successfully finished hotcopy of mysql database $db"
 			else
 				warning $output
-				warning "Failed to hotcopy all mysql databases"
+				warning "Failed to hotcopy mysql database $db"
 			fi
 		fi
-	else	
-		for db in $databases; do
-			if [ $usevserver ]
-			then
-				execstr="$VSERVER $vsname exec $MYSQLHOTCOPY --allowold $db $hotdir"
-			else
-				execstr="$MYSQLHOTCOPY --allowold $db $hotdir"
-			fi
-			debug "su $user -c '$execstr'"
-			if [ ! $test ]; then
-				output=`su $user -c "$execstr" 2>&1`
-				code=$?
-				if [ "$code" == "0" ]; then
-					debug $output
-					info "Successfully finished hotcopy of mysql database $db"
-				else
-					warning $output
-					warning "Failed to hotcopy mysql database $db"
-				fi
-			fi
-		done
-	fi
+	done
+     fi
 fi
 
 ##########################################################################
 ## SQL DUMP
 
-if [ "$sqldump" == "yes" ]; then
-	if [ "$databases" == "all" ]; then
-		if [ $usevserver ]
+if [ "$sqldump" == "yes" ]
+then
+    info "Initializing SQL dump method"
+    if [ "$databases" == "all" ]
+    then
+	if [ $usevserver ]
+	then
+		databases=`echo 'show databases' | $VSERVER $vsname exec su $user -c "$MYSQL $defaultsfile" | grep -v Database`
+		if [ $? -ne 0 ]
 		then
-			databases=`echo 'show databases' | $VSERVER $vsname exec su $user -c "$MYSQL $defaultsfile" | grep -v Database`
-			if [ $? -ne 0 ]
-			then
-			    fatal "Something unexpected happened, the defaults file may have gone missing or is corrupt"
-			fi
-		else
-			databases=`echo 'show databases' | su $user -c "$MYSQL $defaultsfile" | grep -v Database`
-			if [ $? -ne 0 ]
-			then
-			    fatal "Something unexpected happened, the defaults file may have gone missing or is corrupt"
-			fi
+		    fatal "Something unexpected happened, the defaults file may have gone missing or is corrupt"
+		fi
+	else
+		databases=`echo 'show databases' | su $user -c "$MYSQL $defaultsfile" | grep -v Database`
+		if [ $? -ne 0 ]
+		then
+		    fatal "Something unexpected happened, the defaults file may have gone missing or is corrupt"
 		fi
 	fi
+fi
 
-	for db in $databases; do
+	for db in $databases
+	do
 		if [ $usevserver ]
 		then
 			execstr="$VSERVER $vsname exec $MYSQLDUMP $defaultsfile --lock-tables --complete-insert --add-drop-table --quick --quote-names $ignore $db > $vroot$dumpdir/${db}.sql"
@@ -234,10 +246,12 @@ if [ "$sqldump" == "yes" ]; then
 			execstr="$MYSQLDUMP $defaultsfile --lock-tables --complete-insert --add-drop-table --quick --quote-names $ignore $db > $dumpdir/${db}.sql"
 		fi
 		debug "su $user -c '$execstr'"
-		if [ ! $test ]; then
+		if [ ! $test ]
+		then
 			output=`su $user -c "$execstr" 2>&1`
 			code=$?
-			if [ "$code" == "0" ]; then
+			if [ "$code" == "0" ]
+			then
 				debug $output
 				info "Successfully finished dump of mysql database $db"
 			else
@@ -247,18 +261,21 @@ if [ "$sqldump" == "yes" ]; then
 		fi
 	done
 	
-	if [ "$compress" == "yes" ]; then
+	if [ "$compress" == "yes" ]
+	then
 		output=`$GZIP -f $vroot$dumpdir/*.sql 2>&1`
 		debug $output
 	fi
 fi
 
 # clean up tmp config file
-if [ "$dbusername" != "" ]; then
+if [ "$dbusername" != "" ]
+then
 	## clean up tmp config file
 	debug "rm $mycnf"
 	rm $mycnf
-	if [ -f "$tmpcnf" ]; then
+	if [ -f "$tmpcnf" ]
+	then
 		debug "mv $tmpcnf $mycnf"
 		mv $tmpcnf $mycnf
 	fi
