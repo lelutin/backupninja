@@ -107,7 +107,8 @@ then
     fi
     [ -d $home ] || fatal "Can't find root's home directory ($home)."
     mycnf="$home/.my.cnf"
-    if [ -f $mycnf ]; then
+    if [ -f $mycnf ]
+    then
 	# rename temporarily
 	tmpcnf="$home/my.cnf.disable"
 	debug "mv $mycnf $tmpcnf"
