@@ -88,14 +88,18 @@ choose_one_vserver() {
 }
 
 ##
-## If Vservers are not enabled, exit silently.
+## If Vservers are not enabled, set host_or_vservers='host' and then return 
 ## Else, have the user choose if he/she wants to perform the backup on the host
 ## system or on one Vserver.
 ## Set, respectively, $host_or_vservers to 'host' or 'vservers'.
 ## Returns 1 if cancelled.
 ##
 choose_host_or_one_vserver() {
-   [ "$vservers_are_available" == "yes" ] || return
+   if [ "$vservers_are_available" != "yes" ] 
+   then
+       host_or_vservers='host'
+       return
+   fi
    local title=$1
    # if there is one, set the previously chosen item as the default
    [ -n "$host_or_vservers" ] && setDefault $host_or_vservers
@@ -114,7 +118,7 @@ choose_host_or_one_vserver() {
 }
 
 ##
-## If Vservers are not enabled, exit silently.
+## If Vservers are not enabled, set host_or_vservers='host' and then return
 ## Else, have the user choose the target he/she wants to perform the backup on:
 ##   - host system only;
 ##   - some vservers only;
@@ -123,7 +127,11 @@ choose_host_or_one_vserver() {
 ## Returns 1 if cancelled.
 ##
 choose_host_or_vservers_or_both() {
-   [ "$vservers_are_available" == "yes" ] || return
+   if [ "$vservers_are_available" != "yes" ] 
+   then
+       host_or_vservers='host'
+       return
+   fi
    local title=$1
    # if there is one, set the previously chosen item as the default
    [ -n "$host_or_vservers" ] && setDefault $host_or_vservers
