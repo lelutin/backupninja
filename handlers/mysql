@@ -56,8 +56,11 @@ then
 	vroot="$VROOTDIR/$vsname"
 	[ -d $vroot ] || fatal "vserver '$vsname' does not exist at '$vroot'"
 	# is it running ?
-	running=`$VSERVERINFO $vsname RUNNING`
-	[ "$running" = "1" ] || fatal "vserver $vsname is not running."
+	$VSERVERINFO $vsname RUNNING
+	if [ $? -ne 0 ]
+	then
+		fatal "vserver $vsname is not running."
+	fi
 fi
 	
 # create backup dirs, the vroot variable will be empty if no vsname was specified
