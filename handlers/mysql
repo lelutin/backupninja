@@ -120,8 +120,11 @@ then
     if [ $usevserver ]
     then
     	home=`$VSERVER $vsname exec getent passwd "root" | awk -F: '{print $6}'`
+	home="$vroot$home"
+	info "Home set to: $home"
     else
     	home=`getent passwd "root" | awk -F: '{print $6}'`
+	info "Home set to: $home"
     fi
     [ -d $home ] || fatal "Can't find root's home directory ($home)."
     mycnf="$home/.my.cnf"
@@ -151,7 +154,7 @@ EOF
 	umask $oldmask
 	defaultsfile="--defaults-file=$mycnf"
 elif [ "$userset" == "false" ]; then
-	# if user is set, don't use $configfile
+	# if user is set, don't use $mycnf
 	defaultsfile="--defaults-file=$configfile"
 fi
 
