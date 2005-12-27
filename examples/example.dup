@@ -19,12 +19,16 @@ nicelevel = 19
 password = a_very_complicated_passphrase
 
 # default is no, for backward compatibility with backupninja <= 0.5.
-# when set to yes, encryptkey option must be set below.
+# when set to yes, either signkey or encryptkey option must be set below.
 sign = yes
 
-# key ID used for data encryption and, optionnally, signing.
-# if not set, local root's default gpg key is used.
+# key ID used for data encryption.
+# if not set, local root's default GnuPG key is used.
 encryptkey = 04D9EA79
+
+# key ID used for data signing.
+# if not set, encryptkey will be used.
+#signkey = 04D9EA79
 
 ######################################################
 ## source section

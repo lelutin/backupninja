@@ -11,6 +11,7 @@ setsection gpg
 getconf password
 getconf sign no
 getconf encryptkey
+getconf signkey
 
 setsection source
 getconf include
@@ -79,11 +80,17 @@ scpoptions="$sshoptions"
 
 execstr="$options --no-print-statistics --scp-command 'scp $scpoptions' --ssh-command 'ssh $sshoptions' "
 
-if [ "$encryptkey" == "" ]; then
-    [ "$sign" != "yes" ] || fatal "encryptkey option must be set when signing."
-else
-    execstr="${execstr}--encrypt-key $encryptkey "
-    [ "$sign" != "yes" ] || execstr="${execstr}--sign-key $encryptkey "
+# if encryptkey is set, add --encrypt-key to the command-line
+[ -z "$encryptkey" ] || execstr="${execstr}--encrypt-key $encryptkey "
+# if signkey is not set, set it to encryptkey
+[ -n "$signkey" ] || signkey="$encryptkey"
+# if needed, add --sign-key to command-line
+if [ "$sign" == "yes" ]; then
+    if [ -n "$signkey" ]; then
+	execstr="${execstr}--sign-key $signkey "
+    else
+	fatal "Either encryptkey or signkey option must be set when signing."
+    fi
 fi
 
 if [ "$keep" != "yes" ]; then
