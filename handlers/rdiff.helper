@@ -5,7 +5,7 @@ declare -a rdiff_excludes
 
 do_rdiff_dest() {
   set -o noglob
-  formBegin "rdiff action wizard"
+  formBegin "$rdiff_title"
     formItem "keep" "$rdiff_keep"
     formItem "dest_directory" "$rdiff_directory"
     formItem "dest_host" "$rdiff_host"
@@ -32,7 +32,7 @@ do_rdiff_dest() {
 do_rdiff_src() {
   #echo ${rdiff_includes[@]}
   set -o noglob
-  formBegin "rdiff action wizard: includes"
+  formBegin "$rdiff_title: includes"
     for ((i=0; i < ${#rdiff_includes[@]} ; i++)); do
        formItem include ${rdiff_includes[$i]}
     done
@@ -45,7 +45,7 @@ do_rdiff_src() {
   unset rdiff_includes
   rdiff_includes=($REPLY)
 
-  formBegin "rdiff action wizard: excludes" 
+  formBegin "$rdiff_title: excludes" 
     for ((i=0; i < ${#rdiff_excludes[@]} ; i++)); do
        formItem exclude ${rdiff_excludes[$i]}
     done
@@ -65,16 +65,16 @@ do_rdiff_src() {
 do_rdiff_ssh_con() {
   IFS=$' \t\n'
   if [ "$_dest_done" = "" ]; then
-    msgBox "rdiff action wizard: error" "You must first configure the destination."
+    msgBox "$rdiff_title: error" "You must first configure the destination."
     return
   elif [ "$rdiff_user" = "" ]; then
-    msgBox "rdiff action wizard: error" "You must first configure the destination user."
+    msgBox "$rdiff_title: error" "You must first configure the destination user."
     return
   elif [ "$rdiff_host" = "" ]; then
-    msgBox "rdiff action wizard: error" "You must first configure the destination host."
+    msgBox "$rdiff_title: error" "You must first configure the destination host."
     return
   else
-    booleanBox "rdiff action wizard" "This step will create a ssh key for the local root user with no passphrase (if one does not already exist), and attempt to copy root's public ssh key to authorized_keys file of $rdiff_user@$rdiff_host. This will allow the local root to make unattended backups to $rdiff_user@$rdiff_host.\n\n\nAre you sure you want to continue?"
+    booleanBox "$rdiff_title" "This step will create a ssh key for the local root user with no passphrase (if one does not already exist), and attempt to copy root's public ssh key to authorized_keys file of $rdiff_user@$rdiff_host. This will allow the local root to make unattended backups to $rdiff_user@$rdiff_host.\n\n\nAre you sure you want to continue?"
     [ $? = 0 ] || return
   fi
 
@@ -96,10 +96,10 @@ do_rdiff_ssh_con() {
       echo "Hit return to continue."
       read
       case $result in
-        0 )   msgBox "rdiff action wizard: error" "Directories are writable: Probably just a typo the first time." ;;
-        1 )   msgBox "rdiff action wizard: error" "Connected successfully to $rdiff_user@$rdiff_host, but unable to write. Check ownership and modes of ~$rdiff_user on $rdiff_host." ;;
-        255 ) msgBox "rdiff action wizard: error" "Failed to connect to $rdiff_user@$rdiff_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host." ;;
-        * )   msgBox "rdiff action wizard: error" "Unexpected error." ;;
+        0 )   msgBox "$rdiff_title: error" "Directories are writable: Probably just a typo the first time." ;;
+        1 )   msgBox "$rdiff_title: error" "Connected successfully to $rdiff_user@$rdiff_host, but unable to write. Check ownership and modes of ~$rdiff_user on $rdiff_host." ;;
+        255 ) msgBox "$rdiff_title: error" "Failed to connect to $rdiff_user@$rdiff_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host." ;;
+        * )   msgBox "$rdiff_title: error" "Unexpected error." ;;
       esac 
       return
     else
@@ -134,19 +134,19 @@ do_rdiff_ssh_con() {
 		read
 		case $result in
 			0)   
-				msgBox "rdiff action wizard: success" "Creation of the remote destination directory was a success!" 
+				msgBox "$rdiff_title: success" "Creation of the remote destination directory was a success!" 
 				remote_status=0
 			;;
 			1)   
-				msgBox "rdiff action wizard: error" "Connected successfully to $rdiff_user@$rdiff_host, but was unable to create the destination directory, check the directory permissions." 
+				msgBox "$rdiff_title: error" "Connected successfully to $rdiff_user@$rdiff_host, but was unable to create the destination directory, check the directory permissions." 
 				remote_status=1
 			;;
 			255) 
-				msgBox "rdiff action wizard: error" "Failed to connect to $rdiff_user@$rdiff_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host." 
+				msgBox "$rdiff_title: error" "Failed to connect to $rdiff_user@$rdiff_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host." 
 				remote_status=1
 			;;
 			*)   
-				msgBox "rdiff action wizard: error" "Unexpected error." 
+				msgBox "$rdiff_title: error" "Unexpected error." 
 				remote_status=1
 			;;
 			esac 
@@ -179,17 +179,17 @@ do_rdiff_con() {
 				read
 				case $result in
 					0)   
-						msgBox "rdiff action wizard: success" "Installation of rdiff-backup was a success!" 
+						msgBox "$rdiff_title: success" "Installation of rdiff-backup was a success!" 
 						do_rdiff_con
 					;;
 					1)   
-						msgBox "rdiff action wizard: error" "Connected successfully to $rdiff_user@$rdiff_host, but was unable to install the package for some reason." 
+						msgBox "$rdiff_title: error" "Connected successfully to $rdiff_user@$rdiff_host, but was unable to install the package for some reason." 
 					;;
 					255) 
-						msgBox "rdiff action wizard: error" "Failed to connect to $rdiff_user@$rdiff_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host." 
+						msgBox "$rdiff_title: error" "Failed to connect to $rdiff_user@$rdiff_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host." 
 					;;
 					*)   
-						msgBox "rdiff action wizard: error" "Unexpected error." 
+						msgBox "$rdiff_title: error" "Unexpected error." 
 					;;
 				esac 
 				return
@@ -258,7 +258,7 @@ rdiff_main_menu() {
     destitem="configure backup destination $_dest_done"
     conitem="set up ssh keys and test remote connection $_con_done"
     advitem="edit advanced settings $_adv_done"
-    menuBox "rdiff action wizard" "choose a step:" \
+    menuBox "$rdiff_title" "choose a step:" \
         src "$srcitem" \
         dest "$destitem" \
         conn "$conitem" \
@@ -273,7 +273,7 @@ rdiff_main_menu() {
        "adv") do_rdiff_adv;;
        "finish")
           if [[ "$_con_done$_dest_done$_src_done" != "(DONE)(DONE)(DONE)" ]]; then
-            msgBox "rdiff action wizard" "You cannot create the configuration file until the other steps are completed."
+            msgBox "$rdiff_title" "You cannot create the configuration file until the other steps are completed."
           else
             do_rdiff_finish
             return
@@ -286,6 +286,9 @@ rdiff_main_menu() {
 
 rdiff_wizard() {
   require_packages rdiff-backup
+  
+  # Global variables
+  rdiff_title="rdiff-backup action wizard"
   _src_done=
   _dest_done=
   _con_done=
