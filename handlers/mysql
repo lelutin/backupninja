@@ -35,7 +35,7 @@ fi
 # If needed, make sure that the specified vserver exists and is running.
 if [ $usevserver ]
 then
-	info "Examining vserver '$vsname'"
+	debug "Examining vserver '$vsname'"
 	# does it exist ?
 	vroot="$VROOTDIR/$vsname"
 	[ -d $vroot ] || fatal "vserver '$vsname' does not exist at '$vroot'"
@@ -60,7 +60,7 @@ else
 	    	fatal "User $user not found in /etc/passwd"
 	    fi
     	    userhome="$vroot$userhome"
-	    info "User home set to: $userhome"
+	    debug "User home set to: $userhome"
 	    [ -f $userhome/.my.cnf ] || fatal "Can't find config file in $userhome/.my.cnf"
 	else
 	    userhome=`getent passwd "$user" | awk -F: '{print $6}'`
@@ -68,7 +68,7 @@ else
 	    then
 	    	fatal "User $user not found in /etc/passwd"
 	    fi
-       	    info "User home set to: $userhome"
+       	    debug "User home set to: $userhome"
     	    [ -f $userhome/.my.cnf ] || fatal "Can't find config file in $userhome/.my.cnf"
 	fi
 fi
@@ -121,10 +121,10 @@ then
     then
     	home=`$VSERVER $vsname exec getent passwd "root" | awk -F: '{print $6}'`
 	home="$vroot$home"
-	info "Home set to: $home"
+	debug "Home set to: $home"
     else
     	home=`getent passwd "root" | awk -F: '{print $6}'`
-	info "Home set to: $home"
+	debug "Home set to: $home"
     fi
     [ -d $home ] || fatal "Can't find root's home directory ($home)."
     mycnf="$home/.my.cnf"
