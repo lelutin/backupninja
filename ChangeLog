@@ -6,13 +6,18 @@ version 0.9.2 -- unreleased
 			. moved to lib/ some code that has to be shared between
 			  backupninja and ninjahelper
 	handler changes:
-		trac mkdir subdirectory problem fixed
-		fixed duplicity globbing support in include and exclude options 
-		fixed missing makecd.helper in Makefile.am/.in
-		mysql handler vserver bugs fixed and debug output enhanced
+		trac:
+			. mkdir subdirectory problem fixed
+		duplicity:
+			. globbing support fixed in include and exclude options 
+			. different signing and encrypting key support added
+		mysql:
+			. handler vserver bugs fixed and debug output enhanced
 	ninjahelper(s) changes:
 		vserver-related functions added to lib/vservers.in
 		added man/ninjahelper.1 man page
+		makecd:
+			. was missing in Makefile.am/.in
 		rdiff-backup:
 			. used to expand '*' in default source directories
 			. the "Cancel" buttons used to have a weird behaviour
