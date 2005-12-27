@@ -63,7 +63,7 @@ then
 	fi
 fi
 	
-# create backup dirs, the vroot variable will be empty if no vsname was specified
+# create backup dirs, vroot variable will be empty if no vsname was specified
 # and will proceed to operate on the host
 [ -d $vroot$backupdir ] || mkdir -p $vroot$backupdir
 [ -d $vroot$backupdir ] || fatal "Backup directory '$vroot$backupdir'"
@@ -97,19 +97,25 @@ fi
 # specify the password on the command line.
 
 defaultsfile=""
-if [ "$dbusername" != "" -a "$dbpassword" != "" ]; then
-	home=`getent passwd "root" | awk -F: '{print $6}'`
-	[ -d $home ] || fatal "Can't find root's home directory ($home)."
-	mycnf="$home/.my.cnf"
-	if [ -f $mycnf ]; then
-		# rename temporarily
-		tmpcnf="$home/my.cnf.disable"
-		debug "mv $mycnf $tmpcnf"
-		mv $mycnf $tmpcnf
-	fi
-	oldmask=`umask`
-	umask 077
-	cat > $mycnf <<EOF
+if [ "$dbusername" != "" -a "$dbpassword" != "" ]
+then
+    if [ $usevserver ]
+    then
+    	home=`$VSERVER $vsname exec getent passwd "root" | awk -F: '{print $6}'`
+    else
+    	home=`getent passwd "root" | awk -F: '{print $6}'`
+    fi
+    [ -d $home ] || fatal "Can't find root's home directory ($home)."
+    mycnf="$home/.my.cnf"
+    if [ -f $mycnf ]; then
+	# rename temporarily
+	tmpcnf="$home/my.cnf.disable"
+	debug "mv $mycnf $tmpcnf"
+	mv $mycnf $tmpcnf
+    fi
+    oldmask=`umask`
+    umask 077
+    cat > $mycnf <<EOF
 # auto generated backupninja mysql conf
 [mysql]
 user=$dbusername
@@ -185,8 +191,16 @@ if [ "$sqldump" == "yes" ]; then
 		if [ $usevserver ]
 		then
 			databases=`echo 'show databases' | $VSERVER $vsname exec su $user -c "$MYSQL $defaultsfile" | grep -v Database`
+			if [ $? -ne 0 ]
+			then
+			    fatal "Something unexpected happened, the defaults file may have gone missing or is corrupt"
+			fi
 		else
 			databases=`echo 'show databases' | su $user -c "$MYSQL $defaultsfile" | grep -v Database`
+			if [ $? -ne 0 ]
+			then
+			    fatal "Something unexpected happened, the defaults file may have gone missing or is corrupt"
+			fi
 		fi
 	fi
 
