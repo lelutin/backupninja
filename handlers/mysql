@@ -115,19 +115,21 @@ fi
 # specify the password on the command line.
 
 defaultsfile=""
+
 if [ "$dbusername" != "" -a "$dbpassword" != "" ]
 then
     if [ $usevserver ]
     then
-    	home=`$VSERVER $vsname exec getent passwd "root" | awk -F: '{print $6}'`
-	home="$vroot$home"
-	debug "Home set to: $home"
+    	vhome=`$VSERVER $vsname exec getent passwd "root" | awk -F: '{print $6}'`
+	home="$vroot$vhome"
     else
     	home=`getent passwd "root" | awk -F: '{print $6}'`
-	debug "Home set to: $home"
     fi
+
     [ -d $home ] || fatal "Can't find root's home directory ($home)."
+    
     mycnf="$home/.my.cnf"
+    
     if [ -f $mycnf ]
     then
 	# rename temporarily
@@ -135,27 +137,37 @@ then
 	debug "mv $mycnf $tmpcnf"
 	mv $mycnf $tmpcnf
     fi
+    
     oldmask=`umask`
     umask 077
     cat > $mycnf <<EOF
 # auto generated backupninja mysql conf
 [mysql]
+host=$dbhost
 user=$dbusername
 password="$dbpassword"
 
 [mysqldump]
+host=$dbhost
 user=$dbusername
 password="$dbpassword"
 
 [mysqlhotcopy]
+host=$dbhost
 user=$dbusername
 password="$dbpassword"
 EOF
 	umask $oldmask
-	defaultsfile="--defaults-file=$mycnf"
+	if [ $usevserver ] 
+	then
+	    defaultsfile="--defaults-file=$vhome/.my.cnf"
+	else
+	    defaultsfile="--defaults-file=$mycnf"
+	fi
+	
+# if user is set, don't use $mycnf	
 elif [ "$userset" == "false" ]; then
-	# if user is set, don't use $mycnf
-	defaultsfile="--defaults-file=$configfile"
+		defaultsfile="--defaults-file=$configfile"
 fi
 
 #######################################################################
@@ -223,11 +235,11 @@ then
     then
 	if [ $usevserver ]
 	then
-		databases=`echo 'show databases' | $VSERVER $vsname exec su $user -c "$MYSQL $defaultsfile" | grep -v Database`
-		if [ $? -ne 0 ]
-		then
-		    fatal "Something unexpected happened, the defaults file may have gone missing or is corrupt"
-		fi
+	    databases=`echo 'show databases' | $VSERVER $vsname exec su $user -c "$MYSQL $defaultsfile" | grep -v Database`
+	    if [ $? -ne 0 ]
+	    then
+	        fatal "Something unexpected happened, the defaults file may have gone missing or is corrupt"
+	    fi
 	else
 		databases=`echo 'show databases' | su $user -c "$MYSQL $defaultsfile" | grep -v Database`
 		if [ $? -ne 0 ]
