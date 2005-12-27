@@ -180,7 +180,8 @@ then
     then
 	if [ $usevserver ]
 	then
-		execstr="$VSERVER $vsname exec $MYSQLHOTCOPY --quiet --allowold --regexp /.\*/./.\*/ $hotdir"
+	    	info "dbhost: $dbhost"
+		execstr="$VSERVER $vsname exec $MYSQLHOTCOPY -h $dbhost --quiet --allowold --regexp /.\*/./.\*/ $hotdir"
 	else
 		execstr="$MYSQLHOTCOPY --quiet --allowold --regexp /.\*/./.\*/ $hotdir"
 	fi
