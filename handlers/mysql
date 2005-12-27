@@ -51,12 +51,12 @@ fi
 # If needed, make sure that the specified vserver exists and is running.
 if [ $usevserver ]
 then
-	info "examining vserver '$vsname'"
+	info "Examining vserver '$vsname'"
 	# does it exist ?
 	vroot="$VROOTDIR/$vsname"
 	[ -d $vroot ] || fatal "vserver '$vsname' does not exist at '$vroot'"
 	# is it running ?
-	$VSERVERINFO $vsname RUNNING
+	$VSERVERINFO -q $vsname RUNNING
 	if [ $? -ne 0 ]
 	then
 		fatal "vserver $vsname is not running."
