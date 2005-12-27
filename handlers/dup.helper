@@ -99,7 +99,7 @@ do_dup_dest() {
    set -o noglob
    REPLY=
    while [ -z "$REPLY" -o -z "$dup_destdir" -o -z "$dup_desthost" -o -z "$dup_destuser" ]; do
-      formBegin "$dup_title - destination: last three items are compulsory"
+      formBegin "$dup_title - destination: first three items are compulsory"
 	formItem "desthost" "$dup_desthost"
 	formItem "destuser" "$dup_destuser"
 	formItem "destdir" "$dup_destdir"
