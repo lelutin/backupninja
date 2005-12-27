@@ -52,8 +52,25 @@ if [ "$user" == "" ]; then
 	user=root;
 else
 	userset=true;
-	userhome=`getent passwd "$user" | awk -F: '{print $6}'`
-	[ -f $userhome/.my.cnf ] || fatal "Can't find config file in $userhome/.my.cnf"
+	if [ $usevserver ]
+	then
+	    userhome=`$VSERVER $vsname exec getent passwd "$user" | awk -F: '{print $6}'`
+	    if [ $? -eq 2 ]
+	    then
+	    	fatal "User $user not found in /etc/passwd"
+	    fi
+    	    userhome="$VROOTDIR/$vsname$userhome"
+	    info "User home set to: $userhome"
+	    [ -f $userhome/.my.cnf ] || fatal "Can't find config file in $userhome/.my.cnf"
+	else
+	    userhome=`getent passwd "$user" | awk -F: '{print $6}'`
+	    if [ $? -eq 2 ]
+	    then
+	    	fatal "User $user not found in /etc/passwd"
+	    fi
+       	    info "User home set to: $userhome"
+    	    [ -f $userhome/.my.cnf ] || fatal "Can't find config file in $userhome/.my.cnf"
+	fi
 fi
 
 ## Prepare ignore part of the command
