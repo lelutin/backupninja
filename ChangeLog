@@ -19,6 +19,8 @@ version 0.9.2 -- unreleased
 	added duplicity ninjahelper, including:
 		a nice menu to choose the Vservers to backup (thanks to
 		lib/vserver)
+	updated rdiff ninjahelper to include Vserver selection (thanks to
+		lib/vserver)
 	added man/ninjahelper.1 man page
 	duplicity handler: now possible to use different keys to encrypt and
 		sign

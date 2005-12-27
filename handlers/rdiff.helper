@@ -3,65 +3,139 @@ HELPERS="$HELPERS rdiff:incremental_remote_filesystem_backup"
 declare -a rdiff_includes
 declare -a rdiff_excludes
 
-do_rdiff_dest() {
-  set -o noglob
-  formBegin "$rdiff_title"
-    formItem "keep" "$rdiff_keep"
-    formItem "dest_directory" "$rdiff_directory"
-    formItem "dest_host" "$rdiff_host"
-    formItem "dest_user" "$rdiff_user"
-  formDisplay
-  [ $? = 0 ] || return
+# FUNCTIONS
 
-  IFS=$''
-  replyconverted=`echo $REPLY | tr '\n' :`
-  IFS=$':'
-  thereply=($replyconverted)
-  IFS=$' \t\n'
-  
-  rdiff_keep=${thereply[0]}
-  rdiff_directory=${thereply[1]}
-  rdiff_host=${thereply[2]}
-  rdiff_user=${thereply[3]}
+do_rdiff_host_includes() {
+   set -o noglob
+   # choose the files to backup
+   REPLY=
+   while [ -z "$REPLY" ]
+   do
+     formBegin "$rdiff_title - host system: includes"
+      	 for ((i=0; i < ${#rdiff_includes[@]} ; i++))
+      	 do
+      	   formItem include ${rdiff_includes[$i]}
+      	 done
+      	 formItem include 
+      	 formItem include 
+      	 formItem include 
+     	 formDisplay
+     [ $? = 0 ] || return
+     unset rdiff_includes
+     rdiff_includes="$REPLY"
+   done
+ set +o noglob
+}
 
-  _dest_done="(DONE)"
-  setDefault conn
-  set +o noglob
+do_rdiff_vserver() {
+   # choose the vservers to backup (into $selected_vservers)
+   choose_one_or_more_vservers "$rdiff_title"
+   [ $? = 0 ] || return 1
+
+   set -o noglob
+   # choose the files to backup
+   REPLY=
+
+   while [ -z "$REPLY" ]; do
+      formBegin "$rdiff_title - vsincludes (backup these directories from every vserver)"
+         [ -z "$rdiff_vsincludes" ] && rdiff_vsincludes="$rdiff_default_includes"
+   
+   	 for i in $rdiff_vsincludes; do
+            formItem include "$i"
+	 done
+	 
+	 formItem include ""
+	 formItem include ""
+	 formItem include ""
+       	 formDisplay
+      [ $? = 0 ] || return 1
+      rdiff_vsincludes="$REPLY"
+   done
+   
+   set +o noglob
+}
+
+do_rdiff_excludes() {
+   set -o noglob
+   formBegin "$rdiff_title: excludes" 
+     for ((i=0; i < ${#rdiff_excludes[@]} ; i++))
+     do
+       formItem exclude ${rdiff_excludes[$i]}
+     done
+     
+     formItem exclude 
+     formItem exclude 
+     formDisplay
+   
+   [ $? = 0 ] || return
+   unset rdiff_excludes
+   rdiff_excludes="$REPLY"
+   set +o noglob
 }
 
 do_rdiff_src() {
-  #echo ${rdiff_includes[@]}
-  set -o noglob
-  formBegin "$rdiff_title: includes"
-    for ((i=0; i < ${#rdiff_includes[@]} ; i++)); do
-       formItem include ${rdiff_includes[$i]}
-    done
-    formItem include 
-    formItem include 
-    formItem include 
-  formDisplay
-  [ $? = 0 ] || return
-
-  unset rdiff_includes
-  rdiff_includes=($REPLY)
-
-  formBegin "$rdiff_title: excludes" 
-    for ((i=0; i < ${#rdiff_excludes[@]} ; i++)); do
-       formItem exclude ${rdiff_excludes[$i]}
-    done
-    formItem exclude 
-    formItem exclude 
-  formDisplay
-  [ $? = 0 ] || return
-
-  unset rdiff_excludes
-  rdiff_excludes=($REPLY)
-   
-  _src_done="(DONE)"
-  setDefault dest
-  set +o noglob
+   choose_host_or_vservers_or_both "$rdiff_title"
+   [ $? = 0 ] || return 1
+   case $host_or_vservers in
+   	'host')
+	       do_rdiff_host_includes
+	       [ $? = 0 ] || return 1
+	       ;;
+	'vservers')
+	       do_rdiff_vserver
+	       [ $? = 0 ] || return 1
+	       ;;
+	'both')
+	       do_rdiff_host_includes
+	       [ $? = 0 ] || return 1
+	       do_rdiff_vserver
+	       [ $? = 0 ] || return 1
+               ;;
+	*)
+	       return 1
+	       ;;
+        esac
+	do_rdiff_excludes
+	[ $? = 0 ] || return 1
+	_src_done="(DONE)"
+	setDefault dest
 }
 
+do_rdiff_dest() {
+   
+   local replyconverted
+   local thereply
+   
+   set -o noglob
+   REPLY=
+   while [ -z "$REPLY" -o -z "$rdiff_directory" -o -z "$rdiff_host" -o -z "$rdiff_user" ] 
+   do
+     formBegin "$rdiff_title - destination: last three items are required"
+     	formItem "keep" "$rdiff_keep"
+     	formItem "dest_directory" "$rdiff_directory"
+     	formItem "dest_host" "$rdiff_host"
+     	formItem "dest_user" "$rdiff_user"
+     	formDisplay
+     [ $? = 0 ] || return
+
+     IFS=$''
+     replyconverted=`echo $REPLY | tr '\n' :`
+     IFS=$':'
+     thereply=($replyconverted)
+     IFS=$' \t\n'
+  
+     rdiff_keep=${thereply[0]}
+     rdiff_directory=${thereply[1]}
+     rdiff_host=${thereply[2]}
+     rdiff_user=${thereply[3]}
+  
+  done
+  set +o noglob
+  
+  _dest_done="(DONE)"
+  setDefault conn
+}
+	
 do_rdiff_ssh_con() {
   IFS=$' \t\n'
   if [ "$_dest_done" = "" ]; then
@@ -232,15 +306,60 @@ do_rdiff_finish() {
 type = local
 keep = $rdiff_keep
 EOF
-    set -o noglob
-    for ((i=0; i < ${#rdiff_includes[@]} ; i++)); do
-        echo "include = ${rdiff_includes[$i]}" >> $next_filename
-    done
-    for ((i=0; i < ${#rdiff_excludes[@]} ; i++)); do
-        echo exclude = ${rdiff_excludes[$i]} >> $next_filename
-    done
-    set +o noglob
-    cat >> $next_filename <<EOF
+
+   if [ "$host_or_vservers" == host -o "$host_or_vservers" == both ]
+   then
+       set -o noglob
+       
+       for ((i=0; i < ${#rdiff_includes[@]} ; i++))
+       do
+         echo "include = ${rdiff_includes[$i]}" >> $next_filename
+       done
+       
+       set +o noglob
+   fi
+
+   if [ "$host_or_vservers" == vservers -o "$host_or_vservers" == both ]
+   then      
+       cat >> $next_filename <<EOF
+#
+# If vservers = yes in /etc/backupninja.conf then the following variables can
+# be used:
+# vsnames = all | <vserver1> <vserver2> ... (default = all)
+# vsinclude = <path>
+# vsinclude = <path>
+# ...
+# Any path specified in vsinclude is added to the include list for each vserver
+# listed in vsnames (or all if vsnames = all).
+#
+# For example, vsinclude = /home will backup the /home partition in every 
+# vserver listed in vsnames. If you have vsnames = "foo bar baz", this
+# vsinclude will add to the include list /vservers/foo/home, 
+# /vservers/bar/home and /vservers/baz/home.
+# Vserver paths are derived from $VROOTDIR.
+
+EOF
+
+       set -o noglob
+       echo -e "vsnames = \"$selected_vservers\"\n" >> $next_filename
+       for i in $rdiff_vsincludes; do
+           echo "vsinclude = $i" >> $next_filename
+       done
+       set +o noglob
+   fi
+   
+   # excludes
+
+   for ((i=0; i < ${#rdiff_excludes[@]} ; i++))
+   do
+     echo exclude = ${rdiff_excludes[$i]} >> $next_filename
+   done
+   set +o noglob
+       cat >> $next_filename <<EOF
+
+######################################################
+## destination section
+## (where the files are copied to)
   
 [dest]
 type = remote
@@ -248,6 +367,7 @@ directory = $rdiff_directory
 host = $rdiff_host
 user = $rdiff_user
 EOF
+
    chmod 600 $next_filename
 }
 
@@ -297,10 +417,14 @@ rdiff_wizard() {
   rdiff_directory=/backup/`hostname`
   rdiff_user=
   rdiff_host=
+  
+  # Global variables whose '*' shall not be expanded
   set -o noglob
   rdiff_includes=(/var/spool/cron/crontabs /var/backups /etc /root /home /usr/local/*bin /var/lib/dpkg/status*)
   rdiff_excludes=(/home/*/.gnupg)
+  rdiff_vsincludes=
   set +o noglob
+  
   rdiff_main_menu
 }
 
