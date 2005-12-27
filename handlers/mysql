@@ -59,7 +59,7 @@ else
 	    then
 	    	fatal "User $user not found in /etc/passwd"
 	    fi
-    	    userhome="$VROOTDIR/$vsname$userhome"
+    	    userhome="$vroot$userhome"
 	    info "User home set to: $userhome"
 	    [ -f $userhome/.my.cnf ] || fatal "Can't find config file in $userhome/.my.cnf"
 	else
@@ -81,8 +81,8 @@ for i in $ignores; do
        ignore="$ignore --ignore-table=$i"
 done
 	
-# create backup dirs, vroot variable will be empty if no vsname was specified
-# and will proceed to operate on the host
+# create backup dirs, $vroot will be empty if no vsname was specified
+# and we will instead proceed to operate on the host
 [ -d $vroot$backupdir ] || mkdir -p $vroot$backupdir
 [ -d $vroot$backupdir ] || fatal "Backup directory '$vroot$backupdir'"
 hotdir="$backupdir/hotcopy"
