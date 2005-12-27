@@ -54,8 +54,8 @@ compress    = yes
 # space separated list of database names.
 #
 # backupdir = < path/to/destination > (default = /var/backups/mysql)
-# where to dump the backups. hotcopy backups will be in a subdirectory 'hotcopy' and
-# sqldump backups will be in a subdirectory 'sqldump'
+# where to dump the backups. hotcopy backups will be in a subdirectory 
+# 'hotcopy' and sqldump backups will be in a subdirectory 'sqldump'
 #
 # hotcopy = < yes | no > (default = no)
 # make a backup of the actual database binary files using mysqlhotcopy.
@@ -68,8 +68,9 @@ compress    = yes
 # if yes, compress the sqldump output. 
 #
 # vsname = <vserver> (no default)
-# what vserver to operate on, only used if vserver = yes in /etc/backupninja.conf
-# if you do not specify a vsname the host will be operated on
+# what vserver to operate on (only used if vserver = yes 
+# in /etc/backupninja.conf), if you do not specify a vsname the 
+# host will be operated on
 # 
-# NB: databases = all doesn't seem to work with hotcopy = yes when vsname is specified
-# I would like to know how to fix this.
+# NB: databases = all doesn't seem to work with hotcopy = yes 
+# when vsname is specified, I would like to know how to fix this.
