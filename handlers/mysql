@@ -17,22 +17,6 @@ getconf dbusername
 getconf dbpassword
 getconf configfile /etc/mysql/debian.cnf
 
-if [ "$user" == "" ]; then
-	userset=false;
-	user=root;
-else
-	userset=true;
-	userhome=`getent passwd "$user" | awk -F: '{print $6}'`
-	[ -f $userhome/.my.cnf ] || fatal "Can't find config file in $userhome/.my.cnf"
-fi
-
-## Prepare ignore part of the command
-## This only works for mysqldump at the moment
-
-ignore=''
-for i in $ignores; do
-       ignore="$ignore --ignore-table=$i"
-done
 
 # If vservers are configured, decide if the handler should
 # use them or if it should just operate on the host
@@ -62,6 +46,23 @@ then
 		fatal "vserver $vsname is not running."
 	fi
 fi
+
+if [ "$user" == "" ]; then
+	userset=false;
+	user=root;
+else
+	userset=true;
+	userhome=`getent passwd "$user" | awk -F: '{print $6}'`
+	[ -f $userhome/.my.cnf ] || fatal "Can't find config file in $userhome/.my.cnf"
+fi
+
+## Prepare ignore part of the command
+## This only works for mysqldump at the moment
+
+ignore=''
+for i in $ignores; do
+       ignore="$ignore --ignore-table=$i"
+done
 	
 # create backup dirs, vroot variable will be empty if no vsname was specified
 # and will proceed to operate on the host
