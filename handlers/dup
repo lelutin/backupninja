@@ -31,7 +31,6 @@ destdir=${destdir%/}
 
 [ "$destdir" != "" ] || fatal "Destination directory not set"
 [ "$include" != "" ] || fatal "No source includes specified"
-[ "$password" != "" ] || fatal "No password specified"
 
 ### vservers stuff ###
 
@@ -80,17 +79,27 @@ scpoptions="$sshoptions"
 
 execstr="$options --no-print-statistics --scp-command 'scp $scpoptions' --ssh-command 'ssh $sshoptions' "
 
-# if encryptkey is set, add --encrypt-key to the command-line
-[ -z "$encryptkey" ] || execstr="${execstr}--encrypt-key $encryptkey "
-# if signkey is not set, set it to encryptkey
-[ -n "$signkey" ] || signkey="$encryptkey"
-# if needed, add --sign-key to command-line
-if [ "$sign" == "yes" ]; then
-    if [ -n "$signkey" ]; then
-	execstr="${execstr}--sign-key $signkey "
-    else
-	fatal "Either encryptkey or signkey option must be set when signing."
-    fi
+# deal with symmetric or asymmetric (public/private key pair) encryption
+if [ -n "$encryptkey" ]; then
+    execstr="${execstr}--encrypt-key $encryptkey "
+    debug "Data will be encrypted with the GnuPG key $encryptkey."
+else
+    [ -n "$password" ] || fatal "The password option must be set when using symmetric encryption."
+    debug "Data will be encrypted using symmetric encryption."
+fi
+
+# deal with data signing
+if [ "$sign" == yes ]; then
+    # duplicity is not able to sign data when using symmetric encryption
+    [ -n "$encryptkey" ] || fatal "The encryptkey option must be set when signing."
+    # if needed, initialize signkey to a value that is not empty (checked above)
+    [ -n "$signkey" ] || signkey="$encryptkey"
+    # check password validity
+    [ -n "$password" ] || fatal "The password option must be set when signing."
+    execstr="${execstr}--sign-key $signkey "
+    debug "Data will be signed will the GnuPG key $signkey."
+else
+    debug "Data won't be signed."
 fi
 
 if [ "$keep" != "yes" ]; then

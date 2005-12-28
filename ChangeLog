@@ -11,6 +11,8 @@ version 0.9.2 -- unreleased
 		duplicity:
 			. globbing support fixed in include and exclude options 
 			. different signing and encrypting key support added
+			. fixed erroneous comments in example.dup about the way
+			  GnuPG-related options are used
 		mysql:
 			. handler vserver bugs fixed and debug output enhanced
 	ninjahelper(s) changes
