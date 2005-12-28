@@ -1,4 +1,4 @@
-# -*- mode: sh; sh-basic-offset: 8; indent-tabs-mode: nil; -*-
+# -*- mode: sh; sh-basic-offset: 3; indent-tabs-mode: nil; -*-
 
 HELPERS="$HELPERS makecd:makecd_backup"
 wizardname="makecd action wizard"
