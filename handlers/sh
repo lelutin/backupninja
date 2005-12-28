@@ -1,3 +1,4 @@
+# -*- mode: sh; sh-basic-offset: 3; indent-tabs-mode: nil; -*-
 #
 # shell script handler for backupninja
 # runs the file /etc/backup.d/scriptname.sh

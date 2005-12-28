@@ -1,3 +1,4 @@
+# -*- mode: sh; sh-basic-offset: 3; indent-tabs-mode: nil; -*-
 HELPERS="$HELPERS rdiff:incremental_remote_filesystem_backup"
 
 declare -a rdiff_includes

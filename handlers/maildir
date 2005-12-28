@@ -1,3 +1,4 @@
+# -*- mode: sh; sh-basic-offset: 3; indent-tabs-mode: nil; -*-
 ###############################################################
 #
 #  This handler slowly creates a backup of each user's maildir

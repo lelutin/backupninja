@@ -1,3 +1,4 @@
+# -*- mode: sh; sh-basic-offset: 3; indent-tabs-mode: nil; -*-
 #
 # mysql handler script for backupninja
 #

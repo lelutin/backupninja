@@ -1,3 +1,4 @@
+# -*- mode: sh; sh-basic-offset: 3; indent-tabs-mode: nil; -*-
 #
 # this handler will save various reports of vital system information.
 # by default, all the reports are enabled and are saved in /var/backups.

@@ -1,3 +1,4 @@
+# -*- mode: sh; sh-basic-offset: 3; indent-tabs-mode: nil; -*-
 HELPERS="$HELPERS pgsql:postgresql_database_backup"
 
 do_pgsql_vserver() {
