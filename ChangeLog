@@ -1,218 +1,218 @@
 version 0.9.3 -- unreleased
-	backupninja changes
-		backupninja.conf
-			. added (commented out) the various default paths to
-			  programs such as PGSQLDUMP, so that users can figure
-			  out more easily they can customize them
+    backupninja changes
+       backupninja.conf
+         . added (commented out) the various default paths to
+           programs such as PGSQLDUMP, so that users can figure
+           out more easily they can customize them
 
 version 0.9.2 -- December 29, 2005
-	backupninja changes
-		fixed broken toint() which caused when "everyday" problems
-		backupninja.conf.5 updated to include "when" and "vservers"
-		code refactor:
-			. moved to lib/ some code that has to be shared between
-			  backupninja and ninjahelper
-	handler changes
-		trac:
-			. mkdir subdirectory problem fixed
-		duplicity:
-			. globbing support fixed in include and exclude options 
-			. different signing and encrypting key support added
-			. fixed erroneous comments in example.dup about the way
-			  GnuPG-related options are used
-		mysql:
-			. handler vserver bugs fixed and debug output enhanced
-	ninjahelper(s) changes
-		vserver-related functions added to lib/vservers.in
-		added man/ninjahelper.1 man page
-		makecd:
-			. was missing in Makefile.am/.in
-		rdiff-backup:
-			. used to expand '*' in default source directories
-			. the "Cancel" buttons used to have a weird behaviour
-			. updated to include Vserver selection 
-		pgsql:
-			. forbid the user to choose an empty database set 
-			. "Cancel" button now does what it is meant to do
-		mysql:
-			. enhanced for vserver support 
-			. now able to select databases and dump directory
-		duplicity:
-			. new handler added (with Vserver support)
+    backupninja changes
+        fixed broken toint() which caused when "everyday" problems
+        backupninja.conf.5 updated to include "when" and "vservers"
+        code refactor:
+            . moved to lib/ some code that has to be shared between
+              backupninja and ninjahelper
+    handler changes
+        trac:
+            . mkdir subdirectory problem fixed
+        duplicity:
+            . globbing support fixed in include and exclude options 
+            . different signing and encrypting key support added
+            . fixed erroneous comments in example.dup about the way
+              GnuPG-related options are used
+        mysql:
+            . handler vserver bugs fixed and debug output enhanced
+    ninjahelper(s) changes
+        vserver-related functions added to lib/vservers.in
+        added man/ninjahelper.1 man page
+        makecd:
+            . was missing in Makefile.am/.in
+        rdiff-backup:
+            . used to expand '*' in default source directories
+            . the "Cancel" buttons used to have a weird behaviour
+            . updated to include Vserver selection 
+        pgsql:
+            . forbid the user to choose an empty database set 
+            . "Cancel" button now does what it is meant to do
+        mysql:
+            . enhanced for vserver support 
+            . now able to select databases and dump directory
+        duplicity:
+            . new handler added (with Vserver support)
 
 version 0.9.1 -- November 05 2005
-	rearranged source so that it is relocatable with autotools
-		(thanks to Petr Klíma petr.klima@madeta-group.cz)
-	fixed many bugs in rdiff helper
-	rdiff handler does not require 'label' (for real this time?)
-	added makecd ninjahelper
-		(thanks to Stefani stefani@riseup.net)
-	made ninjahelper create files with mode 600 rather than 000
-	changed subversion handler to use svnadmin hotcopy instead of
-	        the unsupported hot-copy.py script, which was moved in Debian
-	update rdiff ninjahelper
-	        now detects and auto-install rdiff-backup on the remote 
-	        machine if possible, also tests the remote backup directory
-	        and offers to create it if it doesn't exist
+    rearranged source so that it is relocatable with autotools
+        (thanks to Petr Klíma petr.klima@madeta-group.cz)
+    fixed many bugs in rdiff helper
+    rdiff handler does not require 'label' (for real this time?)
+    added makecd ninjahelper
+        (thanks to Stefani stefani@riseup.net)
+    made ninjahelper create files with mode 600 rather than 000
+    changed subversion handler to use svnadmin hotcopy instead of
+            the unsupported hot-copy.py script, which was moved in Debian
+    update rdiff ninjahelper
+            now detects and auto-install rdiff-backup on the remote 
+            machine if possible, also tests the remote backup directory
+            and offers to create it if it doesn't exist
 
 version 0.9 -- October 19 2005
-	*** IMPORTANT CHANGE, UPGRADE AT ONCE ***
-	 fixed insecure temporary file creation 
-	*****************************************
-	removed erroneous magic file marker in pgsql handler
-	fixed incorrect find positional
-	changed direct grep of /etc/passwd to getent passwd.
-	rdiff helper has much better information on failed ssh attempt
-		(patch from cmccallum@thecsl.org).
-	rdiff handler now supports remote source and local dest. 
-		(patch from cmccallum@thecsl.org).
-	man pages are greatly improved.
+    *** IMPORTANT CHANGE, UPGRADE AT ONCE ***
+     fixed insecure temporary file creation 
+    *****************************************
+    removed erroneous magic file marker in pgsql handler
+    fixed incorrect find positional
+    changed direct grep of /etc/passwd to getent passwd.
+    rdiff helper has much better information on failed ssh attempt
+        (patch from cmccallum@thecsl.org).
+    rdiff handler now supports remote source and local dest. 
+        (patch from cmccallum@thecsl.org).
+    man pages are greatly improved.
 
 version 0.8 -- September 15 2005
-	added pgsql (PostgreSQL) handler, with vservers support.
-	added vservers support to duplicity handler
-		Note: the configuration is a bit different than the rdiff
-		handler's one, but the default behavior is the same:
-		have a look at example.dup.
-	improved README
-	documented .disabled method.
-	corrected VROOTDIR default value.
-	added ninjahelper to the install instructions.
-	improved rdiff, dup and sys handlers' vservers support
-		prevent vserver-debiantools' $VROOTDIR/ARCHIVES directory
-		to be seen as a vserver
-	changes to sys handler
-		make use of configurable $VSERVERINFO instead of hard-coded vserver-info.
-		fixed dpkg existence test inside vserver.
-		fixed $nodpkg use.
-	changes to pgsql handler
-		now checks if the specified vserver is running.
-		now checks if $PGSQLDUMP/$PGSQLDUMPALL are available where needed.
-		now checks if "postgres" user exists on the host/vserver.
-	changes to ninjahelper
-		check_perms() does not die anymore on group/world readable
-		helper scripts (now consistent with the "helper scripts
-		must not be group or world writable!" error msg).
-	xedit action now tries $EDITOR, then /etc/alternatives/editor,
-		then nano, vim and vi, and aborts if none of these exists.
-	added helper for pgsql handler.
-	rdiff handler now does not require 'label'
-	changes to mysql and svn handlers' vservers support
-		these handlers now check if the source vserver is running
-	added 'ignores' for mysql handler. (thanks Daniel.Bonniot@inria.fr)
+    added pgsql (PostgreSQL) handler, with vservers support.
+    added vservers support to duplicity handler
+        Note: the configuration is a bit different than the rdiff
+        handler's one, but the default behavior is the same:
+        have a look at example.dup.
+    improved README
+    documented .disabled method.
+    corrected VROOTDIR default value.
+    added ninjahelper to the install instructions.
+    improved rdiff, dup and sys handlers' vservers support
+        prevent vserver-debiantools' $VROOTDIR/ARCHIVES directory
+        to be seen as a vserver
+    changes to sys handler
+        make use of configurable $VSERVERINFO instead of hard-coded vserver-info.
+        fixed dpkg existence test inside vserver.
+        fixed $nodpkg use.
+    changes to pgsql handler
+        now checks if the specified vserver is running.
+        now checks if $PGSQLDUMP/$PGSQLDUMPALL are available where needed.
+        now checks if "postgres" user exists on the host/vserver.
+    changes to ninjahelper
+        check_perms() does not die anymore on group/world readable
+        helper scripts (now consistent with the "helper scripts
+        must not be group or world writable!" error msg).
+    xedit action now tries $EDITOR, then /etc/alternatives/editor,
+        then nano, vim and vi, and aborts if none of these exists.
+    added helper for pgsql handler.
+    rdiff handler now does not require 'label'
+    changes to mysql and svn handlers' vservers support
+        these handlers now check if the source vserver is running
+    added 'ignores' for mysql handler. (thanks Daniel.Bonniot@inria.fr)
 
 version 0.7 -- July 26 2005
-	added ninjahelper: a dialog based wizard for creating backupninja configs.
-	considerably improved and changed the log file output.
-	you can now disable actions with .disabled (this is new preferred method).
-	added makecd handler and example.makecd for backing up to cd/dvd (thanks stef).
-	fixed bug when specifying multiple 'when' options.
+    added ninjahelper: a dialog based wizard for creating backupninja configs.
+    considerably improved and changed the log file output.
+    you can now disable actions with .disabled (this is new preferred method).
+    added makecd handler and example.makecd for backing up to cd/dvd (thanks stef).
+    fixed bug when specifying multiple 'when' options.
 
 version 0.6 -- June 16 2005
-	ldap handler has new options: backup method to use (ldapsearch or
-		slapcat), restart, passwordfile and binddn. Default backup method
-		is set to ldapsearch as this is safer
-	******************************************************************
-	NOTE: to get the previous default behavior with the ldap handler, 
-	you must set "method = slapcat". The new default is ldapsearch.
-	******************************************************************
-	implemented fix so that the main script will echo fatal errors rather
-		than being silent about them, this means an error message every hour
-		if there is a major configuration problem (not a handler problem)
-	added vserver support to main script and to the handlers: mysql, svn, sys, rdiff
-	changes to duplicity handler (thanks intrigeri!):
-		"keep = yes" now disables file cleaning on desthost
-		added "sign" option for backups signing
-		added "encryptkey" option to specify the gpg key to use
-		split config into [source], [gpg] and [dest] sections
-		added "nicelevel" option
-		added "testconnect" option
-		added "sshoptions" option (will be passed to ssh/scp)
-		added "bandwidthlimit" option
-	example.dup example config file for duplicity handler 
-	added trac (http://trac.edgewall.com/) environment handler (thanks Charles Lepple!)
-	added configfile option to mysql handler
-		the default is /etc/mysql/debian.cnf. with this, 
-		sqldump doesn't need dbusername. (hotcopy still does).
-	fixed bug in mysql handler which caused some passwords to not work.
-		(.my.cnf files now have double quotes around password)
-	can now pass options to hwinfo and sfdisk in sys handler.
+    ldap handler has new options: backup method to use (ldapsearch or
+        slapcat), restart, passwordfile and binddn. Default backup method
+        is set to ldapsearch as this is safer
+    ******************************************************************
+    NOTE: to get the previous default behavior with the ldap handler, 
+    you must set "method = slapcat". The new default is ldapsearch.
+    ******************************************************************
+    implemented fix so that the main script will echo fatal errors rather
+        than being silent about them, this means an error message every hour
+        if there is a major configuration problem (not a handler problem)
+    added vserver support to main script and to the handlers: mysql, svn, sys, rdiff
+    changes to duplicity handler (thanks intrigeri!):
+        "keep = yes" now disables file cleaning on desthost
+        added "sign" option for backups signing
+        added "encryptkey" option to specify the gpg key to use
+        split config into [source], [gpg] and [dest] sections
+        added "nicelevel" option
+        added "testconnect" option
+        added "sshoptions" option (will be passed to ssh/scp)
+        added "bandwidthlimit" option
+    example.dup example config file for duplicity handler 
+    added trac (http://trac.edgewall.com/) environment handler (thanks Charles Lepple!)
+    added configfile option to mysql handler
+        the default is /etc/mysql/debian.cnf. with this, 
+        sqldump doesn't need dbusername. (hotcopy still does).
+    fixed bug in mysql handler which caused some passwords to not work.
+        (.my.cnf files now have double quotes around password)
+    can now pass options to hwinfo and sfdisk in sys handler.
 
 version 0.5 -- April 12 2005
-	rdiff handler works when remote sshd has a banner
-	rdiff handler supports local dest 
-	logfile is created if it doesn't exist
-	added "when = hourly" 
-	added optional 'nicelevel' to rdiff handler
-	fixed bug where actions were not run in numeric order.
-	improved 'when' parsing.
+    rdiff handler works when remote sshd has a banner
+    rdiff handler supports local dest 
+    logfile is created if it doesn't exist
+    added "when = hourly" 
+    added optional 'nicelevel' to rdiff handler
+    fixed bug where actions were not run in numeric order.
+    improved 'when' parsing.
 
 version 0.4.4 -- March 18 2005
-	results of handlers are now read line by line. 
-	changes to rdiff handler: added "options", and "keep" is
-		not necessarily days now (ie, it will pass straight through to
-		rdiff-backup if the keep has a unit on it, otherwise it adds the 'D').
-	added dup handler (still pretty beta)
-	added maildir handler (very specialized handler)
-	added --run option (runs the specified action file)
-	improved sys handler, now uses hwinfo
-	added subversion hotbackup handler, svn. 
-	added PATH to cron.d file, which fixes file not found errors.
+    results of handlers are now read line by line. 
+    changes to rdiff handler: added "options", and "keep" is
+        not necessarily days now (ie, it will pass straight through to
+        rdiff-backup if the keep has a unit on it, otherwise it adds the 'D').
+    added dup handler (still pretty beta)
+    added maildir handler (very specialized handler)
+    added --run option (runs the specified action file)
+    improved sys handler, now uses hwinfo
+    added subversion hotbackup handler, svn. 
+    added PATH to cron.d file, which fixes file not found errors.
 
 version 0.4.2 -- Jan 6 2005
-	fixed bug which caused a report email to be sent even if no actions were run.
-	fixed bug where multiple handler status messages were ignored
-	added status in the subject line of report emails
+    fixed bug which caused a report email to be sent even if no actions were run.
+    fixed bug where multiple handler status messages were ignored
+    added status in the subject line of report emails
 
 version 0.4.1 -- Jan 3 2005
-	added $usecolors and now more conservative about when colors are echoed.
-	fixed major bug, 'when' actually works now.
-	replaced debug function with debug, info, warning, error, fatal.
-	added --now option to force all actions to be performed now.
-	
+    added $usecolors and now more conservative about when colors are echoed.
+    fixed major bug, 'when' actually works now.
+    replaced debug function with debug, info, warning, error, fatal.
+    added --now option to force all actions to be performed now.
+    
 version 0.4 -- Dec 26 2004
-	added "when" option, so that all configs can specify when
-		they are to be run.
-	added reportsuccess and reportwarning config options
-	added .sys handler (hardware, packages, partitions).
+    added "when" option, so that all configs can specify when
+        they are to be run.
+    added reportsuccess and reportwarning config options
+    added .sys handler (hardware, packages, partitions).
 
 version 0.3.4 -- Dec 8 2004
-	fixed numerical variable quoting compatibility with older wc	
-	fixed stderr redirect bug
-	some comments in example.rdiff
+    fixed numerical variable quoting compatibility with older wc    
+    fixed stderr redirect bug
+    some comments in example.rdiff
 
 version 0.3.3 -- Nov 10 2004
-	'*' (asterisk) works now in rdiff config files
-	works now with gawk as well as mawk
-	many bug fixes to ldap handler
-	paths to helper scripts can be configured in global config
-	does not require /usr/bin/stat
+    '*' (asterisk) works now in rdiff config files
+    works now with gawk as well as mawk
+    many bug fixes to ldap handler
+    paths to helper scripts can be configured in global config
+    does not require /usr/bin/stat
 
 version 0.3.2 -- Sept 29 2004
-	handler scripts are no longer executable (to comply with debian policy)
-	handler error and warning messages are sent with the notify email
+    handler scripts are no longer executable (to comply with debian policy)
+    handler error and warning messages are sent with the notify email
 
 version 0.3.1 -- Sept 5 2004
-	added ldap handler
-	moved sh support to a handler script
-	add test mode, where no action is taken.
-	added --help
-	force only root can read /etc/backup.d/*
-	fixed missing equals symbols in example.rdiff
-	changed backupninja executable to be /usr/sbin rather than /usr/bin
-	
+    added ldap handler
+    moved sh support to a handler script
+    add test mode, where no action is taken.
+    added --help
+    force only root can read /etc/backup.d/*
+    fixed missing equals symbols in example.rdiff
+    changed backupninja executable to be /usr/sbin rather than /usr/bin
+    
 version 0.3 -- Oct 20 2004
-	** IMPORTANT ** all config files are now ini style, not apache style
-	rewrote all scripts in bash for portability
-	added drop-in backupninja lib directory (/usr/share/backupninja)
-	all scripts are now run as root
+    ** IMPORTANT ** all config files are now ini style, not apache style
+    rewrote all scripts in bash for portability
+    added drop-in backupninja lib directory (/usr/share/backupninja)
+    all scripts are now run as root
 
 version 0.2 -- Oct 14 2004
-	move distribution folder ./cron.d to ./etc/cron.d
-	fixed bug: removed printr of excludes (!)
-	added support for changing the user/group in rdiff sources.
-	added support for .mysql config files.
-	
+    move distribution folder ./cron.d to ./etc/cron.d
+    fixed bug: removed printr of excludes (!)
+    added support for changing the user/group in rdiff sources.
+    added support for .mysql config files.
+    
 version 0.1 -- Oct 8 2004
-	initial release 
+    initial release 
 
