@@ -50,3 +50,16 @@ when = everyday at 01:00
 # if running vservers, set to yes
 vservers = no
 
+# programs paths
+# SLAPCAT=/usr/sbin/slapcat
+# LDAPSEARCH=/usr/bin/ldapsearch
+# RDIFFBACKUP=/usr/bin/rdiff-backup
+# MYSQL=/usr/bin/mysql
+# MYSQLHOTCOPY=/usr/bin/mysqlhotcopy
+# MYSQLDUMP=/usr/bin/mysqldump
+# PGSQLDUMP=/usr/bin/pg_dump
+# PGSQLDUMPALL=/usr/bin/pg_dumpall
+# GZIP=/bin/gzip
+# RSYNC=/usr/bin/rsync
+# VSERVERINFO=/usr/sbin/vserver-info
+# VSERVER=/usr/sbin/vserver
