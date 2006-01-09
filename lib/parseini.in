@@ -8,27 +8,26 @@
 #
 # example ini file:
 # 
-#		fruit = apple
-#		fruit = pear
-#		multiline = this is a multiline \
-#       parameter
+#    fruit = apple
+#    fruit = pear
+#    multiline = this is a multiline \
+#    parameter
 #
-#       # this is a comment
+#    # this is a comment
+#    [colors]  
+#    red = yes
+#    green = no
+#    blue = maybe
 #
-#		[colors]  
-#		red = yes
-#		green = no
-#		blue = maybe
-#		
-#		[ocean] 
-#		fish = red 
-#		fish = blue
+#    [ocean] 
+#    fish = red 
+#    fish = blue
 #       
 # example usage:
-#       > awk -f parseini S=ocean P=fish testfile.ini 
+#    > awk -f parseini S=ocean P=fish testfile.ini 
 # would return: 
-#       red
-#       blue
+#    red
+#    blue
 #
    
 BEGIN { 
@@ -119,7 +118,7 @@ END {
     for (x = 0; x < nline; ++x) { 
         sub(/^[ \r\t]+/, "", line[x]) 
         sub(/[ \r\t]+$/, "", line[x]) 
-     } 
+    } 
  
     # output the final result
     for (x = 0; x < nline; ++x) 
