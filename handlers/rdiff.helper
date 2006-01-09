@@ -4,6 +4,8 @@ HELPERS="$HELPERS rdiff:incremental_remote_filesystem_backup"
 
 declare -a rdiff_includes
 declare -a rdiff_excludes
+declare -a rdiff_vsincludes
+declare -a rdiff_vsexcludes
 
 # FUNCTIONS
 
@@ -11,22 +13,20 @@ do_rdiff_host_includes() {
    set -o noglob
    # choose the files to backup
    REPLY=
-   while [ -z "$REPLY" ]
-   do
-     formBegin "$rdiff_title - host system: includes"
-      	 for ((i=0; i < ${#rdiff_includes[@]} ; i++))
-      	 do
-      	   formItem include ${rdiff_includes[$i]}
-      	 done
-      	 formItem include 
-      	 formItem include 
-      	 formItem include 
-     	 formDisplay
-     [ $? = 0 ] || return
-     unset rdiff_includes
-     rdiff_includes="$REPLY"
+   while [ -z "$REPLY" ]; do
+      formBegin "$rdiff_title - host system: includes"
+         for ((i=0; i < ${#rdiff_includes[@]} ; i++)); do
+            formItem include ${rdiff_includes[$i]}
+         done
+         formItem include 
+         formItem include 
+         formItem include 
+      formDisplay
+      [ $? = 0 ] || return
+      unset rdiff_includes
+      rdiff_includes=($REPLY)
    done
- set +o noglob
+   set +o noglob
 }
 
 do_rdiff_vserver() {
@@ -42,16 +42,15 @@ do_rdiff_vserver() {
       formBegin "$rdiff_title - vsincludes (backup these directories from every vserver)"
          [ -z "$rdiff_vsincludes" ] && rdiff_vsincludes="$rdiff_default_includes"
    
-   	 for i in $rdiff_vsincludes; do
+         for i in $rdiff_vsincludes; do
             formItem include "$i"
-	 done
-	 
-	 formItem include ""
-	 formItem include ""
-	 formItem include ""
-       	 formDisplay
+         done
+         formItem include ""
+         formItem include ""
+         formItem include ""
+      formDisplay
       [ $? = 0 ] || return 1
-      rdiff_vsincludes="$REPLY"
+      rdiff_vsincludes=($REPLY)
    done
    
    set +o noglob
@@ -64,14 +63,12 @@ do_rdiff_excludes() {
      do
        formItem exclude ${rdiff_excludes[$i]}
      done
-     
      formItem exclude 
      formItem exclude 
-     formDisplay
-   
+   formDisplay
    [ $? = 0 ] || return
    unset rdiff_excludes
-   rdiff_excludes="$REPLY"
+   rdiff_excludes=($REPLY)
    set +o noglob
 }
 
@@ -79,223 +76,188 @@ do_rdiff_src() {
    choose_host_or_vservers_or_both "$rdiff_title"
    [ $? = 0 ] || return 1
    case $host_or_vservers in
-   	'host')
-	       do_rdiff_host_includes
-	       [ $? = 0 ] || return 1
-	       ;;
-	'vservers')
-	       do_rdiff_vserver
-	       [ $? = 0 ] || return 1
-	       ;;
-	'both')
-	       do_rdiff_host_includes
-	       [ $? = 0 ] || return 1
-	       do_rdiff_vserver
-	       [ $? = 0 ] || return 1
-               ;;
-	*)
-	       return 1
-	       ;;
-        esac
-	do_rdiff_excludes
-	[ $? = 0 ] || return 1
-	_src_done="(DONE)"
-	setDefault dest
+      'host')
+         do_rdiff_host_includes
+         [ $? = 0 ] || return 1
+         ;;
+      'vservers')
+         do_rdiff_vserver
+         [ $? = 0 ] || return 1
+         ;;
+      'both')
+         do_rdiff_host_includes
+         [ $? = 0 ] || return 1
+         do_rdiff_vserver
+         [ $? = 0 ] || return 1
+         ;;
+      *)
+         return 1
+         ;;
+   esac
+   do_rdiff_excludes
+   [ $? = 0 ] || return 1
+   _src_done="(DONE)"
+   setDefault dest
 }
 
 do_rdiff_dest() {
-   
-   local replyconverted
-   local thereply
+   declare -a tmp_array
    
    set -o noglob
    REPLY=
    while [ -z "$REPLY" -o -z "$rdiff_directory" -o -z "$rdiff_host" -o -z "$rdiff_user" ] 
    do
      formBegin "$rdiff_title - destination: last three items are required"
-     	formItem "keep" "$rdiff_keep"
-     	formItem "dest_directory" "$rdiff_directory"
-     	formItem "dest_host" "$rdiff_host"
-     	formItem "dest_user" "$rdiff_user"
-     	formDisplay
+        formItem "keep" "$rdiff_keep"
+        formItem "dest_directory" "$rdiff_directory"
+        formItem "dest_host" "$rdiff_host"
+        formItem "dest_user" "$rdiff_user"
+        formDisplay
      [ $? = 0 ] || return
-
-     IFS=$''
-     replyconverted=`echo $REPLY | tr '\n' :`
-     IFS=$':'
-     thereply=($replyconverted)
-     IFS=$' \t\n'
-  
-     rdiff_keep=${thereply[0]}
-     rdiff_directory=${thereply[1]}
-     rdiff_host=${thereply[2]}
-     rdiff_user=${thereply[3]}
-  
+     tmp_array=($REPLY)
+     rdiff_keep=${tmp_array[0]}
+     rdiff_directory=${tmp_array[1]}
+     rdiff_host=${tmp_array[2]}
+     rdiff_user=${tmp_array[3]}  
   done
   set +o noglob
   
   _dest_done="(DONE)"
   setDefault conn
 }
-	
-do_rdiff_ssh_con() {
-  IFS=$' \t\n'
-  if [ "$_dest_done" = "" ]; then
-    msgBox "$rdiff_title: error" "You must first configure the destination."
-    return
-  elif [ "$rdiff_user" = "" ]; then
-    msgBox "$rdiff_title: error" "You must first configure the destination user."
-    return
-  elif [ "$rdiff_host" = "" ]; then
-    msgBox "$rdiff_title: error" "You must first configure the destination host."
-    return
-  else
-    booleanBox "$rdiff_title" "This step will create a ssh key for the local root user with no passphrase (if one does not already exist), and attempt to copy root's public ssh key to authorized_keys file of $rdiff_user@$rdiff_host. This will allow the local root to make unattended backups to $rdiff_user@$rdiff_host.\n\n\nAre you sure you want to continue?"
-    [ $? = 0 ] || return
-  fi
 
-  if [ ! -f /root/.ssh/id_dsa.pub -a ! -f /root/.ssh/id_rsa.pub ]; then
-    echo "Creating local root's ssh key"
-    ssh-keygen -t dsa -f /root/.ssh/id_dsa -N ""
-    echo "Done. hit return to continue"
-    read
-  fi
-  
-  ssh -o PreferredAuthentications=publickey $rdiff_host -l $rdiff_user "exit" 2> /dev/null
-  if [ $? -ne 0 ]; then
-    echo "Copying root's public ssh key to authorized_keys of $rdiff_user@$rdiff_host. When prompted, specify the password for user $rdiff_user@$rdiff_host."
-    ssh-copy-id -i /root/.ssh/id_[rd]sa.pub $rdiff_user@$rdiff_host
-    if [ $? -ne 0 ]; then
-      echo "FAILED: Couldn't copy root's public ssh key to authorized_keys of $rdiff_user@$rdiff_host."
-      ssh $rdiff_user@$rdiff_host 'test -w .ssh || test -w .'
-      result=$?
-      echo "Hit return to continue."
-      read
-      case $result in
-        0 )   msgBox "$rdiff_title: error" "Directories are writable: Probably just a typo the first time." ;;
-        1 )   msgBox "$rdiff_title: error" "Connected successfully to $rdiff_user@$rdiff_host, but unable to write. Check ownership and modes of ~$rdiff_user on $rdiff_host." ;;
-        255 ) msgBox "$rdiff_title: error" "Failed to connect to $rdiff_user@$rdiff_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host." ;;
-        * )   msgBox "$rdiff_title: error" "Unexpected error." ;;
-      esac 
+do_rdiff_ssh_con() {
+   local remote_status="ok"
+
+   IFS=$' \t\n'
+   if [ "$_dest_done" = "" ]; then
+      msgBox "$rdiff_title: error" "You must first configure the destination."
       return
-    else
+   elif [ "$rdiff_user" = "" ]; then
+      msgBox "$rdiff_title: error" "You must first configure the destination user."
+      return
+   elif [ "$rdiff_host" = "" ]; then
+      msgBox "$rdiff_title: error" "You must first configure the destination host."
+      return
+   else
+      booleanBox "$rdiff_title" "This step will create a ssh key for the local root user with no passphrase (if one does not already exist), and attempt to copy root's public ssh key to authorized_keys file of $rdiff_user@$rdiff_host. This will allow the local root to make unattended backups to $rdiff_user@$rdiff_host.\n\n\nAre you sure you want to continue?"
+      [ $? = 0 ] || return
+   fi
+
+   if [ ! -f /root/.ssh/id_dsa.pub -a ! -f /root/.ssh/id_rsa.pub ]; then
+      echo "Creating local root's ssh key"
+      ssh-keygen -t dsa -f /root/.ssh/id_dsa -N ""
       echo "Done. hit return to continue"
       read
-    fi
-  else
-    echo "root@localhost is already in authorized_keys of $rdiff_user@$rdiff_host."
-    echo "Hit return to continue."
-    read
-  fi
-  # test to see if the remote rdiff backup directory exists and is writable
-  echo "Testing to see if remote rdiff backup directory exists and is writable"
-  ssh $rdiff_user@$rdiff_host "test -d ${rdiff_directory}"
-  if [ $? -eq 0 ]
-  then
-  	ssh $rdiff_user@$rdiff_host "test -w $rdiff_directory"
-  	if [ $? -ne 0 ]
- 	then
-		msgBox "destination directory is not writable!" "The remote destination directory is not writable by the user you specified. Please fix the permissions on the directory and then try again."
-		remote_status=1
-	else
-		remote_status=0
-  	fi
-  else
-	booleanBox "Remote directory does not exist" "The destination backup directory does not exist, do you want me to create it for you?"
-	if [ $? = 0 ]
-  	then
-		ssh $rdiff_user@$rdiff_host "mkdir -p ${rdiff_directory}"
-		result=$?
-		echo "Hit return to continue."
-		read
-		case $result in
-			0)   
-				msgBox "$rdiff_title: success" "Creation of the remote destination directory was a success!" 
-				remote_status=0
-			;;
-			1)   
-				msgBox "$rdiff_title: error" "Connected successfully to $rdiff_user@$rdiff_host, but was unable to create the destination directory, check the directory permissions." 
-				remote_status=1
-			;;
-			255) 
-				msgBox "$rdiff_title: error" "Failed to connect to $rdiff_user@$rdiff_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host." 
-				remote_status=1
-			;;
-			*)   
-				msgBox "$rdiff_title: error" "Unexpected error." 
-				remote_status=1
-			;;
-			esac 
-			return
-	  fi
-  fi
+   fi
   
-  if [ $remote_status -ne 1 ]
-  then
-	do_rdiff_con
-  fi
+   ssh -o PreferredAuthentications=publickey $rdiff_host -l $rdiff_user "exit" 2> /dev/null
+   if [ $? -ne 0 ]; then
+      echo "Copying root's public ssh key to authorized_keys of $rdiff_user@$rdiff_host. When prompted, specify the password for user $rdiff_user@$rdiff_host."
+      ssh-copy-id -i /root/.ssh/id_[rd]sa.pub $rdiff_user@$rdiff_host
+      if [ $? -ne 0 ]; then
+         echo "FAILED: Couldn't copy root's public ssh key to authorized_keys of $rdiff_user@$rdiff_host."
+         ssh $rdiff_user@$rdiff_host 'test -w .ssh || test -w .'
+         result=$?
+         echo "Hit return to continue."
+         read
+         case $result in
+            0 )   msgBox "$rdiff_title: error" "Directories are writable: Probably just a typo the first time." ;;
+            1 )   msgBox "$rdiff_title: error" "Connected successfully to $rdiff_user@$rdiff_host, but unable to write. Check ownership and modes of ~$rdiff_user on $rdiff_host." ;;
+            255 ) msgBox "$rdiff_title: error" "Failed to connect to $rdiff_user@$rdiff_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host." ;;
+            * )   msgBox "$rdiff_title: error" "Unexpected error." ;;
+         esac 
+         return
+      else
+         echo "Done. hit return to continue"
+         read
+      fi
+   else
+      echo "root@localhost is already in authorized_keys of $rdiff_user@$rdiff_host."
+      echo "Hit return to continue."
+      read
+   fi
+
+   # test to see if the remote rdiff backup directory exists and is writable
+   echo "Testing to see if remote rdiff backup directory exists and is writable"
+   ssh $rdiff_user@$rdiff_host "test -d ${rdiff_directory}"
+   if [ $? = 0 ]; then
+      ssh $rdiff_user@$rdiff_host "test -w $rdiff_directory"
+      if [ $? != 0 ]; then
+         msgBox "destination directory is not writable!" "The remote destination directory is not writable by the user you specified. Please fix the permissions on the directory and then try again."
+         remote_status=failed
+      fi
+   else
+      booleanBox "Remote directory does not exist" "The destination backup directory does not exist, do you want me to create it for you?"
+      if [ $? = 0 ]; then
+	 ssh $rdiff_user@$rdiff_host "mkdir -p ${rdiff_directory}"
+         result=$?
+         case $result in
+            0) msgBox "$rdiff_title: success" "Creation of the remote destination directory was a success!";;
+            1) msgBox "$rdiff_title: error" "Connected successfully to $rdiff_user@$rdiff_host, but was unable to create the destination directory, check the directory permissions." 
+               remote_status=failed;;
+            255) msgBox "$rdiff_title: error" "Failed to connect to $rdiff_user@$rdiff_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host." 
+               remote_status=failed;;
+            *) msgBox "$rdiff_title: error" "Unexpected error." 
+               remote_status=failed;;
+         esac
+      fi
+   fi
+  
+   if [ "$remote_status" = "ok" ]; then
+      do_rdiff_con
+   fi
 }
 
 do_rdiff_con() {
-  echo "Testing to make sure destination has rdiff-backup installed and is compatible."
-  remote_result=`/usr/bin/rdiff-backup --test-server $rdiff_user@$rdiff_host::/ 2>&1 >&-`
-  if [ $? -ne 0 ]
-  then
-  	echo $remote_result | grep -q "command not found"
-	if [ $? -eq 0 ]
-	then
-		if [ "$rdiff_user" = "root" ]
-		then
-			booleanBox "install rdiff-backup?" "It seems like the remote machine does not have rdiff-backup installed, I can attempt to install rdiff-backup on the remote machine.\n\n\nDo you want me to attempt this now?"
-    			if [ $? = 0 ] 
-			then
-       				ssh $rdiff_user@$rdiff_host 'apt-get install rdiff-backup'
- 				result=$?
-				echo "Hit return to continue."
-				read
-				case $result in
-					0)   
-						msgBox "$rdiff_title: success" "Installation of rdiff-backup was a success!" 
-						do_rdiff_con
-					;;
-					1)   
-						msgBox "$rdiff_title: error" "Connected successfully to $rdiff_user@$rdiff_host, but was unable to install the package for some reason." 
-					;;
-					255) 
-						msgBox "$rdiff_title: error" "Failed to connect to $rdiff_user@$rdiff_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host." 
-					;;
-					*)   
-						msgBox "$rdiff_title: error" "Unexpected error." 
-					;;
-				esac 
-				return
-     			fi
-		else
-			booleanBox "install rdiff-backup" "Please install rdiff-backup on the remote machine, this cannot be done automatically, as the remote user in your configuration is not root. \n\nIf you have installed rdiff-backup on the remote machine and you are getting this error, then there is a version incompatibility between that version and the local version.\n\nPlease resolve this problem and then try connecting again.\n\n\n\nTry connecting again?"
-			if [ $? = 0 ]
-			then
-				do_rdiff_con
-			else
-				return
-			fi
-		fi
-	else
-		msgBox "incompatible versions of rdiff-backup" "It looks like rdiff-backup is installed on the remote machine, but it may be an incompatible version with the one installed locally, or something else is amiss.\n\nPlease resolve this problem and then try connecting again.\n\n\nTry connecting again?"
-		if [ $? = 0 ]
-		then
-			do_rdiff_con
-		else
-			return
-		fi
-    	fi
+   echo "Checking for local install of rdiff-backup"
+   require_packages rdiff-backup
+
+   echo "Testing to make sure destination has rdiff-backup installed and is compatible."
+   remote_result=`/usr/bin/rdiff-backup --test-server $rdiff_user@$rdiff_host::/ 2>&1 >&-`
+   if [ $? -ne 0 ]; then
+      echo $remote_result | grep -q "command not found"
+      if [ $? -eq 0 ]; then
+         if [ "$rdiff_user" = "root" ]; then
+            booleanBox "install rdiff-backup?" "It seems like the remote machine does not have rdiff-backup installed, I can attempt to install rdiff-backup on the remote machine.\n\n\nDo you want me to attempt this now?"
+            if [ $? = 0 ]; then
+               ssh $rdiff_user@$rdiff_host 'apt-get install rdiff-backup'
+               result=$?
+               echo "Hit return to continue."
+               read
+               case $result in
+                  0) msgBox "$rdiff_title: success" "Installation of rdiff-backup was a success!" 
+                     do_rdiff_con;;
+                  1) msgBox "$rdiff_title: error" "Connected successfully to $rdiff_user@$rdiff_host, but was unable to install the package for some reason.";;
+                  255) msgBox "$rdiff_title: error" "Failed to connect to $rdiff_user@$rdiff_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host.";;
+                  *) msgBox "$rdiff_title: error" "Unexpected error.";;
+               esac 
+               return
+            fi
+         else
+            booleanBox "install rdiff-backup" "Please install rdiff-backup on the remote machine, this cannot be done automatically, as the remote user in your configuration is not root. \n\nIf you have installed rdiff-backup on the remote machine and you are getting this error, then there is a version incompatibility between that version and the local version.\n\nPlease resolve this problem and then try connecting again.\n\n\n\nTry connecting again?"
+            if [ $? = 0 ]; then
+               do_rdiff_con
+            else
+               return
+            fi
+         fi
+      else
+         msgBox "incompatible versions of rdiff-backup" "It looks like rdiff-backup is installed on the remote machine, but it may be an incompatible version with the one installed locally, or something else is amiss.\n\nPlease resolve this problem and then try connecting again.\n\n\nTry connecting again?"
+         if [ $? = 0 ]; then
+            do_rdiff_con
+         else
+            return
+         fi
+      fi
    else
  	echo "SUCCESS: Everything looks good!"
 	echo "Hit return to continue."
 	read
    fi
 
-  _con_done="(DONE)"
-  setDefault finish
+   _con_done="(DONE)"
+   setDefault finish
 }
 
 do_rdiff_finish() {
@@ -308,22 +270,17 @@ do_rdiff_finish() {
 type = local
 keep = $rdiff_keep
 EOF
-
-   if [ "$host_or_vservers" == host -o "$host_or_vservers" == both ]
-   then
-       set -o noglob
-       
-       for ((i=0; i < ${#rdiff_includes[@]} ; i++))
-       do
+   ## includes ##
+   if [ "$host_or_vservers" == host -o "$host_or_vservers" == both ]; then
+      set -o noglob
+      for ((i=0; i < ${#rdiff_includes[@]} ; i++)); do
          echo "include = ${rdiff_includes[$i]}" >> $next_filename
-       done
-       
-       set +o noglob
+      done       
+      set +o noglob
    fi
 
-   if [ "$host_or_vservers" == vservers -o "$host_or_vservers" == both ]
-   then      
-       cat >> $next_filename <<EOF
+   if [ "$host_or_vservers" == vservers -o "$host_or_vservers" == both ]; then      
+      cat >> $next_filename <<EOF
 #
 # If vservers = yes in /etc/backupninja.conf then the following variables can
 # be used:
@@ -341,23 +298,21 @@ EOF
 # Vserver paths are derived from $VROOTDIR.
 
 EOF
-
-       set -o noglob
-       echo -e "vsnames = \"$selected_vservers\"\n" >> $next_filename
-       for i in $rdiff_vsincludes; do
-           echo "vsinclude = $i" >> $next_filename
-       done
-       set +o noglob
+      set -o noglob
+      echo -e "vsnames = \"$selected_vservers\"\n" >> $next_filename
+      for i in $rdiff_vsincludes; do
+         echo "vsinclude = $i" >> $next_filename
+      done
+      set +o noglob
    fi
    
-   # excludes
-
-   for ((i=0; i < ${#rdiff_excludes[@]} ; i++))
-   do
+   ## excludes ##
+   set -o noglob
+   for ((i=0; i < ${#rdiff_excludes[@]} ; i++)); do
      echo exclude = ${rdiff_excludes[$i]} >> $next_filename
    done
    set +o noglob
-       cat >> $next_filename <<EOF
+   cat >> $next_filename <<EOF
 
 ######################################################
 ## destination section
@@ -374,59 +329,55 @@ EOF
 }
 
 rdiff_main_menu() {
-
-  while true; do
-    srcitem="choose files to include & exclude $_src_done"
-    destitem="configure backup destination $_dest_done"
-    conitem="set up ssh keys and test remote connection $_con_done"
-    advitem="edit advanced settings $_adv_done"
-    menuBox "$rdiff_title" "choose a step:" \
-        src "$srcitem" \
-        dest "$destitem" \
-        conn "$conitem" \
-        finish "finish and create config file"
-    [ $? = 0 ] || return
-    result="$REPLY"
-
-    case "$result" in
-       "src") do_rdiff_src;;
-       "dest") do_rdiff_dest;;
-       "conn") do_rdiff_ssh_con;;
-       "adv") do_rdiff_adv;;
-       "finish")
-          if [[ "$_con_done$_dest_done$_src_done" != "(DONE)(DONE)(DONE)" ]]; then
-            msgBox "$rdiff_title" "You cannot create the configuration file until the other steps are completed."
-          else
-            do_rdiff_finish
-            return
-          fi
-          ;;
-    esac
-
-  done
+   while true; do
+      srcitem="choose files to include & exclude $_src_done"
+      destitem="configure backup destination $_dest_done"
+      conitem="set up ssh keys and test remote connection $_con_done"
+      advitem="edit advanced settings $_adv_done"
+      menuBox "$rdiff_title" "choose a step:" \
+         src "$srcitem" \
+         dest "$destitem" \
+         conn "$conitem" \
+         finish "finish and create config file"
+      [ $? = 0 ] || return
+      result="$REPLY"
+      case "$result" in
+         "src") do_rdiff_src;;
+         "dest") do_rdiff_dest;;
+         "conn") do_rdiff_ssh_con;;
+         "adv") do_rdiff_adv;;
+         "finish")
+            if [[ "$_con_done$_dest_done$_src_done" != "(DONE)(DONE)(DONE)" ]]; then
+               msgBox "$rdiff_title" "You cannot create the configuration file until the other steps are completed."
+            else
+               do_rdiff_finish
+               return
+            fi
+            ;;
+      esac
+   done
 }
 
 rdiff_wizard() {
-  require_packages rdiff-backup
+ 
+   # Global variables
+   rdiff_title="rdiff-backup action wizard"
+   _src_done=
+   _dest_done=
+   _con_done=
+   _adv_done=
+   rdiff_keep=60D
+   rdiff_directory=/backup/`hostname`
+   rdiff_user=
+   rdiff_host=
+
+   # Global variables whose '*' shall not be expanded
+   set -o noglob
+   rdiff_includes=(/var/spool/cron/crontabs /var/backups /etc /root /home /usr/local/*bin /var/lib/dpkg/status*)
+   rdiff_excludes=(/home/*/.gnupg)
+   rdiff_vsincludes=
+   set +o noglob
   
-  # Global variables
-  rdiff_title="rdiff-backup action wizard"
-  _src_done=
-  _dest_done=
-  _con_done=
-  _adv_done=
-  rdiff_keep=60D
-  rdiff_directory=/backup/`hostname`
-  rdiff_user=
-  rdiff_host=
-  
-  # Global variables whose '*' shall not be expanded
-  set -o noglob
-  rdiff_includes=(/var/spool/cron/crontabs /var/backups /etc /root /home /usr/local/*bin /var/lib/dpkg/status*)
-  rdiff_excludes=(/home/*/.gnupg)
-  rdiff_vsincludes=
-  set +o noglob
-  
-  rdiff_main_menu
+   rdiff_main_menu
 }
 
