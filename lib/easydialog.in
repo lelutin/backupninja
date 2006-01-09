@@ -244,6 +244,17 @@ formDisplay() {
    ) | xargs $DIALOG 2> $temp
    local status=$?
    
+   ##
+   ## the exit status is meaningless, it is always 0.
+   ## i can't figure out how to get the exit status of dialog
+   ## if we do "dialog `arg code`" or "dialog $args", then the quotes
+   ## get messed up and dialog won't run.
+   ## if we do "(arg code) | xargs dialog", then the exit status is
+   ## swallowed by xargs. xargs should return different exit status
+   ## depending on the exit status of the command run, but i have
+   ## never been able to get that to work.
+   ## 
+
    REPLY=
    if [ $status = 0 ]; then
       IFS=$''
