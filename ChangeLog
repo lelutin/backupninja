@@ -7,6 +7,19 @@ version 0.9.3 -- unreleased
     handler changes
         mysql:
          . fixed no user defaults file processing
+    ninjahelper changes
+        rdiff.helper:
+         . fixed errors in create remote dir
+         . code formatting cleanup (three spaces indent)
+         . fixed bug which caused only first include/exclude dir to
+           have "include = "
+         . fixed globbing bug with exclude
+        ninjahelper:
+         . now reports error if the helper script has a syntax error or bombs out.
+         . code formatting cleanup (three spaces indent)
+    known bugs:
+       easydialog: 
+         . formDisplay does not return exit status.
 
 version 0.9.2 -- December 29, 2005
     backupninja changes
