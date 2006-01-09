@@ -5,19 +5,19 @@
 ## Functions
 
 function check_perms() {
-	local file=$1
-	local perms=`ls -ld $file`
-	group_w_perm=${perms:5:1}
-	world_w_perm=${perms:8:1}
-	if [ "$group_w_perm" == "w" -o "$world_w_perm" == "w" ]; then
-	    echo $perms
-	    echo "helper scripts must not be group or world writable! Dying on file $file"
-	    exit
-	fi
-	if [ `ls -ld $file | awk '{print $3}'` != "root" ]; then
-		echo "helper scripts must be owned by root! Dying on file $file"
-		exit
-	fi
+   local file=$1
+   local perms=`ls -ld $file`
+   group_w_perm=${perms:5:1}
+   world_w_perm=${perms:8:1}
+   if [ "$group_w_perm" == "w" -o "$world_w_perm" == "w" ]; then
+      echo $perms
+      echo "helper scripts must not be group or world writable! Dying on file $file"
+      exit
+   fi
+   if [ `ls -ld $file | awk '{print $3}'` != "root" ]; then
+      echo "helper scripts must be owned by root! Dying on file $file"
+      exit
+   fi
 }
 
 
@@ -27,56 +27,62 @@ function check_perms() {
 ## sets variable $next_filename
 ##
 get_next_filename() {
-  next_filename=$1
-  dir=`dirname $next_filename`
-  file=`basename $next_filename`
-  number=${file:0:2}
-  suffix=${file:3}
-  while [ -f $next_filename ]; do
-    let "number += 1"
-    next_filename="$dir/$number.$suffix"
-  done
+   next_filename=$1
+   dir=`dirname $next_filename`
+   file=`basename $next_filename`
+   number=${file:0:2}
+   suffix=${file:3}
+   while [ -f $next_filename ]; do
+     let "number += 1"
+     next_filename="$dir/$number.$suffix"
+   done
 }
 
 ##
 ## installs packages (passed in as $@) if not present
 ##
 require_packages() {
-       for pkg in "$@"; do
-	   installed=`dpkg -s $pkg | grep 'ok installed'`
-       if [ -z "$installed" ]; then 
-           booleanBox "install $pkg?" "This backup action requires package $pkg. Do you want to install it now?"
-           if [ $? = 0 ]; then
-              apt-get install $pkg
-              echo "hit return to continue...."
-              read
-           fi
-       fi
-    done
+   for pkg in "$@"; do
+      installed=`dpkg -s $pkg | grep 'ok installed'`
+      if [ -z "$installed" ]; then 
+         booleanBox "install $pkg?" "This backup action requires package $pkg. Do you want to install it now?"
+         if [ $? = 0 ]; then
+            apt-get install $pkg
+            echo "hit return to continue...."
+            read
+         fi
+      fi
+   done
 }
 
 ##
 ## menu for the wizards
 ##
 donew() {
-  # (re-)initialize vservers support
-  init_vservers
-  # menu
-  listBegin "new action menu" "select an action to create"
-  listItem return "return to main menu"
-  for data in $HELPERS; do
-    data=${data//_/ }
-    helper_function=${data%%:*}
-    helper_info=${data##*:}
-    listItem $helper_function "$helper_info"
-  done
-  listDisplay menu
+   # (re-)initialize vservers support
+   init_vservers
+   # menu
+   listBegin "new action menu" "select an action to create"
+   listItem return "return to main menu"
+   for data in $HELPERS; do
+      data=${data//_/ }
+      helper_function=${data%%:*}
+      helper_info=${data##*:}
+      listItem $helper_function "$helper_info"
+   done
+   listDisplay menu
     
-  [ $? = 1 ] && return
-  result="$REPLY"
-  [ "$result" = "return" ] && return
-  result=${result}_wizard
-  $result
+   [ $? = 1 ] && return
+   result="$REPLY"
+   [ "$result" = "return" -o "$result" = "" ] && return
+   run_wizard=${result}_wizard
+   $run_wizard
+   result=$?
+   # 0 is ok, 1 is cancel, anything else is bad.
+   if [ $result != 1 -a $result != 0 ]; then    
+      echo "An error occurred ($result), bailing out. Hit return to continue."
+      read
+   fi 
 }
 
 do_rm_action() {
@@ -112,101 +118,101 @@ do_xedit() {
 }
 
 do_run_test() {
-  backupninja --test --run $1
-  echo "Hit return to continue..."
-  read
+   backupninja --test --run $1
+   echo "Hit return to continue..."
+   read
 }
 
 do_disable() {
-  mv $1 $1.disabled
+   mv $1 $1.disabled
 }
 
 do_enable() {
-  mv $1 ${1%.*}
+   mv $1 ${1%.*}
 }
 
 do_rename() {
-  dir=`dirname $1`
-  filename=`basename $1`
-  inputBox "rename action" "enter a new filename" $filename
-  mv $dir/$filename $dir/$REPLY
+   dir=`dirname $1`
+   filename=`basename $1`
+   inputBox "rename action" "enter a new filename" $filename
+   mv $dir/$filename $dir/$REPLY
 }
 
 doaction() {
-  action=$1
-  base=`basename $action`
-  if [ "${base##*.}" == "disabled" ]; then
-     enable="enable";
-  else
-     enable="disable";
-  fi
-  while true; do
-    menuBox "action menu" "$action $first" \
-      main "return to main menu" \
-      view "view configuration" \
-      xedit "launch external editor" \
-      $enable "$enable action" \
-      name "change the filename" \
-      run "run this action now" \
-      test "do a test run" \
-      kill "remove this action" 
-    [ $? = 1 ] && return;
-    result="$REPLY"
-  	case "$result" in
-	   "view") dialog --textbox $action 0 0;; 
-	   "xedit") do_xedit $action;;
-	   "disable") do_disable $action; return;;
-   	   "enable") do_enable $action; return;;
-   	   "name") do_rename $action; return;;
-	   "run") do_run $action;;
-	   "test") do_run_test $action;; 
-	   "kill") do_rm_action $action; return;;
-	   "main") return;;
-	esac
-  done
+   action=$1
+   base=`basename $action`
+   if [ "${base##*.}" == "disabled" ]; then
+      enable="enable";
+   else
+      enable="disable";
+   fi
+   while true; do
+      menuBox "action menu" "$action $first" \
+         main "return to main menu" \
+         view "view configuration" \
+         xedit "launch external editor" \
+         $enable "$enable action" \
+         name "change the filename" \
+         run "run this action now" \
+         test "do a test run" \
+         kill "remove this action" 
+      [ $? = 1 ] && return;
+      result="$REPLY"
+      case "$result" in
+         "view") dialog --textbox $action 0 0;; 
+         "xedit") do_xedit $action;;
+         "disable") do_disable $action; return;;
+         "enable") do_enable $action; return;;
+         "name") do_rename $action; return;;
+         "run") do_run $action;;
+         "test") do_run_test $action;; 
+         "kill") do_rm_action $action; return;;
+         "main") return;;
+      esac
+   done
 }
 
 #####################################################
 ## begin program
 
 if [ ! -x "`which dialog`" ]; then
-	echo "ninjahelper is a menu based wizard for backupninja."
-	echo "It requires 'dialog' in order to run. Do you want to install dialog now?"
-	while true; do
-	  echo -n "(yes/no): "
-	  read install
-	  if [ "$install" == "yes" ]; then
-	     apt-get install dialog
-	     break
-	  elif [ "$install" == "no" ]; then
-	     exit
-	  else
-	     echo "You must answer 'yes' or 'no'"
-	  fi
-    done
+   echo "ninjahelper is a menu based wizard for backupninja."
+   echo "It requires 'dialog' in order to run. Do you want to install dialog now?"
+   while true; do
+      echo -n "(yes/no): "
+      read install
+      if [ "$install" == "yes" ]; then
+         apt-get install dialog
+            break
+         elif [ "$install" == "no" ]; then
+            exit
+         else
+            echo "You must answer 'yes' or 'no'"
+      fi
+   done
 fi
 
 # bootstrap
 conffile="@CFGDIR@/backupninja.conf"
 if [ ! -r "$conffile" ]; then
-	echo "Configuration file $conffile not found." 
-	exit 1
+   echo "Configuration file $conffile not found." 
+   exit 1
 fi
 
 # find $libdirectory
 libdirectory=`grep '^libdirectory' $conffile | awk '{print $3}'`
 if [ -z "$libdirectory" ]; then
-        if [ -d "@libdir@" ]; then
-	   libdirectory="@libdir@"
-	else
-	   echo "Could not find entry 'libdirectory' in $conffile." 
-	   exit 1
-	fi
+   if [ -d "@libdir@" ]; then
+      libdirectory="@libdir@"
+   else
+      echo "Could not find entry 'libdirectory' in $conffile." 
+      exit 1
+   fi
 else
-        if [ ! -d "$libdirectory" ]; then
-	   echo "Lib directory $libdirectory not found." 
-	   exit 1
-	fi
+   if [ ! -d "$libdirectory" ]; then
+      echo "Lib directory $libdirectory not found." 
+      exit 1
+   fi
 fi
 
 # include shared functions
@@ -216,13 +222,17 @@ fi
 
 # am I running as root?
 if [ "$UID" != "0" ]; then
-	msgBox "warning" "`basename $0` must be run by root!"
-	exit 1
+   msgBox "warning" "`basename $0` must be run by root!"
+   exit 1
 fi
 
 # get global config options (second param is the default)
 setfile $conffile
 getconf configdirectory @CFGDIR@/backup.d
+if [ ! -d $configdirectory ]; then
+   msgBox "warning" "The backupninja configuration directory $configdirectory does not exist. Ninjahelper cannot run without it!"
+   exit 1
+fi
 getconf scriptdirectory @datadir@
 
 # load all the helpers
@@ -230,6 +240,10 @@ HELPERS=""
 for file in `find $scriptdirectory -follow -name '*.helper'`; do
    check_perms $file
    . $file
+   if [ $? != 0 ]; then
+      echo "An error occurred while loading $file. Hit return to continue."
+      read
+   fi
 done
 
 setApplicationTitle "ninjahelper"
@@ -244,9 +258,9 @@ menulist=
 action=
 let "i = 1"
 for file in `find $conf/etc/backup.d/ -type f | sort -n`; do
-  menulist="$menulist $i $file"
-  actions[$i]=$file
-  let "i += 1"
+   menulist="$menulist $i $file"
+   actions[$i]=$file
+   let "i += 1"
 done
 
 menuBox "main menu" "Select a backup action for more options, or create a new action:" $menulist \
@@ -257,17 +271,16 @@ menuBox "main menu" "Select a backup action for more options, or create a new ac
 
 choice="$REPLY"
 if [ "$choice" == "new" ]; then
-  donew;
+   donew;
 elif [ "$choice" == "quit" ]; then
-  exit 0;
+   exit 0;
 else
-  action=${actions[$choice]};
-  if [ -f "$action" ]; then
-     doaction $action
-  else
-     msgBox "error" "error: cannot find the file '$action'"
-  fi
+   action=${actions[$choice]};
+   if [ -f "$action" ]; then
+      doaction $action
+   else
+      msgBox "error" "error: cannot find the file '$action'"
+   fi
 fi
-
 
 done
