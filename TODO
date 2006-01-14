@@ -1,0 +1,11 @@
+
+This is a todo list, want to help? Pick something and let the list know
+you are working on it!
+
+. Make ninjahelper allow you to pick what type of backup you want (instead
+  of just assuming you want local-to-remote, or push backups. Some people
+  want local-to-local, or remote-to-local, or pull backups).
+
+. Make it so backupninja can be run as a regular user, instead of requiring
+  root
+
