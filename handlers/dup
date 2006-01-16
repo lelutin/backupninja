@@ -120,13 +120,13 @@ execstr_clientpart="/"
 ### SOURCE ###
 
 # excludes
-for i in $exclude; do
+for i in "$exclude"; do
 	str="${i//__star__/*}"
 	execstr="${execstr}--exclude '$str' "
 done
 	
 # includes 
-for i in $include; do
+for i in "$include"; do
 	str="${i//__star__/*}"
 	execstr="${execstr}--include '$str' "
 done
@@ -134,7 +134,7 @@ done
 # vsincludes
 if [ $usevserver ]; then
     for vserver in $vsnames; do
-	for vi in $vsinclude; do
+	for vi in "$vsinclude"; do
 	    str="${vi//__star__/*}"
 	    execstr="${execstr}--include '$VROOTDIR/$vserver$str' "
 	done
