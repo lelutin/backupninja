@@ -7,6 +7,9 @@ version 0.9.3 -- unreleased
     handler changes
         mysql:
          . fixed no user defaults file processing
+	duplicity:
+	 . fixed (again...) globbing in include and exclude options (Debian bug
+	   #348022, follow-up to #338796)
     ninjahelper changes
         rdiff.helper:
          . fixed errors in create remote dir
