@@ -12,6 +12,8 @@ version 0.9.3 -- unreleased
 	   #348022, follow-up to #338796)
 	 . warn if vsnames or vsinclude is enabled while vservers support is
 	   disabled in backupninja.conf
+	 . now works when multiple vservers names are given (separated by space)
+	   in vsnames config variable
     ninjahelper changes
         rdiff.helper:
          . fixed errors in create remote dir

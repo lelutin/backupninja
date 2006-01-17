@@ -354,7 +354,7 @@ EOF
 # Any path specified in vsinclude is added to the include list for each vserver
 # listed in vsnames (or all if vsnames = all).
 # E.g. vsinclude = /home will backup the /home partition in every vserver
-# listed in vsnames. If you have vsnames = "foo bar baz", this vsinclude will
+# listed in vsnames. If you have 'vsnames = foo bar baz', this vsinclude will
 # add to the include list /vservers/foo/home, /vservers/bar/home and
 # /vservers/baz/home.
 # Vservers paths are derived from $VROOTDIR.
@@ -363,7 +363,7 @@ EOF
 
    if [ "$host_or_vservers" == vservers -o "$host_or_vservers" == both ]; then
       set -o noglob
-      echo -e "vsnames = \"$selected_vservers\"\n" >> $next_filename
+      echo -e "vsnames = $selected_vservers\n" >> $next_filename
       for i in $dup_vsincludes; do
          echo "vsinclude = $i" >> $next_filename
       done
