@@ -29,6 +29,7 @@ version 0.9.3 -- unreleased
     lib changes
 	vserver:
 	 . improved VROOTDIR detection
+	 . test in a stricter way the real vservers availability
     known bugs:
         easydialog: 
          . formDisplay does not return exit status.

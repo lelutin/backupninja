@@ -41,6 +41,16 @@ init_vservers() {
    host_or_vservers=host
    # check vservers real availability
    if [ $vservers = yes ]; then
+      if [ ! -x "$VSERVERINFO" ]; then
+         `if [ "$arg" = nodialog ]; then echo fatal; else echo "msgBox warning"; fi` \
+            "vservers enabled in $conffile, but vserver-info command was not found. Please set the VSERVERINFO configuration variable to its full path."
+            return
+      fi
+      if [ ! -x "$VSERVER" ]; then
+         `if [ "$arg" = nodialog ]; then echo fatal; else echo "msgBox warning"; fi` \
+            "vservers enabled in $conffile, but vserver command was not found. Please set the VSERVER configuration variable to its full path."
+            return
+      fi
       if [ -z "$VROOTDIR" ]; then
          `if [ "$arg" = nodialog ]; then echo fatal; else echo "msgBox warning"; fi` \
             "vservers enabled in $conffile, but VROOTDIR is not set and could not be guessed."
