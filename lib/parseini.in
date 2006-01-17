@@ -1,3 +1,4 @@
+# -*- mode: awk; indent-tabs-mode: nil; -*-
 # 
 # parseini --- parses 'ini' style configuration files.
 #

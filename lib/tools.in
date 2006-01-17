@@ -1,4 +1,5 @@
 #!@BASH@
+# -*- mode: sh; sh-basic-offset: 3; indent-tabs-mode: nil; -*-
 
 # This file contains functions shared between ninjahelper and backupninja.
 
