@@ -10,6 +10,8 @@ version 0.9.3 -- unreleased
 	duplicity:
 	 . fixed (again...) globbing in include and exclude options (Debian bug
 	   #348022, follow-up to #338796)
+	 . warn if vsnames or vsinclude is enabled while vservers support is
+	   disabled in backupninja.conf
     ninjahelper changes
         rdiff.helper:
          . fixed errors in create remote dir
