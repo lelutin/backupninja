@@ -1,9 +1,11 @@
 version 0.9.3 -- unreleased
     backupninja changes
-       backupninja.conf
+        backupninja.conf
          . added (commented out) the various default paths to
            programs such as PGSQLDUMP, so that users can figure
            out more easily they can customize them
+        code refactor:
+	 . now uses vservers lib to init vservers support
     handler changes
         mysql:
          . fixed no user defaults file processing
