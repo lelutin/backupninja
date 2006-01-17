@@ -425,7 +425,7 @@ getconf RSYNC /usr/bin/rsync
 getconf vservers no
 getconf VSERVERINFO /usr/sbin/vserver-info
 getconf VSERVER /usr/sbin/vserver
-getconf VROOTDIR `if [ -f "$VSERVERINFO" ]; then $VSERVERINFO info SYSINFO |grep vserver-Rootdir | awk '{print $2}'; fi`
+getconf VROOTDIR `if [ -f "$VSERVERINFO" ]; then $VSERVERINFO info SYSINFO | grep '^ *vserver-Rootdir' | awk '{print $2}'; fi`
 
 if [ ! -d "$configdirectory" ]; then
 	echo "Configuration directory '$configdirectory' not found."
