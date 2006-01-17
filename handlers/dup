@@ -45,7 +45,7 @@ if [ "$vservers" == "yes" ]; then
 	    vsnames="$vserver $vsnames"
 	done
     else
-	for vserver in "$vsnames"; do
+	for vserver in $vsnames; do
 	    [ -d "$VROOTDIR/$vserver" ] || fatal "vserver '$vserver' does not exist."
 	done
     fi
