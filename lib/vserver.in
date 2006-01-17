@@ -23,8 +23,11 @@
 ##   - set $vservers_are_available to 'yes';
 ##   - set $found_vservers to the list of all vservers found on the system.
 ## This function has to be run once before a new helper is run.
+## If the argument is "nodialog", use the backupninja's message functions
+## instead of easydialog.
 ##
 init_vservers() {
+   local arg=$1
    # get global variables from the conffile
    setfile $conffile
    getconf vservers no
@@ -37,9 +40,17 @@ init_vservers() {
    selected_vservers=
    host_or_vservers=host
    # check vservers real availability
-   if [ $vservers == yes ]; then
-      [ -n "$VROOTDIR" ] || (msgBox "warning" "VROOTDIR is not set in $conffile and could not be guessed."; return)
-      [ -d "$VROOTDIR" ] || (msgBox "warning" "VROOTDIR ($VROOTDIR) does not exist."; return)
+   if [ $vservers = yes ]; then
+      if [ -z "$VROOTDIR" ]; then
+         `if [ "$arg" = nodialog ]; then echo fatal; else echo "msgBox warning"; fi` \
+            "vservers enabled in $conffile, but VROOTDIR is not set and could not be guessed."
+            return
+      fi
+      if [ ! -d "$VROOTDIR" ]; then
+         `if [ "$arg" = nodialog ]; then echo fatal; else echo "msgBox warning"; fi` \
+            "vservers enabled in $conffile, but VROOTDIR ($VROOTDIR) does not exist.";
+            return
+      fi
       found_vservers=`ls $VROOTDIR | grep -E -v "lost+found|ARCHIVES" | tr "\n" " "`
       [ -n "$found_vservers" ] || return
       vservers_are_available=yes
