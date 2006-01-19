@@ -33,7 +33,7 @@ do_dup_vserver() {
    # choose the files to backup
    REPLY=
    while [ -z "$REPLY" ]; do
-      formBegin "$dup_title - vservers: includes"
+      formBegin "$dup_title - vservers: vsincludes (backup these directories from every selected vserver)"
          [ -z "$dup_vsincludes" ] && dup_vsincludes="$dup_default_includes"
          for i in $dup_vsincludes; do
             formItem include "$i"
@@ -351,12 +351,15 @@ EOF
 # be used:
 # vsnames = all | <vserver1> <vserver2> ... (default = all)
 # vsinclude = <path>
+# vsinclude = <path>
+# ...
 # Any path specified in vsinclude is added to the include list for each vserver
 # listed in vsnames (or all if vsnames = all).
-# E.g. vsinclude = /home will backup the /home partition in every vserver
-# listed in vsnames. If you have 'vsnames = foo bar baz', this vsinclude will
-# add to the include list /vservers/foo/home, /vservers/bar/home and
-# /vservers/baz/home.
+#
+# For example, vsinclude = /home will backup the /home directory in every
+# vserver listed in vsnames. If you have 'vsnames = foo bar baz', this
+# vsinclude will add to the include list /vservers/foo/home, /vservers/bar/home
+# and /vservers/baz/home.
 # Vservers paths are derived from $VROOTDIR.
 
 EOF
