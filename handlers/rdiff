@@ -114,7 +114,6 @@ fi
 
 # source specific checks
 [ "$include" != "" -o "$vsinclude" != "" ] || fatal "No source includes specified"
-#TODO should I test for vsinclude if usevservers=yes?
 case $sourcetype in 
 	remote ) execstr_sourcepart="$sourceuser@$sourcehost::/" ;;
 	local  ) execstr_sourcepart="/" ;;
