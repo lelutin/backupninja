@@ -94,7 +94,7 @@ check_consistency "destination" "$type" "$user" "$host"
 
 # See if vservers are configured
 local usevserver=no
-if [ $vservers_are_available = yes ]; then
+if [ $vservers_are_available = yes -a -n "$vsinclude" ]; then
    info "vserver method enabled"
    usevserver=yes
 fi
@@ -160,12 +160,12 @@ execstr="$RDIFFBACKUP $options --print-statistics "
 
 # TODO: order the includes and excludes
 # excludes
-for i in $exclude; do
+for i in "$exclude"; do
 	str="${i//__star__/*}"
 	execstr="${execstr}--exclude '$str' "
 done
 # includes 
-for i in $include; do
+for i in "$include"; do
 	[ "$i" != "/" ] || fatal "Sorry, you cannot use 'include = /'"
 	str="${i//__star__/*}"
 	execstr="${execstr}--include '$str' "
@@ -174,7 +174,7 @@ done
 # vsinclude
 if [ $usevserver = yes ]; then
 	for vserver in `ls $VROOTDIR|grep -v lost+found`; do
-		for vi in $vsinclude; do
+		for vi in "$vsinclude"; do
 			str="${vi//__star__/*}"
 			execstr="${execstr}--include '$VROOTDIR/$vserver$str' "
 		done
