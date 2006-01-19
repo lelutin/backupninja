@@ -299,7 +299,7 @@ EOF
 
 EOF
       set -o noglob
-      echo -e "vsnames = \"$selected_vservers\"\n" >> $next_filename
+      echo -e "vsnames = $selected_vservers\n" >> $next_filename
       for i in $rdiff_vsincludes; do
          echo "vsinclude = $i" >> $next_filename
       done
