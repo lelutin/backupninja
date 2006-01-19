@@ -7,7 +7,8 @@ version 0.9.3 -- unreleased
         code refactor:
 	 . now uses vservers lib to initialize vservers support
     handler changes
-        duplicity, mysql, pgsql, rdiff, svn: use new lib/vserver functionality
+        duplicity, mysql, pgsql, rdiff, svn, sys: start to use (at different
+	   degrees) new lib/vserver functionality
         mysql:
          . fixed no user defaults file processing
 	duplicity:

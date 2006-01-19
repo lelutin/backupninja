@@ -33,23 +33,19 @@ getconf sfdisk_options ""
 getconf hwinfo_options ""
 
 # See if vservers are configured
-if [ "$vservers" = "yes" ]
+local usevserver=no
+if [ $vservers_are_available = yes ]
 then
-	if [ ! -d $VROOTDIR ]
-	then
-		fatal "vservers enabled, but $VROOTDIR does not exist!"
-	else
-		info "vserver method enabled"
-		usevserver=1
-	fi
+   info "vserver method enabled"
+   usevserver=yes
 fi
 
 if [ "$packages" == "yes" ]; then
-	if [ $usevserver ]
+	if [ $usevserver = yes ]
 	then
 		nodpkg="lost+found|ARCHIVES"
 		info "vserver root directory set to: $VROOTDIR"
-		for vserver in `ls $VROOTDIR | grep -E -v $nodpkg`
+		for vserver in $found_vservers
 		do
 			info "examining vserver: $vserver"
 			running=`$VSERVERINFO $vserver RUNNING`
@@ -97,7 +93,7 @@ fi
 #
 
 if [ "$packages" == "yes" ]; then
-   if [ $usevserver ]
+   if [ $usevserver = yes ]
    then
       for vserver in `ls $VROOTDIR | grep -E -v $nodpkg`
       do
