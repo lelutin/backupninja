@@ -10,12 +10,12 @@ getconf vsname
 
 localhost=`hostname`
 
-# If vservers are configured, decide if the handler should
-# use them or if it should just operate on the host
+# If vservers are enabled, check that $vsname exists, and decide if the
+# handler should use it or if it should just operate on the host.
 local usevserver=no
 if [ $vservers_are_available = yes ]; then
    if ! vservers_exist "$vsname" ; then
-      fatal "At least one of the vservers listed in vsnames ($vsnames) does not exist."
+      fatal "The vserver given in vsname ($vsname) does not exist."
    else
       info "using vserver '$vsname'"
       usevserver=yes
@@ -23,13 +23,11 @@ if [ $vservers_are_available = yes ]; then
 fi
 
 # As needed, make sure that :
-#   * the specified vserver exists and is running
+#   * the specified vserver is running
 #   * the specified vserver or host has the needed executables
 if [ $usevserver = yes ]; then
     info "examining vserver '$vsname'"
-    # does it exist ?
     vroot="$VROOTDIR/$vsname"
-    [ -d $vroot ] || fatal "vserver '$vsname' does not exist at '$vroot'"
     # is it running ?
     running=`$VSERVERINFO $vsname RUNNING`
     if [ "$running" = "1" ]; then
