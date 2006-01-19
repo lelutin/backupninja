@@ -17,6 +17,8 @@ version 0.9.3 -- unreleased
 	 . now works when multiple vservers names are given (separated by space)
 	   in vsnames config variable
 	 . make use of new lib/vserver functionality
+        pgsql
+         . make use of new lib/vserver functionality
         rdiff
 	 . make use of new lib/vserver functionality
 	 . fixed globbing bug in include, exclude and vsinclude options
