@@ -32,6 +32,7 @@ version 0.9.3 -- unreleased
 	 . init_vservers: test in a stricter way the real vservers availability
 	 . init_vservers: canonicalize VROOTDIR (since duplicity et al.
 	   don't follow symlinks)
+	 . init_vservers: warn if vservers are enabled but no vserver is found
     known bugs:
         easydialog: 
          . formDisplay does not return exit status.
