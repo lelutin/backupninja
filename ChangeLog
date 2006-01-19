@@ -16,6 +16,7 @@ version 0.9.3 -- unreleased
 	   disabled in backupninja.conf
 	 . now works when multiple vservers names are given (separated by space)
 	   in vsnames config variable
+	 . make use of new lib/vserver functionality
     ninjahelper changes
         rdiff.helper:
          . fixed errors in create remote dir
@@ -33,6 +34,7 @@ version 0.9.3 -- unreleased
 	 . init_vservers: canonicalize VROOTDIR (since duplicity et al.
 	   don't follow symlinks)
 	 . init_vservers: warn if vservers are enabled but no vserver is found
+	 . new function: vservers_exist
     known bugs:
         easydialog: 
          . formDisplay does not return exit status.

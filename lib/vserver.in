@@ -74,7 +74,28 @@ init_vservers() {
 }
 
 ##
-## If the argument is the name of a vserver selected use by the current helper,
+## If all the arguments are existing vservers names, returns 0.
+## Else, returns 1. Also returns 1 if no argument is given.
+##
+vservers_exist() {
+   [ $# -ge 1 ] || return 1
+   local args="$1"
+   local vserver i found
+   for vserver in $args ; do
+      found=no
+      for i in $found_vservers ; do
+         if [ $vserver = $i ]; then
+            found=yes
+            break
+         fi
+      done
+      [ $found = yes ] || return 1
+   done
+   return 0
+}
+
+##
+## If the argument is the name of a vserver selected by the current helper,
 ## echoes 'on' and returns 0.
 ## Else, echoes 'off' and returns 1.
 ##
