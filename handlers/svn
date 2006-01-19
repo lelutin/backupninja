@@ -11,29 +11,28 @@ getconf vsname
 
 error=0
 
-# If vservers are configured, decide if the handler should
-# use them or if it should just operate on the host
-if [ "$vservers" = "yes" ]
-then
-	if [ ! -z $vsname ]
-	then		
-		info "Using vserver '$vsname'"
-		usevserver=1
-	else
-		info "No vserver name specified, actions will be performed on the host"
-	fi
-fi
-
-# If needed, make sure that the specified vserver exists and is running.
-if [ $usevserver ]
-then
-	info "examining vserver '$vsname'"
-        # does it exist ?
-	vroot="$VROOTDIR/$vsname"
-	[ -d $vroot ] || fatal "vserver '$vsname' does not exist at '$vroot'"
-        # is it running ?
-	running=`$VSERVERINFO $vsname RUNNING`
-	[ "$running" = "1" ] || fatal "vserver $vsname is not running."
+# Decide if the handler should operate on a vserver or on the host.
+# In the former case, check that $vsname exists and is running.
+local usevserver=no
+local vroot
+if [ $vservers_are_available = yes ]; then
+   if [ -z "$vsname" ]; then
+      # does it exist ?
+      if ! vservers_exist "$vsname" ; then
+         fatal "The vserver given in vsname ($vsname) does not exist."
+      fi
+      # is it running ?
+      $VSERVERINFO -q $vsname RUNNING
+      if [ $? -ne 0 ]; then
+         fatal "The vserver $vsname is not running."
+      fi
+      # everything ok
+      info "Using vserver '$vsname'."
+      usevserver=yes
+      vroot="$VROOTDIR/$vsname"
+   else
+      info "No vserver name specified, actions will be performed on the host."
+   fi
 fi
 
 cd $vroot$src
@@ -51,7 +50,7 @@ do
        error "command failed mkdir -p $vroot$tmp/$repo"
     fi
 
-    if [ $usevserver ]
+    if [ $usevserver = yes ]
     then
 	ret=`$VSERVER $vsname exec $HOTBACKUP $src/$repo $tmp/$repo 2>&1`
     else
