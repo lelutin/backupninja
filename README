@@ -253,6 +253,11 @@ To add an additional 'wizard' to ninjahelper, follow these steps:
          ... do work here ...
        }
 
-(3) check the examples of the included helpers to see how they are
-    written. The dialog functions are defined in easydialog.sh.
+(3) look at the existing helpers to see how they are written. Try to re-use
+    functions, such as the dialog functions that are defined in easydialog.sh,
+    or the vserver functions defined in lib/vserver.
 
+(4) test, re-test, and test again. Try to break the helper by going backwards,
+    try to think like someone who has no idea how to configure your handler
+    would think, try to make your helper as simple as possible. Walk like a cat,
+    become your shadow, don't let your senses betray you.
