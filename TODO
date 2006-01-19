@@ -4,8 +4,18 @@ you are working on it!
 
 . Make ninjahelper allow you to pick what type of backup you want (instead
   of just assuming you want local-to-remote, or push backups. Some people
-  want local-to-local, or remote-to-local, or pull backups).
+  want local-to-local, or remote-to-local, or pull backups). This has been
+  reported for the duplicity handler as Debian bug #346040.
 
 . Make it so backupninja can be run as a regular user, instead of requiring
   root
 
+. Implement the vsnames options in the mysql, svn and sys handlers, the same
+  way as it already works in the duplicity and rdiff handlers. Then edit the
+  corresponding helpers to make them use the lib/vserver functions to support
+  this option.
+
+. Factorize the rdiff.helper's connection-related functions into a lib, so
+  that they can be used by dup.helper too. (NB: don't forget that the dup
+  handler has a sshoptions configuration setting, that is often used to
+  specify an alternative SSH key, or a specific IP to bind to.)
