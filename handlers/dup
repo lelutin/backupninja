@@ -34,8 +34,9 @@ destdir=${destdir%/}
 [ "$include" != "" ] || fatal "No source includes specified"
 
 ### vservers stuff ###
-local usevserver=no
+
 # If vservers are configured, check that the ones listed in $vsnames do exist.
+local usevserver=no
 if [ $vservers_are_available = yes ]; then
    if [ "$vsnames" = all ]; then
       vsnames="$found_vservers"
@@ -113,14 +114,16 @@ execstr_clientpart="/"
 
 ### SOURCE ###
 
+set -o noglob
+
 # excludes
-for i in "$exclude"; do
+for i in $exclude; do
 	str="${i//__star__/*}"
 	execstr="${execstr}--exclude '$str' "
 done
 	
 # includes 
-for i in "$include"; do
+for i in $include; do
 	str="${i//__star__/*}"
 	execstr="${execstr}--include '$str' "
 done
@@ -128,12 +131,14 @@ done
 # vsincludes
 if [ $usevserver = yes ]; then
     for vserver in $vsnames; do
-	for vi in "$vsinclude"; do
+	for vi in $vsinclude; do
 	    str="${vi//__star__/*}"
 	    execstr="${execstr}--include '$VROOTDIR/$vserver$str' "
 	done
     done
 fi
+
+set +o noglob
 
 ### EXECUTE ###
 

@@ -78,6 +78,7 @@ check_consistency "source" "$type" "$user" "$host"
 getconf label
 getconf keep 60
 getconf include
+getconf vsnames all
 getconf vsinclude
 getconf exclude
 
@@ -92,11 +93,23 @@ check_consistency "destination" "$type" "$user" "$host"
 
 ### CHECK CONFIG ###
 
-# See if vservers are configured
+# If vservers are configured, check that the ones listed in $vsnames do exist.
 local usevserver=no
-if [ $vservers_are_available = yes -a -n "$vsinclude" ]; then
-   info "vserver method enabled"
-   usevserver=yes
+if [ $vservers_are_available = yes ]; then
+   if [ "$vsnames" = all ]; then
+      vsnames="$found_vservers"
+   else
+      if ! vservers_exist "$vsnames" ; then
+            fatal "At least one of the vservers listed in vsnames ($vsnames) does not exist."
+      fi
+   fi
+   if [ -n "$vsinclude" ]; then
+      info "Using vservers '$vsnames'"
+      usevserver=yes
+   fi
+else
+   [ -z "$vsinclude" ] || warning 'vservers support disabled in backupninja.conf, vsincludes configuration lines will be ignored'
+   [ -z "$vsnames" ] || warning 'vservers support disabled in backupninja.conf, vsnames configuration line will be ignored'   
 fi
 
 # check the connection at the source and destination
@@ -157,14 +170,16 @@ fi
 
 execstr="$RDIFFBACKUP $options --print-statistics "
 
+set -o noglob
+
 # TODO: order the includes and excludes
 # excludes
-for i in "$exclude"; do
+for i in $exclude; do
 	str="${i//__star__/*}"
 	execstr="${execstr}--exclude '$str' "
 done
 # includes 
-for i in "$include"; do
+for i in $include; do
 	[ "$i" != "/" ] || fatal "Sorry, you cannot use 'include = /'"
 	str="${i//__star__/*}"
 	execstr="${execstr}--include '$str' "
@@ -172,13 +187,15 @@ done
 
 # vsinclude
 if [ $usevserver = yes ]; then
-   for vserver in $found_vservers; do
-      for vi in "$vsinclude"; do
+   for vserver in $vsnames; do
+      for vi in $vsinclude; do
 	 str="${vi//__star__/*}"
 	 execstr="${execstr}--include '$VROOTDIR/$vserver$str' "
       done
    done
 fi
+
+set +o noglob
 
 # exclude everything else
 execstr="${execstr}--exclude '/*' "

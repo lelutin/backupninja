@@ -289,13 +289,14 @@ EOF
 # vsinclude = <path>
 # ...
 # Any path specified in vsinclude is added to the include list for each vserver
-# listed in vsnames (or all if vsnames = all).
+# listed in vsnames (or all if vsnames = all, which is the default).
 #
 # For example, vsinclude = /home will backup the /home directory in every
 # vserver listed in vsnames. If you have 'vsnames = foo bar baz', this
 # vsinclude will add to the include list /vservers/foo/home, /vservers/bar/home
 # and /vservers/baz/home.
 # Vservers paths are derived from $VROOTDIR.
+# vsinclude supports globbing with '*'.
 
 EOF
       set -o noglob

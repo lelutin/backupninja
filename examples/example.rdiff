@@ -52,11 +52,21 @@ include = /usr/local/sbin
 include = /var/lib/dpkg/status
 include = /var/lib/dpkg/status-old
 
-# If vservers = yes in /etc/backupninja.conf then vsinclude
-# may be used. Any path specified in vsinclude is added to
-# the include list for each vserver on the system. e.g.
-# vsinclude = /home will backup /vservers/v1/home,
-# /vservers/v2/home, etc.
+# If vservers = yes in /etc/backupninja.conf then the following variables can
+# be used:
+# vsnames = all | <vserver1> <vserver2> ... (default = all)
+# vsinclude = <path>
+# vsinclude = <path>
+# ...
+# Any path specified in vsinclude is added to the include list for each vserver
+# listed in vsnames (or all if vsnames = all, which is the default).
+#
+# For example, vsinclude = /home will backup the /home directory in every
+# vserver listed in vsnames. If you have 'vsnames = foo bar baz', this
+# vsinclude will add to the include list /vservers/foo/home, /vservers/bar/home
+# and /vservers/baz/home.
+# Vservers paths are derived from $VROOTDIR.
+# vsinclude supports globbing with '*'.
 
 # files to exclude from the backup
 # (supports globbing with '*')
