@@ -2,6 +2,9 @@
 This is a todo list, want to help? Pick something and let the list know
 you are working on it!
 
+. Fix all bugs reported on the Debian BTS:
+  http://bugs.debian.org/cgi-bin/pkgreport.cgi?which=pkg&data=backupninja&archive=no
+
 . Figure out why configure decides to use /bin/sh for bash when
   it shouldn't (Debian bug #346303)
 
