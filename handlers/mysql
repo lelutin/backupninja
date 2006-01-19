@@ -136,7 +136,7 @@ EOF
 	fi
 fi
 
-# if a user is not set, use $confgfile, otherwise use $mycnf
+# if a user is not set, use $configfile, otherwise use $mycnf
 if [ "$user" == "" ]; then
 	user=root;
 	defaultsfile="--defaults-file=$configfile"
