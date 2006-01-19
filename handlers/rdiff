@@ -93,15 +93,10 @@ check_consistency "destination" "$type" "$user" "$host"
 ### CHECK CONFIG ###
 
 # See if vservers are configured
-if [ "$vservers" = "yes" ]
-then
-	if [ ! -d $VROOTDIR ]
-	then
-		fatal "vservers enabled, but $VROOTDIR does not exist!"
-	else
-		info "vserver method enabled"
-		usevserver=1
-	fi
+local usevserver=no
+if [ $vservers_are_available = yes ]; then
+   info "vserver method enabled"
+   usevserver=yes
 fi
 
 # check the connection at the source and destination
@@ -119,7 +114,7 @@ fi
 
 # source specific checks
 [ "$include" != "" -o "$vsinclude" != "" ] || fatal "No source includes specified"
-#TODO should I test for vsinclude if usevservers=1?
+#TODO should I test for vsinclude if usevservers=yes?
 case $sourcetype in 
 	remote ) execstr_sourcepart="$sourceuser@$sourcehost::/" ;;
 	local  ) execstr_sourcepart="/" ;;
@@ -177,7 +172,7 @@ for i in $include; do
 done
 
 # vsinclude
-if [ $usevserver ]; then
+if [ $usevserver = yes ]; then
 	for vserver in `ls $VROOTDIR|grep -v lost+found`; do
 		for vi in $vsinclude; do
 			str="${vi//__star__/*}"
