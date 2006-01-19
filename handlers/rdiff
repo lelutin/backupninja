@@ -172,12 +172,12 @@ done
 
 # vsinclude
 if [ $usevserver = yes ]; then
-	for vserver in `ls $VROOTDIR|grep -v lost+found`; do
-		for vi in "$vsinclude"; do
-			str="${vi//__star__/*}"
-			execstr="${execstr}--include '$VROOTDIR/$vserver$str' "
-		done
-	done
+   for vserver in $found_vservers; do
+      for vi in "$vsinclude"; do
+	 str="${vi//__star__/*}"
+	 execstr="${execstr}--include '$VROOTDIR/$vserver$str' "
+      done
+   done
 fi
 
 # exclude everything else

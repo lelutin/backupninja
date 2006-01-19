@@ -17,13 +17,16 @@ version 0.9.3 -- unreleased
 	 . now works when multiple vservers names are given (separated by space)
 	   in vsnames config variable
 	 . make use of new lib/vserver functionality
+        rdiff
+	 . make use of new lib/vserver functionality
+	 . fixed globbing bug in include, exclude and vsinclude options
     ninjahelper changes
         rdiff.helper:
          . fixed errors in create remote dir
          . code formatting cleanup (three spaces indent)
          . fixed bug which caused only first include/exclude dir to
            have "include = "
-         . fixed globbing bug with include and exclude (twice ;)
+         . fixed globbing bug with exclude
         ninjahelper:
          . now reports error if the helper script has a syntax error or bombs out.
          . code formatting cleanup (three spaces indent)
