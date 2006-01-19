@@ -20,6 +20,9 @@ version 0.9.3 -- unreleased
 	   in vsnames config variable
         rdiff
 	 . fixed globbing bug in include, exclude and vsinclude options
+	 . it's now possible to choose exactly which vservers should be
+	   backed-up, as it already was with duplicity handler, with the
+	   "vsnames" configuration setting
     ninjahelper changes
         rdiff.helper:
          . fixed errors in create remote dir
