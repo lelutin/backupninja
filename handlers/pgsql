@@ -10,45 +10,48 @@ getconf vsname
 
 localhost=`hostname`
 
-# If vservers are enabled, check that $vsname exists, and decide if the
-# handler should use it or if it should just operate on the host.
+# Decide if the handler should operate on a vserver or on the host.
+# In the former case, check that $vsname exists and is running.
 local usevserver=no
+local vroot
 if [ $vservers_are_available = yes ]; then
-   if ! vservers_exist "$vsname" ; then
-      fatal "The vserver given in vsname ($vsname) does not exist."
-   else
-      info "using vserver '$vsname'"
+   if [ -z "$vsname" ]; then
+      # does it exist ?
+      if ! vservers_exist "$vsname" ; then
+         fatal "The vserver given in vsname ($vsname) does not exist."
+      fi
+      # is it running ?
+      $VSERVERINFO -q $vsname RUNNING
+      if [ $? -ne 0 ]; then
+         fatal "The vserver $vsname is not running."
+      fi
+      # everything ok
+      info "Using vserver '$vsname'."
       usevserver=yes
+      vroot="$VROOTDIR/$vsname"
+   else
+      info "No vserver name specified, actions will be performed on the host."
    fi
 fi
 
-# As needed, make sure that :
-#   * the specified vserver is running
-#   * the specified vserver or host has the needed executables
+# Make sure that the system to backup has the needed executables
 if [ $usevserver = yes ]; then
-    info "examining vserver '$vsname'"
-    vroot="$VROOTDIR/$vsname"
-    # is it running ?
-    running=`$VSERVERINFO $vsname RUNNING`
-    if [ "$running" = "1" ]; then
-	if [ "$databases" == "all" ]; then
-	    [ -x "$vroot`$VSERVER $vsname exec which $PGSQLDUMPALL`" ] || \
-		fatal "Can't find $PGSQLDUMPALL in vserver $vsname."
-	else
-	    [ -x "$vroot`$VSERVER $vsname exec which $PGSQLDUMP`" ] || \
-		fatal "Can't find $PGSQLDUMP in vserver $vsname."
-	fi
-    else
-	fatal "vserver $vsname is not running."
-    fi
+   debug "Examining vserver '$vsname'."
+   if [ "$databases" == "all" ]; then
+      [ -x "$vroot`$VSERVER $vsname exec which $PGSQLDUMPALL`" ] || \
+	 fatal "Can't find $PGSQLDUMPALL in vserver $vsname."
+   else
+      [ -x "$vroot`$VSERVER $vsname exec which $PGSQLDUMP`" ] || \
+	 fatal "Can't find $PGSQLDUMP in vserver $vsname."
+   fi
 else
-    if [ "$databases" == "all" ]; then
-	[ -x "`which $PGSQLDUMPALL`" ] || \
-	    fatal "Can't find $PGSQLDUMPALL."
-    else
-	[ -x "`which $PGSQLDUMP`" ] || \
-	    fatal "Can't find $PGSQLDUMP."
-    fi
+   if [ "$databases" == "all" ]; then
+      [ -x "`which $PGSQLDUMPALL`" ] || \
+	 fatal "Can't find $PGSQLDUMPALL."
+   else
+      [ -x "`which $PGSQLDUMP`" ] || \
+	 fatal "Can't find $PGSQLDUMP."
+   fi
 fi
 
 # create backup dir, the vroot variable will be empty if no vsname was specified

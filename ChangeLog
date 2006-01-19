@@ -5,8 +5,9 @@ version 0.9.3 -- unreleased
            programs such as PGSQLDUMP, so that users can figure
            out more easily they can customize them
         code refactor:
-	 . now uses vservers lib to init vservers support
+	 . now uses vservers lib to initialize vservers support
     handler changes
+        duplicity, mysql, pgsql, rdiff: use new lib/vserver functionality
         mysql:
          . fixed no user defaults file processing
 	duplicity:
@@ -16,11 +17,7 @@ version 0.9.3 -- unreleased
 	   disabled in backupninja.conf
 	 . now works when multiple vservers names are given (separated by space)
 	   in vsnames config variable
-	 . make use of new lib/vserver functionality
-        pgsql
-         . make use of new lib/vserver functionality
         rdiff
-	 . make use of new lib/vserver functionality
 	 . fixed globbing bug in include, exclude and vsinclude options
     ninjahelper changes
         rdiff.helper:

@@ -19,33 +19,28 @@ getconf dbpassword
 getconf configfile /etc/mysql/debian.cnf
 
 
-# If vservers are configured, decide if the handler should
-# use them or if it should just operate on the host
-
-if [ "$vservers" = "yes" ]
-then
-	if [ ! -z $vsname ]
-	then		
-		info "Using vserver '$vsname'"
-		usevserver=1
-	else
-		info "No vserver name specified, actions will be performed on the host"
-	fi
-fi
-
-# If needed, make sure that the specified vserver exists and is running.
-if [ $usevserver ]
-then
-	debug "Examining vserver '$vsname'"
-	# does it exist ?
-	vroot="$VROOTDIR/$vsname"
-	[ -d $vroot ] || fatal "vserver '$vsname' does not exist at '$vroot'"
-	# is it running ?
-	$VSERVERINFO -q $vsname RUNNING
-	if [ $? -ne 0 ]
-	then
-		fatal "vserver $vsname is not running."
-	fi
+# Decide if the handler should operate on a vserver or on the host.
+# In the former case, check that $vsname exists and is running.
+local usevserver=no
+local vroot
+if [ $vservers_are_available = yes ]; then
+   if [ -z "$vsname" ]; then
+      # does it exist ?
+      if ! vservers_exist "$vsname" ; then
+         fatal "The vserver given in vsname ($vsname) does not exist."
+      fi
+      # is it running ?
+      $VSERVERINFO -q $vsname RUNNING
+      if [ $? -ne 0 ]; then
+         fatal "The vserver $vsname is not running."
+      fi
+      # everything ok
+      info "Using vserver '$vsname'."
+      usevserver=yes
+      vroot="$VROOTDIR/$vsname"
+   else
+      info "No vserver name specified, actions will be performed on the host."
+   fi
 fi
 
 ## Prepare ignore part of the command
@@ -63,7 +58,7 @@ done
 hotdir="$backupdir/hotcopy"
 dumpdir="$backupdir/sqldump"
 
-if [ $usevserver ]
+if [ $usevserver = yes ]
 then
 	[ "$sqldump" == "no" -o -d $vroot$dumpdir ] || $VSERVER $vsname exec mkdir -p $dumpdir
 	[ "$hotcopy" == "no" -o -d $vroot$hotdir ] || $VSERVER $vsname exec mkdir -p $hotdir
@@ -93,7 +88,7 @@ defaultsfile=""
 
 if [ "$dbusername" != "" -a "$dbpassword" != "" ]
 then
-    if [ $usevserver ]
+    if [ $usevserver = yes ]
     then
     	vhome=`$VSERVER $vsname exec getent passwd "root" | awk -F: '{print $6}'`
 	home="$vroot$vhome"
@@ -133,7 +128,7 @@ user=$dbusername
 password="$dbpassword"
 EOF
 	umask $oldmask
-	if [ $usevserver ] 
+	if [ $usevserver = yes ] 
 	then
 	    defaultsfile="--defaults-file=$vhome/.my.cnf"
 	else
@@ -147,7 +142,7 @@ if [ "$user" == "" ]; then
 	defaultsfile="--defaults-file=$configfile"
 else
 	userset=true;
-	if [ $usevserver ]
+	if [ $usevserver = yes ]
 	then
 	    vuserhome=`$VSERVER $vsname exec getent passwd "$user" | awk -F: '{print $6}'`
 	    if [ $? -eq 2 ]
@@ -177,7 +172,7 @@ then
     info "Initializing hotcopy method"
     if [ "$databases" == "all" ]
     then
-	if [ $usevserver ]
+	if [ $usevserver = yes ]
 	then
 	    	info "dbhost: $dbhost"
 		execstr="$VSERVER $vsname exec $MYSQLHOTCOPY -h $dbhost --quiet --allowold --regexp /.\*/./.\*/ $hotdir"
@@ -201,7 +196,7 @@ then
     else	
 	for db in $databases
 	do
-		if [ $usevserver ]
+		if [ $usevserver = yes ]
 		then
 			execstr="$VSERVER $vsname exec $MYSQLHOTCOPY --allowold $db $hotdir"
 		else
@@ -233,7 +228,7 @@ then
     info "Initializing SQL dump method"
     if [ "$databases" == "all" ]
     then
-	if [ $usevserver ]
+	if [ $usevserver = yes ]
 	then
 	    debug "echo show databases | $VSERVER $vsname exec su $user -c $MYSQL $defaultsfile | grep -v Database"
 	    databases=`echo 'show databases' | $VSERVER $vsname exec su $user -c "$MYSQL $defaultsfile" | grep -v Database`
@@ -252,7 +247,7 @@ fi
 
 	for db in $databases
 	do
-		if [ $usevserver ]
+		if [ $usevserver = yes ]
 		then
 			execstr="$VSERVER $vsname exec $MYSQLDUMP $defaultsfile --lock-tables --complete-insert --add-drop-table --quick --quote-names $ignore $db > $vroot$dumpdir/${db}.sql"
 		else
