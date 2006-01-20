@@ -102,21 +102,21 @@ Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
 
 install-libSCRIPTS: $(lib_SCRIPTS)
 	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(DESTDIR)$(srcdir)/lib
+	$(mkinstalldirs) $(DESTDIR)$(libdir)/backupninja
 	@list='$(lib_SCRIPTS)'; for p in $$list; do \
 	  if test -f $$p; then \
-	    echo " $(INSTALL_SCRIPT) $$p $(DESTDIR)$(srcdir)/lib/`echo $$p|sed '$(transform)'`"; \
-	    $(INSTALL_SCRIPT) $$p $(DESTDIR)$(srcdir)/lib/`echo $$p|sed '$(transform)'`; \
+	    echo " $(INSTALL_SCRIPT) $$p $(DESTDIR)$(libdir)/backupninja/`echo $$p|sed '$(transform)'`"; \
+	    $(INSTALL_SCRIPT) $$p $(DESTDIR)$(libdir)/backupninja/`echo $$p|sed '$(transform)'`; \
 	  else if test -f $(srcdir)/lib/$$p; then \
-	    echo " $(INSTALL_SCRIPT) $(srcdir)/lib/$$p $(DESTDIR)$(srcdir)/lib/`echo $$p|sed '$(transform)'`"; \
-	    $(INSTALL_SCRIPT) $(srcdir)/lib/$$p $(DESTDIR)$(srcdir)/lib/`echo $$p|sed '$(transform)'`; \
+	    echo " $(INSTALL_SCRIPT) $(libdir)/backupninja/$$p $(DESTDIR)$(libdir)/backupninja/`echo $$p|sed '$(transform)'`"; \
+	    $(INSTALL_SCRIPT) $(libdir)/$$p $(DESTDIR)$(libdir)/backupninja/`echo $$p|sed '$(transform)'`; \
 	  else :; fi; fi; \
 	done
 
 uninstall-libSCRIPTS:
 	@$(NORMAL_UNINSTALL)
 	list='$(lib_SCRIPTS)'; for p in $$list; do \
-	  rm -f $(DESTDIR)$(srcdir)/lib/`echo $$p|sed '$(transform)'`; \
+	  rm -f $(DESTDIR)$(libdir)/`echo $$p|sed '$(transform)'`; \
 	done
 tags: TAGS
 TAGS:
@@ -166,7 +166,7 @@ all-redirect: all-am
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
 installdirs:
-	$(mkinstalldirs)  $(DESTDIR)$(sbindir)
+	$(mkinstalldirs)  $(DESTDIR)$(libdir)/backupninja
 
 
 mostlyclean-generic:
