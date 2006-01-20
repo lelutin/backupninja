@@ -1,26 +1,29 @@
+lib_SCRIPTS = easydialog parseini tools vserver
+
+CLEANFILES = $(lib_SCRIPTS)
+
 EXTRA_DIST = easydialog.in parseini.in tools.in vserver.in
 
-GENERATED_FILES = easydialog parseini tools vserver
-
-dist_pkglib_DATA = $(GENERATED_FILES)
-
-CLEANFILES = $(GENERATED_FILES)
-
 edit = sed \
-    -e "s,@BASH\@,$(BASH),g"
+    -e "s,@CFGDIR\@,$(CFGDIR),g" \
+    -e "s,@BASH\@,$(BASH),g" \
+    -e 's,@datadir\@,$(pkgdatadir),g' \
+    -e "s,@libdir\@,$(pkglibdir),g" \
+    -e 's,@localstatedir\@,$(localstatedir),g' \
+        -e 's,@prefix\@,$(prefix),g'
 
-easydialog:
+easydialog: $(srcdir)/easydialog.in
 	rm -f easydialog
 	$(edit) easydialog.in > easydialog
 
-parseini:
+parseini: $(srcdir)/parseini.in
 	rm -f parseini
 	$(edit) parseini.in > parseini
 
-tools:
+tools: $(srcdir)/tools.in
 	rm -f tools
 	$(edit) tools.in > tools
 
-vserver:
+vserver: $(srcdir)/vserver.in
 	rm -f vserver
 	$(edit) vserver.in > vserver
