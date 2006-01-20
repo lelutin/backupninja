@@ -13,5 +13,5 @@ fi
 #autoheader
 
 aclocal
-automake -a
+automake -a -c
 autoconf

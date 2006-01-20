@@ -1,4 +1,5 @@
 version 0.9.3 -- unreleased
+    autotools fixes
     backupninja changes
         backupninja.conf
          . added (commented out) the various default paths to

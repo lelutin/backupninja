@@ -1,27 +1,31 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT([backupninja],[0.9.2],[backupninja@lists.riseup.net])
+AC_INIT([backupninja],[0.9.3],[backupninja@lists.riseup.net])
 AC_CONFIG_SRCDIR([src/backupninja.in])
-#AC_CONFIG_HEADERS([config.sh])
 AM_INIT_AUTOMAKE
 
 # Checks for programs.
-AC_PATH_PROGS([BASH], [bash])
-#AC_PATH_PROGS([PERL], [perl])
 
-#AC_DEFINE([MYVERSION], [5.6])
-#AC_DEFINE_UNQUOTED([MYDIR], "${sysconfdir}")
-#AC_DEFINE([SYSCONFDIR], [$sysconfdir], [System config dir])
+# BASH may already be set in the shell, if the admin then changes the
+# the /bin/sh symlink to a non-bash shell, all hell will break lose.
+unset BASH
+AC_PATH_PROGS([BASH], [bash], [/bin/bash], [$PATH:/bin:/usr/bin:/usr/sbin])
+if test x$BASH = "x"; then
+    AC_MSG_ERROR([bash is required])
+fi
+
+AC_CHECK_PROGS(SED, sed)
+if test x$SED = "x"; then
+    AC_MSG_ERROR([sed is required])
+fi
+
+AC_CHECK_PROGS(AWK, awk)
+if test x$AWK = "x"; then
+    AC_MSG_ERROR([awk is required])
+fi
+
 AC_SUBST([CFGDIR], "${sysconfdir}")
-
-# Checks for libraries.
-
-# Checks for header files.
-
-# Checks for typedefs, structures, and compiler characteristics.
-
-# Checks for library functions.
 
 AC_CONFIG_FILES([Makefile
                 etc/Makefile
