@@ -12,6 +12,6 @@ fi
 ### použít jen když je třeba použít configure.h.in
 #autoheader
 
-aclocal
-automake -a -c
-autoconf
+aclocal \
+&& automake -a -c
+&& autoconf
