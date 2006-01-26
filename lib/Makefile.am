@@ -1,6 +1,6 @@
-lib_SCRIPTS = easydialog parseini tools vserver
+pkglib_SCRIPTS = easydialog parseini tools vserver
 
-CLEANFILES = $(lib_SCRIPTS)
+CLEANFILES = $(bin_SCRIPTS)
 
 EXTRA_DIST = easydialog.in parseini.in tools.in vserver.in
 
