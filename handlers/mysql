@@ -24,7 +24,7 @@ getconf configfile /etc/mysql/debian.cnf
 local usevserver=no
 local vroot
 if [ $vservers_are_available = yes ]; then
-   if [ ! -z "$vsname" ]; then
+   if [ -n "$vsname" ]; then
       # does it exist ?
       if ! vservers_exist "$vsname" ; then
          fatal "The vserver given in vsname ($vsname) does not exist."
