@@ -35,7 +35,7 @@ init_vservers() {
    getconf VSERVER /usr/sbin/vserver
    getconf VROOTDIR `if [ -x "$VSERVERINFO" ]; then $VSERVERINFO info SYSINFO | grep '^ *vserver-Rootdir' | awk '{print $2}'; fi`
    # canonicalize VROOTDIR
-   VROOTDIR=`readlink --canonicalize $VROOTDIR`
+   [ -z "$VROOTDIR" ] || VROOTDIR=`readlink --canonicalize $VROOTDIR`
    # init this library's global variables
    vservers_are_available=no
    found_vservers=
