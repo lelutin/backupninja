@@ -1,6 +1,8 @@
 version 0.9.4 -- unreleased
     handler changes
 	mysql, pgsql, svn: fixed inversed vsname emptyness check
+	mysql:
+	 . Fixed improper use of $vuserhome (Debian: #351083)
     lib changes
 	vserver:
 	 . init_vservers: fixed Debian bug #351083 (improper readlink syntax)

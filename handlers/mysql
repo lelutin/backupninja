@@ -160,7 +160,7 @@ else
 	
 	debug "User home set to: $userhome"
 	[ -f $userhome/.my.cnf ] || fatal "Can't find config file in $userhome/.my.cnf"
-	defaultsfile="--defaults-file=$vuserhome/.my.cnf"
+	defaultsfile="--defaults-file=$userhome/.my.cnf"
 	debug "using $defaultsfile"
 fi
 
