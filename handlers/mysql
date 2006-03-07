@@ -277,7 +277,7 @@ fi
 fi
 
 # clean up tmp config file
-if [ "$dbusername" != "" ]
+if [ "$dbusername" != "" -a "$dbpassword" != "" ]
 then
 	## clean up tmp config file
 	debug "rm $mycnf"
