@@ -6,6 +6,8 @@ version 0.9.4 -- unreleased
 	 . Fixed erroneous removal of tmpfile when it didn't exit
 	rdiff:
 	 . Fixed improper include/exclude symlink dereference
+	dup:
+	 . Fixed improper include/exclude symlink dereference
     lib changes
 	vserver:
 	 . init_vservers: fixed Debian bug #351083 (improper readlink syntax)
