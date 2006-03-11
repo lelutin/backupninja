@@ -174,12 +174,14 @@ set -o noglob
 # TODO: order the includes and excludes
 # excludes
 for i in $exclude; do
+	i=`readlink -f $i`
 	str="${i//__star__/*}"
 	execstr="${execstr}--exclude '$str' "
 done
 # includes 
 for i in $include; do
 	[ "$i" != "/" ] || fatal "Sorry, you cannot use 'include = /'"
+	i=`readlink -f $i`
 	str="${i//__star__/*}"
 	execstr="${execstr}--include '$str' "
 done
@@ -188,7 +190,8 @@ done
 if [ $usevserver = yes ]; then
    for vserver in $vsnames; do
       for vi in $vsinclude; do
-	 str="${vi//__star__/*}"
+      	 i=`readlink -f $VROOTDIR/$vserver$vi`
+	 str="${i//__star__/*}"
 	 execstr="${execstr}--include '$VROOTDIR/$vserver$str' "
       done
    done
