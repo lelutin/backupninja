@@ -11,6 +11,7 @@ version 0.9.4 -- unreleased
     lib changes
 	vserver:
 	 . init_vservers: fixed Debian bug #351083 (improper readlink syntax)
+	 . found_vservers: escaped special grep repetition character +
 
 version 0.9.3 -- February 1st, 2006
     autotools fixes

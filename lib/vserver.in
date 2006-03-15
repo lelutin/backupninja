@@ -63,7 +63,7 @@ init_vservers() {
             "vservers enabled in $conffile, but VROOTDIR ($VROOTDIR) does not exist.";
             return
       fi
-      found_vservers=`ls $VROOTDIR | grep -E -v "lost+found|ARCHIVES" | tr "\n" " "`
+      found_vservers=`ls $VROOTDIR | grep -E -v "lost\+found|ARCHIVES" | tr "\n" " "`
       if [ -z "$found_vservers" ]; then
          `if [ "$arg" = nodialog ]; then echo warning; else echo "msgBox warning"; fi` \
             "vservers enabled in $conffile, but no vserver was found in $VROOTDIR.";      
