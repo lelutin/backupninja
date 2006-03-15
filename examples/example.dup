@@ -55,20 +55,6 @@ password = a_very_complicated_passphrase
 
 # files to include in the backup
 # (supports globbing with '*')
-# BIG FAT WARNING
-# Symlinks are not dereferenced. Moreover, an include line whose path
-# contains, at any level, a symlink to a directory, will only have the
-# symlink backed-up, not the target directory's content. Yes, you have
-# to dereference yourself the symlinks, or to use 'mount --bind'
-# instead.
-# EXAMPLE
-# Let's say /home is a symlink to /mnt/crypt/home ; the following line
-# will only backup a "/home" symlink ; neither /home/user nor
-# /home/user/Mail will be backed-up :
-#   include = /home/user/Mail
-# A workaround is to 'mount --bind /mnt/crypt/home /home' ; another
-# one is to write :
-#   include = /mnt/crypt/home/user/Mail
 
 include = /var/spool/cron/crontabs
 include = /var/backups

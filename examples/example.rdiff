@@ -35,10 +35,7 @@ keep = 60
 
 # a note about includes and excludes:
 # All the excludes come after all the includes. The order is
-# not otherwise taken into account. Symlinks are backed up as
-# symlinks, they are not followed! This means you must specify
-# the real canonical path of a directory for it to actually
-# get included.
+# not otherwise taken into account. 
 
 # files to include in the backup
 # (supports globbing with '*')

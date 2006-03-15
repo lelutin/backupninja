@@ -174,15 +174,15 @@ set -o noglob
 # TODO: order the includes and excludes
 # excludes
 for i in $exclude; do
-	i=`readlink -f $i`
 	str="${i//__star__/*}"
+	i=`readlink -f ${i#}`
 	execstr="${execstr}--exclude '$str' "
 done
 # includes 
 for i in $include; do
 	[ "$i" != "/" ] || fatal "Sorry, you cannot use 'include = /'"
-	i=`readlink -f $i`
 	str="${i//__star__/*}"
+	i=`readlink -f $i`
 	execstr="${execstr}--include '$str' "
 done
 

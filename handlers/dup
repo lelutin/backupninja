@@ -118,15 +118,15 @@ set -o noglob
 
 # excludes
 for i in $exclude; do
-	i=`readlink -f $i`
 	str="${i//__star__/*}"
+	i=`readlink -f ${i#}`
 	execstr="${execstr}--exclude '$str' "
 done
 	
 # includes 
 for i in $include; do
-	i=`readlink -f $i`
 	str="${i//__star__/*}"
+	i=`readlink -f ${i#}`
 	execstr="${execstr}--include '$str' "
 done
 

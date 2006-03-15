@@ -25,7 +25,7 @@
 # packagesfile = /var/backups/dpkg-selections.txt
 
 # partitions = yes
-# partitionsfile = /var/backups/partitions.__star__.txt
+# partitionsfile = /var/backups/partitions.*.txt
 
 # hardware = yes
 # hardwarefile = /var/backups/hardware.txt
