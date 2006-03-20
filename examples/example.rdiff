@@ -86,7 +86,7 @@ directory = /backups
 host = backuphost
 
 # make the files owned by this user. you must be able to
-# `su -c ssh backupuser@backhost` without specifying a password.
+# `su -c "ssh backupuser@backhost"` without specifying a password.
 # only use if "[dest] type = remote"
 user = backupuser
 

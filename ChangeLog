@@ -1,9 +1,15 @@
 version 0.9.4 -- unreleased
     handler changes
-	mysql, pgsql, svn: fixed inversed vsname emptyness check
 	mysql:
 	 . Fixed improper use of $vuserhome (Debian: #351083)
 	 . Fixed erroneous removal of tmpfile when it didn't exit
+	 . Fixed inversed vsname emptiness check
+	 . Fixed su quote usage to be more posixy
+	pgsql:
+	 . Fixed inversed vsname emptiness check
+	 . Fixed su quote usage to be more posixy
+	svn:
+	 . Fixed inversed vsname emptiness check
 	rdiff:
 	 . Fixed improper include/exclude symlink dereference
 	dup:
