@@ -1,7 +1,8 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AM_MAINTAINER_MODE
+# The maintainer mode is causing me grief with newest versions of autotools
+#AM_MAINTAINER_MODE
 AC_INIT([backupninja],[0.9.3],[backupninja@lists.riseup.net])
 AC_CONFIG_SRCDIR([src/backupninja.in])
 AM_INIT_AUTOMAKE
