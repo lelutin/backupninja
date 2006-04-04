@@ -56,12 +56,12 @@ These files must be owned by root and must not be world or group readable/writab
 The configuration files are processed in alphabetical order. However, it is suggested that you name the config files in "sysvinit style." 
 .TP
 For example:
- 10-disabled.ldap.disabled
+ 10-local.ldap.disabled
  15-runthisfirst.sh
  20-runthisnext.mysql
  90-runthislast.rdiff
 .TP
-Typically, you will put a '.rdiff' config file last, so that any database dumps you make are included in the filesystem backup. Action configurations which begin end with .disabled are skipped.
+Typically, you will put a '.rdiff' config file last, so that any database dumps you make are included in the filesystem backup. Action configurations which end with .disabled are skipped.
 .TP
 Example templates for the action configuration files can be found in /usr/share/doc/backupninja/examples. You can also use \fBninjahelper(1)\fP, a console based "wizard" for creating backup actions.
 
