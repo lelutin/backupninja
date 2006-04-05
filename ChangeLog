@@ -12,12 +12,15 @@ version 0.9.4 -- unreleased
 	 . Fixed inversed vsname emptiness check
 	rdiff:
 	 . Fixed improper include/exclude symlink dereference
+	 . Removed overzealous vsnames check
 	dup:
 	 . Fixed improper include/exclude symlink dereference
+	 . Removed over zealous vsnames check
     lib changes
 	vserver:
 	 . init_vservers: fixed Debian bug #351083 (improper readlink syntax)
 	 . found_vservers: escaped special grep repetition character +
+    minor documentation fixes
 
 version 0.9.3 -- February 1st, 2006
     autotools fixes

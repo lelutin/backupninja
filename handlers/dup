@@ -51,7 +51,6 @@ if [ $vservers_are_available = yes ]; then
    fi
 else
    [ -z "$vsinclude" ] || warning 'vservers support disabled in backupninja.conf, vsincludes configuration lines will be ignored'
-   [ -z "$vsnames" ] || warning 'vservers support disabled in backupninja.conf, vsnames configuration line will be ignored'   
 fi
 
 ### see if we can login ###
