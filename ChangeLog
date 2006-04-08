@@ -1,4 +1,6 @@
 version 0.9.4 -- unreleased
+    backupninja changes
+	Recursively ignore subdirs in /etc/backup.d (Closes: #361102)
     handler changes
 	mysql:
 	 . Fixed improper use of $vuserhome (Debian: #351083)

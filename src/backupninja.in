@@ -455,7 +455,7 @@ errormsg=""
 if [ "$singlerun" ]; then
 	files=$singlerun
 else
-	files=`find $configdirectory -mindepth 1 ! -name '.*.swp' | sort -n`
+	files=`find $configdirectory -mindepth 1 -maxdepth 1 -type f ! -name '.*.swp' | sort -n`
 fi
 
 for file in $files; do
