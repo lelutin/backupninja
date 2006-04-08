@@ -179,10 +179,10 @@ then
 	else
 		execstr="$MYSQLHOTCOPY --quiet --allowold --regexp /.\*/./.\*/ $hotdir"
 	fi
-	debug 'su $user -c \"$execstr\"'
+	debug 'su $user -c "$execstr"'
 	if [ ! $test ]
 	then
-		output=`su $user -c \"$execstr\" 2>&1`
+		output=`su $user -c "$execstr" 2>&1`
 		code=$?
 		if [ "$code" == "0" ]
 		then
@@ -202,10 +202,10 @@ then
 		else
 			execstr="$MYSQLHOTCOPY --allowold $db $hotdir"
 		fi
-		debug 'su $user -c \"$execstr\"'
+		debug 'su $user -c "$execstr"'
 		if [ ! $test ]
 		then
-			output=`su $user -c \"$execstr\" 2>&1`
+			output=`su $user -c "$execstr" 2>&1`
 			code=$?
 			if [ "$code" == "0" ]
 			then
@@ -231,13 +231,13 @@ then
 	if [ $usevserver = yes ]
 	then
 	    debug 'echo show databases | $VSERVER $vsname exec su $user -c \"$MYSQL $defaultsfile\" | grep -v Database'
-	    databases=`echo 'show databases' | $VSERVER $vsname exec su $user -c \"$MYSQL $defaultsfile\" | grep -v Database`
+	    databases=`echo 'show databases' | $VSERVER $vsname exec su $user -c "$MYSQL $defaultsfile" | grep -v Database`
 	    if [ $? -ne 0 ]
 	    then
 	        fatal "Authentication problem, maybe user/password is wrong"
 	    fi
 	else
-		databases=`echo 'show databases' | su $user -c \"$MYSQL $defaultsfile\" | grep -v Database`
+		databases=`echo 'show databases' | su $user -c "$MYSQL $defaultsfile" | grep -v Database`
 		if [ $? -ne 0 ]
 		then
 		    fatal "Authentication problem, maybe user/password is wrong"
@@ -253,10 +253,10 @@ fi
 		else
 			execstr="$MYSQLDUMP $defaultsfile --lock-tables --complete-insert --add-drop-table --quick --quote-names $ignore $db > $dumpdir/${db}.sql"
 		fi
-		debug 'su $user -c \"$execstr\"'
+		debug 'su $user -c "$execstr"'
 		if [ ! $test ]
 		then
-			output=`su $user -c \"$execstr\" 2>&1`
+			output=`su $user -c "$execstr" 2>&1`
 			code=$?
 			if [ "$code" == "0" ]
 			then
