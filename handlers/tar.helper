@@ -1,0 +1,94 @@
+# -*- mode: sh; sh-basic-offset: 3; indent-tabs-mode: nil; -*-
+
+HELPERS="$HELPERS tar:tar_backup"
+
+tar_wizard() {
+   tar_title="Tar action wizard"
+
+   backupname=`hostname --fqdn`
+
+   inputBox "$tar_title" "When to run this action?" "everyday at 01"
+   [ $? = 1 ] && return
+   tar_when_run="when = $REPLY"
+
+   inputBox "$tar_title" "\"Name\" of backups" "$backupname"
+   [ $? = 1 ] && return
+   tar_backupname="backupname = $REPLY"
+   backupname="$REPLY"   
+
+   inputBox "$tar_title" "Directory where to store the backups" "/net/backups/$backupname"
+   [ $? = 1 ] && return
+   tar_backupdir="backupdir = $REPLY"
+
+   radioBox "$tar_title" "Compression" \
+       "none"     "do not filter trough" off \
+       "compress" "filter trough compress" off \
+       "gzip"     "filter trough gzip" off \
+       "bzip"     "filter trough bzip" on 
+   [ $? = 1 ] && return;    
+   result="$REPLY"
+   tar_compress="compress = $REPLY "
+
+   REPLY=
+   while [ -z "$REPLY" ]; do
+      formBegin "$tar_title: Includes"
+         formItem "Include:" /etc
+         formItem "Include:" /home
+         formItem "Include:" /usr/local
+         formItem "Include:"
+         formItem "Include:"
+         formItem "Include:"
+         formItem "Include:"
+         formItem "Include:"
+         formItem "Include:"
+         formItem "Include:"
+         formItem "Include:"
+      formDisplay
+      [ $? = 0 ] || return 1
+      tar_includes="includes = "
+      for i in $REPLY; do
+	 [ -n "$i" ] && tar_includes="$tar_includes $i"
+      done
+   done
+
+   REPLY=
+   while [ -z "$REPLY" ]; do
+      formBegin "$tar_title: Excludes"
+         formItem "Exclude:" /tmp 
+         formItem "Exclude:" /proc
+         formItem "Exclude:" /sys
+         formItem "Exclude:" /dev
+         formItem "Exclude:" /srv
+         formItem "Exclude:" /media
+         formItem "Exclude:" /misc
+         formItem "Exclude:" /net
+         formItem "Exclude:" /selinux
+         formItem "Exclude:" 
+         formItem "Exclude:"
+      formDisplay
+      [ $? = 0 ] || return 1
+      tar_excludes="excludes = "
+      for i in $REPLY; do
+	 [ -n "$i" ] && tar_excludes="$tar_excludes $i"
+      done
+   done
+
+# Save the config 
+   get_next_filename $configdirectory/10.tar
+   cat > $next_filename <<EOF
+$tar_when_run
+$tar_backupname
+$tar_backupdir
+$tar_compress
+$tar_includes
+$tar_excludes
+
+# tar binary - have to be GNU tar
+#TAR=/bin/tar
+#DATE		/bin/date
+#DATEFORMAT	"%Y.%m.%d-%H%M"
+
+EOF
+   chmod 600 $next_filename
+}
+

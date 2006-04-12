@@ -1,0 +1,79 @@
+# -*- mode: sh; sh-basic-offset: 3; indent-tabs-mode: nil; -*-
+#
+# tar handler script for backupninja
+
+getconf backupname 	`hostname --fqdn`
+getconf backupdir 	/var/backups/`hostname --fqdn`
+getconf compress	bzip
+getconf includes	"/etc /home /usr/local"
+getconf excludes	"/tmp /proc /dev /sys /net /misc /media /srv /selinux"
+
+getconf TAR		`which tar`
+getconf EXTENSION	tar
+getconf DATE		`which date`
+getconf DATEFORMAT	"%Y.%m.%d-%H%M"		
+
+# See if vservers are configured
+if [ "$vservers" = "yes" ]
+then
+   warning "vservers enabled, but tar does not support it!"
+fi
+
+if [ ! -d "$backupdir" ]
+then
+   mkdir -p "$backupdir" || fatal "Can not make directory $backupdir"
+fi
+
+if [ ! -w "$backupdir" ]
+then
+   fatal "Directory $backupdir is not writable"
+fi
+
+## DO IT #################################################
+#
+# here we grab a list of the packages installed and removed.
+#
+
+case $compress in
+   "compress")
+      compress_option="-Z"
+      EXTENSION="tar.compress"
+      ;;
+   "gzip")
+      compress_option="-z"
+      EXTENSION="tgz"
+      ;;
+   "bzip")
+      compress_option="-j"
+      EXTENSION="tar.bz2"
+      ;;
+   "none")
+      compress_option=""
+      ;;
+   *)
+      warning "Unknown compress filter ($tar_compress)"
+      compress_option=""
+      EXTENSION="tgz"
+      ;;
+esac
+
+exclude_options=""
+for i in $excludes
+do
+   exclude_options="$exclude_options --exclude $i"
+done
+
+debug "Running backup: " $TAR -c -p -v $compress_option $exclude_options \
+   -f "$backupdir/$backupname-"`$DATE "+$DATEFORMAT"`".$EXTENSION" \
+   $includes 
+
+$TAR -c -p -v $compress_option $exclude_options \
+   -f "$backupdir/$backupname-"`$DATE "+$DATEFORMAT"`".$EXTENSION" \
+   $includes \
+   > "$backupdir/$backupname-"`$DATE "+$DATEFORMAT"`.list \
+   2> "$backupdir/$backupname-"`$DATE "+$DATEFORMAT"`.err
+
+[ $? -ne 0 ] && fatal "Tar backup failed" 
+
+
+
