@@ -22,7 +22,7 @@ edit = sed \
 cron.d/backupninja: cron.d/backupninja.in
 	rm -f cron.d/backupninja
 	$(edit) cron.d/backupninja.in > cron.d/backupninja
-	chmod ugo+x cron.d/backupninja
+	chmod 644 cron.d/backupninja
 
 logrotate.d/backupninja: logrotate.d/backupninja.in
 	rm -f logrotate.d/backupninja

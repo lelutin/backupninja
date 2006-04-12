@@ -22,6 +22,7 @@ version 0.9.4 -- unreleased
 	vserver:
 	 . init_vservers: fixed Debian bug #351083 (improper readlink syntax)
 	 . found_vservers: escaped special grep repetition character +
+    changed cron permissions to 644
     minor documentation fixes
 
 version 0.9.3 -- February 1st, 2006
