@@ -18,14 +18,46 @@
 #     write to a text file the important things which hwinfo can gleen.
 #
 
+if [ -f /etc/debian_version ]
+then
+   os=debian
+   debug "Debian detected"
+   osversion="/etc/debian_version"
+elif [ -f /etc/redhat-release ]
+then
+   os=redhat
+   debug "Redhat detected"
+   osversion="/etc/redhat-release"
+else
+   warning "Unknown OS detected!"
+fi
+
 getconf packages yes
-getconf packagesfile /var/backups/dpkg-selections.txt
+if [ $os = "debian" ]
+then
+   getconf packagesfile /var/backups/dpkg-selections.txt
+   getconf packagemgr   `which dpkg`
+   getconf packagemgroptions " --get-selections"
+elif [ $os = "redhat" ]
+then
+   getconf packagesfile  /var/backups/rpmpackages.txt 
+   getconf packagemgr	`which rpm`
+   getconf packagemgroptions	" -qa "
+
+   getconf SYSREPORT `which sysreport`
+   getconf sysreport_options " -norpm "
+else
+   getconf packagesfile /var/backups/unknownOS.txt
+fi
 
 getconf partitions yes
 getconf partitionsfile /var/backups/partitions.__star__.txt
 
 getconf hardware yes
 getconf hardwarefile /var/backups/hardware.txt
+
+getconf sysreport yes
+getconf sysreportfile /var/backups/sysreport.txt
 
 getconf SFDISK `which sfdisk`
 getconf HWINFO `which hwinfo`
@@ -40,6 +72,12 @@ then
    usevserver=yes
 fi
 
+## PACKAGES ##############################
+
+#
+# here we grab a list of the packages installed and removed.
+#
+
 if [ "$packages" == "yes" ]; then
 	if [ $usevserver = yes ]
 	then
@@ -50,27 +88,345 @@ if [ "$packages" == "yes" ]; then
 			info "examining vserver: $vserver"
 			running=`$VSERVERINFO $vserver RUNNING`
 			if [ "$running" = "1" ]; then
-			    if [ ! -x "$VROOTDIR/$vserver`$VSERVER $vserver exec which dpkg`" ]; then
-				warning "can't find dpkg in vserver $vserver, skipping installed packages report."
-				nodpkg="$nodpkg|$vserver"
-			    fi
+                           if [ ! -x "$VROOTDIR/$vserver`$VSERVER $vserver exec which $packagemgr`" ]; then
+                              warning "can't find $packagemgr in vserver $vserver, skipping installed packages report."
+                              nodpkg="$nodpkg|$vserver"
+                           fi
 			else
-			    warning "vserver $vserver is not running, skipping installed packages report."
-			    nodpkg="$nodpkg|$vserver"
+                           warning "vserver $vserver is not running, skipping installed packages report."
+                           nodpkg="$nodpkg|$vserver"
 			fi
 
 		done
 	else
-		if [ ! -x "`which dpkg`" ]; then
-			warning "can't find dpkg, skipping installed packages report."
+		if [ -z "$packagemgr" -o ! -x "$packagemgr" ]; then 
+			warning "can't find ${packagemgr}, skipping installed packages report."
 			packages="no"
 		fi
 	fi
 fi
 
+if [ "$packages" == "yes" ]; then
+   if [ $usevserver = yes ]
+   then
+      for vserver in `ls $VROOTDIR | grep -E -v $nodpkg`
+      do
+	 debug "$VSERVER $vserver exec $packagemgr $packagemgroptions > $VROOTDIR/$vserver$packagesfile"
+	 $VSERVER $vserver exec $packagemgr $packagemgroptions > $VROOTDIR/$vserver$packagesfile || fatal "can not save $packagemgr info to $packagesfile"
+      done
+   fi
+   
+# We want to perform this on the host as well
+   if [ "$packages" == "yes" ]; then
+      debug "$packagemgr $packagemgroptions > $packagesfile"
+      $packagemgr $packagemgroptions > $packagesfile || fatal "can not save $packagemgr info to $packagesfile"
+   fi
+fi
+
+## System report ##############################
+
+#
+# here we grab a bunch of system stuff for a report
+#
+
+export STATUS
+
+HASHES="#################################################################"
+DASHES="-----------------------------------------------------------------"
+
+cat /dev/null > $sysreportfile || fatal "can not write to $sysreportfile"
+
+
+catiffile () {
+   echo $HASHES >> $sysreportfile
+   echo "# $STATUS" >> $sysreportfile
+   echo $HASHES >> $sysreportfile
+   if [ -f $1 ]; then
+      echo "file: $1" >> $sysreportfile
+      echo $DASHES >> $sysreportfile
+      cat $1 >> $sysreportfile 2>&1 || info "reading of $1 failed"
+   fi
+   if [ -d $1 ]; then
+      echo "directory: $1" >> $sysreportfile
+      echo $DASHES >> $sysreportfile
+      for file in `find $1 -maxdepth 3 -noleaf -type f`
+      do
+       catiffile $file
+      done
+   fi
+   echo $DASHES >> $sysreportfile
+} 
+
+catifexec () {
+   echo $HASHES >> $sysreportfile
+   echo "# $STATUS" >> $sysreportfile
+   echo $HASHES >> $sysreportfile
+   $1  >> $sysreportfile 2>&1 || info "executing of $1 failed"
+}
+   
+
+STATUS="Determining $os version:"
+catiffile $osversion
+
+STATUS="Determinding your current hostname: " 
+catifexec "/bin/hostname"
+
+STATUS="Getting the date:"
+catifexec "/bin/date"
+
+STATUS="Checking your systems current uptime and load average:"
+catifexec "/usr/bin/uptime"
+
+STATUS="Checking available memory:"
+catifexec "/usr/bin/free"
+
+STATUS="Checking free disk space:"
+catifexec "/bin/df" "-al"
+
+STATUS="Collecting what services run at what run level:"
+if [ $os = "redhat" ]; then
+   catifexec "/sbin/chkconfig --list"
+   STATUS="Collecting information about /etc/rc.d:"
+   catiffile "/bin/ls /etc/rc.d/rc*.d/"
+
+elif [ $os = "debian" ]; then
+    for level in 0 1 2 3 4 5 6 S; do
+       echo "Level: $level" >> $sysreportfile
+       for f in /etc/rc${level}.d/*; do
+	# Remove /etc/Knn or Snn from beginning
+          ff=$(echo $f | sed 's_/etc/rc..d/[KS][0-9][0-9]__')
+          if [ $f != $ff ]; then
+             echo $ff >> $sysreportfile
+          fi
+       done
+       echo "" >> $sysreportfile
+    done
+fi
+
+STATUS="Getting bootloader information:"
+catifexec "/bin/ls -alR /boot"
+
+# This covers sparc, alpha, and intel (respectively)
+# updated for grub -mpg
+if [ -f /etc/silo.conf ]; then
+  STATUS="Collecting information about the boot process (silo):"
+  catiffile "/etc/silo.conf"
+fi
+if [ -f /etc/milo.conf ]; then
+  STATUS="Collecting information about the boot process (milo):"
+  catiffile "/etc/milo.conf"
+fi
+if [ -f /etc/lilo.conf ]; then
+  STATUS="Collecting information about the boot process (lilo):"
+  catiffile "/etc/lilo.conf"
+  catifexec "/sbin/lilo -q"
+fi
+if [ -d /boot/grub -a -f /boot/grub/grub.conf -a -f /boot/grub/device.map ]; then
+  STATUS="Collecting information about the boot process (grub.conf):"
+  catiffile "/boot/grub/grub.conf"
+  STATUS="Collecting information about the boot process (grub.map):"
+  catiffile "/boot/grub/device.map"
+fi
+if [ -f /etc/cluster.conf -o -f /etc/cluster.xml ] ; then
+  STATUS="Gathering information on cluster setup"
+  # 2.1 AS
+  if [ -f /etc/cluster.conf ] ; then
+    catiffile "/etc/cluster.conf"
+  fi
+  # Taroon
+  if [ -f /etc/cluster.xml ] ; then
+    catiffile "/etc/cluster.xml"
+  fi
+fi
+
+STATUS="Gathering sysctl information (sysctl -a):"
+catiffile "sysctl -a 2>/dev/null"
+STATUS="Gathering sysctl information (/etc/sysctl.conf):"
+catiffile "/etc/sysctl.conf"
+
+STATUS="Gathering IP information (/sbin/ifconfig):"
+catifexec "/sbin/ifconfig -a"
+
+STATUS="Gathering additional IP information (/bin/ip addr list):"
+catifexec "/bin/ip addr list"
+
+STATUS="Checking network routes:"
+catifexec "/sbin/route -n"
+
+STATUS="Collecting Name Service Switch config information:"
+catiffile "/etc/nsswitch.conf"
+
+STATUS="Collecting information about system authentication (pam):"
+catiffile "/etc/pam.conf"
+catiffile "/etc/pam.d"
+
+echo
+echo "Getting information about the kernel."
+echo
+STATUS="Getting kernel version:"
+catifexec "/bin/uname" "-a"
+STATUS="Checking module information:"
+catifexec "/sbin/lsmod"
+for x  in $(/sbin/lsmod | /bin/cut -f1 -d" " 2>/dev/null | /bin/grep -v Module 2>/dev/null 
+) ; do
+  STATUS="Checking module information $x:"
+  catifexec "/sbin/modinfo  $x"
+done
+
+STATUS="Currently getting ksysms information:"
+catifexec "/sbin/ksyms"
+
+STATUS="Gathering information about your filesystems:"
+catiffile "/proc/filesystems"
+
+STATUS="Gathering information about your system stat:"
+catiffile "/proc/stat"
+
+STATUS="Gathering information about your partitions:"
+catiffile "/proc/partitions"
+
+STATUS="Gathering information about your ksysms:"
+catiffile "/proc/ksyms"
+
+STATUS="Gathering information about slabinfo:"
+catiffile "/proc/slabinfo"
+
+# Added support to cover for the new modules.conf layout in Red Hat 7
+STATUS="Collecting information regarding kernel modules"
+VER=`uname -r`
+catiffile "/lib/modules/$VER/modules.dep"
+if [ -f /etc/conf.modules ]; then
+  STATUS="Collecting information regarding kernel modules (conf.modules)"
+  catiffile "/etc/conf.modules"
+fi
+if [ -f /etc/modules.conf ]; then
+  STATUS="Collecting information regarding kernel modules (modules.conf)"
+  catiffile "/etc/modules.conf"
+fi
+if [ -f /etc/modprobe.conf ]; then
+  STATUS="Collecting information regarding kernel modules (modeprobe.conf)"
+  catiffile "/etc/modprobe.conf"
+fi
+
+# dkms status
+if [ -x /usr/sbin/dkms ] ; then
+   STATUS="Gathering current status of modules, versions and kernels (dkms):"
+  catifexec "/usr/sbin/dkms" "status"
+fi
+
+if [ -f /etc/sysconfig/isdncard ] ; then
+  STATUS="Gathering information about ISDN:"
+  catiffile "/etc/sysconfig/isdncard"
+fi
+
+STATUS="Collecting information from the proc directory:"
+catiffile "/proc/pci"
+
+STATUS="Getting kernel command line"
+catiffile "/proc/cmdline"
+
+STATUS="Gathering information about your CPU:"
+catiffile "/proc/cpuinfo"
+
+STATUS="Gathering information about your Ram:"
+catiffile "/proc/meminfo"
+
+STATUS="Gathering information about your ioports:"
+catiffile "/proc/ioports"
+
+STATUS="Gathering information about your interrupts:"
+catiffile "/proc/interrupts"
+
+STATUS="Gathering information about your scsi devices:"
+catiffile "/proc/scsi"
+
+STATUS="Gathering information about your dma:"
+catiffile "/proc/dma"
+
+STATUS="Gathering information about your devices (/proc/devices):"
+catiffile "/proc/devices"
+
+STATUS="Gathering information about your rtc:"
+catiffile "/proc/rtc"
+
+STATUS="Gathering information about your ide drivers:"
+catiffile "/proc/ide"
+
+STATUS="Gathering information about your bus:"
+catifexec lspci
+catiffile "/proc/bus"
+
+echo
+echo "Getting disk and filesystem information."
+echo
+
+STATUS="Collecting information from /etc/fstab:"
+catiffile "/etc/fstab"
+
+STATUS="Collecting disk partition information:"
+catifexec "fdisk -l"
+
+STATUS="Checking mounted file systems (mount) "
+catifexec "/bin/mount"
+
+STATUS="Checking mounted file systems (/proc/mounts)"
+catiffile "/proc/mounts"
+
+STATUS="Collecting Software RAID information (/proc/mdstat)"
+catiffile "/proc/mdstat"
+
+STATUS="Collecting Software RAID information (/etc/raidtab)"
+catiffile "/etc/raidtab"
+
+STATUS="Collecting Software RAID information (/etc/mdadm.conf)"
+catiffile "/etc/mdadm.conf"
+
+STATUS="Collecting Automount information (auto.master)"
+catiffile "/etc/auto.master"
+
+STATUS="Collecting Automount information (auto.misc)"
+catiffile "/etc/auto.misc"
+
+STATUS="Collecting Automount information (auto.net)"
+catiffile "/etc/auto.net"
+
+STATUS="Collecting LVM information:"
+if [ $os = "redhat" ]; then
+   catifexec "/usr/sbin/vgdisplay" "-vv"
+elif [ $os = "debian" ]; then
+   catifexec "/sbin/vgdisplay" "-vv"
+fi
+   
+STATUS="Collecting SCSI Tape information (/etc/stinit.def)"
+catiffile "/etc/stinit.def"
+
+if [ -x /sbin/lsusb ] ; then
+  STATUS="Collecting USB devices list (lsusb):"
+  catifexec "/sbin/lsusb"
+fi
+
+if [ -x /usr/bin/lshal ] ; then
+  STATUS="Collecting global devices list (lshal):"
+  catifexec "/usr/bin/lshal"
+fi
+
+
+STATUS="Gathering information on SELinux setup"
+catifexec "/usr/bin/selinuxconfig"
+catifexec "/usr/sbin/sestatus"
+if [ $os = "redhat" ]; then
+   catifexec "rpm" "-q -V selinux-policy-targeted"
+   catifexec "rpm" "-q -V selinux-policy-strict"
+fi
+
+if [ $usevserver = yes ]; then
+   STATUS="Gathering vserver information"
+   catiffile "/proc/virtual"
+fi
+
 if [ "$partitions" == "yes" ]; then
 	if [ ! -x "$SFDISK" ]; then
-		warning "can't find sfdisk, skipping partition report."
+		warning "can't find sfdisk, skipping sfdisk report."
 		partitions="no"
 	fi
 	if [ ! -x "$HWINFO" ]; then
@@ -86,28 +442,6 @@ if [ "$hardware" == "yes" ]; then
 	fi
 fi
 
-## PACKAGES ##############################
-
-#
-# here we grab a list of the packages installed and removed.
-#
-
-if [ "$packages" == "yes" ]; then
-   if [ $usevserver = yes ]
-   then
-      for vserver in `ls $VROOTDIR | grep -E -v $nodpkg`
-      do
-	 debug "$VSERVER $vserver exec dpkg --get-selections > $VROOTDIR/$vserver$packagesfile"
-	 $VSERVER $vserver exec dpkg --get-selections > $VROOTDIR/$vserver$packagesfile
-      done
-   fi
-   
-# We want to perform this on the host as well
-   if [ "$packages" == "yes" ]; then
-      debug "dpkg --get-selections > $packagesfile"
-      dpkg --get-selections > $packagesfile
-   fi
-fi
 
 ## PARTITIONS #############################
 
