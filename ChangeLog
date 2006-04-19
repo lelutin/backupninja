@@ -1,8 +1,10 @@
 version 0.9.4 -- unreleased
-    backupninja changes
-	Recursively ignore subdirs in /etc/backup.d (Closes: #361102)
-    handler changes
-        Added tar handler
+	backupninja changes
+	 . Fixed bug in toint(), and thus isnow(), which caused it
+	   to not work when run from cron.
+	handler changes
+	 Recursively ignore subdirs in /etc/backup.d (Closes: #361102)
+	 Added tar handler
 	mysql:
 	 . Fixed improper use of $vuserhome (Debian: #351083)
 	 . Fixed erroneous removal of tmpfile when it didn't exit
