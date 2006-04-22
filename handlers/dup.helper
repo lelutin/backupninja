@@ -276,7 +276,7 @@ testconnect = $dup_testconnect
 
 ######################################################
 ## gpg section
-## (how to encrypt and optionnally sign the backups)
+## (how to encrypt and optionally sign the backups)
 ##
 ## WARNING: old (pre-0.9.2) example.dup used to give wrong information about
 ##          the way the following options are used. Please read the following
