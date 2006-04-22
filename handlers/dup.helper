@@ -207,10 +207,10 @@ do_dup_gpg() {
 	 [ $? = 0 ] || return 1
    elif [ "$dup_gpg_sign" == "yes" ]; then
       if [ -z "$dup_gpg_signkey" ]; then
-	 do_dup_gpg_passphrase "unlock the GnuPG 0x$dup_gpg_signkey key used to sign the backups"
+	 do_dup_gpg_passphrase "unlock the GnuPG key used to sign the backups"
 	 [ $? = 0 ] || return 1
       else
-	 do_dup_gpg_passphrase "unlock the GnuPG 0x$dup_gpg_encryptkey key used to sign the backups"
+	 do_dup_gpg_passphrase "unlock the GnuPG key used to sign the backups"
 	 [ $? = 0 ] || return 1
       fi
    fi
