@@ -279,14 +279,14 @@ testconnect = $dup_testconnect
 ## (how to encrypt and optionnally sign the backups)
 ##
 ## WARNING: old (pre-0.9.2) example.dup used to give wrong information about
-##          the way the following options are used. Please read ahead
+##          the way the following options are used. Please read the following
 ##          carefully.
 ##
 ## If the encryptkey variable is set:
 ##   - data is encrypted with the GnuPG public key specified by the encryptkey
 ##     variable
 ##   - if signing is enabled, the password variable is used to unlock the GnuPG
-##     private key used for signing; else, you do not need to set the password
+##     private key used for signing; otherwise, you do not need to set the password
 ##     variable
 ## If the encryptkey option is not set:
 ##   - data signing is not possible
@@ -295,10 +295,10 @@ testconnect = $dup_testconnect
 
 [gpg]
 
-# when set to yes, encryptkey variable must be set bellow; if you want to use
+# when set to yes, encryptkey variable must be set below; if you want to use
 # two different keys for encryption and signing, you must also set the signkey
-# variable bellow.
-# default is no, for backward compatibility with backupninja <= 0.5.
+# variable below.
+# default is no, for backwards compatibility with backupninja <= 0.5.
 sign = $dup_gpg_sign
 
 # ID of the GnuPG public key used for data encryption.
@@ -310,7 +310,7 @@ encryptkey = $dup_gpg_encryptkey
 signkey = $dup_gpg_signkey
 
 # password
-# NB: do not quote it, and it should not contain any quote
+# NB: neither quote this, nor should it include any quotes
 password = $dup_gpg_password
 
 ######################################################
