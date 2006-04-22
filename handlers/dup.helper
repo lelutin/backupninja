@@ -185,7 +185,7 @@ do_dup_gpg_passphrase() {
 do_dup_gpg() {
    
    # symmetric or public key encryption ?
-   booleanBox "$dup_title - GnuPG" "Use public key encryption? Else, symmetric encryption will be used, and data signing will be impossible." "$dup_gpg_asymmetric_encryption"
+   booleanBox "$dup_title - GnuPG" "Use public key encryption? Otherwise, symmetric encryption will be used, and data signing will be impossible." "$dup_gpg_asymmetric_encryption"
    if [ $? = 0 ]; then
       dup_gpg_asymmetric_encryption=yes
    else
