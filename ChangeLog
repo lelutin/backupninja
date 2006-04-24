@@ -6,13 +6,14 @@ version 0.9.4 -- unreleased
 	 Recursively ignore subdirs in /etc/backup.d (Closes: #361102)
 	 Added tar handler
 	mysql:
-	 . Fixed improper use of $vuserhome (Debian: #351083)
+	 . Fixed improper use of $vuserhome (Closes: #351083)
 	 . Fixed erroneous removal of tmpfile when it didn't exit
 	 . Fixed inversed vsname emptiness check
 	 . Fixed su quote usage to be more posixy
 	pgsql:
 	 . Fixed inversed vsname emptiness check
 	 . Fixed su quote usage to be more posixy
+	 . Fixed shell expansion, thanks Thomas Kotzian (Closes: #363297)
 	svn:
 	 . Fixed inversed vsname emptiness check
 	rdiff:
