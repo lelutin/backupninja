@@ -14,6 +14,7 @@ version 0.9.4 -- unreleased
 	 . Fixed inversed vsname emptiness check
 	 . Fixed su quote usage to be more posixy
 	 . Fixed shell expansion, thanks Thomas Kotzian (Closes: #363297)
+	 . postgres user UID is now the one from inside the vserver if necessary
 	svn:
 	 . Fixed inversed vsname emptiness check
 	rdiff:

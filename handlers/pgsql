@@ -61,7 +61,11 @@ fi
 
 # give backup dir the good uid and permissions
 # (in respect to the vserver, if $usevserver = yes)
-pguid=`getent passwd postgres | awk -F: '{print $3}'`
+if [ $usevserver = yes ]; then
+   pguid=`$VSERVER $vsname exec getent passwd postgres | awk -F: '{print $3}'`
+else
+   pguid=`getent passwd postgres | awk -F: '{print $3}'`
+fi
 [ -n "$pguid" ] || \
     fatal "No user called postgres`[ $usevserver = no ] || echo \" on vserver $vsname\"`."
 debug "chown $pguid $vroot$backupdir"
