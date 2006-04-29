@@ -13,10 +13,7 @@ you are working on it!
 . Make it so backupninja can be run as a regular user, instead of requiring
   root
 
-. Implement the vsnames options in the mysql, svn and sys handlers, the same
-  way as it already works in the duplicity and rdiff handlers. Then edit the
-  corresponding helpers to make them use the lib/vserver functions to support
-  this option.
+. Allow vsnames "all" in the msyql handler.
 
 . Factorize the rdiff.helper's connection-related functions into a lib, so
   that they can be used by dup.helper too. (NB: don't forget that the dup
