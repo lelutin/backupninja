@@ -19,3 +19,6 @@ you are working on it!
   that they can be used by dup.helper too. (NB: don't forget that the dup
   handler has a sshoptions configuration setting, that is often used to
   specify an alternative SSH key, or a specific IP to bind to.)
+
+. Add an exclude option to database handlers so you can configure it to backup
+  all databases, except for the excluded ones
