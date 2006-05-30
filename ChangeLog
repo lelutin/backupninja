@@ -23,6 +23,8 @@ version 0.9.4 -- unreleased
 	dup:
 	 . Fixed improper include/exclude symlink dereference
 	 . Removed over zealous vsnames check
+	 . Does not pretend anymore that duplicity can work without
+	   any passphrase
 	sys:
 	 . Many more system checks were added, thanks to Petr Klíma
     lib changes

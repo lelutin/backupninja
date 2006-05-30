@@ -79,7 +79,6 @@ if [ -n "$encryptkey" ]; then
     execstr="${execstr}--encrypt-key $encryptkey "
     debug "Data will be encrypted with the GnuPG key $encryptkey."
 else
-    [ -n "$password" ] || fatal "The password option must be set when using symmetric encryption."
     debug "Data will be encrypted using symmetric encryption."
 fi
 
@@ -89,13 +88,14 @@ if [ "$sign" == yes ]; then
     [ -n "$encryptkey" ] || fatal "The encryptkey option must be set when signing."
     # if needed, initialize signkey to a value that is not empty (checked above)
     [ -n "$signkey" ] || signkey="$encryptkey"
-    # check password validity
-    [ -n "$password" ] || fatal "The password option must be set when signing."
     execstr="${execstr}--sign-key $signkey "
     debug "Data will be signed will the GnuPG key $signkey."
 else
     debug "Data won't be signed."
 fi
+
+# deal with GnuPG passphrase
+[ -n "$password" ] || fatal "The password option must be set."
 
 if [ "$keep" != "yes" ]; then
     if [ "`echo $keep | tr -d 0-9`" == "" ]; then
