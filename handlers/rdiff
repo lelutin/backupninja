@@ -192,7 +192,7 @@ if [ $usevserver = yes ]; then
       for vi in $vsinclude; do
       	 i=`readlink -f $VROOTDIR/$vserver$vi`
 	 str="${i//__star__/*}"
-	 execstr="${execstr}--include '$VROOTDIR/$vserver$str' "
+	 execstr="${execstr}--include '$str' "
       done
    done
 fi
