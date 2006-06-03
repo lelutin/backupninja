@@ -25,8 +25,8 @@ version 0.9.4 -- unreleased
 	 . Removed over zealous vsnames check
 	 . Does not pretend anymore that duplicity can work without
 	   any passphrase
-	 . More or less support duplicity >=0.4.2 (bandwidthlimit option maybe
-	   does not work with this version, though; work in progress)
+	 . Support duplicity 0.4.2 (with Debian patches applied; upstream's
+	   0.4.3 will integrate them)
 	sys:
 	 . Many more system checks were added, thanks to Petr Klíma
     lib changes

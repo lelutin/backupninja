@@ -398,7 +398,6 @@ incremental = $dup_incremental
 keep = $dup_keep
 
 # bandwith limit, in kbit/s ; default is 0, i.e. no limit
-# NB: does not work anymore with duplicity >=0.4.2, work in progress to fix this
 #bandwidthlimit = 128
 bandwidthlimit = $dup_bandwidth
 
