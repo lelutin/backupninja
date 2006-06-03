@@ -1,5 +1,8 @@
 WARNING FOR DUPLICITY USERS
 
-Old (pre-0.9.4) example.dup file used to give false information about the way
-the GnuPG-related options are used. Please read the new example.dup file, and
-update your own configuration files if needed.
+1. Old (pre-0.9.4) example.dup file used to give false information about the way
+   the GnuPG-related options are used. Please read the new example.dup file, and
+   update your own configuration files if needed.
+
+2. The bandwidthlimit option does not work anymore with duplicity >=0.4.2.
+   Trying to solve this...

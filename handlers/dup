@@ -53,6 +53,7 @@ else
    [ -z "$vsinclude" ] || warning 'vservers support disabled in backupninja.conf, vsincludes configuration lines will be ignored'
 fi
 
+
 ### see if we can login ###
 
 if [ "$testconnect" == "yes" ]; then
@@ -69,10 +70,23 @@ fi
 
 ### COMMAND-LINE MANGLING ###
 
+# duplicity >= 0.4.2 needs --sftp-command (NB: sftp does not support the -l option)
+duplicity_version="`duplicity --version | awk '{print $2}'`"
+duplicity_major="`echo $duplicity_version | awk -F '.' '{print $1}'`"
+duplicity_minor="`echo $duplicity_version | awk -F '.' '{print $2}'`"
+duplicity_sub="`echo $duplicity_version | awk -F '.' '{print $3}'`"
+if [ "$duplicity_major" -ge 0 -a "$duplicity_minor" -ge 4 -a "$duplicity_sub" -ge 2 ]; then
+   sftpoptions="$sshoptions"
+fi
+
 scpoptions="$sshoptions"
 [ "$bandwidthlimit" == 0 ] || scpoptions="$scpoptions -l $bandwidthlimit"
 
-execstr="$options --no-print-statistics --scp-command 'scp $scpoptions' --ssh-command 'ssh $sshoptions' "
+if [ -z "$sftpoptions" ]; then
+   execstr="$options --no-print-statistics --scp-command 'scp $scpoptions' --ssh-command 'ssh $sshoptions' "
+else
+   execstr="$options --no-print-statistics --scp-command 'scp $scpoptions' --sftp-command 'sftp $sftpoptions' --ssh-command 'ssh $sshoptions' "
+fi
 
 # deal with symmetric or asymmetric (public/private key pair) encryption
 if [ -n "$encryptkey" ]; then
