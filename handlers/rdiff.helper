@@ -269,6 +269,14 @@ do_rdiff_finish() {
 [source]
 type = local
 keep = $rdiff_keep
+
+# A few notes about includes and excludes:
+#   - include, exclude and vsinclude statements support EITHER globbing with '*'
+#     OR symlinks in the path; usage of both in the same statement is *not*
+#     supported and will lead to weird behaviour.
+#   - All the excludes come after all the includes. The order is not otherwise
+#     taken into account.
+
 EOF
    ## includes ##
    if [ "$host_or_vservers" == host -o "$host_or_vservers" == both ]; then
@@ -296,7 +304,6 @@ EOF
 # vsinclude will add to the include list /vservers/foo/home, /vservers/bar/home
 # and /vservers/baz/home.
 # Vservers paths are derived from $VROOTDIR.
-# vsinclude supports globbing with '*'.
 
 EOF
       set -o noglob

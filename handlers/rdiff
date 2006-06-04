@@ -112,6 +112,7 @@ else
 fi
 
 # check the connection at the source and destination
+[ -n "$test" ] || test=0
 if [ "$testconnect" = "yes" ] || [ "${test}" -eq 1 ]; then
 	test_connection $sourceuser $sourcehost
 	test_connection $destuser $desthost
@@ -171,28 +172,42 @@ execstr="$RDIFFBACKUP $options --print-statistics "
 
 set -o noglob
 
+symlinks_warning="Maybe you have mixed symlinks and '*' in this statement, which is not supported."
+
 # TODO: order the includes and excludes
 # excludes
 for i in $exclude; do
-	str="${i//__star__/*}"
-	i=`readlink -f ${i#}`
-	execstr="${execstr}--exclude '$str' "
+   str="${i//__star__/*}"
+   str=`readlink -f $str`
+   if [ -n "$str" ]; then
+      execstr="${execstr}--exclude '$str' "
+   else
+      warning "exclude statement ${i//__star__/*} will be ignored. $symlinks_warning"
+   fi
 done
 # includes 
 for i in $include; do
-	[ "$i" != "/" ] || fatal "Sorry, you cannot use 'include = /'"
-	str="${i//__star__/*}"
-	i=`readlink -f $i`
-	execstr="${execstr}--include '$str' "
+   [ "$i" != "/" ] || fatal "Sorry, you cannot use 'include = /'"
+   str="${i//__star__/*}"
+   str=`readlink -f $str`
+   if [ -n "$str" ]; then
+      execstr="${execstr}--include '$str' "
+   else
+      warning "include statement ${i//__star__/*} will be ignored. $symlinks_warning"
+   fi
 done
 
 # vsinclude
 if [ $usevserver = yes ]; then
    for vserver in $vsnames; do
       for vi in $vsinclude; do
-      	 i=`readlink -f $VROOTDIR/$vserver$vi`
-	 str="${i//__star__/*}"
-	 execstr="${execstr}--include '$str' "
+	 str="${vi//__star__/*}"
+	 str=`readlink -f $VROOTDIR/$vserver$str`
+         if [ -n "$str" ]; then
+	    execstr="${execstr}--include '$str' "
+         else
+            warning "vsinclude statement ${vi//__star__/*} will be ignored for VServer $vserver. $symlinks_warning"
+         fi
       done
    done
 fi

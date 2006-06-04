@@ -33,12 +33,14 @@ type = local
 # (you can also use the time format of rdiff-backup, e.g. 6D5h)
 keep = 60
 
-# a note about includes and excludes:
-# All the excludes come after all the includes. The order is
-# not otherwise taken into account. 
+# A few notes about includes and excludes:
+#   - include, exclude and vsinclude statements support EITHER globbing with '*'
+#     OR symlinks in the path; usage of both in the same statement is *not*
+#     supported and will lead to weird behaviour.
+#   - All the excludes come after all the includes. The order is not otherwise
+#     taken into account.
 
 # files to include in the backup
-# (supports globbing with '*')
 include = /var/spool/cron/crontabs
 include = /var/backups
 include = /etc
@@ -63,10 +65,8 @@ include = /var/lib/dpkg/status-old
 # vsinclude will add to the include list /vservers/foo/home, /vservers/bar/home
 # and /vservers/baz/home.
 # Vservers paths are derived from $VROOTDIR.
-# vsinclude supports globbing with '*'.
 
 # files to exclude from the backup
-# (supports globbing with '*')
 #exclude = /home/*/.gnupg
 
 ######################################################

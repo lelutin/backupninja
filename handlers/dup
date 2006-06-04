@@ -129,40 +129,48 @@ execstr_clientpart="/"
 
 set -o noglob
 
+symlinks_warning="Maybe you have mixed symlinks and '*' in this statement, which is not supported."
+
 # excludes
 for i in $exclude; do
-	str="${i//__star__/*}"
-	i=`readlink -f ${i#}`
-	execstr="${execstr}--exclude '$str' "
+   str="${i//__star__/*}"
+   str=`readlink -f $str`
+   if [ -n "$str" ]; then
+      execstr="${execstr}--exclude '$str' "
+   else
+      warning "exclude statement ${i//__star__/*} will be ignored. $symlinks_warning"
+   fi
 done
 	
 # includes 
 for i in $include; do
-	str="${i//__star__/*}"
-	i=`readlink -f ${i#}`
-	execstr="${execstr}--include '$str' "
+   str="${i//__star__/*}"
+   str=`readlink -f $str`
+   if [ -n "$str" ]; then
+      execstr="${execstr}--include '$str' "
+   else
+      warning "include statement ${i//__star__/*} will be ignored. $symlinks_warning"
+   fi
 done
 
 # vsincludes
 if [ $usevserver = yes ]; then
-    for vserver in $vsnames; do
-	for vi in $vsinclude; do
-	    i=`readlink -f $VROOTDIR/$vserver$vi`
-	    str="${i//__star__/*}"
-	    execstr="${execstr}--include '$VROOTDIR/$vserver$str' "
-	done
-    done
+   for vserver in $vsnames; do
+      for vi in $vsinclude; do
+	 str="${vi//__star__/*}"
+	 str=`readlink -f $VROOTDIR/$vserver$str`
+         if [ -n "$str" ]; then
+	    execstr="${execstr}--include '$str' "
+         else
+            warning "vsinclude statement ${vi//__star__/*} will be ignored for VServer $vserver. $symlinks_warning"
+         fi
+      done
+   done
 fi
 
 set +o noglob
 
 ### EXECUTE ###
-
-# exclude everything else, start with root
-#execstr="${execstr}--exclude '**' / "
-		
-# include client-part and server-part
-#execstr="$execstr $execstr_serverpart"
 
 execstr=${execstr//\\*/\\\\\\*}
 
