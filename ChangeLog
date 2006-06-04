@@ -33,6 +33,7 @@ version 0.9.4 -- unreleased
 	   any passphrase
 	 . Support duplicity 0.4.2 (with Debian patches applied; upstream's
 	   0.4.3 will integrate them)
+	 . Now forbid to (try to) include /.
 	sys:
 	 . Many more system checks were added, thanks to Petr Klíma
     lib changes

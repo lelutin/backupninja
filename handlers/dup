@@ -144,6 +144,7 @@ done
 	
 # includes 
 for i in $include; do
+   [ "$i" != "/" ] || fatal "Sorry, you cannot use 'include = /'"
    str="${i//__star__/*}"
    str=`readlink -f $str`
    if [ -n "$str" ]; then
