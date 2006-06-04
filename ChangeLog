@@ -18,10 +18,16 @@ version 0.9.4 -- unreleased
 	svn:
 	 . Fixed inversed vsname emptiness check
 	rdiff:
+	 . Symlink and globbing support enhancement and clarification: for
+	   a given include/exclude/vsinclude statement, rdiff handler now
+	   support EITHER globbing with '*' OR symlinks in the path.
 	 . Fixed improper include/exclude symlink dereference
 	 . Removed overzealous vsnames check
+	 . Now works if testconnect=no and if $test is not defined.
 	dup:
-	 . Fixed improper include/exclude symlink dereference
+	 . Symlink and globbing support enhancement and clarification: for
+	   a given include/exclude/vsinclude statement, dup handler now
+	   support EITHER globbing with '*' OR symlinks in the path.
 	 . Removed over zealous vsnames check
 	 . Does not pretend anymore that duplicity can work without
 	   any passphrase
