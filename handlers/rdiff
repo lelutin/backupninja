@@ -182,7 +182,7 @@ for i in $exclude; do
    if [ -n "$str" ]; then
       execstr="${execstr}--exclude '$str' "
    else
-      warning "exclude statement ${i//__star__/*} will be ignored. $symlinks_warning"
+      warning "exclude statement '${i//__star__/*}' will be ignored. $symlinks_warning"
    fi
 done
 # includes 
@@ -193,7 +193,7 @@ for i in $include; do
    if [ -n "$str" ]; then
       execstr="${execstr}--include '$str' "
    else
-      warning "include statement ${i//__star__/*} will be ignored. $symlinks_warning"
+      warning "include statement '${i//__star__/*}' will be ignored. $symlinks_warning"
    fi
 done
 
@@ -206,7 +206,7 @@ if [ $usevserver = yes ]; then
          if [ -n "$str" ]; then
 	    execstr="${execstr}--include '$str' "
          else
-            warning "vsinclude statement ${vi//__star__/*} will be ignored for VServer $vserver. $symlinks_warning"
+            warning "vsinclude statement '${vi//__star__/*}' will be ignored for VServer $vserver. $symlinks_warning"
          fi
       done
    done
