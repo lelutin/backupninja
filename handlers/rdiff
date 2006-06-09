@@ -155,7 +155,7 @@ fi
 removestr="${removestr}${destdir}/${label}";
 
 debug "$removestr"
-if [ ! $test ]; then
+if [ $test = 0 ]; then
 	output=`$removestr 2>&1`
 	if [ $? = 0 ]; then
 		debug $output
@@ -221,7 +221,7 @@ execstr="${execstr}--exclude '/*' "
 execstr="${execstr}$execstr_sourcepart $execstr_destpart"
 
 debug "$execstr"
-if [ ! $test ]; then
+if [ $test = 0 ]; then
 	output=`nice -n $nicelevel su -c "$execstr" 2>&1`
 	if [ $? = 0 ]; then
 		debug $output
