@@ -130,17 +130,37 @@ function msg {
 #
 
 function check_perms() {
-	local file=$1
-	local perms=`ls -ld $file`
-	perms=${perms:4:6}
-	if [ "$perms" != "------" ]; then
-		echo "Configuration files must not be group or world writable/readable! Dying on file $file"
-		fatal "Configuration files must not be group or world writable/readable! Dying on file $file"
-	fi
-	if [ `ls -ld $file | awk '{print $3}'` != "root" ]; then
-		echo "Configuration files must be owned by root! Dying on file $file"
-		fatal "Configuration files must be owned by root! Dying on file $file"
-	fi
+   local file=$1
+   local perms
+   perms=($(stat -L --printf='%a %g %G %u %U' $file))
+   local gperm=${perms[0]:1:1}
+   local wperm=${perms[0]:2:1}
+   local gid=${perms[1]}
+   local group=${perms[2]}
+   local owner=${perms[3]}
+
+   if [ "$owner" != 0 ]; then
+      echo "Configuration files must be owned by root! Dying on file $file"
+      fatal "Configuration files must be owned by root! Dying on file $file"
+   fi
+   
+   if [ $wperm -gt 0 ]; then
+      echo "Configuration files must not be world writable/readable! Dying on file $file"
+      fatal "Configuration files must not be world writable/readable! Dying on file $file"
+   fi
+
+   if [ $gperm -gt 0 ]; then
+      case "$admingroup" in
+         $gid|$group) :;;
+
+         *)
+           if [ "$gid" != 0 ]; then
+              echo "Configuration files must writable/readable by group ${perms[2]}! Dying on file $file"
+              fatal "Configuration files must writable/readable by group ${perms[2]}! Dying on file $file"
+           fi
+         ;;
+         esac
+   fi
 }
 
 # simple lowercase function
@@ -423,6 +443,7 @@ getconf PGSQLDUMP /usr/bin/pg_dump
 getconf PGSQLDUMPALL /usr/bin/pg_dumpall
 getconf GZIP /bin/gzip
 getconf RSYNC /usr/bin/rsync
+getconf admingroup root
 
 # initialize vservers support
 # (get config variables and check real vservers availability)
@@ -461,6 +482,7 @@ fi
 for file in $files; do
 	[ -f "$file" ] || continue
 
+        check_perms ${file%/*} # check containing dir
 	check_perms $file
 	suffix="${file##*.}"
 	base=`basename $file`

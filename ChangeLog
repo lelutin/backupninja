@@ -3,6 +3,11 @@ version 0.9.4 -- unreleased
 	 . Fixed bug in toint(), and thus isnow(), which caused it
 	   to not work when run from cron.
 	 . Recursively ignore subdirs in /etc/backup.d (Closes: #361102)
+	 . Add admingroup option to configuration to allow a group that can
+	   read/write configurations (instead of only allowing root). Checks
+	   and complains about group-readable files only when the group differs
+	   from the one in the configuration file (default is root as before). 
+	   Thanks to Martin Krafft for the patch (Closes: #370396).
     handler changes
 	Added tar handler
 	mysql:
