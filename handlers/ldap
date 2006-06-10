@@ -46,10 +46,18 @@ if [ "$ldif" == "yes" ]; then
       fi
       
       if [ "$method" == "slapcat" ]; then
-         execstr="$SLAPCAT -f $conf -b $dbsuffix"
+         if [ "$compress" == "yes" ]; then
+            execstr="$SLAPCAT -f $conf -b $dbsuffix | $GZIP"
+         else
+            execstr="$SLAPCAT -f $conf -b $dbsuffix"
+         fi
          debug "$execstr"
       else
-         execstr="$LDAPSEARCH -x -L -b ""$dbsuffix"" -D ""$binddn"" -y $passwordfile"
+         if [ "$compress" == "yes" ]; then
+            execstr="$LDAPSEARCH -x -L -b ""$dbsuffix"" -D ""$binddn"" -y $passwordfile | $GZIP"
+         else
+            execstr="$LDAPSEARCH -x -L -b ""$dbsuffix"" -D ""$binddn"" -y $passwordfile"
+         fi
          [ -f "$passwordfile" ] || fatal "Password file $passwordfile not found. When method is set to ldapsearch, you must also specify a password file."
          debug "$execstr"
       fi
@@ -64,7 +72,11 @@ if [ "$ldif" == "yes" ]; then
             fatal "Couldn't create ldif dump file: $dumpdir/$dbsuffix.ldif"
          fi
          
-         output=`$execstr > $dumpdir/$dbsuffix.ldif`
+         if [ "$compress" == "yes" ]; then
+            output=`$execstr > $dumpdir/$dbsuffix.ldif.gz`
+         else
+            output=`$execstr > $dumpdir/$dbsuffix.ldif`
+         fi
          code=$?
          if [ "$code" == "0" ]; then
             debug $output
@@ -72,10 +84,6 @@ if [ "$ldif" == "yes" ]; then
          else
             warning $output
             warning "Failed ldif export of $dbsuffix"
-         fi
-         if [ "$compress" == "yes" ]; then
-            output=`$GZIP -f "$dumpdir/$dbsuffix.ldif" 2>&1`
-            debug $output
          fi
          
          if [ "$restart" == "yes" ]; then

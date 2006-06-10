@@ -15,13 +15,13 @@ version 0.9.4 -- unreleased
 	 . Fixed erroneous removal of tmpfile when it didn't exit
 	 . Fixed inversed vsname emptiness check
 	 . Fixed su quote usage to be more posixy
-	 . compress for sqldumps now happens in-line to save some disk space (Closes: #370778)
+	 . Compress for sqldumps now happens in-line to save some disk space (Closes: #370778)
 	pgsql:
 	 . Fixed inversed vsname emptiness check
 	 . Fixed su quote usage to be more posixy
 	 . Fixed shell expansion, thanks Thomas Kotzian (Closes: #363297)
 	 . postgres user UID is now the one from inside the vserver if necessary
-	 . compress now happens in-line to save some disk space (Closes: #370778)
+	 . Compress now happens in-line to save some disk space (Closes: #370778)
 	svn:
 	 . Fixed inversed vsname emptiness check
 	rdiff:
@@ -43,6 +43,8 @@ version 0.9.4 -- unreleased
 	 . Now forbid to (try to) include /.
 	sys:
 	 . Many more system checks were added, thanks to Petr Klíma
+	ldap:
+	 . Compress now happens in-line to save some disk space (Closes: #370778)
     lib changes
 	vserver:
 	 . init_vservers: fixed Debian bug #351083 (improper readlink syntax)
