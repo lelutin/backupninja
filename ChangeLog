@@ -8,6 +8,8 @@ version 0.9.4 -- unreleased
 	   and complains about group-readable files only when the group differs
 	   from the one in the configuration file (default is root as before). 
 	   Thanks to Martin Krafft for the patch (Closes: #370396).
+	 . When determining which backup actions to make, find now follows
+	   symlinks for /etc/backup.d
     handler changes
 	Added tar handler
 	mysql:
