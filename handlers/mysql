@@ -249,9 +249,17 @@ fi
 	do
 		if [ $usevserver = yes ]
 		then
-			execstr="$VSERVER $vsname exec $MYSQLDUMP $defaultsfile --lock-tables --complete-insert --add-drop-table --quick --quote-names $ignore $db > $vroot$dumpdir/${db}.sql"
+                   if [ "$compress" == "yes" ]; then
+                      execstr="$VSERVER $vsname exec $MYSQLDUMP $defaultsfile --lock-tables --complete-insert --add-drop-table --quick --quote-names $ignore $db | $GZIP > $vroot$dumpdir/${db}.sql.gz"
+                   else
+                      execstr="$VSERVER $vsname exec $MYSQLDUMP $defaultsfile --lock-tables --complete-insert --add-drop-table --quick --quote-names $ignore $db > $vroot$dumpdir/${db}.sql"
+                   fi
 		else
-			execstr="$MYSQLDUMP $defaultsfile --lock-tables --complete-insert --add-drop-table --quick --quote-names $ignore $db > $dumpdir/${db}.sql"
+                   if [ "$compress" == "yes" ]; then
+                      execstr="$MYSQLDUMP $defaultsfile --lock-tables --complete-insert --add-drop-table --quick --quote-names $ignore $db | $GZIP > $dumpdir/${db}.sql.gz"
+                   else
+                      execstr="$MYSQLDUMP $defaultsfile --lock-tables --complete-insert --add-drop-table --quick --quote-names $ignore $db > $dumpdir/${db}.sql"
+                   fi
 		fi
 		debug "su $user -c \"$execstr\""
 		if [ ! $test ]
@@ -268,13 +276,6 @@ fi
 			fi
 		fi
 	done
-	
-	if [ "$compress" == "yes" ]
-	then
-		output=`$GZIP -f $vroot$dumpdir/*.sql 2>&1`
-		debug $output
-	fi
-fi
 
 # clean up tmp config file
 if [ "$dbusername" != "" -a "$dbpassword" != "" ]

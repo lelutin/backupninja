@@ -76,9 +76,17 @@ chmod 700 $vroot$backupdir
 # if $databases = all, use pg_dumpall
 if [ "$databases" == "all" ]; then
     if [ $usevserver = yes ]; then
-	execstr="$VSERVER $vsname exec su - postgres -c \"$PGSQLDUMPALL > $backupdir/${vsname}.sql\""
+       if [ "$compress" == "yes" ]; then          
+          execstr="$VSERVER $vsname exec su - postgres -c \"$PGSQLDUMPALL | $GZIP > $backupdir/${vsname}.sql.gz\""
+       else
+          execstr="$VSERVER $vsname exec su - postgres -c \"$PGSQLDUMPALL > $backupdir/${vsname}.sql\""
+       fi
     else
+       if [ "$compress" == "yes" ]; then
+          execstr="su - postgres -c \"$PGSQLDUMPALL | $GZIP > $backupdir/${localhost}-all.sql.gz\""
+       else
 	execstr="su - postgres -c \"$PGSQLDUMPALL > $backupdir/${localhost}-all.sql\""
+       fi
     fi
     debug "$execstr"
     if [ ! $test ]; then
@@ -96,11 +104,18 @@ if [ "$databases" == "all" ]; then
 # else use pg_dump on each specified database
 else
     for db in $databases; do
-	if [ $usevserver = yes ]
-	    then
-	    execstr="$VSERVER $vsname exec su - postgres -c \"$PGSQLDUMP $db > $backupdir/${db}.sql\""
+	if [ $usevserver = yes ]; then
+           if [ "$compress" == "yes" ]; then
+              execstr="$VSERVER $vsname exec su - postgres -c \"$PGSQLDUMP $db | $GZIP > $backupdir/${db}.sql.gz\""
+           else
+              execstr="$VSERVER $vsname exec su - postgres -c \"$PGSQLDUMP $db | > $backupdir/${db}.sql\""
+           fi
 	else
-	    execstr="su - postgres -c \"$PGSQLDUMP $db > $backupdir/${db}.sql\""
+           if [ "$compress" == "yes" ]; then
+              execstr="su - postgres -c \"$PGSQLDUMP $db | $GZIP > $backupdir/${db}.sql.gz\""
+           else
+              execstr="su - postgres -c \"$PGSQLDUMP $db > $backupdir/${db}.sql\""
+           fi
 	fi
 	debug "$execstr"
 	if [ ! $test ]; then
@@ -115,11 +130,6 @@ else
 	    fi
 	fi
     done
-fi
-
-if [ "$compress" == "yes" ]; then
-    output=`$GZIP -f $vroot$backupdir/*.sql 2>&1`
-    debug $output
 fi
 
 return 0

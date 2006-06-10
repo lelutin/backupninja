@@ -15,11 +15,13 @@ version 0.9.4 -- unreleased
 	 . Fixed erroneous removal of tmpfile when it didn't exit
 	 . Fixed inversed vsname emptiness check
 	 . Fixed su quote usage to be more posixy
+	 . compress for sqldumps now happens in-line to save some disk space (Closes: #370778)
 	pgsql:
 	 . Fixed inversed vsname emptiness check
 	 . Fixed su quote usage to be more posixy
 	 . Fixed shell expansion, thanks Thomas Kotzian (Closes: #363297)
 	 . postgres user UID is now the one from inside the vserver if necessary
+	 . compress now happens in-line to save some disk space (Closes: #370778)
 	svn:
 	 . Fixed inversed vsname emptiness check
 	rdiff:
