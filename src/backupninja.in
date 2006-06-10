@@ -526,7 +526,7 @@ if [ $doit == 1 ]; then
 	 		echo ${messages[$i]}
 		done
 		echo -e "$errormsg"
-	} | mail $reportemail -s "backupninja: $hostname $subject"
+	} | mail -s "backupninja: $hostname $subject" $reportemail
 fi
 
 if [ $actions_run != 0 ]; then
