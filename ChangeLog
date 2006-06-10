@@ -51,6 +51,8 @@ version 0.9.4 -- unreleased
 	vserver:
 	 . init_vservers: fixed Debian bug #351083 (improper readlink syntax)
 	 . found_vservers: escaped special grep repetition character +
+	 . forced mktemp to use a template with a name to be more compatible with 
+	   different versions of mktemp, thanks anarcat
     ninjahelper changes
 	 . Recursively ignore subdirs in /etc/backup.d (Closes: #361102)
 	 . Fix configdirectory error that forced you to use /etc/backup.d, thanks anarcat
