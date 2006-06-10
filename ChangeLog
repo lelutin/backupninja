@@ -9,7 +9,7 @@ version 0.9.4 -- unreleased
 	   from the one in the configuration file (default is root as before). 
 	   Thanks to Martin Krafft for the patch (Closes: #370396).
 	 . When determining which backup actions to make, find now follows
-	   symlinks for /etc/backup.d
+	   symlinks for $configdirectory
     handler changes
 	Added tar handler
 	mysql:
@@ -53,6 +53,9 @@ version 0.9.4 -- unreleased
 	 . found_vservers: escaped special grep repetition character +
     ninjahelper changes
 	 . Recursively ignore subdirs in /etc/backup.d (Closes: #361102)
+	 . Fix configdirectory error that forced you to use /etc/backup.d, thanks anarcat
+	 . When determining which backup actions to list, find now follows
+           symlinks for $configdirectory
     changed cron permissions to 644
     minor documentation fixes
 
