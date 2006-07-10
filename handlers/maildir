@@ -5,8 +5,9 @@
 #  This handler slowly creates a backup of each user's maildir
 #  to a remote server. It is designed to be run with low overhead
 #  in terms of cpu and bandwidth so it runs pretty slow.
+#  Hardlinking is used to save storage space.
 #
-#  if destdir is /backup/maildir/, then it will contain the files
+#  each users maildir will contain these files:
 #    daily.1
 #    daily.2
 #    daily.3
@@ -14,21 +15,28 @@
 #    weekly.2
 #    monthly.1
 #  if keepdaily is 3, keepweekly is 2, and keepmonthly is 1. 
+#  the actual maildir is stored within each snapshot directory.
 #
 #  The basic algorithm is to rsync each maildir individually,
 #  and to use hard links for retaining historical data.
 #
-#  We rsync each maildir individually because it becomes very
-#  unweldy to start a single rsync of many hundreds of thousands
-#  of files. 
+#  We handle each maildir individually because it becomes very
+#  unweldy to hardlink and rsync many hundreds of thousands
+#  of files at once. It is much faster to take on smaller
+#  chunks at a time. 
 #
 #  For the backup rotation to work, destuser must be able to run 
 #  arbitrary bash commands on the desthost.
 #
+#  Any maildir which is deleted from the source will be moved to
+#  "deleted" directory in the destination. It is up to you to 
+#  periodically remove this directory or old maildirs in it.
+# 
 ##############################################################
 
 getconf rotate yes
 getconf remove yes
+getconf backup yes
 
 getconf loadlimit 5
 getconf speedlimit 0
@@ -42,61 +50,42 @@ getconf desthost
 getconf destport 22
 getconf destuser
 
-failedcount=0
+getconf multiconnection notset
 
+letters="a b c d e f g h i j k l m n o p q r s t u v w x y z"
+failedcount=0
 # strip trailing /
 destdir=${destdir%/}
 srcdir=${srcdir%/}
 
 # used for testing
-#getconf letter
 #getconf testuser elijah
-getconf backup yes
-#letters=e
-letters="a b c d e f g h i j k l m n o p q r s t u v w x y z"
 
 [ -d $srcdir ] || fatal "source directory $srcdir doesn't exist"
+
+[ "$multiconnection" == "notset" ] && fatal "The maildir handler uses a very different destination format. See the example .maildir for more information"
 
 [ ! $test ] || testflags="--dry-run -v"
 rsyncflags="$testflags -e 'ssh -p $destport' -r -v --ignore-existing --delete --size-only --bwlimit=$speedlimit"
 excludes="--exclude '.Trash/\*' --exclude '.Mistakes/\*' --exclude '.Spam/\*'"
-
-# see if we can login
-debug "ssh -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1'"
-if [ ! $test ]; then
-	result=`ssh -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1' 2>&1`
-	if [ "$result" != "1" ]; then
-		fatal "Can't connect to $desthost as $destuser."
-	fi
-fi
 
 ##################################################################
 ### FUNCTIONS
 
 function do_user() {
 	local user=$1
-	local destdir=$2
+	local btype=$2
 	local letter=${user:0:1}
-	local dir="$srcdir/$letter/$user"
-	[ -d $dir ] || fatal "maildir $dir not found".
+	local source="$srcdir/$letter/$user/"
+	local target="$destdir/$letter/$user/$btype.1"
+	[ -d $source ] || fatal "maildir $source not found".
 
-#	while true; do
-#		load=`uptime | sed 's/^.*load average: \\([^,]*\\).*$/\\1/'`
-#		over=`expr $load \> $loadlimit`
-#		if [ $over == 1 ]; then
-#			info "load $load, sleeping..."
-#			sleep 600
-#		else
-#			break
-#		fi
-#	done
-	
-  	cmd="$RSYNC $rsyncflags $excludes $dir $destuser@$desthost:$destdir/$letter"
-	ret=`rsync -e "ssh -p $destport" -r \
---links --ignore-existing --delete --size-only --bwlimit=$speedlimit \
---exclude '.Trash/*' --exclude '.Mistakes/*' --exclude '.Spam/*' \
-$dir $destuser@$desthost:$destdir/$letter \
-2>&1`
+	debug "syncing"
+	ret=`$RSYNC -e "ssh -p $destport" -r \
+		--links --ignore-existing --delete --size-only --bwlimit=$speedlimit \
+		--exclude '.Trash/*' --exclude '.Mistakes/*' --exclude '.Spam/*' \
+		$source $destuser@$desthost:$target \
+		2>&1`
 	ret=$?
 	# ignore 0 (success) and 24 (file vanished before it could be copied)
 	if [ $ret != 0 -a $ret != 24 ]; then
@@ -107,32 +96,37 @@ $dir $destuser@$desthost:$destdir/$letter \
 			fatal "100 rsync errors -- something is not working right. bailing out."
 		fi
 	fi
+	ssh -o PasswordAuthentication=no $desthost -l $destuser "date +%c%n%s > $target/created"
 }
 
 # remove any maildirs from backup which might have been deleted
 # and add new ones which have just been created.
+# (actually, it just moved them to the directory "deleted")
 
 function do_remove() {
 	local tmp1=`maketemp maildir-tmp-file`
 	local tmp2=`maketemp maildir-tmp-file`
 	
+	ssh -p $destport $destuser@$desthost mkdir -p "$destdir/deleted"
 	for i in a b c d e f g h i j k l m n o p q r s t u v w x y z; do
-		ls -1 "$srcdir/$i" | sort > $tmp1
-		ssh -p $destport $desthost ls -1 '$destdir/maildir/$i' | sort > $tmp2
+		ls -1 "$srcdir/$i/" | sort > $tmp1
+		ssh -p $destport $destuser@$desthost ls -1 "$destdir/$i/" | sort > $tmp2
 		for deluser in `join -v 2 $tmp1 $tmp2`; do
-			cmd="ssh -p $destport $desthost rm -vr '$destdir/maildir/$i/$deluser/'"
-			debug $cmd
+			[ "$deluser" != "" ] || continue
+			info "removing $destuser@$desthost:$destdir/$i/$deluser/"
+			ssh -p $destport $destuser@$desthost mv "$destdir/$i/$deluser/" "$destdir/deleted"
 		done
 	done
 	rm $tmp1
-	rm $tmp2	
+	rm $tmp2
 }
 
 function do_rotate() {
-	backuproot=$destdir
-
+	[ "$rotate" == "yes" ] || return;
+	local user=$1
+	local letter=${user:0:1}
+	local backuproot="$destdir/$letter/$user"
 (
-	debug Connecting to $desthost
 	ssh -T -o PasswordAuthentication=no $desthost -l $destuser <<EOF
 ##### BEGIN REMOTE SCRIPT #####
 	seconds_daily=86400
@@ -143,12 +137,16 @@ function do_rotate() {
 	keepmonthly=$keepmonthly
 	now=\`date +%s\`
 
+	if [ ! -d "$backuproot" ]; then
+		echo "Debug: skipping rotate of $user. $backuproot doesn't exist."
+		exit
+	fi
 	for rottype in daily weekly monthly; do
 		seconds=\$((seconds_\${rottype}))
 
 		dir="$backuproot/\$rottype"
 		if [ ! -d \$dir.1 ]; then
-			echo "Info: \$dir.1 does not exist. This backup is missing, so we are skipping the rotation."
+			echo "Debug: \$dir.1 does not exist, skipping."
 			continue 1
 		elif [ ! -f \$dir.1/created ]; then
 			echo "Warning: \$dir.1/created does not exist. This backup may be only partially completed. Skipping rotation."
@@ -157,7 +155,7 @@ function do_rotate() {
 		
 		# Rotate the current list of backups, if we can.
 		oldest=\`find $backuproot -type d -maxdepth 1 -name \$rottype'.*' | sed 's/^.*\.//' | sort -n | tail -1\`
-		echo "Debug: oldest \$oldest"
+		#echo "Debug: oldest \$oldest"
 		[ "\$oldest" == "" ] && oldest=0
 		for (( i=\$oldest; i > 0; i-- )); do
 			if [ -d \$dir.\$i ]; then
@@ -170,14 +168,14 @@ function do_rotate() {
 				if [ ! \$created -gt \$cutoff_time ]; then
 					next=\$(( i + 1 ))
 					if [ ! -d \$dir.\$next ]; then
-						echo "Debug: mv \$dir.\$i \$dir.\$next"
+						echo "Debug: \$rottype.\$i --> \$rottype.\$next"
 						mv \$dir.\$i \$dir.\$next
 						date +%c%n%s > \$dir.\$next/rotated
 					else
-						echo "Info: skipping rotation of \$dir.\$i because \$dir.\$next already exists."
+						echo "Debug: skipping rotation of \$dir.\$i because \$dir.\$next already exists."
 					fi
 				else
-					echo "Info: skipping rotation of \$dir.\$i because it was created" \$(( (now-created)/86400)) "days ago ("\$(( (now-cutoff_time)/86400))" needed)."
+					echo "Debug: skipping rotation of \$dir.\$i because it was created" \$(( (now-created)/86400)) "days ago ("\$(( (now-cutoff_time)/86400))" needed)."
 				fi
 			fi
 		done
@@ -185,14 +183,14 @@ function do_rotate() {
 
 	max=\$((keepdaily+1))
 	if [ \( \$keepweekly -gt 0 -a -d $backuproot/daily.\$max \) -a ! -d $backuproot/weekly.1 ]; then
-		echo mv $backuproot/daily.\$max $backuproot/weekly.1
+		echo "Debug: daily.\$max --> weekly.1"
 		mv $backuproot/daily.\$max $backuproot/weekly.1
 		date +%c%n%s > $backuproot/weekly.1/rotated
 	fi
 
 	max=\$((keepweekly+1))
 	if [ \( \$keepmonthly -gt 0 -a -d $backuproot/weekly.\$max \) -a ! -d $backuproot/monthly.1 ]; then
-		echo mv $backuproot/weekly.\$max $backuproot/monthly.1
+		echo "Debug: weekly.\$max --> monthly.1"
 		mv $backuproot/weekly.\$max $backuproot/monthly.1
 		date +%c%n%s > $backuproot/monthly.1/rotated
 	fi
@@ -206,10 +204,10 @@ function do_rotate() {
 		for (( i=\$oldest; i >= \$max; i-- )); do
 			if [ -d \$dir.\$i ]; then
 				if [ -d $backuproot/rotate.tmp ]; then
-					echo "Info: removing $backuproot/rotate.tmp"
+					echo "Debug: removing rotate.tmp"
 					rm -rf $backuproot/rotate.tmp
 				fi
-				echo "Info: moving \$dir.\$i to $backuproot/rotate.tmp"
+				echo "Debug: moving \$rottype.\$i to rotate.tmp"
 				mv \$dir.\$i $backuproot/rotate.tmp
 			fi
 		done
@@ -222,9 +220,11 @@ EOF
 
 
 function setup_remote_dirs() {
-	local backuptype=$1
-	local dir="$destdir/$backuptype"
-
+	local user=$1
+	local backuptype=$2
+	local letter=${user:0:1}
+	local dir="$destdir/$letter/$user/$backuptype"
+	local tmpdir="$destdir/$letter/$user/rotate.tmp"
 (
 	ssh -T -o PasswordAuthentication=no $desthost -l $destuser <<EOF
 		if [ ! -d $destdir ]; then
@@ -237,25 +237,22 @@ function setup_remote_dirs() {
 				echo "Warning: we seem to be resuming a partially written $dir.1"
 			fi
 		else
-			if [ -d $destdir/rotate.tmp ]; then
-				mv $destdir/rotate.tmp $dir.1
+			if [ -d $tmpdir ]; then
+				mv $tmpdir $dir.1
 				if [ \$? == 1 ]; then
 					echo "Fatal: could mv $destdir/rotate.tmp $dir.1 on host $desthost"
 					exit 1
 				fi
 			else
-				mkdir $dir.1
+				mkdir --parents $dir.1
 				if [ \$? == 1 ]; then
 					echo "Fatal: could not create directory $dir.1 on host $desthost"
 					exit 1
 				fi
-				for i in a b c d e f g h i j k l m n o p q r s t u v w y x z; do
-					mkdir $dir.1/\$i
-				done
 			fi
-			if [ -d $destdir/$backuptype.2 ]; then
-				echo "Info: updating hard links to $dir.1. This may take a while."
-				cp -alf $destdir/$backuptype.2/. $dir.1
+			if [ -d $dir.2 ]; then
+				echo "Debug: update links $backuptype.2 --> $backuptype.1"
+				cp -alf $dir.2/. $dir.1
 				#if [ \$? == 1 ]; then
 				#	echo "Fatal: could not create hard links to $dir.1 on host $desthost"
 				#	exit 1
@@ -271,19 +268,48 @@ EOF
 	if [ $? == 1 ]; then exit; fi
 }
 
+function start_mux() {
+	if [ "$multiconnection" == "yes" ]; then
+		debug "Starting dummy ssh connection"
+		ssh -p $destport $destuser@$desthost sleep 1d &
+        sleep 1
+	fi
+}
+
+function end_mux() {
+	if [ "$multiconnection" == "yes" ]; then
+		debug "Stopping dummy ssh connection"
+		ssh -p $destport $destuser@$desthost pkill sleep
+	fi
+}
+
 ###
 ##################################################################
 
-### ROTATE BACKUPS ###
+# see if we can login
+debug "ssh -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1'"
+if [ ! $test ]; then
+	result=`ssh -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1' 2>&1`
+	if [ "$result" != "1" ]; then
+		fatal "Can't connect to $desthost as $destuser."
+	fi
+fi
 
-if [ "$rotate" == "yes" ]; then
-	do_rotate
+end_mux
+start_mux
+
+## SANITY CHECKS ##
+status=`ssh -p $destport $destuser@$desthost "[ -d \"$destdir\" ] && echo 'ok'"`
+if [ "$status" != "ok" ]; then
+	end_mux
+	fatal "Destination directory $destdir doesn't exist!"
+    exit
 fi
 
 ### REMOVE OLD MAILDIRS ###
 
 if [ "$remove" == "yes" ]; then
-	debug remove
+	do_remove
 fi
 
 ### MAKE BACKUPS ###
@@ -293,18 +319,27 @@ if [ "$backup" == "yes" ]; then
 	elif [ $keepweekly -gt 0 ]; then btype=weekly
 	elif [ $keepmonthly -gt 0 ]; then btype=monthly
 	else fatal "keeping no backups"; fi
-
-	setup_remote_dirs $btype
 	
-	for i in $letters; do
-		[ -d "$srcdir/$i" ] || fatal "directory $srcdir/$i not found."
-		cd "$srcdir/$i"
-		debug $i
-		for user in `ls -1`; do
-			if [ "$testuser" != "" -a "$testuser" != "$user" ]; then continue; fi
-			do_user $user $destdir/$btype.1
+	if [ "$testuser" != "" ]; then
+		cd "$srcdir/${user:0:1}"
+		do_rotate $testuser
+		setup_remote_dirs $testuser $btype
+		do_user $testuser $btype
+	else
+		for i in $letters; do
+			[ -d "$srcdir/$i" ] || fatal "directory $srcdir/$i not found."
+			cd "$srcdir/$i"
+			debug $i
+			for user in `ls -1`; do
+				[ "$user" != "" ] || continue
+				info $user
+				do_rotate $user
+				setup_remote_dirs $user $btype
+				do_user $user $btype
+			done
 		done
-	done
-
-	ssh -o PasswordAuthentication=no $desthost -l $destuser "date +%c%n%s > $destdir/$btype.1/created"
+	fi
 fi
+
+end_mux
+
