@@ -8,6 +8,7 @@ stefani@riseup.net -- makecd handler, man pages
 intrigeri@boum.org -- dup handler, pgsql handler, vserver support, bug fixes
 Charles Lepple 	   -- trac handler
 Petr Klíma <petr.klima@madeta-group.cz>	-- autotools, RPM support and sys checks
+paulv@bikkel.org   -- rsnap handler
 
 Patches: 
 
