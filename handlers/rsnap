@@ -1,0 +1,244 @@
+# -*- mode: sh; sh-basic-offset: 3; indent-tabs-mode: nil; -*-
+#
+# rsync backup handler for backupninja
+# requires rsync and optional freedups 
+#
+# freedups:
+# http://www.stearns.org/freedups/
+# http://freshmeat.net/projects/freedups/
+#
+# rsync:
+# http://samba.anu.edu.au/rsync/
+
+# exit on error
+#set -e 
+
+# System commands used by this script 
+# replace with absolute path's if neccecary
+getconf rm rm
+getconf cp cp
+getconf touch touch
+getconf mv mv
+getconf ssh ssh
+getconf tr tr
+getconf rsync $RSYNC
+
+setsection options
+getconf options
+getconf label
+getconf nicelevel 0
+getconf keep 60
+
+setsection source
+getconf testconnect no
+getconf srchost localhost
+getconf compress 1
+getconf sshoptions
+getconf bandwidthlimit 1000
+getconf remote_rsync rsync
+getconf numericids 1
+getconf include
+getconf vsnames all
+getconf vsinclude
+getconf include
+getconf exclude
+
+setsection dest
+getconf directory
+getconf enable_mv_timestamp_bug no
+getconf freedups freedups
+getconf enable_freedups no
+getconf incremental yes
+
+# Apparently, a bug in some Linux kernels between 2.4.4 and 2.4.9 causes mv to update timestamps; 
+# this may result in inaccurate timestamps on the snapshot directories. 
+# Set enable_mv_timestamp_bug=1 to enable this workaround 
+if [ $enable_mv_timestamp_bug == "yes" ]; then
+	mv=my_mv 
+fi;
+
+function my_mv() {
+   ref=/tmp/makesnapshot-mymv-$$;
+   $touch -r $1 $ref;
+   $mv $1 $2;
+   $touch -r $ref $2;
+   $rm $ref;
+}
+
+if [ $enable_freedups == "yes" ]; then
+	# $freedups
+	debug "Not implemented yet!"
+fi;
+
+
+[ "$directory" != "" ] || fatal "Destination directory not set"
+[ "$include" != "" ] || fatal "No source includes specified"
+
+### vservers stuff ###
+
+# If vservers are configured, check that the ones listed in $vsnames do exist.
+local usevserver=no
+if [ $vservers_are_available = yes ]; then
+   if [ "$vsnames" = all ]; then
+      vsnames="$found_vservers"
+   else
+      if ! vservers_exist "$vsnames" ; then
+            fatal "At least one of the vservers listed in vsnames ($vsnames) does not exist."
+      fi
+   fi
+   if [ -n "$vsinclude" ]; then
+      info "Using vservers '$vsnames'"
+      usevserver=yes
+   fi
+else
+   [ -z "$vsinclude" ] || warning 'vservers support disabled in backupninja.conf, vsincludes configuration lines will be ignored'
+   [ -z "$vsnames" ] || warning 'vservers support disabled in backupninja.conf, vsnames configuration line will be ignored'   
+fi
+
+### see if we can login ###
+
+if [ "$testconnect" == "yes" ]; then
+    debug "$ssh $sshoptions -o PasswordAuthentication=no $srchost  'echo -n 1'"
+    if [ ! $test ]; then
+	result=`ssh $sshoptions -o PasswordAuthentication=no $srchost  'echo -n 1'`
+	if [ "$result" != "1" ]; then
+	    fatal "Can't connect to $srchost."
+	else
+	    debug "Connected to $srchost successfully"
+	fi
+    fi
+fi
+
+### COMMAND-LINE MANGLING ###
+
+[ "$bandwidthlimit" == 1000 ]    || options="$options --bwlimit=$bandwidthlimit"
+[ "$numericids"     == 1 ]       || options="$options --numeric-ids "
+[ "$compress"       == 1 ]       || options="$options --compress "
+[ "$remote_rsync"   == "rsync" ] || options="$options --rsync-path=$remote_rsync"
+
+if [ "$nicelevel" -ne 0 ]; then 
+	nice="nice -n $nicelevel" ;
+else 
+	nice="";
+fi
+
+execstr="$options --exclude '/' --delete-during --delete-excluded  --archive $sshoptions "
+
+if [ "$incremental" == "no" ]; then
+    execstr="${execstr} --whole-file "
+fi
+
+execstr_serverpart="$srchost:/"
+
+
+### SOURCE ###
+
+set -o noglob
+
+# excludes
+for i in $exclude; do
+	str="${i//__star__/*}"
+	#execstr="${execstr}--exclude '$str' "
+	execstr="${execstr}--exclude $str "
+done
+	
+# includes 
+for i in $include; do
+	str="${i//__star__/*}"
+	#execstr="${execstr}--include '$str' "
+	execstr="${execstr}--include $str "
+done
+
+# vsincludes
+if [ $usevserver = yes ]; then
+    for vserver in $vsnames; do
+	for vi in $vsinclude; do
+	    str="${vi//__star__/*}"
+	    execstr="${execstr}--include '$label/$vserver$str' "
+	done
+    done
+fi
+
+
+### SNAPSHOT ROTATION ###
+
+if [ "$incremental" == "yes" ]; then
+	debug "starting to rotate the old dirs"
+	# rotating snapshots 
+	# delete the oldest snapshot, if it exists:
+	debug "does $directory/$label/$keep exist?"
+	if [ -d "$directory/$label/$keep" ] ; then
+		debug "$rm -rf $directory/$label/$keep" 
+		if [ !$test ]; then 
+			#$rm -rf "$directory/$label/$keep" ;
+			debug "$rm -rf $directory/$label/$keep";
+		fi;
+	fi;
+
+	# shift the snapshots(s) back by one, if they exist
+	for (( i=$keep; $i>=0; i--)) ; do 
+		debug "does $directory/$label/$i exist?"
+		if [ -d "$directory/$label/$i" ] ; then
+			debug "$mv $directory/$label/$i $directory/$label/$(($i + 1))"
+			if [ !$test ]; then 
+				$mv "$directory/$label/$i" "$directory/$label/$(($i + 1))"
+			fi;
+		fi;
+	done
+
+	# make a hard-link-only (except for dirs) copy of
+	# assuming that exists, into the new dir
+	if [ -d "$directory/$label/1" ]; then	
+		debug "$cp -al $directory/$label/1 $directory/$label/0"
+		if [ !$test ]; then 
+			$cp -al $directory/$label/1 $directory/$label/0 ;
+		fi;
+	fi;
+
+fi
+
+
+set +o noglob
+
+### EXECUTE ###
+
+# exclude everything else, start with root
+#execstr="${execstr}--exclude '*' "
+		
+# include client-part and server-part
+#execstr="$execstr $execstr_serverpart"
+
+execstr=${execstr//\\*/\\\\\\*}
+
+if [ "$debug" == "1" ]; then 
+	execstr=" --verbose $execstr";
+	# execstr=" --verbose --dry-run $execstr";
+else 
+	execstr=" --quiet $execstr";
+fi;
+
+debug "$rsync $execstr $execstr_serverpart  $directory/$label/0"
+
+
+# rsync from the system into the latest snapshot (notice that
+# rsync behaves like cp --remove-destination by default, so the destination
+# is unlinked first.  If it were not so, this would copy over the other
+# snapshot(s) too!
+output=`$nice $rsync $execstr $execstr_serverpart $directory/$label/0 2>&1`
+code=$?
+
+# update the mtime of the 0 dir to reflect the snapshot time
+$touch $directory/$label/0 
+
+if [ $code -eq 0 ]; then
+	debug $output
+	info "rsync finished successfully.";
+else
+	debug "returncode $code : $output "
+	#fatal "rsync failed.";
+	warning "rsync failed.";
+fi;
+
+
+return 0;
+
