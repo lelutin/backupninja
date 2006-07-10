@@ -11,7 +11,11 @@ version 0.9.4 -- unreleased
 	 . When determining which backup actions to make, find now follows
 	   symlinks for $configdirectory
     handler changes
-	Added tar handler
+	Added tar handler:
+	 . create tarballs
+	Added rsnap handler:
+	 . rotated rsync snapshops
+	 . code from paulv@bikkel.org
 	mysql:
 	 . Fixed improper use of $vuserhome (Closes: #351083)
 	 . Fixed erroneous removal of tmpfile when it didn't exit
