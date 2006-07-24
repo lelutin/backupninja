@@ -67,3 +67,4 @@ vservers = no
 # RSYNC=/usr/bin/rsync
 # VSERVERINFO=/usr/sbin/vserver-info
 # VSERVER=/usr/sbin/vserver
+# VROOTDIR=/var/lib/vservers
