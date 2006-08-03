@@ -75,7 +75,7 @@ fi
 # 1. setting the user, so that /home/user/.my.cnf is used.
 # 2. specifying the user and password in the handler config,
 #    which generates a temporary .my.cnf in /root/.my.cnf
-# 3. specify the config file with --defaults-file
+# 3. specify the config file with --defaults-extra-file
 #    (this option DOESN'T WORK WITH MYSQLHOTCOPY)
 #
 
@@ -130,16 +130,16 @@ EOF
 	umask $oldmask
 	if [ $usevserver = yes ] 
 	then
-	    defaultsfile="--defaults-file=$vhome/.my.cnf"
+	    defaultsfile="--defaults-extra-file=$vhome/.my.cnf"
 	else
-	    defaultsfile="--defaults-file=$mycnf"
+	    defaultsfile="--defaults-extra-file=$mycnf"
 	fi
 fi
 
 # if a user is not set, use $configfile, otherwise use $mycnf
 if [ "$user" == "" ]; then
 	user=root;
-	defaultsfile="--defaults-file=$configfile"
+	defaultsfile="--defaults-extra-file=$configfile"
 else
 	userset=true;
 	if [ $usevserver = yes ]
@@ -160,7 +160,7 @@ else
 	
 	debug "User home set to: $userhome"
 	[ -f $userhome/.my.cnf ] || fatal "Can't find config file in $userhome/.my.cnf"
-	defaultsfile="--defaults-file=$userhome/.my.cnf"
+	defaultsfile="--defaults-extra-file=$userhome/.my.cnf"
 	debug "using $defaultsfile"
 fi
 

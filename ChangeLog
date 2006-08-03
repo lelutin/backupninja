@@ -10,6 +10,7 @@ version 0.9.4 -- unreleased
 	   Thanks to Martin Krafft for the patch (Closes: #370396).
 	 . When determining which backup actions to make, find now follows
 	   symlinks for $configdirectory
+	 . Changed order of -s to mail for compatibility
     handler changes
 	Added tar handler:
 	 . create tarballs
@@ -22,12 +23,14 @@ version 0.9.4 -- unreleased
 	 . Fixed inversed vsname emptiness check
 	 . Fixed su quote usage to be more posixy
 	 . Compress for sqldumps now happens in-line to save some disk space (Closes: #370778)
+	 . Fixed --defaults-file now as --defaults-extra-file (thanks rhatto)
 	pgsql:
 	 . Fixed inversed vsname emptiness check
 	 . Fixed su quote usage to be more posixy
 	 . Fixed shell expansion, thanks Thomas Kotzian (Closes: #363297)
 	 . postgres user UID is now the one from inside the vserver if necessary
 	 . Compress now happens in-line to save some disk space (Closes: #370778)
+	 . $PGSQLUSER is used instead of hardcoding user 'postgres' (although this is the default) 
 	svn:
 	 . Fixed inversed vsname emptiness check
 	rdiff:
