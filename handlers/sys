@@ -450,6 +450,9 @@ fi
 
 if [ "$partitions" == "yes" ]; then
 	devices=`$HWINFO --disk | grep "Device File" | cut -d\  -f5`
+	if [ "$devices" == "" ]; then 
+	   warning "No harddisks found" 
+	fi
 	for dev in $devices; do
 		[ -b $dev ] || continue
 		label=${dev#/dev/}
