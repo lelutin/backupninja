@@ -67,6 +67,8 @@ version 0.9.4 -- unreleased
            symlinks for $configdirectory
     changed cron permissions to 644
     minor documentation fixes
+    improved RPM build process allowing 'make rpm-package' and 'make
+    srpm-package' targets (thanks Robert Napier)
 
 version 0.9.3 -- February 1st, 2006
     autotools fixes
