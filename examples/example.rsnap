@@ -1,0 +1,36 @@
+[options]
+options =
+nicelevel = 19
+keep = 90
+label = systemname_domain_tld
+
+[source]
+bandwidthlimit = 1000
+#remote_rsync = /usr/local/bin/sudo_rsync
+#sshoptions =
+testconnect = yes
+numericids = 1
+compress = 1
+srchost = backupuser@hostname.domain.tld
+
+# files to include in the backup
+# (supports globbing with '*')
+include = /var
+include = /usr/local
+include = /home
+
+# files to exclude from the backup
+# (supports globbing with '*')
+exclude = /home/*/Maildir
+exclude = /var/log
+exclude = /proc
+exclude = /srv
+exclude = /sys
+exclude = /*.gz
+
+[dest]
+directory = /media/backup
+enable_mv_timestamp_bug = no
+incremental = yes
+enable_freedups = no
+freedups = /usr/local/bin/freedups 
