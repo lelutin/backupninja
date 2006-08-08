@@ -52,6 +52,7 @@ version 0.9.4 -- unreleased
 	 . Now forbid to (try to) include /.
 	sys:
 	 . Many more system checks were added, thanks to Petr Klíma
+	 . Changed partition check to use sfdisk as its more common, thanks Rainer Zocholl
 	ldap:
 	 . Compress now happens in-line to save some disk space (Closes: #370778)
     lib changes

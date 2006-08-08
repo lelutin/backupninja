@@ -449,7 +449,7 @@ fi
 # these files can be used to directly partition a disk of the same size.
 
 if [ "$partitions" == "yes" ]; then
-	devices=`$HWINFO --disk | grep "Device File" | cut -d\  -f5`
+	devices=`$SFDISK -l | grep "^Disk /dev" | cut -d/  -f2,3 | cut -d: -f1`
 	if [ "$devices" == "" ]; then 
 	   warning "No harddisks found" 
 	fi
@@ -458,8 +458,8 @@ if [ "$partitions" == "yes" ]; then
 		label=${dev#/dev/}
 		label=${label//\//-}
 		outputfile=${partitionsfile//__star__/$label}
-		debug "$SFDISK $sfdisk_options -d $dev > $outputfile"
-		$SFDISK $sfdisk_options -d $dev > $outputfile
+		debug "$SFDISK $sfdisk_options -d /$dev > $outputfile"
+		$SFDISK $sfdisk_options -d /$dev > $outputfile
 	done
 fi
 
