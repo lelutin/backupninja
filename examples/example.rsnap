@@ -1,20 +1,47 @@
+##
+## This is an example rsnap configuration file.
+## The defaults are useful in most cases.
+##
+
+## global options
 [options]
 options =
+
+## the nicelevel the backup and all the children should run at
+## the higher nicelevel reduces the priority
 nicelevel = 19
+
+# how many days of data to keep
 keep = 90
+
+# the name of the directory created for the backup
 label = systemname_domain_tld
 
 [source]
+
+# bandwidth limit to be used for rsync
 bandwidthlimit = 1000
+
+# remote_rsync can be used if your rsync is not in your PATH, or if you
+# need a wrapper
 #remote_rsync = /usr/local/bin/sudo_rsync
+
+# options like -P<port> can be specified here
 #sshoptions =
+
+# test the ssh connection before proceding?
 testconnect = yes
+
+# don't translate owner+groupid's to local names
 numericids = 1
+
+# turn on rsync compression? (1 = on, 0 = off)
 compress = 1
+
 srchost = backupuser@hostname.domain.tld
 
 # files to include in the backup
-# (supports globbing with '*')
+# (supports globbing with '*'), by default / is included
 include = /var
 include = /usr/local
 include = /home
@@ -29,8 +56,12 @@ exclude = /sys
 exclude = /*.gz
 
 [dest]
+
+# base directory where backup is made to
 directory = /media/backup
+
+# only necessary if you hit a specifi 2.4 kernel bug
 enable_mv_timestamp_bug = no
+
+# if you say no here, only one dir is kept, and 'keep' is irrelevant
 incremental = yes
-enable_freedups = no
-freedups = /usr/local/bin/freedups 
