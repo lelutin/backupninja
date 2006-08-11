@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ "x$EDITOR" = "x" ];
+then
+        EDITOR=vi
+fi
+
 if [ "x$1" = "x-f"  ]
 then
     autoscan

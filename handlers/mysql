@@ -276,6 +276,7 @@ fi
 			fi
 		fi
 	done
+fi
 
 # clean up tmp config file
 if [ "$dbusername" != "" -a "$dbpassword" != "" ]

@@ -69,7 +69,9 @@ version 0.9.4 -- unreleased
     changed cron permissions to 644
     minor documentation fixes
     improved RPM build process allowing 'make rpm-package' and 'make
-    srpm-package' targets (thanks Robert Napier)
+    srpm-package' targets, also fixes permissions on man directories, 
+    cleans up RPM-related files during distclean, and adds default
+    EDITOR for "autogen.sh -f" if none is set. (thanks Robert Napier)
 
 version 0.9.3 -- February 1st, 2006
     autotools fixes

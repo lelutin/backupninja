@@ -6,34 +6,40 @@ EXTRA_DIST = README COPYING AUTHORS INSTALL NEWS ChangeLog \
 
 SUBDIRS = etc examples handlers lib man src
 
-rpm_topdir=`cd $(top_srcdir) && pwd`/rpm
+local_rpm_topdir=`cd $(top_srcdir) && pwd`/rpm
 rpm-package: dist
        if test x$(HAVE_RPM) = xyes ; then \
-               mkdir -p $(rpm_topdir) ; \
-               cd $(rpm_topdir) ; \
+               mkdir -p $(local_rpm_topdir) ; \
+               cd $(local_rpm_topdir) ; \
                mkdir -p BUILD RPMS SOURCES SPECS ; \
                cd SOURCES ; \
-               ln -sf ../../$(distdir).tar.gz ; \
+               $(LN_S) ../../$(distdir).tar.gz ; \
                cd .. ; \
                cd SPECS ; \
-               ln -sf ../../backupninja.spec . ; \
-               cd .. ; \
+               $(LN_S) ../../backupninja.spec . ; \
+	       cd .. ; \
                rpmbuild --define "_topdir `cd . && pwd`" -bb SPECS/backupninja.spec && \
                echo "Package successfully built in `pwd`/RPMS." ; \
        else \
                echo "Error: RPM executable and/or source directory not found." ; \
        fi
+
 srpm-package: dist
-       if test x$(HAVE_RPM) = xyes ; then \
-               cd $(rpm_topdir) ; \
+      if test x$(HAVE_RPM) = xyes ; then \
+               mkdir -p $(local_rpm_topdir) ; \
+               cd $(local_rpm_topdir) ; \
                mkdir -p BUILD SRPMS SOURCES SPECS ; \
                cd SOURCES ; \
-               ln -s ../../$(distdir).tar.gz ; \
+               $(LN_S) ../../$(distdir).tar.gz ; \
                cd .. ; \
                cd SPECS ; \
-               ln -sf ../../backupninja.spec .
+               $(LN_S) ../../backupninja.spec . \
+	       cd .. ; \
                rpmbuild --define "_topdir `cd . && pwd`" -bs SPECS/backupninja.spec && \
                echo "Package successfully built in `pwd`/SRPMS." ; \
        else \
-               echo "Error: RPM executable and/or source directory not found." ; \
-       fi 
+              echo "Error: RPM executable and/or source directory not found." ; \
+       fi
+
+clean-local:
+	-rm -rf $(local_rpm_topdir)

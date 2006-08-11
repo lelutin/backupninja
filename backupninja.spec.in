@@ -38,22 +38,26 @@ touch "%{buildroot}%{_localstatedir}/log/backupninja.log"
 #rm -fr %{buildroot}
 
 %files
-%defattr(0750,root,root)
+%defattr(-,root,root,-)
 %{_sbindir}/*
 %{_datadir}/backupninja/*
 %{_libdir}/backupninja/*
-%{_sysconfdir}/cron.d/backupninja
-%{_sysconfdir}/logrotate.d/backupninja
 
-%defattr(0600,root,root)
+%config %{_sysconfdir}/cron.d/backupninja
+%config %{_sysconfdir}/logrotate.d/backupninja
+
 %config(noreplace) %{_sysconfdir}/backupninja.conf
-%dir %{_sysconfdir}/backup.d
 %dir %{_localstatedir}/backups
+
 %ghost %{_localstatedir}/log/backupninja.log
 
-%defattr(0644,root,root)
 %doc AUTHORS COPYING ChangeLog INSTALL NEWS README
-%{_mandir}/*
+%{_mandir}/man1/*
+%{_mandir}/man5/*
+
+%defattr(0640,root,root,0750)
+%dir %{_sysconfdir}/backup.d
+
 
 %changelog
 * Mon Apr 29 2002 Petr Klima <Petr.Klima@madeta-group.cz> 0.7.0
