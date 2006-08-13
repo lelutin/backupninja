@@ -132,7 +132,7 @@ function msg {
 function check_perms() {
    local file=$1
    local perms
-   perms=($(stat -L --printf='%a %g %G %u %U' $file))
+   perms=($(stat -L --format='%a %g %G %u %U' $file))
    local gperm=${perms[0]:1:1}
    local wperm=${perms[0]:2:1}
    local gid=${perms[1]}

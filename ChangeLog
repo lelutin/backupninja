@@ -11,6 +11,8 @@ version 0.9.4 -- unreleased
 	 . When determining which backup actions to make, find now follows
 	   symlinks for $configdirectory
 	 . Changed order of -s to mail for compatibility
+	 . fixed permission stat call so it uses the --format supported by
+	   coreutils (Closes: #382747)
     handler changes
 	Added tar handler:
 	 . create tarballs
