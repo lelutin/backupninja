@@ -10,6 +10,7 @@ Charles Lepple 	   -- trac handler
 Petr Klíma <petr.klima@madeta-group.cz>	-- autotools, RPM support and sys checks
 paulv@bikkel.org   -- rsnap handler
 Robert Napier 	   -- improved RPM build
+rhatto 		   -- rub handler and patches
 
 Patches: 
 
@@ -19,4 +20,4 @@ Brad Fritz <brad@fritzfam.com> -- trac patch
 garcondumonde@riseup.net
 Martin Krafft madduck@debian.org -- admingroup patch
 Anarcat
-rhatto
+

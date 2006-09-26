@@ -1,0 +1,221 @@
+#
+# backupninja handler to do incremental backups using
+# rsync and hardlinks, based on
+#
+#   http://www.mikerubel.org/computers/rsync_snapshots/
+#
+# feedback: rhatto at riseup.net | gpl
+#
+# config file options
+# -------------------
+#
+#   [general]
+#   log = rsync log file
+#   partition = partition where the backup lives
+#   fsck = set to 1 if fsck should run on $partition after the backup is made
+#   read_only = set to 1 if $partition is mounted read-only
+#   mountpoint = backup partition mountpoint or backup main folder
+#   backupdir = folder relative do $mountpoint where the backup should be stored
+#   days = number of backup increments (min = 5)
+#   lockfile = lockfile to be kept during backup execution
+#
+#   [source]
+#   include = include folder on backup
+#   exclude = exclude folder on backup
+#   from = local or remote
+#   ssh = ssh command line (remote only)
+#   rsync = rsync command line
+#   exclude_vserver = vserver-name (valid only if vservers = yes on backupninja.conf)
+#
+#   [services]
+#   initscripts = absolute path where scripts are located
+#   service = script name to be stoped at the begining of the backup and started at its end
+#
+# You dont need to manually specify vservers using "include = /vservers".
+# They are automatically backed-up if vserver is set to "yes" on your backupninja.conf.
+#
+
+setsection general
+getconf log /var/log/backupninja-rub.log
+getconf partition
+getconf fsck
+getconf read_only
+getconf mountpoint
+getconf backupdir
+getconf rotate
+getconf days
+getconf lockfile
+
+setsection source
+getconf from local
+getconf rsync "rsync -av --delete"
+getconf ssh ssh
+getconf user
+getconf host
+getconf include
+getconf exclude
+getconf exclude_vserver
+
+setsection services
+getconf initscripts
+getconf service
+
+backupdir="$mountpoint/$backupdir"
+
+if [ ! -d "$backupdir" ]; then 
+  error "Backupdir $backupdir does not exist"
+  exit 1
+fi
+
+if [ -z "$days" ]; then
+  keep="4"
+else
+  keep="`echo $days - 1 | bc -l`"
+fi
+
+if [ ! -z "$lockfile" ]; then
+  touch $lockfile || warning "Could not create lockfile $lockfile"
+fi
+
+for path in $exclude; do
+  EXCLUDES="$EXCLUDES --exclude=$path"
+done
+
+if [ ! -z "$service" ]; then
+  for daemon in $service; do
+    info "Stopping service $daemon..."
+    $initscripts/$daemon stop
+  done
+fi
+
+function rotate {
+
+  # please use an absolute path
+
+  if [[ "$2" < 4 ]]; then
+    error "Rotate: minimum of 4 rotations"
+    exit 1
+  fi
+
+  if [ -d $1.$2 ]; then
+    mv $1.$2 $1.tmp
+  fi
+
+  for ((n=`echo "$2 - 1" | bc`; n >= 0; n--)); do
+    if [ -d $1.$n ]; then
+      dest=`echo "$n + 1" | bc`
+      mv $1.$n $1.$dest
+      touch $1.$dest
+    fi
+  done
+
+  if [ -d $1.tmp ]; then
+    mv $1.tmp $1.0
+  fi
+
+  if [ -d $1.1 ]; then
+    cp -alf $1.1/. $1.0
+  fi
+
+}
+
+echo "Starting backup at `date`" >> $log
+
+if [ "$read_only" == "1" ] || [ "$read_only" == "yes" ]; then
+  if [ -d "$mountpoint" ]; then
+    mount -o remount,rw $mountpoint
+    if (($?)); then
+      error "Could not mount $mountpoint"
+      exit 1
+    fi
+  fi
+fi
+
+if [ "$vservers_are_available" == "yes" ]; then
+
+  # sane permission on backup
+  mkdir -p $backupdir/$VROOTDIR
+  chmod 000 $backupdir/$VROOTDIR
+
+  for candidate in `ls $VROOTDIR`; do
+    found_excluded_vserver="0"
+    if [ "$candidate" != "lost+found" ]; then
+      for excluded_vserver in $exclude_vserver; do
+        if [ "$excluded_vserver" == "$candidate" ]; then
+          found_excluded_vserver="1"
+          break
+        fi
+      done
+      if [ "$found_excluded_vserver" == "0" ]; then
+        include="$include $VROOTDIR/$candidate"
+      fi
+    fi
+  done
+fi
+
+for SECTION in $include; do
+
+  section="`basename $SECTION`"
+
+  if [ ! -d "$backupdir/$SECTION/$section.0" ]; then
+    mkdir -p $backupdir/$SECTION/$section.0
+  fi
+ 
+  info "Rotating $backupdir/$SECTION/$section..."
+  echo "Rotating $backupdir/$SECTION/$section..." >> $log
+  rotate $backupdir/$SECTION/$section $keep
+  info "Syncing $SECTION on $backupdir/$SECTION/$section.0..."
+
+  if [ "$from" == "local" ]; then
+    debug $rsync $EXCLUDES /$SECTION/ $backupdir/$SECTION/$section.0/ 
+    $rsync $EXCLUDES /$SECTION/ $backupdir/$SECTION/$section.0/ >> $log
+    if [ "$?" != "0" ]; then
+      warning "Rsync error when trying to transfer $SECTION"
+    fi
+  elif [ "$from" == "remote" ]; then
+    if [ -z "$user" ] || [ -z "$host" ]; then
+      error "Config file error: either user or host was not specified"
+      exit 1
+    else
+      debug $rsync $EXCLUDES -e "$ssh" $user@$host:/$SECTION/ $backupdir/$SECTION/$section.0
+      $rsync $EXCLUDES -e "$ssh" $user@$host:/$SECTION/ $backupdir/$SECTION/$section.0 >> $log
+      if [ "$?" != "0" ]; then
+        warning "Rsync error when trying to transfer $SECTION"
+      fi
+    fi
+  else
+    error "Invalid source $from"
+    exit 1
+  fi
+
+  touch $backupdir/$SECTION/$section.0
+
+done
+
+if [ "$read_only" == "1" ] || [ "$read_only" == "yes" ]; then
+  mount -o remount,ro $mountpoint
+fi
+
+if [ "$fsck" == "1" ] || [ "$fsck" == "yes" ]; then
+  umount $mountpoint
+  if (($?)); then
+    warning "Could not umount $mountpoint to run fsck"
+  else
+    fsck -v -y $partition >> $log
+    mount $mountpoint
+  fi
+fi
+
+if [ ! -z "$service" ]; then
+  for daemon in $service; do
+    info "Starting service $daemon..."
+    $initscripts/$daemon start
+  done
+fi
+
+if [ ! -z "$lockfile" ]; then
+  rm $lockfile || warning "Could not remove lockfile $lockfile"
+fi
+
+echo "Finnishing backup at `date`" >> $log
+

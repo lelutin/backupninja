@@ -22,3 +22,5 @@ you are working on it!
 
 . Add an exclude option to database handlers so you can configure it to backup
   all databases, except for the excluded ones
+
+. Consolidate the 'rsnap' and 'rub' handlers into one rsync snapshot handler
