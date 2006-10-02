@@ -19,6 +19,9 @@ version 0.9.4 -- unreleased
 	Added rsnap handler:
 	 . rotated rsync snapshops
 	 . code from paulv@bikkel.org
+	Added rub handler: 
+	 . alternative to rsnap
+	 . code from rhatto@riseup.net
 	mysql:
 	 . Fixed improper use of $vuserhome (Closes: #351083)
 	 . Fixed erroneous removal of tmpfile when it didn't exit
@@ -42,6 +45,11 @@ version 0.9.4 -- unreleased
 	 . Fixed improper include/exclude symlink dereference
 	 . Removed overzealous vsnames check
 	 . Now works if testconnect=no and if $test is not defined.
+	 . add $sshoptions config parameter in [dest] section of config so
+	   connections to ports other than 22 can be made by adding the
+	   following to the top of the handler config:
+	   options = --remote-schema 'ssh -p REMOTE-PORT -C %s rdiff-backup
+	   --server'
 	dup:
 	 . Symlink and globbing support enhancement and clarification: for
 	   a given include/exclude/vsinclude statement, dup handler now
@@ -57,6 +65,8 @@ version 0.9.4 -- unreleased
 	 . Added warning if no devices were found (thanks Ranier Zocholl)
 	ldap:
 	 . Compress now happens in-line to save some disk space (Closes: #370778)
+	makecd:
+	 . Added nicelevel option (thanks rhatto)
     lib changes
 	vserver:
 	 . init_vservers: fixed Debian bug #351083 (improper readlink syntax)

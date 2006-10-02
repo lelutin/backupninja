@@ -17,8 +17,8 @@ function test_connection() {
 	fi
 	local user=$1
 	local host=$2
-	debug "ssh -o PasswordAuthentication=no $host -l $user 'echo -n 1'"
-	local ret=`ssh -o PasswordAuthentication=no $host -l $user 'echo -n host is alive'`
+	debug "ssh $sshoptions -o PasswordAuthentication=no $host -l $user 'echo -n 1'"
+	local ret=`ssh $sshoptions -o PasswordAuthentication=no $host -l $user 'echo -n host is alive'`
 	if echo $ret | grep "host is alive"; then
 		debug "Connected to $host as $user successfully"
 	else
@@ -36,8 +36,8 @@ function get_version() {
 	else
 		local user=$1
 		local host=$2
-		debug "ssh $host -l $user '$RDIFFBACKUP -V'"
-		echo `ssh $host -l $user "$RDIFFBACKUP -V | grep rdiff-backup"`
+		debug "ssh $sshoptions $host -l $user '$RDIFFBACKUP -V'"
+		echo `ssh $sshoptions $host -l $user "$RDIFFBACKUP -V | grep rdiff-backup"`
 	fi
 }
 
@@ -89,6 +89,7 @@ destdir=${destdir%/}
 getconf type; desttype=$type
 getconf user; destuser=$user
 getconf host; desthost=$host
+getconf sshoptions
 check_consistency "destination" "$type" "$user" "$host"
 
 ### CHECK CONFIG ###
@@ -148,7 +149,7 @@ if [ "`echo $keep | tr -d 0-9`" == "" ]; then
 	keep="${keep}D"
 fi
 
-removestr="$RDIFFBACKUP --force --remove-older-than $keep "
+removestr="$RDIFFBACKUP $options --force --remove-older-than $keep "
 if [ "$desttype" == "remote" ]; then
 	removestr="${removestr}${destuser}@${desthost}::"
 fi
@@ -156,7 +157,7 @@ removestr="${removestr}${destdir}/${label}";
 
 debug "$removestr"
 if [ $test = 0 ]; then
-	output=`$removestr 2>&1`
+	output="`su -c "$removestr" 2>&1`"
 	if [ $? = 0 ]; then
 		debug $output
 		info "Removing backups older than $keep days succeeded."
