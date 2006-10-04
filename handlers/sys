@@ -37,7 +37,7 @@ if [ $os = "debian" ]
 then
    getconf packagesfile /var/backups/dpkg-selections.txt
    getconf packagemgr   `which dpkg`
-   getconf packagemgroptions " --get-selections"
+   getconf packagemgroptions " --get-selections \*"
 elif [ $os = "redhat" ]
 then
    getconf packagesfile  /var/backups/rpmpackages.txt 

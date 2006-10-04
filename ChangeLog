@@ -63,6 +63,7 @@ version 0.9.4 -- unreleased
 	sys:
 	 . Many more system checks were added, thanks to Petr Klíma
 	 . Added warning if no devices were found (thanks Ranier Zocholl)
+	 . Enhanced debian package selections to include purged packages (Thanks Tom Hoover)
 	ldap:
 	 . Compress now happens in-line to save some disk space (Closes: #370778)
 	makecd:
