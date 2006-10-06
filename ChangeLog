@@ -13,6 +13,7 @@ version 0.9.4 -- unreleased
 	 . Changed order of -s to mail for compatibility
 	 . fixed permission stat call so it uses the --format supported by
 	   coreutils (Closes: #382747)
+	 . Added disk space report option (thanks Adam Kosmin)
     handler changes
 	Added tar handler:
 	 . create tarballs
@@ -61,9 +62,10 @@ version 0.9.4 -- unreleased
 	   0.4.3 will integrate them)
 	 . Now forbid to (try to) include /.
 	sys:
-	 . Many more system checks were added, thanks to Petr Klíma
+	 . Many more system checks were added, (thanks to Petr Klíma)
 	 . Added warning if no devices were found (thanks Ranier Zocholl)
-	 . Enhanced debian package selections to include purged packages (Thanks Tom Hoover)
+	 . Enhanced debian package selections to include purged packages (thanks Tom Hoover)
+	 . Removed warning about vserver not running (thanks anarcat)
 	ldap:
 	 . Compress now happens in-line to save some disk space (Closes: #370778)
 	makecd:

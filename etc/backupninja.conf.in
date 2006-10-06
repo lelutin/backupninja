@@ -25,6 +25,10 @@ reportsuccess = yes
 # even if there was no error. (default = yes)
 reportwarning = yes
 
+# if set to 'yes', disk space usage will be included in
+# the backup email report
+reportspace = no
+
 # set to the administration group that is allowed to 
 # read/write configuration files in /etc/backup.d
 admingroup = root

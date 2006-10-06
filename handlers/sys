@@ -93,7 +93,6 @@ if [ "$packages" == "yes" ]; then
                               nodpkg="$nodpkg|$vserver"
                            fi
 			else
-                           warning "vserver $vserver is not running, skipping installed packages report."
                            nodpkg="$nodpkg|$vserver"
 			fi
 
