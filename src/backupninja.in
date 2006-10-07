@@ -155,8 +155,8 @@ function check_perms() {
 
          *)
            if [ "$gid" != 0 ]; then
-              echo "Configuration files must writable/readable by group ${perms[2]}! Dying on file $file"
-              fatal "Configuration files must writable/readable by group ${perms[2]}! Dying on file $file"
+              echo "Configuration files must not be writable/readable by group ${perms[2]}! Dying on file $file"
+              fatal "Configuration files must not be writable/readable by group ${perms[2]}! Dying on file $file"
            fi
          ;;
          esac
