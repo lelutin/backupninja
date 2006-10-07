@@ -14,6 +14,14 @@ backupninja (0.9.4-1) UNRELEASED
 	  Please read the new /usr/share/doc/backupninja/examples/example.dup
 	  or /usr/share/doc/backupninja/examples/example.rdiff file, and update
 	  your own configuration files if needed.
+
+	* duplicity: duplicity now uses sftp, which does not support all scp
+	  command line options; you thus have to convert the sshoptions setting
+	  in your *.dup configuration files, to sftp-compatible syntax; for
+	  example, you can replace:
+	    sshoptions = -i /root/.ssh/id_dsa_duplicity
+	  with:
+	    sshoptions = -o IdentityFile=/root/.ssh/id_dsa_duplicity
 	
 backupninja (0.9.2-1) unstable; urgency=low
 

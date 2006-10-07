@@ -60,7 +60,8 @@ version 0.9.4 -- unreleased
 	 . Does not pretend anymore that duplicity can work without
 	   any passphrase
 	 . Support duplicity 0.4.2 (with Debian patches applied; upstream's
-	   0.4.3 will integrate them)
+	   0.4.3 will integrate them); documented how to write sftp-compatible
+           sshoptions (Closes: #388543)
 	 . Now forbid to (try to) include /.
 	sys:
 	 . Many more system checks were added, (thanks to Petr Klíma)
