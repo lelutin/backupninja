@@ -34,5 +34,5 @@ backupninja.conf: backupninja.conf.in
 	$(edit) backupninja.conf.in > backupninja.conf
 
 install-data-hook:
-	mkdir $(DESTDIR)/$(sysconfdir)/backup.d
+	mkdir -p $(DESTDIR)/$(sysconfdir)/backup.d
 	chmod 0770 $(DESTDIR)/$(sysconfdir)/backup.d
