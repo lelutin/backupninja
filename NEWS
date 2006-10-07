@@ -1,8 +1,25 @@
+backupninja (0.9.4-1) UNRELEASED
+
+	* duplicity: Old (pre-0.9.4) example.dup file used to give false
+	  information about the way the GnuPG-related options are used.
+	  Please read the new /usr/share/doc/backupninja/examples/example.dup
+	  file, and update your own configuration files if needed.
+
+	* duplicity, rdiff: symlinks and globbing support in
+	  include/exclude/vsinclude was unclear and did not work in all
+	  situations, with weird behavious, due to incompatibilities
+	  between various readlink versions in this field. This has been made
+	  clear eventually: globbing is fully supported again, whereas no
+	  attempt is done to dereference symlinks anymore. 
+	  Please read the new /usr/share/doc/backupninja/examples/example.dup
+	  or /usr/share/doc/backupninja/examples/example.rdiff file, and update
+	  your own configuration files if needed.
+	
+backupninja (0.9.2-1) unstable; urgency=low
+
 WARNING FOR DUPLICITY USERS
 
-1. Old (pre-0.9.4) example.dup file used to give false information about the way
-   the GnuPG-related options are used. Please read the new example.dup file, and
-   update your own configuration files if needed.
+Old (pre-0.9.2) example.dup file used to give false information about the way
+the GnuPG-related options are used. Please read the new example.dup file, and
+update your own configuration files if needed.
 
-2. The bandwidthlimit option does not work anymore with duplicity >=0.4.2.
-   Trying to solve this...

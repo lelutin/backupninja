@@ -199,6 +199,8 @@ do_dup_gpg() {
       if [ "$dup_gpg_sign" == yes ]; then
 	 do_dup_gpg_signkey ; [ $? = 0 ] || return 1
       fi
+   else
+      dup_gpg_sign=no
    fi
 
    # a passphrase is alway needed
@@ -310,9 +312,21 @@ password = $dup_gpg_password
 
 [source]
 
-# WARNING: include, exclude and vsinclude statements support EITHER globbing
-# with '*' OR symlinks in the path; usage of both in the same statement is *not*
-# supported and will lead to weird behaviour.
+# A few notes about includes and excludes:
+# 1. include, exclude and vsinclude statements support globbing with '*'
+# 2. Symlinks are not dereferenced. Moreover, an include line whose path
+#    contains, at any level, a symlink to a directory, will only have the
+#    symlink backed-up, not the target directory's content. Yes, you have to
+#    dereference yourself the symlinks, or to use 'mount --bind' instead.
+#    Example: let's say /home is a symlink to /mnt/crypt/home ; the following
+#    line will only backup a "/home" symlink ; neither /home/user nor
+#    /home/user/Mail will be backed-up :
+#      include = /home/user/Mail
+#    A workaround is to 'mount --bind /mnt/crypt/home /home' ; another one is to
+#    write :
+#      include = /mnt/crypt/home/user/Mail
+# 3. All the excludes come after all the includes. The order is not otherwise
+#    taken into account.
 
 # files to include in the backup
 EOF

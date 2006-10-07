@@ -40,10 +40,10 @@ version 0.9.4 -- unreleased
 	svn:
 	 . Fixed inversed vsname emptiness check
 	rdiff:
-	 . Symlink and globbing support enhancement and clarification: for
-	   a given include/exclude/vsinclude statement, rdiff handler now
-	   support EITHER globbing with '*' OR symlinks in the path.
-	 . Fixed improper include/exclude symlink dereference
+	 . Symlink and globbing support in include/exclude/vsinclude
+	   clarification: globbing is fully supported again, whereas no attempt
+	   is done to dereference symlinks anymore, due to incompatibilities
+	   between various readlink versions in this field.
 	 . Removed overzealous vsnames check
 	 . Now works if testconnect=no and if $test is not defined.
 	 . add $sshoptions config parameter in [dest] section of config so
@@ -52,9 +52,10 @@ version 0.9.4 -- unreleased
 	   options = --remote-schema 'ssh -p REMOTE-PORT -C %s rdiff-backup
 	   --server'
 	dup:
-	 . Symlink and globbing support enhancement and clarification: for
-	   a given include/exclude/vsinclude statement, dup handler now
-	   support EITHER globbing with '*' OR symlinks in the path.
+	 . Symlink and globbing support in include/exclude/vsinclude
+	   clarification: globbing is fully supported again, whereas no attempt
+	   is done to dereference symlinks anymore, due to incompatibilities
+	   between various readlink versions in this field.
 	 . Removed over zealous vsnames check
 	 . Does not pretend anymore that duplicity can work without
 	   any passphrase
@@ -82,6 +83,8 @@ version 0.9.4 -- unreleased
 	 . Fix configdirectory error that forced you to use /etc/backup.d, thanks anarcat
 	 . When determining which backup actions to list, find now follows
            symlinks for $configdirectory
+	dup.helper:
+	 . Fix: signing was enabled with symmetric encryption.
     changed cron permissions to 644
     minor documentation fixes
     improved RPM build process allowing 'make rpm-package' and 'make
