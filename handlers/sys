@@ -115,7 +115,7 @@ if [ "$packages" == "yes" ]; then
          set -o noglob
 	 debug "$VSERVER $vserver exec $packagemgr $packagemgroptions > $VROOTDIR/$vserver$packagesfile"
 	 $VSERVER $vserver exec $packagemgr $packagemgroptions > $VROOTDIR/$vserver$packagesfile || fatal "can not save $packagemgr info to $packagesfile"
-         set +o noglog
+         set +o noglob
       done
    fi
    

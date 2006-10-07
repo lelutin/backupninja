@@ -1,4 +1,9 @@
-version 0.9.4 -- unreleased
+version 0.9.5 -- unreleased
+    handler changes
+	sys:
+	 . Fixed typo breaking things for VServers.
+
+version 0.9.4 -- October 6th, 2006
     backupninja changes
 	 . Fixed bug in toint(), and thus isnow(), which caused it
 	   to not work when run from cron.
