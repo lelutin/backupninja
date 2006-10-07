@@ -37,18 +37,19 @@ if [ $os = "debian" ]
 then
    getconf packagesfile /var/backups/dpkg-selections.txt
    getconf packagemgr   `which dpkg`
-   getconf packagemgroptions " --get-selections \*"
+   getconf packagemgroptions ' --get-selections *'
 elif [ $os = "redhat" ]
 then
    getconf packagesfile  /var/backups/rpmpackages.txt 
    getconf packagemgr	`which rpm`
-   getconf packagemgroptions	" -qa "
+   getconf packagemgroptions	' -qa '
 
    getconf SYSREPORT `which sysreport`
-   getconf sysreport_options " -norpm "
+   getconf sysreport_options ' -norpm '
 else
    getconf packagesfile /var/backups/unknownOS.txt
 fi
+packagemgroptions="${packagemgroptions//__star__/*}"
 
 getconf partitions yes
 getconf partitionsfile /var/backups/partitions.__star__.txt
@@ -110,15 +111,21 @@ if [ "$packages" == "yes" ]; then
    then
       for vserver in `ls $VROOTDIR | grep -E -v $nodpkg`
       do
+         # don't expand * since it can be used in $packagemgroptions
+         set -o noglob
 	 debug "$VSERVER $vserver exec $packagemgr $packagemgroptions > $VROOTDIR/$vserver$packagesfile"
 	 $VSERVER $vserver exec $packagemgr $packagemgroptions > $VROOTDIR/$vserver$packagesfile || fatal "can not save $packagemgr info to $packagesfile"
+         set +o noglog
       done
    fi
    
 # We want to perform this on the host as well
    if [ "$packages" == "yes" ]; then
+      # don't expand * since it can be used in $packagemgroptions
+      set -o noglob
       debug "$packagemgr $packagemgroptions > $packagesfile"
       $packagemgr $packagemgroptions > $packagesfile || fatal "can not save $packagemgr info to $packagesfile"
+      set +o noglob
    fi
 fi
 
