@@ -70,9 +70,10 @@ version 0.9.4 -- unreleased
 	 . Removed warning about vserver not running (thanks anarcat)
 	ldap:
 	 . Compress now happens in-line to save some disk space (Closes: #370778)
-	 . ldaphost and tls options added for ldapsearch method (Closes: #362027)
 	makecd:
 	 . Added nicelevel option (thanks rhatto)
+	trac:
+	 . fixed problem when src was set to the trac repo directly (Closes: #382737)
     lib changes
 	vserver:
 	 . init_vservers: fixed Debian bug #351083 (improper readlink syntax)

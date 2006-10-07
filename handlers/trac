@@ -13,7 +13,12 @@ error=0
 cd $src
 for repo in `find . -name VERSION`
 do
+
     repo=`dirname $repo`
+    if [ "$repo" == "." ]
+    then 
+       repo="" 
+    fi
 
     # Just make the parent directory for $tmp/$repo
     parentdir=`dirname $tmp/$repo`
