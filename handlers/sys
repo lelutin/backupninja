@@ -291,7 +291,7 @@ catiffile "/proc/stat"
 STATUS="Gathering information about your partitions:"
 catiffile "/proc/partitions"
 
-STATUS="Gathering information about your ksysms:"
+STATUS="Gathering information about your ksyms:"
 catiffile "/proc/ksyms"
 
 STATUS="Gathering information about slabinfo:"
