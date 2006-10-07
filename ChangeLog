@@ -93,6 +93,7 @@ version 0.9.4 -- unreleased
 	dup.helper:
 	 . Fix: signing was enabled with symmetric encryption.
     changed cron permissions to 644
+    changed /etc/backup.d permissions to 0770 (for admingroup)
     minor documentation fixes
     improved RPM build process allowing 'make rpm-package' and 'make
     srpm-package' targets, also fixes permissions on man directories, 
