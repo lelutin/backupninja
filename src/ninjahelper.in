@@ -4,23 +4,6 @@
 ####################################################
 ## Functions
 
-function check_perms() {
-   local file=$1
-   local perms=`ls -ld $file`
-   group_w_perm=${perms:5:1}
-   world_w_perm=${perms:8:1}
-   if [ "$group_w_perm" == "w" -o "$world_w_perm" == "w" ]; then
-      echo $perms
-      echo "helper scripts must not be group or world writable! Dying on file $file"
-      exit
-   fi
-   if [ `ls -ld $file | awk '{print $3}'` != "root" ]; then
-      echo "helper scripts must be owned by root! Dying on file $file"
-      exit
-   fi
-}
-
-
 ##
 ## returns the next available file name given a file
 ## in the form @CFGDIR@/backup.d/10.sys
@@ -238,7 +221,6 @@ getconf scriptdirectory @datadir@
 # load all the helpers
 HELPERS=""
 for file in `find $scriptdirectory -follow -name '*.helper'`; do
-   check_perms $file
    . $file
    if [ $? != 0 ]; then
       echo "An error occurred while loading $file. Hit return to continue."

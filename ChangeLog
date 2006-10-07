@@ -85,6 +85,10 @@ version 0.9.4 -- unreleased
 	 . Fix configdirectory error that forced you to use /etc/backup.d, thanks anarcat
 	 . When determining which backup actions to list, find now follows
            symlinks for $configdirectory
+	 . Stop checking helpers perms: both "make install" and distros packages
+	   install them with appropriate permissions, it's overzealous to check
+	   this at runtime, and is more complicated to do with current
+	   admingroup option.
 	dup.helper:
 	 . Fix: signing was enabled with symmetric encryption.
     changed cron permissions to 644
