@@ -1,4 +1,8 @@
 version 0.9.5 -- unreleased
+    backupninja changes
+	 . Fixed checks on configuration files permissions, since the patch
+	   applied to fix #370396 broke this, especially for configuration files
+	   created with permissions 000 by an older ninjahelper version.
     handler changes
 	sys:
 	 . Fixed typo breaking things for VServers.

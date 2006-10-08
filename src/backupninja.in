@@ -131,32 +131,40 @@ function msg {
 
 function check_perms() {
    local file=$1
+   debug "check_perms $file"
    local perms
-   perms=($(stat -L --format='%a %g %G %u %U' $file))
-   local gperm=${perms[0]:1:1}
-   local wperm=${perms[0]:2:1}
-   local gid=${perms[1]}
-   local group=${perms[2]}
-   local owner=${perms[3]}
+   local owners
+
+   perms=($(stat -L --format='%A' $file))
+   debug "perms: $perms"
+   local gperm=${perms:4:3}
+   debug "gperm: $gperm"
+   local wperm=${perms:7:3}
+   debug "wperm: $wperm"
+
+   owners=($(stat -L --format='%g %G %u %U' $file))
+   local gid=${owners[0]}
+   local group=${owners[1]}
+   local owner=${owners[2]}
 
    if [ "$owner" != 0 ]; then
       echo "Configuration files must be owned by root! Dying on file $file"
       fatal "Configuration files must be owned by root! Dying on file $file"
    fi
    
-   if [ $wperm -gt 0 ]; then
+   if [ "$wperm" != '---' ]; then
       echo "Configuration files must not be world writable/readable! Dying on file $file"
       fatal "Configuration files must not be world writable/readable! Dying on file $file"
    fi
 
-   if [ $gperm -gt 0 ]; then
+   if [ "$gperm" != '---' ]; then
       case "$admingroup" in
          $gid|$group) :;;
 
          *)
            if [ "$gid" != 0 ]; then
-              echo "Configuration files must not be writable/readable by group ${perms[2]}! Dying on file $file"
-              fatal "Configuration files must not be writable/readable by group ${perms[2]}! Dying on file $file"
+              echo "Configuration files must not be writable/readable by group $group! Use the admingroup option in backupninja.conf. Dying on file $file"
+              fatal "Configuration files must not be writable/readable by group $group! Use the admingroup option in backupninja.conf. Dying on file $file"
            fi
          ;;
          esac
