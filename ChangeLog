@@ -6,6 +6,7 @@ version 0.9.5 -- unreleased
     handler changes
 	sys:
 	 . Fixed typo breaking things for VServers.
+	 . Fix bug when vrootdir is on its own partition.
     fixed automake 'make install' bug that failed if /etc/backup.d already
     existed
 

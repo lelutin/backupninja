@@ -80,37 +80,22 @@ fi
 #
 
 if [ "$packages" == "yes" ]; then
-	if [ $usevserver = yes ]
-	then
-		nodpkg="lost+found|ARCHIVES"
-		info "vserver root directory set to: $VROOTDIR"
-		for vserver in $found_vservers
-		do
-			info "examining vserver: $vserver"
-			running=`$VSERVERINFO $vserver RUNNING`
-			if [ "$running" = "1" ]; then
-                           if [ ! -x "$VROOTDIR/$vserver`$VSERVER $vserver exec which $packagemgr`" ]; then
-                              warning "can't find $packagemgr in vserver $vserver, skipping installed packages report."
-                              nodpkg="$nodpkg|$vserver"
-                           fi
-			else
-                           nodpkg="$nodpkg|$vserver"
-			fi
 
-		done
-	else
-		if [ -z "$packagemgr" -o ! -x "$packagemgr" ]; then 
-			warning "can't find ${packagemgr}, skipping installed packages report."
-			packages="no"
-		fi
-	fi
-fi
-
-if [ "$packages" == "yes" ]; then
-   if [ $usevserver = yes ]
-   then
-      for vserver in `ls $VROOTDIR | grep -E -v $nodpkg`
-      do
+   if [ $usevserver = yes ]; then
+      info "vserver root directory set to: $VROOTDIR"
+      for vserver in $found_vservers; do
+         info "examining vserver: $vserver"
+         # is it running ?
+         $VSERVERINFO -q $vserver RUNNING
+         if [ $? -ne 0 ]; then
+            warning "The vserver $vserver is not running."
+            continue
+         fi
+         # is $packagemgr available inside $vserver ?
+         if [ ! -x "$VROOTDIR/$vserver`$VSERVER $vserver exec which $packagemgr`" ]; then
+            warning "can't find $packagemgr in vserver $vserver, skipping installed packages report."
+            continue
+         fi
          # don't expand * since it can be used in $packagemgroptions
          set -o noglob
 	 debug "$VSERVER $vserver exec $packagemgr $packagemgroptions > $VROOTDIR/$vserver$packagesfile"
@@ -119,14 +104,17 @@ if [ "$packages" == "yes" ]; then
       done
    fi
    
-# We want to perform this on the host as well
-   if [ "$packages" == "yes" ]; then
+   # We want to perform this on the host as well
+   if [ -z "$packagemgr" -o ! -x "$packagemgr" ]; then 
+      warning "can't find ${packagemgr}, skipping installed packages report."
+   else
       # don't expand * since it can be used in $packagemgroptions
       set -o noglob
       debug "$packagemgr $packagemgroptions > $packagesfile"
       $packagemgr $packagemgroptions > $packagesfile || fatal "can not save $packagemgr info to $packagesfile"
       set +o noglob
    fi
+
 fi
 
 ## System report ##############################
