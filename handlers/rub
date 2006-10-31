@@ -204,7 +204,7 @@ if [ "$from" == "remote" ]; then
     rsync_remote_options="$rsync_remote_options --compress"
   fi
 
-  fi [ ! -z "$bandwidthlimit" ]; then
+  if [ ! -z "$bandwidthlimit" ]; then
     rsync_remote_options="$rsync_remote_options --bwlimit=$bandwidthlimit"
   fi
 
