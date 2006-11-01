@@ -64,10 +64,10 @@ fi
 if [ $usevserver = yes ]; then
    pguid=`$VSERVER $vsname exec getent passwd $PGSQLUSER | awk -F: '{print $3}'`
 else
-   pguid=`getent passwd postgres | awk -F: '{print $3}'`
+   pguid=`getent passwd $PGSQLUSER | awk -F: '{print $3}'`
 fi
 [ -n "$pguid" ] || \
-    fatal "No user called postgres`[ $usevserver = no ] || echo \" on vserver $vsname\"`."
+    fatal "No user called $PGSQLUSER`[ $usevserver = no ] || echo \" on vserver $vsname\"`."
 debug "chown $pguid $vroot$backupdir"
 chown $pguid $vroot$backupdir
 debug "chmod 700 $vroot$backupdir"
@@ -77,15 +77,15 @@ chmod 700 $vroot$backupdir
 if [ "$databases" == "all" ]; then
     if [ $usevserver = yes ]; then
        if [ "$compress" == "yes" ]; then          
-          execstr="$VSERVER $vsname exec su - postgres -c \"$PGSQLDUMPALL | $GZIP > $backupdir/${vsname}.sql.gz\""
+          execstr="$VSERVER $vsname exec su - $PGSQLUSER -c \"$PGSQLDUMPALL | $GZIP > $backupdir/${vsname}.sql.gz\""
        else
-          execstr="$VSERVER $vsname exec su - postgres -c \"$PGSQLDUMPALL > $backupdir/${vsname}.sql\""
+          execstr="$VSERVER $vsname exec su - $PGSQLUSER -c \"$PGSQLDUMPALL > $backupdir/${vsname}.sql\""
        fi
     else
        if [ "$compress" == "yes" ]; then
-          execstr="su - postgres -c \"$PGSQLDUMPALL | $GZIP > $backupdir/${localhost}-all.sql.gz\""
+          execstr="su - $PGSQLUSER -c \"$PGSQLDUMPALL | $GZIP > $backupdir/${localhost}-all.sql.gz\""
        else
-	execstr="su - postgres -c \"$PGSQLDUMPALL > $backupdir/${localhost}-all.sql\""
+	execstr="su - $PGSQLUSER -c \"$PGSQLDUMPALL > $backupdir/${localhost}-all.sql\""
        fi
     fi
     debug "$execstr"
@@ -106,15 +106,15 @@ else
     for db in $databases; do
 	if [ $usevserver = yes ]; then
            if [ "$compress" == "yes" ]; then
-              execstr="$VSERVER $vsname exec su - postgres -c \"$PGSQLDUMP $db | $GZIP > $backupdir/${db}.sql.gz\""
+              execstr="$VSERVER $vsname exec su - $PGSQLUSER -c \"$PGSQLDUMP $db | $GZIP > $backupdir/${db}.sql.gz\""
            else
-              execstr="$VSERVER $vsname exec su - postgres -c \"$PGSQLDUMP $db | > $backupdir/${db}.sql\""
+              execstr="$VSERVER $vsname exec su - $PGSQLUSER -c \"$PGSQLDUMP $db | > $backupdir/${db}.sql\""
            fi
 	else
            if [ "$compress" == "yes" ]; then
-              execstr="su - postgres -c \"$PGSQLDUMP $db | $GZIP > $backupdir/${db}.sql.gz\""
+              execstr="su - $PGSQLUSER -c \"$PGSQLDUMP $db | $GZIP > $backupdir/${db}.sql.gz\""
            else
-              execstr="su - postgres -c \"$PGSQLDUMP $db > $backupdir/${db}.sql\""
+              execstr="su - $PGSQLUSER -c \"$PGSQLDUMP $db > $backupdir/${db}.sql\""
            fi
 	fi
 	debug "$execstr"

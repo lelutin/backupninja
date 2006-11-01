@@ -17,4 +17,7 @@
 # compress = < yes | no > (default = yes)
 # if yes, compress the pg_dump/pg_dumpall output. 
 
-
+### You can also set the following variables in /etc/backupninja.conf:
+# PGSQLDUMP: pg_dump path (default: /usr/bin/pg_dump)
+# PGSQLDUMPALL: pg_dumpall path (default: /usr/bin/pg_dumpall)
+# PGSQLUSER: user running PostgreSQL (default: postgres)

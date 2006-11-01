@@ -96,6 +96,11 @@ $pgsql_databases
 # if yes, compress the pg_dump/pg_dumpall output. 
 $pgsql_compress
 
+### You can also set the following variables in backupninja.conf:
+# PGSQLDUMP: pg_dump path (default: /usr/bin/pg_dump)
+# PGSQLDUMPALL: pg_dumpall path (default: /usr/bin/pg_dumpall)
+# PGSQLUSER: user running PostgreSQL (default: postgres)
+
 EOF
    chmod 600 $next_filename
 
