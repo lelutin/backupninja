@@ -7,6 +7,7 @@ version 0.9.5 -- unreleased
 	sys:
 	 . Fixed typo breaking things for VServers.
 	 . Fix bug when vrootdir is on its own partition (Closes: #395928)
+	 . Hide silly sfdisk error output.
 	pgsql:
 	 . Support configuring PGSQLUSER for real, and document it a bit
 	   (Closes: #396578)

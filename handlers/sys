@@ -443,17 +443,19 @@ fi
 # these files can be used to directly partition a disk of the same size.
 
 if [ "$partitions" == "yes" ]; then
-	devices=`$SFDISK -l | grep "^Disk /dev" | cut -d/  -f2,3 | cut -d: -f1`
+	devices=`$SFDISK -l 2>/dev/null | grep "^Disk /dev" | awk '{print $2}' | cut -d: -f1`
+        debug "$SFDISK will try to backup partition tables for devices $devices"
 	if [ "$devices" == "" ]; then 
 	   warning "No harddisks found" 
 	fi
 	for dev in $devices; do
+                debug "$SFDISK will try to backup partition tables for device $dev"
 		[ -b $dev ] || continue
 		label=${dev#/dev/}
 		label=${label//\//-}
 		outputfile=${partitionsfile//__star__/$label}
-		debug "$SFDISK $sfdisk_options -d /$dev > $outputfile"
-		$SFDISK $sfdisk_options -d /$dev > $outputfile
+		debug "$SFDISK $sfdisk_options -d $dev > $outputfile"
+		$SFDISK $sfdisk_options -d $dev > $outputfile
 	done
 fi
 
