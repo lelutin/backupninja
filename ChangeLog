@@ -7,9 +7,12 @@ version 0.9.5 -- unreleased
 	sys:
 	 . Fixed typo breaking things for VServers.
 	 . Fix bug when vrootdir is on its own partition (Closes: #395928)
-	 . Hide silly sfdisk error output.
+	 . Better sfdisk error and output handling: should now properly warn
+	   when it does not manage to backup a partition table, and shut up when
+	   it succeeds (Closes: #396632)
 	pgsql:
-	 . Support configuring PGSQLUSER for real, and document it a bit
+	 . Support configuring PGSQLUSER for real, and document it a bit; this
+	   broken support actually prevented pgsql handler to work for VServers
 	   (Closes: #396578)
     fixed automake 'make install' bug that failed if /etc/backup.d already
     existed

@@ -444,7 +444,6 @@ fi
 
 if [ "$partitions" == "yes" ]; then
 	devices=`$SFDISK -l 2>/dev/null | grep "^Disk /dev" | awk '{print $2}' | cut -d: -f1`
-        debug "$SFDISK will try to backup partition tables for devices $devices"
 	if [ "$devices" == "" ]; then 
 	   warning "No harddisks found" 
 	fi
@@ -454,8 +453,11 @@ if [ "$partitions" == "yes" ]; then
 		label=${dev#/dev/}
 		label=${label//\//-}
 		outputfile=${partitionsfile//__star__/$label}
-		debug "$SFDISK $sfdisk_options -d $dev > $outputfile"
-		$SFDISK $sfdisk_options -d $dev > $outputfile
+		debug "$SFDISK $sfdisk_options -d $dev > $outputfile 2>/dev/null"
+		$SFDISK $sfdisk_options -d $dev > $outputfile 2>/dev/null
+                if [ $? -ne 0 ]; then
+                   warning "The partition table for $dev could not be saved."
+                fi
 	done
 fi
 
