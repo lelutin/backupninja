@@ -7,11 +7,13 @@ version 0.9.5 -- unreleased
 	sys:
 	 . Fixed typo breaking things for VServers.
 	 . Fix bug when vrootdir is on its own partition (Closes: #395928)
-	rub
-	 . Fixed typo in rub handler that caused it to not work
 	 . Better sfdisk error and output handling: should now properly warn
 	   when it does not manage to backup a partition table, and shut up when
 	   it succeeds (Closes: #396632)
+	rub
+	 . Fixed typo in rub handler that caused it to not work
+	 . Changed to use lib/vserver code
+	 . Fixed fsck error
 	pgsql:
 	 . Support configuring PGSQLUSER for real, and document it a bit; this
 	   broken support actually prevented pgsql handler to work for VServers
