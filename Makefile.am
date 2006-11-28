@@ -8,7 +8,7 @@ SUBDIRS = etc examples handlers lib man src
 
 local_rpm_topdir=`cd $(top_srcdir) && pwd`/rpm
 rpm-package: dist
-       if test x$(HAVE_RPM) = xyes ; then \
+	if test x$(HAVE_RPM) = xyes ; then \
                mkdir -p $(local_rpm_topdir) ; \
                cd $(local_rpm_topdir) ; \
                mkdir -p BUILD RPMS SOURCES SPECS ; \
@@ -25,7 +25,7 @@ rpm-package: dist
        fi
 
 srpm-package: dist
-      if test x$(HAVE_RPM) = xyes ; then \
+	if test x$(HAVE_RPM) = xyes ; then \
                mkdir -p $(local_rpm_topdir) ; \
                cd $(local_rpm_topdir) ; \
                mkdir -p BUILD SRPMS SOURCES SPECS ; \

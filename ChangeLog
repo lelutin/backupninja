@@ -20,6 +20,7 @@ version 0.9.5 -- unreleased
 	   (Closes: #396578)
     fixed automake 'make install' bug that failed if /etc/backup.d already
     existed
+    changed spaces to tabs in Makefile.am
 
 version 0.9.4 -- October 6th, 2006
     backupninja changes
