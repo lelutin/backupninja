@@ -234,13 +234,13 @@ then
 	    databases=`echo 'show databases' | $VSERVER $vsname exec su $user -c "$MYSQL $defaultsfile" | grep -v Database`
 	    if [ $? -ne 0 ]
 	    then
-	        fatal "Authentication problem, maybe user/password is wrong"
+	        fatal "Authentication problem, maybe user/password is wrong or mysqld is not running?"
 	    fi
 	else
 		databases=`echo 'show databases' | su $user -c "$MYSQL $defaultsfile" | grep -v Database`
 		if [ $? -ne 0 ]
 		then
-		    fatal "Authentication problem, maybe user/password is wrong"
+		    fatal "Authentication problem, maybe user/password is wrong or mysqld is not running?"
 		fi
 	fi
 fi
@@ -249,16 +249,26 @@ fi
 	do
 		if [ $usevserver = yes ]
 		then
+                   # Test to make sure mysqld is running, if it is not sqldump will not work
+                   $VSERVER $vsname exec su $user -c "$MYSQLADMIN $defaultsfile ping"
+                   if [ $? -ne 0 ]; then
+                      fatal "Either you have an authentication problem, or mysqld doesn't appear to be running!"
+                   fi
                    if [ "$compress" == "yes" ]; then
                       execstr="$VSERVER $vsname exec $MYSQLDUMP $defaultsfile --lock-tables --complete-insert --add-drop-table --quick --quote-names $ignore $db | $GZIP > $vroot$dumpdir/${db}.sql.gz"
                    else
-                      execstr="$VSERVER $vsname exec $MYSQLDUMP $defaultsfile --lock-tables --complete-insert --add-drop-table --quick --quote-names $ignore $db > $vroot$dumpdir/${db}.sql"
+                      execstr="$VSERVER $vsname exec $MYSQLDUMP $defaultsfile --lock-tables --complete-insert --add-drop-table --quick --quote-names $ignore $db -r $vroot$dumpdir/${db}.sql"
                    fi
 		else
+                   # Test to make sure mysqld is running, if it is not sqldump will not work
+                   su $user -c "$MYSQLADMIN $defaultsfile ping"
+                   if [ $? -ne 0 ]; then
+                      fatal "Either you have an authentication problem, or mysqld doesn't appear to be running!"
+                   fi
                    if [ "$compress" == "yes" ]; then
                       execstr="$MYSQLDUMP $defaultsfile --lock-tables --complete-insert --add-drop-table --quick --quote-names $ignore $db | $GZIP > $dumpdir/${db}.sql.gz"
                    else
-                      execstr="$MYSQLDUMP $defaultsfile --lock-tables --complete-insert --add-drop-table --quick --quote-names $ignore $db > $dumpdir/${db}.sql"
+                      execstr="$MYSQLDUMP $defaultsfile --lock-tables --complete-insert --add-drop-table --quick --quote-names $ignore $db -r $dumpdir/${db}.sql"
                    fi
 		fi
 		debug "su $user -c \"$execstr\""

@@ -18,6 +18,9 @@ version 0.9.5 -- unreleased
 	 . Support configuring PGSQLUSER for real, and document it a bit; this
 	   broken support actually prevented pgsql handler to work for VServers
 	   (Closes: #396578)
+	mysql:
+	 . Fixed case where odd combination of configuration options caused sqldump
+	   backups to get overwritten with an empty file (Closes: #402679)
     fixed automake 'make install' bug that failed if /etc/backup.d already
     existed
     changed spaces to tabs in Makefile.am
