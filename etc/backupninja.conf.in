@@ -62,6 +62,7 @@ vservers = no
 # SLAPCAT=/usr/sbin/slapcat
 # LDAPSEARCH=/usr/bin/ldapsearch
 # RDIFFBACKUP=/usr/bin/rdiff-backup
+# CSTREAM=/usr/bin/cstream
 # MYSQL=/usr/bin/mysql
 # MYSQLHOTCOPY=/usr/bin/mysqlhotcopy
 # MYSQLDUMP=/usr/bin/mysqldump

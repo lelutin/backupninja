@@ -13,6 +13,13 @@
 ## default is yes. set to no to skip the test if the remote host is alive
 # testconnect = no
 
+## default is not to limit bandwidth. 
+## set to a number in bytes/second to limit bandwidth usage. Use a negative 
+## number to set a limit that will never be exceeded, or a positive number 
+## to set a target average bandwidth use. cstream is required. See cstream's 
+## -t option for more information. 62500 bytes = 500 Kb (.5 Mb)
+# bwlimit = 62500
+
 ######################################################
 ## source section
 ## (where the files to be backed up are coming from)

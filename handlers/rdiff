@@ -64,11 +64,19 @@ function check_consistency() {
 	fi
 }
 
+function check_cstream() {
+	local cstream=$1
+	if [ ! -x $cstream ]; then
+		fatal "Can't find your cstream binary (trying: $cstream). If you use bwlimit you must have cstream installed."
+	fi
+}
+
 ### GET CONFIG ###
 
 getconf options
 getconf testconnect yes
 getconf nicelevel 0
+getconf bwlimit
 
 setsection source
 getconf type; sourcetype=$type
@@ -164,6 +172,19 @@ if [ $test = 0 ]; then
 	else
 		warning $output
 		warning "Failed removing backups older than $keep."
+	fi
+fi
+
+# Add cstream 
+
+if [ ! -z $bwlimit ]; then
+	check_cstream $CSTREAM;
+	if [ "$desttype" = "remote" ]; then
+		RDIFFBACKUP="$RDIFFBACKUP --remote-schema 'cstream -t $bwlimit | ssh %s \''rdiff-backup --server\'''"
+	elif [ "$sourcetype" = "remote" ]; then
+		RDIFFBACKUP="$RDIFFBACKUP --remote-schema 'ssh %s \''rdiff-backup --server\'' | cstream -t $bwlimit'"
+	else
+		fatal "You specified a bandwidth limit but neither your source nor destination types are remote."
 	fi
 fi
 
