@@ -26,6 +26,7 @@ version 0.9.5 -- unreleased
     fixed automake 'make install' bug that failed if /etc/backup.d already
     existed
     changed spaces to tabs in Makefile.am
+    updated examples/Makefile.am and handlers/Makefile.am to include rsnap/rub files
 
 version 0.9.4 -- October 6th, 2006
     backupninja changes
