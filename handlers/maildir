@@ -78,7 +78,10 @@ function do_user() {
 	local letter=${user:0:1}
 	local source="$srcdir/$letter/$user/"
 	local target="$destdir/$letter/$user/$btype.1"
-	[ -d $source ] || fatal "maildir $source not found".
+	if [ ! -d $source ]; then
+	  warning "maildir $source not found"
+	  return
+    fi
 
 	debug "syncing"
 	ret=`$RSYNC -e "ssh -p $destport" -r \
