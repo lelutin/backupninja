@@ -7,10 +7,10 @@ EXTRA_DIST = easydialog.in parseini.in tools.in vserver.in
 edit = sed \
     -e "s,@CFGDIR\@,$(CFGDIR),g" \
     -e "s,@BASH\@,$(BASH),g" \
-    -e 's,@datadir\@,$(pkgdatadir),g' \
-    -e "s,@libdir\@,$(pkglibdir),g" \
-    -e 's,@localstatedir\@,$(localstatedir),g' \
-        -e 's,@prefix\@,$(prefix),g'
+    -e "s,@AWK\@,$(AWK),g" \
+    -e "s,@SED\@,$(SED),g" \
+    -e "s,@MD5SUM\@,$(MD5SUM),g" \
+    -e "s,@libdir\@,$(pkglibdir),g" 
 
 easydialog: $(srcdir)/easydialog.in
 	rm -f easydialog

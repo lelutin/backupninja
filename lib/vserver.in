@@ -33,7 +33,7 @@ init_vservers() {
    getconf vservers no
    getconf VSERVERINFO /usr/sbin/vserver-info
    getconf VSERVER /usr/sbin/vserver
-   getconf VROOTDIR `if [ -x "$VSERVERINFO" ]; then $VSERVERINFO info SYSINFO | grep '^ *vserver-Rootdir' | awk '{print $2}'; fi`
+   getconf VROOTDIR `if [ -x "$VSERVERINFO" ]; then $VSERVERINFO info SYSINFO | grep '^ *vserver-Rootdir' | @AWK@ '{print $2}'; fi`
    # canonicalize VROOTDIR
    [ -z "$VROOTDIR" ] || VROOTDIR=`readlink --canonicalize $VROOTDIR`
    # init this library's global variables

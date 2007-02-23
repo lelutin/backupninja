@@ -188,7 +188,7 @@ elif [ $os = "debian" ]; then
        echo "Level: $level" >> $sysreportfile
        for f in /etc/rc${level}.d/*; do
 	# Remove /etc/Knn or Snn from beginning
-          ff=$(echo $f | sed 's_/etc/rc..d/[KS][0-9][0-9]__')
+          ff=$(echo $f | @SED@ 's_/etc/rc..d/[KS][0-9][0-9]__')
           if [ $f != $ff ]; then
              echo $ff >> $sysreportfile
           fi
@@ -443,7 +443,7 @@ fi
 # these files can be used to directly partition a disk of the same size.
 
 if [ "$partitions" == "yes" ]; then
-	devices=`$SFDISK -l 2>/dev/null | grep "^Disk /dev" | awk '{print $2}' | cut -d: -f1`
+	devices=`$SFDISK -l 2>/dev/null | grep "^Disk /dev" | @AWK@ '{print $2}' | cut -d: -f1`
 	if [ "$devices" == "" ]; then 
 	   warning "No harddisks found" 
 	fi

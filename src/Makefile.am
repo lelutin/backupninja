@@ -9,10 +9,12 @@ EXTRA_DIST = backupninja.in ninjahelper.in
 edit = sed \
     -e "s,@CFGDIR\@,$(CFGDIR),g" \
     -e "s,@BASH\@,$(BASH),g" \
+    -e "s,@AWK\@,$(AWK),g" \
+    -e "s,@SED\@,$(SED),g" \
     -e 's,@datadir\@,$(pkgdatadir),g' \
     -e "s,@libdir\@,$(pkglibdir),g" \
     -e 's,@localstatedir\@,$(localstatedir),g' \
-	-e 's,@prefix\@,$(prefix),g'
+    -e 's,@prefix\@,$(prefix),g'
 
 #install-exec-hook:
 

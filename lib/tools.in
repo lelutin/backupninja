@@ -15,7 +15,7 @@ function maketemp() {
 		local tempfile=`mktemp /tmp/$1.XXXXXXXX`
 	else
 		DATE=`date`
-		sectmp=`echo $DATE | /usr/bin/md5sum | cut -d- -f1`
+		sectmp=`echo $DATE | @MD5SUM@ | cut -d- -f1`
 		local tempfile=/tmp/$1.$sectmp
 	fi
 	echo $tempfile
@@ -39,7 +39,7 @@ function setsection() {
 # 
 function getconf() {
 	CURRENT_PARAM=$1
-	ret=`awk -f $libdirectory/parseini S=$CURRENT_SECTION P=$CURRENT_PARAM $CURRENT_CONF_FILE`
+	ret=`@AWK@ -f $libdirectory/parseini S=$CURRENT_SECTION P=$CURRENT_PARAM $CURRENT_CONF_FILE`
 	# if nothing is returned, set the default
 	if [ "$ret" == "" -a "$2" != "" ]; then
 		ret="$2"

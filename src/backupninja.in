@@ -34,7 +34,7 @@ function setupcolors () {
 
 function colorize () {
 	if [ "$usecolors" == "yes" ]; then
-		local typestr=`echo "$@" | sed 's/\(^[^:]*\).*$/\1/'`
+		local typestr=`echo "$@" | @SED@ 's/\(^[^:]*\).*$/\1/'`
 		[ "$typestr" == "Debug" ] && type=0
 		[ "$typestr" == "Info" ] && type=1
 		[ "$typestr" == "Warning" ] && type=2
@@ -68,7 +68,7 @@ function printmsg() {
 	type=$1
 	shift
 	if [ $type == 100 ]; then
-		typestr=`echo "$@" | sed 's/\(^[^:]*\).*$/\1/'`
+		typestr=`echo "$@" | @SED@ 's/\(^[^:]*\).*$/\1/'`
 		[ "$typestr" == "Debug" ] && type=0
 		[ "$typestr" == "Info" ] && type=1
 		[ "$typestr" == "Warning" ] && type=2
@@ -204,7 +204,7 @@ function isnow() {
 	whendayofweek=$1; at=$2; whentime=$3;
 	whenday=`toint "$whendayofweek"`
 	whendayofweek=`tolower "$whendayofweek"`
-	whentime=`echo "$whentime" | sed 's/:[0-9][0-9]$//' | sed -r 's/^([0-9])$/0\1/'`
+	whentime=`echo "$whentime" | @SED@ 's/:[0-9][0-9]$//' | @SED@ -r 's/^([0-9])$/0\1/'`
 
 	if [ "$whendayofweek" == "everyday" -o "$whendayofweek" == "daily" ]; then
 		whendayofweek=$nowdayofweek
@@ -409,7 +409,7 @@ if [ ! -r "$conffile" ]; then
 fi
 
 # find $libdirectory
-libdirectory=`grep '^libdirectory' $conffile | awk '{print $3}'`
+libdirectory=`grep '^libdirectory' $conffile | @AWK@ '{print $3}'`
 if [ -z "$libdirectory" ]; then
         if [ -d "@libdir@" ]; then
 	   libdirectory="@libdir@"
@@ -541,9 +541,9 @@ if [ $doit == 1 ]; then
 		if [ "$reportspace" == "yes" ]; then
 			previous=""
 			for i in $(ls "$configdirectory"); do
-			backuploc=$(grep ^directory "$configdirectory"/"$i" | awk '{print $3}')
+			backuploc=$(grep ^directory "$configdirectory"/"$i" | @AWK@ '{print $3}')
 			if [ "$backuploc" != "$previous" ]; then
-				mountdev=$(mount | grep "$backuploc" | awk '{print $1}')
+				mountdev=$(mount | grep "$backuploc" | @AWK@ '{print $1}')
 				df -h "$mountdev"
 				previous="$backuploc"
 				fi

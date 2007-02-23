@@ -5,4 +5,9 @@ HANDLERS = dup dup.helper maildir mysql.helper rdiff sys makecd makecd.helper \
 
 EXTRA_DIST = Makefile.am $(HANDLERS)
 
+edit = sed \
+    -e "s,@BASH\@,$(BASH),g" \
+    -e "s,@AWK\@,$(AWK),g" \
+    -e "s,@SED\@,$(SED),g" 
+
 dist_pkgdata_DATA = $(HANDLERS)

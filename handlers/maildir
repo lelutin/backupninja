@@ -157,7 +157,7 @@ function do_rotate() {
 		fi
 		
 		# Rotate the current list of backups, if we can.
-		oldest=\`find $backuproot -type d -maxdepth 1 -name \$rottype'.*' | sed 's/^.*\.//' | sort -n | tail -1\`
+		oldest=\`find $backuproot -type d -maxdepth 1 -name \$rottype'.*' | @SED@ 's/^.*\.//' | sort -n | tail -1\`
 		#echo "Debug: oldest \$oldest"
 		[ "\$oldest" == "" ] && oldest=0
 		for (( i=\$oldest; i > 0; i-- )); do
@@ -201,7 +201,7 @@ function do_rotate() {
 	for rottype in daily weekly monthly; do
 		max=\$((keep\${rottype}+1))
 		dir="$backuproot/\$rottype"
-		oldest=\`find $backuproot -type d -maxdepth 1 -name \$rottype'.*' | sed 's/^.*\.//' | sort -n | tail -1\`
+		oldest=\`find $backuproot -type d -maxdepth 1 -name \$rottype'.*' | @SED@ 's/^.*\.//' | sort -n | tail -1\`
 		[ "\$oldest" == "" ] && oldest=0 
 		# if we've rotated the last backup off the stack, remove it.
 		for (( i=\$oldest; i >= \$max; i-- )); do

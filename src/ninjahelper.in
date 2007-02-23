@@ -183,7 +183,7 @@ if [ ! -r "$conffile" ]; then
 fi
 
 # find $libdirectory
-libdirectory=`grep '^libdirectory' $conffile | awk '{print $3}'`
+libdirectory=`grep '^libdirectory' $conffile | @AWK@ '{print $3}'`
 if [ -z "$libdirectory" ]; then
    if [ -d "@libdir@" ]; then
       libdirectory="@libdir@"

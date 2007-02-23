@@ -27,7 +27,7 @@ status="ok"
 [ -d $backupdir ] || mkdir -p $backupdir
 [ -d $backupdir ] || fatal "Backup directory '$backupdir'"
 
-dbsuffixes=(`awk 'BEGIN {OFS=":"} /[:space:]*^database[:space:]*\w*/ {db=$2}; /^[:space:]*suffix[:space:]*\w*/ {if (db=="bdb"||db=="ldbm") print db,$2}' $conf|sed -e 's/[" ]//g'`)
+dbsuffixes=(`@AWK@ 'BEGIN {OFS=":"} /[:space:]*^database[:space:]*\w*/ {db=$2}; /^[:space:]*suffix[:space:]*\w*/ {if (db=="bdb"||db=="ldbm") print db,$2}' $conf|@SED@ -e 's/[" ]//g'`)
 
 ## LDIF DUMP
 

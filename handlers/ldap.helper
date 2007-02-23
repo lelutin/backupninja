@@ -54,7 +54,7 @@ done
 ldap_wizard() {
    bdb=no
    ldbm=no
-   for backend in `grep -e "^backend" /etc/ldap/slapd.conf | awk '{print $2}'`; do
+   for backend in `grep -e "^backend" /etc/ldap/slapd.conf | @AWK@ '{print $2}'`; do
       if [ "$backend" == "bdb" -a "$bdb" == "no" ]; then
          bdb=yes
       elif [ "$backend" == "ldbm" -a "$ldbm" == "no" ]; then

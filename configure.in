@@ -12,20 +12,30 @@ AM_INIT_AUTOMAKE
 # BASH may already be set in the shell, if the admin then changes the
 # the /bin/sh symlink to a non-bash shell, all hell will break lose.
 unset BASH
-AC_PATH_PROGS([BASH], [bash], [/bin/bash], [$PATH:/bin:/usr/bin:/usr/sbin])
-if test x$BASH = "x"; then
+AC_PATH_PROGS(BASH, bash, "no", [$PATH:/bin:/usr/bin:/usr/sbin])
+if test x$BASH = "xno"; then
     AC_MSG_ERROR([bash is required])
 fi
 
-AC_CHECK_PROGS(SED, sed)
-if test x$SED = "x"; then
+AC_PATH_PROGS(SED, sed, "no")
+if test x$SED = "xno"; then
     AC_MSG_ERROR([sed is required])
+else
+   export SED
 fi
 
-AC_CHECK_PROGS(AWK, awk)
-if test x$AWK = "x"; then
+AC_PATH_PROGS(AWK, awk, "no")
+if test x$AWK = "xno"; then
     AC_MSG_ERROR([awk is required])
+else
+   export AWK
 fi
+
+AC_PATH_PROGS(MD5SUM, md5sum, "no")
+if test x$MD5SUM = "xno"; then
+    AC_MSG_ERROR([md5sum is required])
+fi
+
 AC_CHECK_PROG(ac_cv_have_rpm, rpm, "yes", "no")
 if test "x$ac_cv_have_rpm" = "xyes"; then
         rpm --define '_topdir /tmp' > /dev/null 2>&1

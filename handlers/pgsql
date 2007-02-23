@@ -62,9 +62,9 @@ fi
 # give backup dir the good uid and permissions
 # (in respect to the vserver, if $usevserver = yes)
 if [ $usevserver = yes ]; then
-   pguid=`$VSERVER $vsname exec getent passwd $PGSQLUSER | awk -F: '{print $3}'`
+   pguid=`$VSERVER $vsname exec getent passwd $PGSQLUSER | @AWK@ -F: '{print $3}'`
 else
-   pguid=`getent passwd $PGSQLUSER | awk -F: '{print $3}'`
+   pguid=`getent passwd $PGSQLUSER | @AWK@ -F: '{print $3}'`
 fi
 [ -n "$pguid" ] || \
     fatal "No user called $PGSQLUSER`[ $usevserver = no ] || echo \" on vserver $vsname\"`."

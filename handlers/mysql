@@ -90,10 +90,10 @@ if [ "$dbusername" != "" -a "$dbpassword" != "" ]
 then
     if [ $usevserver = yes ]
     then
-    	vhome=`$VSERVER $vsname exec getent passwd "root" | awk -F: '{print $6}'`
+    	vhome=`$VSERVER $vsname exec getent passwd "root" | @AWK@ -F: '{print $6}'`
 	home="$vroot$vhome"
     else
-    	home=`getent passwd "root" | awk -F: '{print $6}'`
+    	home=`getent passwd "root" | @AWK@ -F: '{print $6}'`
     fi
 
     [ -d $home ] || fatal "Can't find root's home directory ($home)."
@@ -144,14 +144,14 @@ else
 	userset=true;
 	if [ $usevserver = yes ]
 	then
-	    vuserhome=`$VSERVER $vsname exec getent passwd "$user" | awk -F: '{print $6}'`
+	    vuserhome=`$VSERVER $vsname exec getent passwd "$user" | @AWK@ -F: '{print $6}'`
 	    if [ $? -eq 2 ]
 	    then
 	    	fatal "User $user not found in /etc/passwd"
 	    fi
     	    userhome="$vroot$vuserhome"
 	else
-	    userhome=`getent passwd "$user" | awk -F: '{print $6}'`
+	    userhome=`getent passwd "$user" | @AWK@ -F: '{print $6}'`
 	    if [ $? -eq 2 ]
 	    then
 	    	fatal "User $user not found in /etc/passwd"
