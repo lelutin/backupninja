@@ -37,6 +37,7 @@ version 0.9.5 -- unreleased
 	   that produce warnings about no harddisks found (Closes: #404071)
 	 . Fixed example in example.sys to detail the __star__ in partitionsfile and
 	   note why its necessary (Closes: #409192)
+	 . Force C locale for sfdisk to ensure english words are found in grep
     fixed 'make install' bug that failed if /etc/backup.d already existed
     changed spaces to tabs in Makefile.am
     updated examples/Makefile.am and handlers/Makefile.am to include rsnap/rub files
