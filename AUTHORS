@@ -20,4 +20,5 @@ Brad Fritz <brad@fritzfam.com> -- trac patch
 garcondumonde@riseup.net
 Martin Krafft madduck@debian.org -- admingroup patch
 Anarcat -- lotsa patches
-Jamie McClelland - cstream patches
+Jamie McClelland -- cstream patches
+ale -- ldap cleanup

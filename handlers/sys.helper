@@ -7,16 +7,19 @@ sys_wizard() {
    checkBox "new sys action" "check options" \
        "packages" "list of all installed packages." on \
        "partitions" "the partition table of all disks." on  \
+       "sfdisk" "use sfdisk to get partition information." on \
        "hardware" "detailed hardware information" on
    [ $? = 1 ] && return;    
    result="$REPLY"
    packages="packages = no"
    partitions="partitions = no"
+   sfdisk="dosfdisk = no"
    hardware="hardware = no"
    for opt in $result; do
       case $opt in
         '"packages"') packages="packages = yes";;
         '"partitions"') partitions="partitions = yes";;
+        '"sfdisk"') sfdisk="dosfdisk = yes";;
         '"hardware"') hardware="hardware = yes";;
       esac
    done
@@ -24,6 +27,7 @@ sys_wizard() {
    cat > $next_filename <<EOF
 $packages
 $partitions
+$sfdisk
 $hardware
 # packagesfile = /var/backups/dpkg-selections.txt
 # partitionsfile = /var/backups/partitions.__star__.txt

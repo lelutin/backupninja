@@ -4,7 +4,7 @@ sbin_SCRIPTS  = backupninja ninjahelper
 # a proto je taky musíme smazat ...
 CLEANFILES = $(sbin_SCRIPTS)
 
-EXTRA_DIST = backupninja.in ninjahelper.in
+EXTRA_DIST = backupninja.in ninjahelper.in ninjareport.in
 
 edit = sed \
     -e "s,@CFGDIR\@,$(CFGDIR),g" \
@@ -28,3 +28,7 @@ ninjahelper: $(srcdir)/ninjahelper.in
 	$(edit) $(srcdir)/ninjahelper.in > ninjahelper
 	chmod ugo+x ninjahelper
 
+ninjareport: $(srcdir)/ninjareport.in
+	rm -f ninjareport
+	$(edit) $(srcdir)/ninjareport.in > ninjareport
+	chmod ugo+x ninjareport

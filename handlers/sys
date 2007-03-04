@@ -33,6 +33,8 @@ else
 fi
 
 getconf packages yes
+getconf dosfdisk yes
+getconf dohwinfo yes
 if [ $os = "debian" ]
 then
    getconf packagesfile /var/backups/dpkg-selections.txt
@@ -419,14 +421,18 @@ if [ $usevserver = yes ]; then
 fi
 
 if [ "$partitions" == "yes" ]; then
+   if [ "$dosfdisk" == "yes" ]; then
 	if [ ! -x "$SFDISK" ]; then
 		warning "can't find sfdisk, skipping sfdisk report."
 		partitions="no"
 	fi
+   fi
+   if [ "$dohwinfo" == "yes" ]; then
 	if [ ! -x "$HWINFO" ]; then
 		warning "can't find hwinfo, skipping partition report."
 		partitions="no"
 	fi
+   fi
 fi
 
 if [ "$hardware" == "yes" ]; then
@@ -436,6 +442,29 @@ if [ "$hardware" == "yes" ]; then
 	fi
 fi
 
+## HARDWARE #############################
+
+#
+# here we use hwinfo to dump a table listing all the
+# information we can find on the hardware of this machine
+# 
+
+if [ "$hardware" == "yes" ]; then
+   if [ "dohwinfo" == "yes" ]; then
+      if [ -f $hardwarefile ]; then
+	 rm $hardwarefile
+      fi
+      touch $hardwarefile
+      echo -e "\n\n====================== summary ======================\n" >>  $hardwarefile
+      debug "$HWINFO --short --cpu --network --disk --pci  >> $hardwarefile"
+      $HWINFO --short --cpu --network --disk --pci  >> $hardwarefile
+      for flag in cpu network bios pci; do
+	 echo -e "\n\n====================== $flag ======================\n" >>  $hardwarefile
+	 $HWINFO --$flag >> $hardwarefile
+      done
+   fi
+fi
+
 
 ## PARTITIONS #############################
 
@@ -443,7 +472,8 @@ fi
 # these files can be used to directly partition a disk of the same size.
 
 if [ "$partitions" == "yes" ]; then
-	devices=`$SFDISK -l 2>/dev/null | grep "^Disk /dev" | @AWK@ '{print $2}' | cut -d: -f1`
+   if [ "$dosfdisk" == "yes" ]; then
+      devices=`$SFDISK -l 2>/dev/null | grep "^Disk /dev" | @AWK@ '{print $2}' | cut -d: -f1`
 	if [ "$devices" == "" ]; then 
 	   warning "No harddisks found" 
 	fi
@@ -459,25 +489,10 @@ if [ "$partitions" == "yes" ]; then
                    warning "The partition table for $dev could not be saved."
                 fi
 	done
-fi
-
-## HARDWARE #############################
-
-#
-# here we use hwinfo to dump a table listing all the
-# information we can find on the hardware of this machine
-# 
-
-if [ "$hardware" == "yes" ]; then
-	if [ -f $hardwarefile ]; then
-		rm $hardwarefile
-	fi
-	touch $hardwarefile
-	echo -e "\n\n====================== summary ======================\n" >>  $hardwarefile
-	debug "$HWINFO --short --cpu --network --disk --pci  >> $hardwarefile"
-	$HWINFO --short --cpu --network --disk --pci  >> $hardwarefile
-	for flag in cpu network disk bios pci; do
-		echo -e "\n\n====================== $flag ======================\n" >>  $hardwarefile
-		$HWINFO --$flag >> $hardwarefile
-	done
+   fi
+   if [ "$dohwinfo" == "yes" ]; then
+      debug "Using $HWINFO to get all available disk information"
+      echo -e "\n\n====================== $disk ======================\n" >>  $hardwarefile
+      $HWINFO --disk >> $hardwarefile
+   fi
 fi

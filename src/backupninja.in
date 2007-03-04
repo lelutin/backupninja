@@ -433,9 +433,12 @@ setfile $conffile
 # get global config options (second param is the default)
 getconf configdirectory @CFGDIR@/backup.d
 getconf scriptdirectory @datadir@
+getconf reportdirectory
 getconf reportemail
+getconf reporthost
 getconf reportspace
 getconf reportsuccess yes
+getconf reportuser
 getconf reportwarning yes
 getconf loglevel 3
 getconf when "Everyday at 01:00"
@@ -554,4 +557,9 @@ fi
 
 if [ $actions_run != 0 ]; then
 	info "FINISHED: $actions_run actions run. $fatals fatal. $errors error. $warnings warning."
+fi
+
+if [ -n "$reporthost" ]; then
+	debug "send $logfile to $reportuser@$reporthost:$reportdirectory"
+	rsync -qt $logfile $reportuser@$reporthost:$reportdirectory
 fi
