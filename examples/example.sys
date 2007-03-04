@@ -25,7 +25,12 @@
 # packagesfile = /var/backups/dpkg-selections.txt
 
 # partitions = yes
-# partitionsfile = /var/backups/partitions.*.txt
+# NOTE: the __star__ below will be replaced by the disks found on the
+# system (e.g. partitions.sda.txt, partitions.sdb.txt). If you change 
+# the partitionsfile default below, be sure to include the __star__ 
+# replacement in the filename, or you will get one file for only one disk, 
+# the others being written to the same file, and then overwritten by the next.
+# partitionsfile = /var/backups/partitions.__star__.txt
 # dosfdisk = yes
 
 # hardware = yes
