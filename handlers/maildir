@@ -335,7 +335,7 @@ if [ "$backup" == "yes" ]; then
 			debug $i
 			for user in `ls -1`; do
 				[ "$user" != "" ] || continue
-				#info $user
+				debug $user
 				do_rotate $user
 				setup_remote_dirs $user $btype
 				do_user $user $btype
