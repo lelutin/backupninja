@@ -5,6 +5,9 @@ you are working on it!
 . Fix all bugs reported on the Debian BTS:
   http://bugs.debian.org/cgi-bin/pkgreport.cgi?which=pkg&data=backupninja&archive=no
 
+. Fix all bugs reported on our Trac:
+  https://code.autistici.org/trac/backupninja/report/3
+
 . Make ninjahelper allow you to pick what type of backup you want (instead
   of just assuming you want local-to-remote, or push backups. Some people
   want local-to-local, or remote-to-local, or pull backups). This has been
