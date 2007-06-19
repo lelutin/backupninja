@@ -28,6 +28,7 @@ version 0.9.5 -- unreleased
 	 . Fixed typo in rub handler that caused it to not work
 	 . Changed to use lib/vserver code
 	 . Fixed fsck error
+	 . Fixed integer comparison (Closes: Trac#3)
 	sys:
 	 . Fixed typo breaking things for VServers.
 	 . Fix bug when vrootdir is on its own partition (Closes: #395928)
