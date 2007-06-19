@@ -23,6 +23,7 @@ version 0.9.5 -- unreleased
 	   (Closes: #396578)
 	rdiff:
 	 . Added cstream support to allow for bandwidth limiting
+	 . Handle "keep = yes" to disable old backups removal (Closes: #424633)
 	rub
 	 . Fixed typo in rub handler that caused it to not work
 	 . Changed to use lib/vserver code

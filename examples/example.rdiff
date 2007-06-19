@@ -38,6 +38,8 @@ type = local
 
 # how many days of data to keep
 # (you can also use the time format of rdiff-backup, e.g. 6D5h)
+# (to keep everything, set this to yes)
+#keep = yes
 keep = 60
 
 # A few notes about includes and excludes:

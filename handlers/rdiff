@@ -152,27 +152,31 @@ esac
 	
 ### REMOVE OLD BACKUPS ###
 
-if [ "`echo $keep | tr -d 0-9`" == "" ]; then
+if [ "$keep" != yes ]; then
+
+   if [ "`echo $keep | tr -d 0-9`" == "" ]; then
 	# add D if no other date unit is specified
-	keep="${keep}D"
-fi
+      keep="${keep}D"
+   fi
 
-removestr="$RDIFFBACKUP $options --force --remove-older-than $keep "
-if [ "$desttype" == "remote" ]; then
-	removestr="${removestr}${destuser}@${desthost}::"
-fi
-removestr="${removestr}${destdir}/${label}";
+   removestr="$RDIFFBACKUP $options --force --remove-older-than $keep "
+   if [ "$desttype" == "remote" ]; then
+      removestr="${removestr}${destuser}@${desthost}::"
+   fi
+   removestr="${removestr}${destdir}/${label}";
 
-debug "$removestr"
-if [ $test = 0 ]; then
-	output="`su -c "$removestr" 2>&1`"
-	if [ $? = 0 ]; then
-		debug $output
-		info "Removing backups older than $keep days succeeded."
-	else
-		warning $output
-		warning "Failed removing backups older than $keep."
-	fi
+   debug "$removestr"
+   if [ $test = 0 ]; then
+      output="`su -c "$removestr" 2>&1`"
+      if [ $? = 0 ]; then
+	 debug $output
+	 info "Removing backups older than $keep days succeeded."
+      else
+	 warning $output
+	 warning "Failed removing backups older than $keep."
+      fi
+   fi
+
 fi
 
 # Add cstream 
