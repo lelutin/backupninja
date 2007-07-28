@@ -32,12 +32,12 @@ function get_version() {
 	# if user or host is missing, returns the local version.
 	if [ "$#" -lt 2 ]; then
 		debug "$RDIFFBACKUP -V"
-		echo `$RDIFFBACKUP -V`
+                echo `$RDIFFBACKUP -V | cut -d. -f1,2`
 	else
 		local user=$1
 		local host=$2
 		debug "ssh $sshoptions $host -l $user '$RDIFFBACKUP -V'"
-		echo `ssh $sshoptions $host -l $user "$RDIFFBACKUP -V | grep rdiff-backup"`
+                echo `ssh $sshoptions $host -l $user "$RDIFFBACKUP -V | grep rdiff-backup | cut -d. -f1,2"`
 	fi
 }
 
