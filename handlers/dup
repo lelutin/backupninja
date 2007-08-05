@@ -129,8 +129,6 @@ execstr_clientpart="/"
 
 set -o noglob
 
-symlinks_warning="Maybe you have mixed symlinks and '*' in this statement, which is not supported."
-
 # excludes
 for i in $exclude; do
    str="${i//__star__/*}"
