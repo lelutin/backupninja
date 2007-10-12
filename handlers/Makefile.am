@@ -1,7 +1,7 @@
 
-HANDLERS = dup dup.helper maildir mysql.helper rdiff sys makecd makecd.helper \
-		rdiff.helper rsnap rub sys.helper ldap pgsql sh trac \
-		ldap.helper mysql pgsql.helper svn
+HANDLERS = dup dup.helper ldap ldap.helper maildir makecd		\
+         makecd.helper mysql mysql.helper pgsql pgsql.helper rdiff	\
+         rdiff.helper rsnap rub sh svn sys sys.helper trac
 
 EXTRA_DIST = Makefile.am $(HANDLERS)
 
@@ -11,3 +11,84 @@ edit = sed \
     -e "s,@SED\@,$(SED),g" 
 
 dist_pkgdata_DATA = $(HANDLERS)
+
+dup: $(srcdir)/dup.in
+	rm -f dup
+	$(edit) $(srcdir)/dup.in > dup
+
+dup.helper: $(srcdir)/dup.helper.in
+	rm -f dup.helper
+	$(edit) $(srcdir)/dup.helper.in > dup.helper
+
+ldap: $(srcdir)/ldap.in
+	rm -f ldap
+	$(edit) $(srcdir)/ldap.in > ldap
+
+ldap.helper: $(srcdir)/ldap.helper.in
+	rm -f ldap.helper
+	$(edit) $(srcdir)/ldap.helper.in > ldap.helper
+
+maildir: $(srcdir)/maildir.in
+	rm -f maildir
+	$(edit) $(srcdir)/maildir.in > maildir
+
+makecd: $(srcdir)/makecd.in
+	rm -f makecd
+	$(edit) $(srcdir)/makecd.in > makecd
+
+makecd.helper: $(srcdir)/makecd.helper.in
+	rm -f makecd.helper
+	$(edit) $(srcdir)/makecd.helper.in > makecd.helper
+
+mysql: $(srcdir)/mysql.in
+	rm -f mysql
+	$(edit) $(srcdir)/mysql.in > mysql
+
+mysql.helper: $(srcdir)/mysql.helper.in
+	rm -f mysql.helper
+	$(edit) $(srcdir)/mysql.helper.in > mysql.helper
+
+pgsql: $(srcdir)/pgsql.in
+	rm -f pgsql
+	$(edit) $(srcdir)/pgsql.in > pgsql
+
+pgsql.helper: $(srcdir)/pgsql.helper.in
+	rm -f pgsql.helper
+	$(edit) $(srcdir)/pgsql.helper.in > pgsql.helper
+
+rdiff: $(srcdir)/rdiff.in
+	rm -f rdiff
+	$(edit) $(srcdir)/rdiff.in > rdiff
+
+rdiff.helper: $(srcdir)/rdiff.helper.in
+	rm -f rdiff.helper
+	$(edit) $(srcdir)/rdiff.helper.in > rdiff.helper
+
+rsnap: $(srcdir)/rsnap.in
+	rm -f rsnap
+	$(edit) $(srcdir)/rsnap.in > rsnap
+
+rub: $(srcdir)/rub.in
+	rm -f rub
+	$(edit) $(srcdir)/rub.in > rub
+
+sh: $(srcdir)/sh.in
+	rm -f sh
+	$(edit) $(srcdir)/sh.in > sh
+
+svn: $(srcdir)/svn.in
+	rm -f svn
+	$(edit) $(srcdir)/svn.in > svn
+
+sys: $(srcdir)/sys.in
+	rm -f sys
+	$(edit) $(srcdir)/sys.in > sys
+
+sys.helper: $(srcdir)/sys.helper.in
+	rm -f sys.helper
+	$(edit) $(srcdir)/sys.helper.in > sys.helper
+
+trac: $(srcdir)/trac.in
+	rm -f trac
+	$(edit) $(srcdir)/trac.in > trac
+
