@@ -1,7 +1,7 @@
 version 0.9.5 -- unreleased
     ninjareport
 	 . Added first draft of method to aggregate reports from many servers into
-	   one email. Requires logtail, rsync, configuration of reporthost, 
+	   one email. Requires logtail, rsync, configuration of reporthost,
 	   reportdirectory and reportuser in backupninja.conf. Configure cron to
 	   run once a day, and individual backupninjas not to report by email their
 	   status, then enjoy one email report from all hosts, rather than multiple
@@ -9,7 +9,9 @@ version 0.9.5 -- unreleased
 	 . Fixed checks on configuration files permissions, since the patch
 	   applied to fix #370396 broke this, especially for configuration files
 	   created with permissions 000 by an older ninjahelper version.
-	 . Enhanced portability for other platforms 
+	 . Enhanced portability for other platforms
+	 . Fixed Trac#11 (quoting needed to prevent shell expansion, broke the
+           toint function sometimes)
     handler changes
         ldap:
 	 . Fixed shell command quoting issues, missing 'then' clauses, cleaned up

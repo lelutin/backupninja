@@ -178,7 +178,7 @@ function tolower() {
 
 # simple to integer function
 function toint() {
-	echo "$1" | tr -d [:alpha:] 
+	echo "$1" | tr -d '[:alpha:]'
 }
 
 #
