@@ -3,6 +3,8 @@ HANDLERS = dup dup.helper ldap ldap.helper maildir makecd		\
          makecd.helper mysql mysql.helper pgsql pgsql.helper rdiff	\
          rdiff.helper rsnap rub sh svn sys sys.helper trac
 
+CLEANFILES = $(HANDLERS)
+
 EXTRA_DIST = Makefile.am $(HANDLERS)
 
 edit = sed \
