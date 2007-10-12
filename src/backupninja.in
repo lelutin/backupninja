@@ -546,10 +546,9 @@ if [ $doit == 1 ]; then
 			for i in $(ls "$configdirectory"); do
 			backuploc=$(grep ^directory "$configdirectory"/"$i" | @AWK@ '{print $3}')
 			if [ "$backuploc" != "$previous" ]; then
-				mountdev=$(mount | grep "$backuploc" | @AWK@ '{print $1}')
-				df -h "$mountdev"
+				df -h "$backuploc"
 				previous="$backuploc"
-				fi
+			fi
 			done
 		fi
 	} | mail -s "backupninja: $hostname $subject" $reportemail

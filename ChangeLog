@@ -12,6 +12,7 @@ version 0.9.5 -- unreleased
 	 . Enhanced portability for other platforms
 	 . Fixed Trac#11 (quoting needed to prevent shell expansion, broke the
            toint function sometimes)
+	 . Fixed reportspace option (Trac#10)
     handler changes
         ldap:
 	 . Fixed shell command quoting issues, missing 'then' clauses, cleaned up
