@@ -14,6 +14,9 @@ version 0.9.5 -- unreleased
            toint function sometimes)
 	 . Fixed reportspace option (Trac#10)
     handler changes
+	dup:
+	 . Support duplicity >= 0.4.3 invocation syntax (--ssh-command option
+	   is not supported anymore)
         ldap:
 	 . Fixed shell command quoting issues, missing 'then' clauses, cleaned up
 	   compress=yes to be less redundant and not create empty uncompressed file

@@ -70,22 +70,37 @@ fi
 
 ### COMMAND-LINE MANGLING ###
 
-# duplicity >= 0.4.2 needs --sftp-command (NB: sftp does not support the -l option)
 duplicity_version="`duplicity --version | @AWK@ '{print $2}'`"
 duplicity_major="`echo $duplicity_version | @AWK@ -F '.' '{print $1}'`"
 duplicity_minor="`echo $duplicity_version | @AWK@ -F '.' '{print $2}'`"
 duplicity_sub="`echo $duplicity_version | @AWK@ -F '.' '{print $3}'`"
-if [ "$duplicity_major" -ge 0 -a "$duplicity_minor" -ge 4 -a "$duplicity_sub" -ge 2 ]; then
-   sftpoptions="$sshoptions"
-fi
+
+# 1. duplicity >= 0.4.2 needs --sftp-command (NB: sftp does not support the -l option)
+# 2. duplicity >= 0.4.3 replaces --ssh-command with --ssh-options, which:
+#      - is passed to scp and sftp commands by duplicity
+#      - has a special syntax we can not feed the command line with
+#    so we don't use it: since this version does not use the ssh command anymore,
+#    we keep compatibility with our previous config files by passing $sshoptions to
+#    --scp-command and --sftp-command ourselves
 
 scpoptions="$sshoptions"
 [ "$bandwidthlimit" == 0 ] || scpoptions="$scpoptions -l $bandwidthlimit"
 
-if [ -z "$sftpoptions" ]; then
-   execstr="$options --no-print-statistics --scp-command 'scp $scpoptions' --ssh-command 'ssh $sshoptions' "
+execstr="$options --no-print-statistics "
+
+# < 0.4.2 : only uses ssh and scp
+if [ "$duplicity_major" -le 0 -a "$duplicity_minor" -le 4 -a "$duplicity_sub" -le 2 ]; then
+   execstr="$execstr --scp-command 'scp $scpoptions' --ssh-command 'ssh $sshoptions' "
+# >= 0.4.2 : also uses sftp, --sftp-command option is now supported
 else
-   execstr="$options --no-print-statistics --scp-command 'scp $scpoptions' --sftp-command 'sftp $sftpoptions' --ssh-command 'ssh $sshoptions' "
+   sftpoptions="$sshoptions"
+   # == 0.4.2 : uses ssh, scp and sftp
+   if [ "$duplicity_major" -eq 0 -a "$duplicity_minor" -eq 4 -a "$duplicity_sub" -eq 2 ]; then
+      execstr="$execstr --scp-command 'scp $scpoptions' --sftp-command 'sftp $sftpoptions' --ssh-command 'ssh $sshoptions' "
+   # >= 0.4.3 : uses only scp and sftp, --ssh-command option is not supported anymore
+   else
+      execstr="$execstr --scp-command 'scp $scpoptions' --sftp-command 'sftp $sftpoptions' "
+   fi
 fi
 
 # deal with symmetric or asymmetric (public/private key pair) encryption
