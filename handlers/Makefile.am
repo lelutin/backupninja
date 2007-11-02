@@ -1,7 +1,7 @@
 
 HANDLERS = dup dup.helper ldap ldap.helper maildir makecd		\
          makecd.helper mysql mysql.helper pgsql pgsql.helper rdiff	\
-         rdiff.helper rsnap rub sh svn sys sys.helper trac
+         rdiff.helper rsync sh svn sys sys.helper trac
 
 CLEANFILES = $(HANDLERS)
 
@@ -66,13 +66,9 @@ rdiff.helper: $(srcdir)/rdiff.helper.in
 	rm -f rdiff.helper
 	$(edit) $(srcdir)/rdiff.helper.in > rdiff.helper
 
-rsnap: $(srcdir)/rsnap.in
-	rm -f rsnap
-	$(edit) $(srcdir)/rsnap.in > rsnap
-
-rub: $(srcdir)/rub.in
-	rm -f rub
-	$(edit) $(srcdir)/rub.in > rub
+rsync: $(srcdir)/rsyn.in
+	rm -f rsync 
+	$(edit) $(srcdir)/rsync.in > rsync
 
 sh: $(srcdir)/sh.in
 	rm -f sh

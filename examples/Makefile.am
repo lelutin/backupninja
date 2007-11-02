@@ -1,6 +1,6 @@
 
 EXAMPLES = example.dup example.ldap example.makecd example.mysql \
-		example.pgsql example.rdiff example.rsnap example.sh \
+		example.pgsql example.rdiff example.sh \
 		example.svn example.sys example.trac
 
 EXTRA_DIST = $(EXAMPLES)

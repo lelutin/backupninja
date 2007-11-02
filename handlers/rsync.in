@@ -63,7 +63,7 @@ getconf mv mv
 getconf fsck fsck
 
 setsection general
-getconf log /var/log/backupninja-rub.log
+getconf log /var/log/backupninja-rsync.log
 getconf partition
 getconf fscheck
 getconf read_only

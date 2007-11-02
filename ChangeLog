@@ -37,11 +37,14 @@ version 0.9.5 -- unreleased
 	 . Handle "keep = yes" to disable old backups removal (Closes: #424633)
 	 . Add configuration option to allow you to disable the version check
 	   as in some instances this may be an ok scenario (Closes: #424632)
-	rub
+	rub/rsync
 	 . Fixed typo in rub handler that caused it to not work
 	 . Changed to use lib/vserver code
 	 . Fixed fsck error
 	 . Fixed integer comparison (Closes: Trac#3)
+	 . Renamed handler to 'rsync', replaces outdated rub handler
+	 . updated examples/Makefile.am and handlers/Makefile.am to include
+	   rsnap/rsync (Closes: #440554)
 	sys:
 	 . Fixed typo breaking things for VServers.
 	 . Fix bug when vrootdir is on its own partition (Closes: #395928)
@@ -55,8 +58,6 @@ version 0.9.5 -- unreleased
 	 . Force C locale for sfdisk to ensure english words are found in grep
     fixed 'make install' bug that failed if /etc/backup.d already existed
     changed spaces to tabs in Makefile.am
-    updated examples/Makefile.am and handlers/Makefile.am to include rsnap/rub
-    files (Closes: #440554)
     
 
 version 0.9.4 -- October 6th, 2006
