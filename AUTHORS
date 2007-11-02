@@ -15,7 +15,7 @@ rhatto 		   -- rub handler and patches
 Patches: 
 
 cmccallum@thecsl.org
-Daniel.Bonniot@inria.fr
+Daniel.Bonniot@inria.fr -- mysql ignores and nodata
 Brad Fritz <brad@fritzfam.com> -- trac patch
 garcondumonde@riseup.net
 Martin Krafft madduck@debian.org -- admingroup patch

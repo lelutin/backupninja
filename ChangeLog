@@ -24,6 +24,10 @@ version 0.9.5 -- unreleased
         mysql:
 	 . Fixed case where odd combination of configuration options caused sqldump
 	   backups to get overwritten with an empty file (Closes: #402679)
+	 . Added 'nodata' option to enable you to specify tables that you want to omit
+	   the data from a backup, but still backup the table structure. This is very
+	   useful in cases where tables contain large amounts of cache data. See the
+	   example.mysql for options, thanks Daniel Bonniot (Closes: #408829)
 	pgsql:
 	 . Support configuring PGSQLUSER for real, and document it a bit; this
 	   broken support actually prevented pgsql handler to work for VServers

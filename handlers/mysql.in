@@ -6,6 +6,7 @@
 getconf backupdir /var/backups/mysql
 getconf databases all
 getconf ignores
+getconf nodata
 getconf dbhost localhost
 getconf hotcopy no
 getconf sqldump no
@@ -47,7 +48,7 @@ fi
 ## This only works for mysqldump at the moment
 
 ignore=''
-for i in $ignores; do
+for i in $ignores $nodata; do
        ignore="$ignore --ignore-table=$i"
 done
 	
@@ -243,10 +244,27 @@ then
 		    fatal "Authentication problem, maybe user/password is wrong or mysqld is not running?"
 		fi
 	fi
-fi
+    fi
 
 	for db in $databases
 	do
+           DUMP_BASE="$MYSQLDUMP $defaultsfile --lock-tables --complete-insert --add-drop-table --quick --quote-names"
+
+           # Dumping structure and data
+           DUMP="$DUMP_BASE $ignore $db"
+
+           # If requested, dump only the table structure for this database
+           if echo "$nodata" | grep -E '(^|[[:space:]])'"$db\." >/dev/null
+           then
+              # Get the structure of the tables, without data
+              DUMP_STRUCT="$DUMP_BASE --no-data $db"
+              for qualified_table in $nodata
+              do
+                 table=$( expr match "$qualified_table" "$db\.\([^\w]*\)" )
+                 DUMP_STRUCT="$DUMP_STRUCT $table"
+              done
+              DUMP="( $DUMP; $DUMP_STRUCT )"
+           fi
 		if [ $usevserver = yes ]
 		then
                    # Test to make sure mysqld is running, if it is not sqldump will not work
@@ -255,9 +273,9 @@ fi
                       fatal "Either you have an authentication problem, or mysqld doesn't appear to be running!"
                    fi
                    if [ "$compress" == "yes" ]; then
-                      execstr="$VSERVER $vsname exec $MYSQLDUMP $defaultsfile --lock-tables --complete-insert --add-drop-table --quick --quote-names $ignore $db | $GZIP > $vroot$dumpdir/${db}.sql.gz"
+                      execstr="$VSERVER $vsname exec $DUMP | $GZIP > $vroot$dumpdir/${db}.sql.gz"
                    else
-                      execstr="$VSERVER $vsname exec $MYSQLDUMP $defaultsfile --lock-tables --complete-insert --add-drop-table --quick --quote-names $ignore $db -r $vroot$dumpdir/${db}.sql"
+                      execstr="$VSERVER $vsname exec $DUMP -r $vroot$dumpdir/${db}.sql"
                    fi
 		else
                    # Test to make sure mysqld is running, if it is not sqldump will not work
@@ -266,9 +284,9 @@ fi
                       fatal "Either you have an authentication problem, or mysqld doesn't appear to be running!"
                    fi
                    if [ "$compress" == "yes" ]; then
-                      execstr="$MYSQLDUMP $defaultsfile --lock-tables --complete-insert --add-drop-table --quick --quote-names $ignore $db | $GZIP > $dumpdir/${db}.sql.gz"
+                      execstr="$DUMP | $GZIP > $dumpdir/${db}.sql.gz"
                    else
-                      execstr="$MYSQLDUMP $defaultsfile --lock-tables --complete-insert --add-drop-table --quick --quote-names $ignore $db -r $dumpdir/${db}.sql"
+                      execstr="$DUMP -r $dumpdir/${db}.sql"
                    fi
 		fi
 		debug "su $user -c \"$execstr\""
