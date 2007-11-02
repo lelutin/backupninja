@@ -32,12 +32,12 @@ function get_version() {
 	# if user or host is missing, returns the local version.
 	if [ "$#" -lt 2 ]; then
 		debug "$RDIFFBACKUP -V"
-                echo `$RDIFFBACKUP -V | cut -d. -f1,2`
+		echo `$RDIFFBACKUP -V`
 	else
 		local user=$1
 		local host=$2
 		debug "ssh $sshoptions $host -l $user '$RDIFFBACKUP -V'"
-                echo `ssh $sshoptions $host -l $user "$RDIFFBACKUP -V | grep rdiff-backup | cut -d. -f1,2"`
+		echo `ssh $sshoptions $host -l $user "$RDIFFBACKUP -V | grep rdiff-backup"`
 	fi
 }
 
@@ -127,11 +127,13 @@ if [ "$testconnect" = "yes" ] || [ "${test}" -eq 1 ]; then
 	test_connection $destuser $desthost
 fi
 
-# see that rdiff-backup has the same version at the source and destination
-sourceversion=`get_version $sourceuser $sourcehost`
-destversion=`get_version $destuser $desthost`
-if [ "$sourceversion" != "$destversion" ]; then
-	fatal "rdiff-backup does not have the same version at the source and at the destination."
+if [ $ignore_version != "yes" ]; then
+	# see that rdiff-backup has the same version at the source and destination
+	sourceversion=`get_version $sourceuser $sourcehost`
+	destversion=`get_version $destuser $desthost`
+	if [ "$sourceversion" != "$destversion" ]; then
+		fatal "rdiff-backup does not have the same version at the source and at the destination."
+	fi
 fi
 
 # source specific checks

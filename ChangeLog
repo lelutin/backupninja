@@ -28,10 +28,11 @@ version 0.9.5 -- unreleased
 	 . Support configuring PGSQLUSER for real, and document it a bit; this
 	   broken support actually prevented pgsql handler to work for VServers
 	   (Closes: #396578)
-	rdiff:
+	rdiff-backup:
 	 . Added cstream support to allow for bandwidth limiting
 	 . Handle "keep = yes" to disable old backups removal (Closes: #424633)
-	 . Ignore rdiff-backup minor versions (thanks Sami Haahtinen)
+	 . Add configuration option to allow you to disable the version check
+	   as in some instances this may be an ok scenario (Closes: #424632)
 	rub
 	 . Fixed typo in rub handler that caused it to not work
 	 . Changed to use lib/vserver code

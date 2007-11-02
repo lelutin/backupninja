@@ -20,6 +20,16 @@
 ## -t option for more information. 62500 bytes = 500 Kb (.5 Mb)
 # bwlimit = 62500
 
+## should backupninja ignore the version differences between source and remote
+## rdiff-backup? (default: no)
+## This could be useful if the version differences between rdiff-backup instances
+## on remote and local side are different, and you are certain there are no
+## problems in using mis-matched versions and want to get beyond this check.
+## An example usage could be the remote side has its authorized_keys configured
+## with command="rdiff-backup --server" to allow for restricted yet automated 
+## password-less backups
+# ignore_version = no
+
 ######################################################
 ## source section
 ## (where the files to be backed up are coming from)
