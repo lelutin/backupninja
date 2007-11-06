@@ -19,6 +19,7 @@
 #   backupdir = folder relative do $mountpoint where the backup should be stored
 #   days = number of backup increments (min = 5)
 #   lockfile = lockfile to be kept during backup execution
+#   nicelevel = rsync command nice level
 #   enable_mv_timestamp_bug = set to "yes" if your system isnt handling timestamps correctly
 #   tmp = temp folder
 #
@@ -34,7 +35,7 @@
 #   numericids = when set to 1, use numeric ids instead of user/group mappings on rsync
 #   compress = if set to 1, compress data on rsync (remote source only)
 #   bandwidthlimit = set a badnwidth limit in kbps (remote source only)
-#   remote_rsync = remove rsync program (remote source only)
+#   remote_rsync = remote rsync program (remote source only)
 #
 #   [services]
 #   initscripts = absolute path where scripts are located
@@ -63,7 +64,7 @@ getconf mv mv
 getconf fsck fsck
 
 setsection general
-getconf log /var/log/backupninja-rsync.log
+getconf log /var/log/backup/rsync.log
 getconf partition
 getconf fscheck
 getconf read_only
@@ -100,7 +101,7 @@ getconf service
 
 function rotate {
 
-  if [[ "$2" -lt 4 ]]; then
+  if [[ "$2" < 4 ]]; then
     error "Rotate: minimum of 4 rotations"
     exit 1
   fi

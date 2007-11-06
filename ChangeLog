@@ -45,6 +45,7 @@ version 0.9.5 -- unreleased
 	 . Renamed handler to 'rsync', replaces outdated rub handler
 	 . updated examples/Makefile.am and handlers/Makefile.am to include
 	   rsnap/rsync (Closes: #440554)
+	 . Added example.rsync configuration file
 	sys:
 	 . Fixed typo breaking things for VServers.
 	 . Fix bug when vrootdir is on its own partition (Closes: #395928)
