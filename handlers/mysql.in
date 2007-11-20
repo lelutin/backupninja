@@ -238,7 +238,7 @@ then
 	        fatal "Authentication problem, maybe user/password is wrong or mysqld is not running?"
 	    fi
 	else
-		databases=`echo 'show databases' | su $user -c "$MYSQL $defaultsfile" | grep -v Database`
+		databases=$(su $user -c "$MYSQL $defaultsfile -N -B -e 'show databases'" | sed 's/|//g;/\+----/d')
 		if [ $? -ne 0 ]
 		then
 		    fatal "Authentication problem, maybe user/password is wrong or mysqld is not running?"

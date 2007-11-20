@@ -28,6 +28,10 @@ version 0.9.5 -- unreleased
 	   the data from a backup, but still backup the table structure. This is very
 	   useful in cases where tables contain large amounts of cache data. See the
 	   example.mysql for options, thanks Daniel Bonniot (Closes: #408829)
+	 . Enhance code for selecting databases by asking MySQL not to give us the 
+	   header (-N), to not draw pretty boxes around the output (-B), send the query 
+	   via -e instead of a pipe and ensure MySQL listens to -B. Thanks to
+	   Matthew Palmer (Closes: #452039).
 	pgsql:
 	 . Support configuring PGSQLUSER for real, and document it a bit; this
 	   broken support actually prevented pgsql handler to work for VServers
