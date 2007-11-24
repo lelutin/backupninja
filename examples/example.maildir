@@ -1,0 +1,53 @@
+##
+## This is an example maildir configuration file.
+##
+## The maildir handler slowly creates a backup of each user's
+## maildir to a remote server. It is designed to be run with
+## low overhead in terms of CPU and bandwidth, so it runs pretty
+## slow. Hardlinking is used to save storage space. The actual
+## maildir is stored within each snapshot directory.
+##
+## The basic algorithm is to rsync each maildir individually,
+## and to use hard links for retaining historical data.
+##
+## We handle each maildir individually because it becomes very
+## unweldy to hardlink and rsync many hundreds of thousands
+## of files at once. It is much faster to take on smaller
+## chunks at a time. 
+##
+## Any maildir which is deleted from the source will be moved to
+## "deleted" directory in the destination. It is up to you to 
+## periodically remove this directory or old maildirs in it.
+## The defaults are useful in most cases, just make sure
+## to configure the source and destination information
+
+when = everyday at 21:00
+
+## each users maildir will contain these files:
+## daily.1, daily.2, daily.3, daily.4, daily.5, weekly.1, weekly.2, 
+## weekly.3, monthly.1
+## if keepdaily is 5, keepweekly is 3, and keepmonthly is 1
+keepdaily = 5
+keepweekly = 3
+keepmonthly = 1
+
+# directory which contains all the maildirs
+# this directory is expected to have subdirectories lettered a-z and
+# in each letter subdirectory are the users Maildirs which start with 
+# those letters
+srcdir = /maildir/riseup.net
+
+# put the backups under this directory
+destdir = /crypta/maildir/riseup.net
+desthost = kakapo-pn
+
+# For the backup rotation to work, destuser must be able to run
+# arbitrary bash commands on the desthost.
+destuser = backer
+
+# remove any maildirs from backup which might have been deleted
+remove = yes
+
+# use a ssh-mux to reuse connections, see the following article
+# http://www.debian-administration.org/articles/290 for an example
+multiconnection = notset
