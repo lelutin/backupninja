@@ -112,6 +112,7 @@ do_rdiff_dest() {
         formItem "dest_directory" "$rdiff_directory"
         formItem "dest_host" "$rdiff_host"
         formItem "dest_user" "$rdiff_user"
+        formItem "dest_type" "$rdiff_type"
         formDisplay
      [ $? = 0 ] || return
      tmp_array=($REPLY)
@@ -119,6 +120,7 @@ do_rdiff_dest() {
      rdiff_directory=${tmp_array[1]}
      rdiff_host=${tmp_array[2]}
      rdiff_user=${tmp_array[3]}  
+     rdiff_type=${tmp_array[4]}
   done
   set +o noglob
   
@@ -132,6 +134,9 @@ do_rdiff_ssh_con() {
    IFS=$' \t\n'
    if [ "$_dest_done" = "" ]; then
       msgBox "$rdiff_title: error" "You must first configure the destination."
+      return
+   elif [ "$rdiff_type" = "" ]; then
+      msgBox "$rdiff_title: error" "You must first configure the destination backup type."
       return
    elif [ "$rdiff_user" = "" ]; then
       msgBox "$rdiff_title: error" "You must first configure the destination user."
@@ -386,6 +391,7 @@ rdiff_wizard() {
    _adv_done=
    rdiff_keep=60D
    rdiff_directory=/backup/`hostname`
+   rdiff_type=remote
    rdiff_user=
    rdiff_host=
 
