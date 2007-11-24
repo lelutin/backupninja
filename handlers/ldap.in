@@ -42,7 +42,7 @@ if [ "$ldif" == "yes" ]; then
    fi	
    
    for db in $databases; do
-      if [ `expr index "$dbnum" "="` == "0" ]; then
+      if [ `expr index "$db" "="` == "0" ]; then
 			# db is a number, get the suffix.
          dbsuffix=${dbsuffixes[$db]/*:/}
       else

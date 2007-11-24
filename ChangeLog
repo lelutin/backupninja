@@ -13,6 +13,7 @@ version 0.9.5 -- unreleased
 	 . Added quoting because it was needed to prevent shell expansion, broking the
            toint function sometimes (Closes: Trac#11)
 	 . Fixed reportspace option (Closes: Trac#10)
+	 . Fixed ldap handler not recognizing database suffix (Closes: Trac#28)
     handler changes
 	dup:
 	 . Support duplicity >= 0.4.3 invocation syntax (--ssh-command option
