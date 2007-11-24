@@ -62,7 +62,10 @@ srcdir=${srcdir%/}
 
 [ "$multiconnection" == "notset" ] && fatal "The maildir handler uses a very different destination format. See the example .maildir for more information"
 
-[ ! $test ] || testflags="--dry-run -v"
+if [ $test ]; then
+   testflags="--dry-run -v"
+fi
+
 rsyncflags="$testflags -e 'ssh -p $destport' -r -v --ignore-existing --delete --size-only --bwlimit=$speedlimit"
 excludes="--exclude '.Trash/\*' --exclude '.Mistakes/\*' --exclude '.Spam/\*'"
 
