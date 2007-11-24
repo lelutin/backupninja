@@ -55,7 +55,6 @@ if [ "$ldif" == "yes" ]; then
       
       if [ "$method" == "slapcat" ]; then
          execstr="$SLAPCAT -f $conf -b $dbsuffix"
-         debug "$execstr"
       else
          if [ -n "$ldaphost" ]; then
             execstr="$LDAPSEARCH -H $URLBASE://$ldaphost -x -L -b ""$dbsuffix"" -D ""$binddn"" -y $passwordfile"
@@ -81,10 +80,12 @@ if [ "$ldif" == "yes" ]; then
          fi
          
          if [ "$compress" == "yes" ]; then
-            output=`$execstr | $GZIP > $dumpdir/$dbsuffix.ldif.gz`
+            execstr="$execstr | $GZIP > $dumpdir/$dbsuffix.ldif.gz"
          else
-            output=`$execstr > $dumpdir/$dbsuffix.ldif`
+            execstr="$execstr > $dumpdir/$dbsuffix.ldif"
          fi
+         debug "$execstr"
+         output=`su root -c "$execstr" 2>&1`
          code=$?
          if [ "$code" == "0" ]; then
             debug $output

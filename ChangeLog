@@ -11,8 +11,8 @@ version 0.9.5 -- unreleased
 	   created with permissions 000 by an older ninjahelper version.
 	 . Enhanced portability for other platforms
 	 . Added quoting because it was needed to prevent shell expansion, broking the
-           toint function sometimes (Trac#11)
-	 . Fixed reportspace option (Trac#10)
+           toint function sometimes (Closes: Trac#11)
+	 . Fixed reportspace option (Closes: Trac#10)
     handler changes
 	dup:
 	 . Support duplicity >= 0.4.3 invocation syntax (--ssh-command option
@@ -23,6 +23,8 @@ version 0.9.5 -- unreleased
 	   file (Closes: #394935)
 	 . Fixed ninjahelper to properly set compress option, standardized on yes/no
 	   instead of on/off
+	 . Fixed problem that caused combination of slapcat and compress to not work
+	   together (Closes: Trac#29)
 	maildir:
 	 . Added an examples file (Closes: Trac#23)
         mysql:
