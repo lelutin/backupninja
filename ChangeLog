@@ -21,6 +21,8 @@ version 0.9.5 -- unreleased
 	 . Fixed shell command quoting issues, missing 'then' clauses, cleaned up
 	   compress=yes to be less redundant and not create empty uncompressed
 	   file (Closes: #394935)
+	maildir:
+	 . Added an examples file (Closes: Trac#23)
         mysql:
 	 . Fixed case where odd combination of configuration options caused sqldump
 	   backups to get overwritten with an empty file (Closes: #402679)

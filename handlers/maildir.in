@@ -58,9 +58,6 @@ failedcount=0
 destdir=${destdir%/}
 srcdir=${srcdir%/}
 
-# used for testing
-#getconf testuser elijah
-
 [ -d $srcdir ] || fatal "source directory $srcdir doesn't exist"
 
 [ "$multiconnection" == "notset" ] && fatal "The maildir handler uses a very different destination format. See the example .maildir for more information"
