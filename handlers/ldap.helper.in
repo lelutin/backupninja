@@ -5,11 +5,11 @@ HELPERS="$HELPERS ldap:ldap_database_backup"
 ldap_create_file() {
 while true; do
       checkBox "ldap action wizard" "check options (slapcat OR ldapsearch)" \
-         "slapcat" "export ldif using slapcat" on \
-         "ldapsearch" "export ldif using ldapsearch" off \
-         "compress" "compress the ldif output files" on
+         "slapcat" "export ldif using slapcat" yes \
+         "ldapsearch" "export ldif using ldapsearch" no \
+         "compress" "compress the ldif output files" yes
       status=$?
-      compress="compress = off"
+      compress="compress = no"
       method="method = <unset>"
       restart="restart = no"
       binddn=""
@@ -18,7 +18,7 @@ while true; do
       result="$REPLY"
       for opt in $result; do
          case $opt in
-           '"compress"') compress="compress = on";;
+           '"compress"') compress="compress = yes";;
            '"slapcat"')
               method="method = slapcat"
               [ "$_RESTART" == "yes" ] && restart="restart = yes"
