@@ -26,6 +26,8 @@ version 0.9.5 -- unreleased
 	   instead of on/off
 	 . Fixed problem that caused combination of slapcat and compress to not work
 	   together (Closes: Trac#29)
+	 . Applied patch from romain.tartiere@healthgrid.org to fix the SSL/TLS options
+	   to be correct, also set TLS to be the default over SSL (Closes: Trac#13)
 	maildir:
 	 . Added an examples file (Closes: Trac#23)
 	 . Applied patch from Anarcat that fixes the cp/mkdir calls to not use GNU 

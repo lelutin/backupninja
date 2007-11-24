@@ -7,13 +7,17 @@ while true; do
       checkBox "ldap action wizard" "check options (slapcat OR ldapsearch)" \
          "slapcat" "export ldif using slapcat" yes \
          "ldapsearch" "export ldif using ldapsearch" no \
-         "compress" "compress the ldif output files" yes
+         "compress" "compress the ldif output files" yes \
+         "ssl" "use SSL (deprecated)" no \
+         "tls" "use TLS extended operations (RFC2246, RFC2830)" yes
       status=$?
       compress="compress = no"
       method="method = <unset>"
       restart="restart = no"
       binddn=""
       passwordfile=""
+      ssl="ssl = no"
+      tls="tls = no"
       [ $status = 1 ] && return;
       result="$REPLY"
       for opt in $result; do
@@ -33,6 +37,8 @@ while true; do
               binddn="binddn = $REPLY"
               require_packages ldap-utils
               ;;
+            '"ssl"') ssl="ssl = yes";;
+            '"tls"') tls="tls = yes";;
          esac
       done
       get_next_filename $configdirectory/30.ldap
@@ -42,6 +48,8 @@ $compress
 $restart
 $binddn
 $passwordfile
+$ssl
+$tls
 # backupdir = /var/backups/ldap
 # conf = /etc/ldap/slapd.conf
 # databases = all
