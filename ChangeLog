@@ -54,6 +54,7 @@ version 0.9.5 -- unreleased
 	 . Add configuration option to allow you to disable the version check
 	   as in some instances this may be an ok scenario (Closes: #424632)
 	 . Added local destination support to helper (Closes: Trac#4)
+	 . Allow exclude-only configurations (Closes: Trac#21)
 	rub/rsync
 	 . Fixed typo in rub handler that caused it to not work
 	 . Changed to use lib/vserver code

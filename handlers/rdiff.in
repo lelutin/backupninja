@@ -137,7 +137,6 @@ if [ $ignore_version != "yes" ]; then
 fi
 
 # source specific checks
-[ "$include" != "" -o "$vsinclude" != "" ] || fatal "No source includes specified"
 case $sourcetype in 
 	remote ) execstr_sourcepart="$sourceuser@$sourcehost::/" ;;
 	local  ) execstr_sourcepart="/" ;;
@@ -233,7 +232,7 @@ fi
 set +o noglob
 
 # exclude everything else
-execstr="${execstr}--exclude '/*' "
+[ "$include" != "" -o "$vsinclude" != "" ] && execstr="${execstr}--exclude '/*' "
 		
 # include client-part and server-part
 execstr="${execstr}$execstr_sourcepart $execstr_destpart"
