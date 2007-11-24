@@ -18,6 +18,9 @@
 ## Any maildir which is deleted from the source will be moved to
 ## "deleted" directory in the destination. It is up to you to 
 ## periodically remove this directory or old maildirs in it.
+##
+## Note: This handler assumes that the remote shell is set to bash
+##
 ## The defaults are useful in most cases, just make sure
 ## to configure the source and destination information
 

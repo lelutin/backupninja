@@ -28,6 +28,8 @@ version 0.9.5 -- unreleased
 	   together (Closes: Trac#29)
 	maildir:
 	 . Added an examples file (Closes: Trac#23)
+	 . Applied patch from Anarcat that fixes the cp/mkdir calls to not use GNU 
+	   coreutils options, as well as some bashisms (Closes: Trac#24)
         mysql:
 	 . Fixed case where odd combination of configuration options caused sqldump
 	   backups to get overwritten with an empty file (Closes: #402679)
