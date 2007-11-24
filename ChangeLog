@@ -10,8 +10,8 @@ version 0.9.5 -- unreleased
 	   applied to fix #370396 broke this, especially for configuration files
 	   created with permissions 000 by an older ninjahelper version.
 	 . Enhanced portability for other platforms
-	 . Fixed Trac#11 (quoting needed to prevent shell expansion, broke the
-           toint function sometimes)
+	 . Added quoting because it was needed to prevent shell expansion, broking the
+           toint function sometimes (Trac#11)
 	 . Fixed reportspace option (Trac#10)
     handler changes
 	dup:
@@ -61,6 +61,8 @@ version 0.9.5 -- unreleased
 	 . Fixed example in example.sys to detail the __star__ in partitionsfile and
 	   note why its necessary (Closes: #409192)
 	 . Force C locale for sfdisk to ensure english words are found in grep
+	 . Make directory where output is placed configurable, and create the parent dir 
+	   if it doesn't exist (Closes: Trac#1)
     fixed 'make install' bug that failed if /etc/backup.d already existed
     changed spaces to tabs in Makefile.am
     

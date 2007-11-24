@@ -1,0 +1,124 @@
+#
+# rsync handler example file
+#
+# Mandatory options are uncommented with sugested values
+# Other options are commented out with their default values
+#
+# Note: You dont need to manually specify vservers using "include = /vservers".
+#       They're automatically backuped if vserver is set to "yes" on you backupninja.conf.
+
+[general]
+
+# rsync log file
+#log = /var/log/backup/rsync.log
+
+# partition device where the backup lives
+# just use this option if your data is backed up in a separate partition and
+# you want backupninja to fsck it; this option will just be used if fscheck
+# (see below) is set to 'yes'
+#partition = 
+
+# backup partition mountpoint or backup main folder
+# this doesn't need to be a real partition, but should be at least the
+# main folder where the backup is being stored
+mountpoint = /mnt/backup
+
+# folder relative do mountpoint where the backup should be stored
+backupdir = myserver
+
+# number of backup increments (min = 5)
+days = 7 
+
+# set to 1 if fsck should run on partition after the backup is made
+#fscheck = 
+
+# set to 1 if $partition is mounted read-only
+#read_only = 
+
+# use this if you need a lockfile to be kept during backup execution
+# this is an useful feature in case you have some tasks that should
+# know if the backup is running or not
+#lockfile = 
+
+# rsync command nice level
+#nicelevel = 0
+
+# set to "yes" if your system isnt handling timestamps correctly
+#enable_mv_timestamp_bug = no
+
+# temp folder
+#tmp = /tmp
+
+[source]
+
+# where the data to be backed up is (local or remote)
+#from = local
+
+# when "yes", test the connection for a remote source before backup
+#testconnect = no
+
+# include folder on backup
+include = /etc
+include = /var
+
+# exclude folder on backup
+exclude = exclude_folder1
+exclude = exclude_folder2
+
+# exlude some vserver from backup
+# this is used only if vservers = yes on backupninja.conf
+exclude_vserver = excluded_vserver1
+exclude_vserver = excluded_vserver2
+
+# ssh command line (remote only)
+#ssh = ssh
+
+# rsync program
+# it defaults to $RSYNC value from backupninja.conf
+#rsync = $RSYNC
+
+# rsync command options
+#rsync_options = "-av --delete"
+
+# when set to 1, use numeric ids instead of user/group mappings on rsync
+#numericids = 0
+
+# if set to 1, compress data on rsync (remote source only)
+#compress = 0
+
+# set a badnwidth limit in kbps (remote source only)
+#bandwidthlimit =
+
+# remote rsync program (remote source only)
+#remote_rsync = rsync
+
+# This section is used to stop and start services that should be turned of
+# during the backup procedure.
+#
+#[services]
+#
+# absolute path where scripts are located
+#initscripts =
+#
+# script name to be stoped at the begining of the backup and started at its end
+#service =
+
+# You can also specify some system comands if you don't want the default system values
+# by enabling the section below.
+#
+#[system]
+#
+# rm command
+#rm = rm
+#
+# cp command
+#cp = cp
+#
+# touch command
+#touch = touch
+#
+# mv command
+#mv = mv
+#
+# fsck command
+#fsck = fsck

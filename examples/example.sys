@@ -21,6 +21,8 @@
 
 # here are the defaults, commented out:
 
+# The output from the sys handler will be placed in $parentdir
+# parentdir = /var/backups
 # packages = yes
 # packagesfile = /var/backups/dpkg-selections.txt
 

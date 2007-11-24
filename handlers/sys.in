@@ -32,35 +32,41 @@ else
    warning "Unknown OS detected!"
 fi
 
+getconf parentdir /var/backups
 getconf packages yes
 getconf dosfdisk yes
 getconf dohwinfo yes
+
+if [ ! -d $parentdir ]; then
+   mkdir -p $parentdir
+fi
+   
 if [ $os = "debian" ]
 then
-   getconf packagesfile /var/backups/dpkg-selections.txt
+   getconf packagesfile $parentdir/dpkg-selections.txt
    getconf packagemgr   `which dpkg`
    getconf packagemgroptions ' --get-selections *'
 elif [ $os = "redhat" ]
 then
-   getconf packagesfile  /var/backups/rpmpackages.txt 
+   getconf packagesfile  $parentdir/rpmpackages.txt 
    getconf packagemgr	`which rpm`
    getconf packagemgroptions	' -qa '
 
    getconf SYSREPORT `which sysreport`
    getconf sysreport_options ' -norpm '
 else
-   getconf packagesfile /var/backups/unknownOS.txt
+   getconf packagesfile $parentdir/unknownOS.txt
 fi
 packagemgroptions="${packagemgroptions//__star__/*}"
 
 getconf partitions yes
-getconf partitionsfile /var/backups/partitions.__star__.txt
+getconf partitionsfile $parentdir/partitions.__star__.txt
 
 getconf hardware yes
-getconf hardwarefile /var/backups/hardware.txt
+getconf hardwarefile $parentdir/hardware.txt
 
 getconf sysreport yes
-getconf sysreportfile /var/backups/sysreport.txt
+getconf sysreportfile $parentdir/sysreport.txt
 
 getconf SFDISK `which sfdisk`
 getconf HWINFO `which hwinfo`
