@@ -67,7 +67,7 @@ rdiff.helper: $(srcdir)/rdiff.helper.in
 	$(edit) $(srcdir)/rdiff.helper.in > rdiff.helper
 
 rsync: $(srcdir)/rsync.in
-	rm -f rsync
+	rm -f rsync 
 	$(edit) $(srcdir)/rsync.in > rsync
 
 sh: $(srcdir)/sh.in
