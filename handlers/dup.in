@@ -89,7 +89,7 @@ scpoptions="$sshoptions"
 execstr="$options --no-print-statistics "
 
 # < 0.4.2 : only uses ssh and scp
-if [ "$duplicity_major" -le 0 -a "$duplicity_minor" -le 4 -a "$duplicity_sub" -le 2 ]; then
+if [ "$duplicity_major" -le 0 -a "$duplicity_minor" -le 4 -a "$duplicity_sub" -lt 2 ]; then
    execstr="$execstr --scp-command 'scp $scpoptions' --ssh-command 'ssh $sshoptions' "
 # >= 0.4.2 : also uses sftp, --sftp-command option is now supported
 else
