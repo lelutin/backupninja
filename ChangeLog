@@ -18,6 +18,8 @@ version 0.9.5 -- unreleased
 	dup:
 	 . Support duplicity >= 0.4.3 invocation syntax (--ssh-command option
 	   is not supported anymore) (Closes: #447425)
+	 . New tmpdir configuration option, very useful in case duplicity tends
+	   to fill up /tmp.
         ldap:
 	 . Fixed shell command quoting issues, missing 'then' clauses, cleaned up
 	   compress=yes to be less redundant and not create empty uncompressed

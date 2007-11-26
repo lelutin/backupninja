@@ -8,6 +8,10 @@ nicelevel = 19
 # default is yes. set to no to skip the test if the remote host is alive
 #testconnect = no
 
+# temporary directory used by duplicity
+# (default = /tmp or /usr/tmp, depending on the system)
+#tmpdir = /var/tmp/duplicity
+
 ######################################################
 ## gpg section
 ## (how to encrypt and optionally sign the backups)

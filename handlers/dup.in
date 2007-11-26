@@ -7,6 +7,7 @@
 getconf options
 getconf testconnect yes
 getconf nicelevel 0
+getconf tmpdir
 
 setsection gpg
 getconf password
@@ -170,16 +171,28 @@ fi
 
 set +o noglob
 
+### deal with tmpdir ###
+precmd=
+if [ -n "$tmpdir" ]; then
+   if [ ! -d "$tmpdir" ]; then
+      info "Temporary directory ($tmpdir) does not exist, creating it."
+      mkdir -p "$tmpdir"
+      [ $? -eq 0 ] || fatal "Could not create temporary directory ($tmpdir)."
+   fi
+   info "Using $tmpdir as TMPDIR"
+   precmd="${precmd}TMPDIR=$tmpdir "
+fi
+
 ### EXECUTE ###
 
 execstr=${execstr//\\*/\\\\\\*}
 
-debug "duplicity $execstr --exclude '**' / $execstr_serverpart"
+debug "$precmd duplicity $execstr --exclude '**' / $execstr_serverpart"
 if [ ! $test ]; then
         export PASSPHRASE=$password
 	output=`nice -n $nicelevel \
                   su -c \
-                    "duplicity $execstr --exclude '**' / $execstr_serverpart 2>&1"`
+                    "$precmd duplicity $execstr --exclude '**' / $execstr_serverpart 2>&1"`
 	code=$?
 	if [ $code -eq 0 ]; then
 		debug $output
