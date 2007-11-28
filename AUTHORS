@@ -25,3 +25,4 @@ ale -- ldap cleanup
 Sami Haahtinen <ressu@ressukka.net>
 Matthew Palmer -- mysql enhancements
 romain.tartiere@healthgrid.org -- ldap fixes
+Adam Monsen - spec file updates

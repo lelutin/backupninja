@@ -1,10 +1,4 @@
 version 0.9.5 -- unreleased
-    ninjareport
-	 . Added first draft of method to aggregate reports from many servers into
-	   one email. Requires logtail, rsync, configuration of reporthost,
-	   reportdirectory and reportuser in backupninja.conf. Configure cron to
-	   run once a day, and individual backupninjas not to report by email their
-	   status, then enjoy one email report from all hosts, rather than multiple
     backupninja changes
 	 . Fixed checks on configuration files permissions, since the patch
 	   applied to fix #370396 broke this, especially for configuration files
@@ -79,8 +73,15 @@ version 0.9.5 -- unreleased
 	 . Force C locale for sfdisk to ensure english words are found in grep
 	 . Make directory where output is placed configurable, and create the parent dir 
 	   if it doesn't exist (Closes: Trac#1)
+    ninjareport
+	 . Added first draft of method to aggregate reports from many servers into
+	   one email. Requires logtail, rsync, configuration of reporthost,
+	   reportdirectory and reportuser in backupninja.conf. Configure cron to
+	   run once a day, and individual backupninjas not to report by email their
+	   status, then enjoy one email report from all hosts, rather than multiple
     fixed 'make install' bug that failed if /etc/backup.d already existed
     changed spaces to tabs in Makefile.am
+    updated redhat spec file (thanks Adam Monsen)
     
 
 version 0.9.4 -- October 6th, 2006
