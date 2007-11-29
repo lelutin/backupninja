@@ -79,7 +79,8 @@ duplicity_sub="`echo $duplicity_version | @AWK@ -F '.' '{print $3}'`"
 # 1. duplicity >= 0.4.2 needs --sftp-command (NB: sftp does not support the -l option)
 # 2. duplicity >= 0.4.3 replaces --ssh-command with --ssh-options, which:
 #      - is passed to scp and sftp commands by duplicity
-#      - has a special syntax we can not feed the command line with
+#      - has a special syntax we can not directly feed the command line with
+#        (e.g. "IdentityFile=/root/.ssh/id_dsa_backupninja Port=2222", without the -o)
 #    so we don't use it: since this version does not use the ssh command anymore,
 #    we keep compatibility with our previous config files by passing $sshoptions to
 #    --scp-command and --sftp-command ourselves
