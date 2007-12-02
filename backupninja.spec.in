@@ -59,7 +59,7 @@ rm -fr %{buildroot}
 
 
 %changelog
-* Sun Oct 14 2007 Adam Monsen <haircut@gmail.com> 0.9.4-1
+* Sun Oct 14 2007 Adam Monsen <haircut@gmail.com> 0.9.5-1
 - use cleanup steps during %install and %clean
 * Mon Apr 29 2002 Petr Klima <Petr.Klima@madeta-group.cz> 0.7.0
 - first RPM release
