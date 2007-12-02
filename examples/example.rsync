@@ -54,6 +54,9 @@ days = 7
 # where the data to be backed up is (local or remote)
 #from = local
 
+# if remote source, specify the hostname or IP
+#host =
+
 # when "yes", test the connection for a remote source before backup
 #testconnect = no
 

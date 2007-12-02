@@ -25,6 +25,7 @@
 #
 #   [source]
 #   from = local or remote
+#   host = source hostname or ip, if remote backup
 #   testconnect = when "yes", test the connection for a remote source before backup
 #   include = include folder on backup
 #   exclude = exclude folder on backup
