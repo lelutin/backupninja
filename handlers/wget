@@ -1,0 +1,220 @@
+#
+# backupninja handler to do incremental backups using
+# wget and hardlinks, based on rsync handler
+#
+# feedback: rhatto at riseup.net | gpl
+#
+# Config file options
+# -------------------
+#
+#   [general]
+#   log = wget log file
+#   partition = partition where the backup lives
+#   fscheck = set to 1 if fsck should run on $partition after the backup is made
+#   read_only = set to 1 if $partition is mounted read-only
+#   mountpoint = backup partition mountpoint or backup main folder
+#   backupdir = folder relative do $mountpoint where the backup should be stored
+#   days = number of backup increments (min = 5)
+#   lockfile = lockfile to be kept during backup execution
+#   nicelevel = wget command nice level
+#   enable_mv_timestamp_bug = set to "yes" if your system isnt handling timestamps correctly
+#   tmp = temp folder
+#
+#   [source]
+#   wget = wget program
+#   wget_options = wget command options
+#   url = remote data url
+#   bandwidthlimit = set a badnwidth limit in kbps (remote source only)
+#
+#   [destination]
+#   folder = local folder
+#
+# You can also specify some system comands if you don't want the default system values:
+#
+#   [system]
+#   rm = rm command
+#   cp = cp command
+#   touch = touch command
+#   mv = mv command
+#   fsck = fsck command
+#
+# TODO: Daily, weekly and monthly snapshot rotation (like the one present on maildir handler).
+#
+
+# config file evaluation
+
+setsection system
+getconf rm rm
+getconf cp cp
+getconf touch touch
+getconf mv mv
+getconf fsck fsck
+
+setsection general
+getconf log /var/log/backup/wget.log
+getconf partition
+getconf fscheck
+getconf read_only
+getconf mountpoint
+getconf backupdir
+getconf rotate
+getconf days
+getconf lockfile
+getconf nicelevel 0
+getconf enable_mv_timestamp_bug no
+getconf tmp /tmp
+
+setsection source
+getconf wget wget
+getconf wget_options
+getconf url
+getconf bandwidthlimit
+
+setsection destination
+getconf folder
+
+# function definitions
+
+function rotate {
+
+  if [[ "$2" < 4 ]]; then
+    error "Rotate: minimum of 4 rotations"
+    exit 1
+  fi
+
+  if [ -d $1.$2 ]; then
+    $nice $mv /$1.$2 /$1.tmp
+  fi
+
+  for ((n=`echo "$2 - 1" | bc`; n >= 0; n--)); do
+    if [ -d $1.$n ]; then
+      dest=`echo "$n + 1" | bc`
+      $nice $mv /$1.$n /$1.$dest
+      $touch /$1.$dest
+    fi
+  done
+
+  if [ -d $1.tmp ]; then
+    $nice $mv /$1.tmp /$1.0
+  fi
+
+  if [ -d $1.1 ]; then
+    $nice $cp -alf /$1.1/. /$1.0
+  fi
+
+}
+
+function move_files {
+
+ ref=$tmp/makesnapshot-mymv-$$;
+ $touch -r $1 $ref;
+ $mv $1 $2;
+ $touch -r $ref $2;
+ $rm $ref;
+
+}
+
+backupdir="$mountpoint/$backupdir"
+
+# does $backupdir exists?
+
+if [ ! -d "$backupdir" ]; then 
+  error "Backupdir $backupdir does not exist"
+  exit 1
+fi
+
+# setup number of increments
+
+if [ -z "$days" ]; then
+  keep="4"
+else
+  keep="`echo $days - 1 | bc -l`"
+fi
+
+# lockfile setup
+
+if [ ! -z "$lockfile" ]; then
+  $touch $lockfile || warning "Could not create lockfile $lockfile"
+fi
+
+# nicelevel setup
+
+if [ ! -z "$nicelevel" ]; then 
+  nice="nice -n $nicelevel"
+else 
+  nice=""
+fi
+
+# set mv procedure
+
+if [ $enable_mv_timestamp_bug == "yes" ]; then
+  mv=move_files
+fi
+
+# set excludes
+
+for path in $exclude; do
+  EXCLUDES="$EXCLUDES --exclude=$path"
+done
+
+echo "Starting backup at `date`" >> $log
+
+# mount backup destination folder as read-write
+
+if [ "$read_only" == "1" ] || [ "$read_only" == "yes" ]; then
+  if [ -d "$mountpoint" ]; then
+    mount -o remount,rw $mountpoint
+    if (($?)); then
+      error "Could not mount $mountpoint"
+      exit 1
+    fi
+  fi
+fi
+
+# the backup procedure
+
+if [ ! -d "$backupdir/$folder/$folder.0" ]; then
+  mkdir -p $backupdir/$folder/$folder.0
+fi
+
+info "Rotating $backupdir/$folder/$folder..."
+echo "Rotating $backupdir/$folder/$folder..." >> $log
+rotate $backupdir/$folder/$folder $keep
+info "Wget'ing $SECTION on $backupdir/$folder/$folder.0..."
+
+if [ ! -z "$badnwidth" ]; then
+  limit_rate="--limit-rate=$badnwidth""k"
+fi
+
+cd $backupdir/$folder/$folder.0
+wget $wget_options $limit-rate -r -c -N -e robots=off $url
+cd -
+
+$touch $backupdir/$folder/$folder.0
+
+# remount backup destination as read-only
+
+if [ "$read_only" == "1" ] || [ "$read_only" == "yes" ]; then
+  mount -o remount,ro $mountpoint
+fi
+
+# check partition for errors
+
+if [ "$fscheck" == "1" ] || [ "$fscheck" == "yes" ]; then
+  umount $mountpoint
+  if (($?)); then
+    warning "Could not umount $mountpoint to run fsck"
+  else
+    $nice $fsck -v -y $partition >> $log
+    mount $mountpoint
+  fi
+fi
+
+# removes the lockfile
+
+if [ ! -z "$lockfile" ]; then
+  $rm $lockfile || warning "Could not remove lockfile $lockfile"
+fi
+
+echo "Finnishing backup at `date`" >> $log
+

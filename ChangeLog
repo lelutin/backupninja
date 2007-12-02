@@ -1,4 +1,12 @@
-version 0.9.5 -- unreleased
+version 0.9.6 -- unreleased
+    backupninja changes
+
+    handler changes
+	wget:
+	 . New handler from rhatto designed to incrementally pull content from
+	   a website to a local folder, based on the rsync handler
+
+version 0.9.5 -- December 2, 2007
     backupninja changes
 	 . Fixed checks on configuration files permissions, since the patch
 	   applied to fix #370396 broke this, especially for configuration files
@@ -83,7 +91,6 @@ version 0.9.5 -- unreleased
     changed spaces to tabs in Makefile.am
     updated redhat spec file (thanks Adam Monsen)
     
-
 version 0.9.4 -- October 6th, 2006
     backupninja changes
 	 . Fixed bug in toint(), and thus isnow(), which caused it
