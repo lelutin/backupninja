@@ -77,6 +77,7 @@ getconf options
 getconf testconnect yes
 getconf nicelevel 0
 getconf bwlimit
+getconf ignore_version no
 
 setsection source
 getconf type; sourcetype=$type
@@ -127,7 +128,7 @@ if [ "$testconnect" = "yes" ] || [ "${test}" -eq 1 ]; then
 	test_connection $destuser $desthost
 fi
 
-if [ $ignore_version != "yes" ]; then
+if [ "$ignore_version" != "yes" ]; then
 	# see that rdiff-backup has the same version at the source and destination
 	sourceversion=`get_version $sourceuser $sourcehost`
 	destversion=`get_version $destuser $desthost`

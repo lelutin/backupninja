@@ -2,6 +2,8 @@ version 0.9.6 -- unreleased
     backupninja changes
 
     handler changes
+	rdiff: 
+	 . Fixed ignore_version default value missing
 	wget:
 	 . New handler from rhatto designed to incrementally pull content from
 	   a website to a local folder, based on the rsync handler
