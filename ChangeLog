@@ -4,6 +4,8 @@ version 0.9.6 -- unreleased
     handler changes
 	rdiff: 
 	 . Fixed ignore_version default value missing
+	 . Add patch from Matthew Palmer to rdiff handler to incorporate sshoptions 
+	   into options via remote-schema not already specified (Closes: #424639)
 	wget:
 	 . New handler from rhatto designed to incrementally pull content from
 	   a website to a local folder, based on the rsync handler

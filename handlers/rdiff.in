@@ -101,6 +101,10 @@ getconf host; desthost=$host
 getconf sshoptions
 check_consistency "destination" "$type" "$user" "$host"
 
+if [ -n "$sshoptions" ] && echo $options | grep -qv "remote-schema"; then
+	options="$options --remote-schema 'ssh -C $sshoptions %s rdiff-backup --server'"
+fi
+
 ### CHECK CONFIG ###
 
 # If vservers are configured, check that the ones listed in $vsnames do exist.
