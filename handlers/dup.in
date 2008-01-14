@@ -31,11 +31,13 @@ getconf destdir
 getconf destuser
 destdir=${destdir%/}
 
-[ "$destdir" != "" ] || fatal "Destination directory not set"
-[ "$include" != "" ] || fatal "No source includes specified"
+### SANITY CHECKS ##############################################################
 
-### vservers stuff ###
+[ -n "$destdir" ]  || fatal "Destination directory not set"
+[ -n "$include" ]  || fatal "No source includes specified"
+[ -n "$password" ] || fatal "The password option must be set."
 
+### VServers
 # If vservers are configured, check that the ones listed in $vsnames do exist.
 local usevserver=no
 if [ $vservers_are_available = yes ]; then
@@ -54,125 +56,95 @@ else
    [ -z "$vsinclude" ] || warning 'vservers support disabled in backupninja.conf, vsincludes configuration lines will be ignored'
 fi
 
-
-### see if we can login ###
-
+### See if we can login on $desthost
 if [ "$testconnect" == "yes" ]; then
-    debug "ssh $sshoptions -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1'"
-    if [ ! $test ]; then
-	result=`ssh $sshoptions -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1'`
-	if [ "$result" != "1" ]; then
-	    fatal "Can't connect to $desthost as $destuser."
-	else
-	    debug "Connected to $desthost as $destuser successfully"
-	fi
-    fi
+   debug "ssh $sshoptions -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1'"
+   if [ ! $test ]; then
+      result=`ssh $sshoptions -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1'`
+      if [ "$result" != "1" ]; then
+	 fatal "Can't connect to $desthost as $destuser."
+      else
+	 debug "Connected to $desthost as $destuser successfully"
+      fi
+   fi
 fi
 
-### COMMAND-LINE MANGLING ###
+### COMMAND-LINE MANGLING ######################################################
 
+### initialize $execstr*
+execstr_command=
+execstr_options="$options --no-print-statistics"
+execstr_source=
+execstr_serverpart="scp://$destuser@$desthost/$destdir"
+
+### duplicity version
 duplicity_version="`duplicity --version | @AWK@ '{print $2}'`"
 duplicity_major="`echo $duplicity_version | @AWK@ -F '.' '{print $1}'`"
 duplicity_minor="`echo $duplicity_version | @AWK@ -F '.' '{print $2}'`"
 duplicity_sub="`echo $duplicity_version | @AWK@ -F '.' '{print $3}'`"
 
-# 1. duplicity >= 0.4.2 needs --sftp-command (NB: sftp does not support the -l option)
-# 2. duplicity >= 0.4.3 replaces --ssh-command with --ssh-options, which:
-#      - is passed to scp and sftp commands by duplicity
-#      - has a special syntax we can not directly feed the command line with
-#        (e.g. "IdentityFile=/root/.ssh/id_dsa_backupninja Port=2222", without the -o)
-#    so we don't use it: since this version does not use the ssh command anymore,
-#    we keep compatibility with our previous config files by passing $sshoptions to
-#    --scp-command and --sftp-command ourselves
+### ssh/scp/sftp options
+# 1. duplicity >= 0.4.2 needs --sftp-command
+#    (NB: sftp does not support the -l option)
+# 2. duplicity 0.4.3 to 0.4.9 replace --ssh-command with --ssh-options, which is
+#    passed to scp and sftp commands by duplicity. We don't use it: since this
+#    version does not use the ssh command anymore, we keep compatibility with
+#    our previous config files by passing $sshoptions to --scp-command and
+#    --sftp-command ourselves
 
 scpoptions="$sshoptions"
 [ "$bandwidthlimit" == 0 ] || scpoptions="$scpoptions -l $bandwidthlimit"
 
-execstr="$options --no-print-statistics "
-
 # < 0.4.2 : only uses ssh and scp
 if [ "$duplicity_major" -le 0 -a "$duplicity_minor" -le 4 -a "$duplicity_sub" -lt 2 ]; then
-   execstr="$execstr --scp-command 'scp $scpoptions' --ssh-command 'ssh $sshoptions' "
+   execstr_options="${execstr_options} --scp-command 'scp $scpoptions' --ssh-command 'ssh $sshoptions'"
 # >= 0.4.2 : also uses sftp, --sftp-command option is now supported
 else
    sftpoptions="$sshoptions"
    # == 0.4.2 : uses ssh, scp and sftp
    if [ "$duplicity_major" -eq 0 -a "$duplicity_minor" -eq 4 -a "$duplicity_sub" -eq 2 ]; then
-      execstr="$execstr --scp-command 'scp $scpoptions' --sftp-command 'sftp $sftpoptions' --ssh-command 'ssh $sshoptions' "
+      execstr_options="${execstr_options} --scp-command 'scp $scpoptions' --sftp-command 'sftp $sftpoptions' --ssh-command 'ssh $sshoptions'"
    # >= 0.4.3 : uses only scp and sftp, --ssh-command option is not supported anymore
    else
-      execstr="$execstr --scp-command 'scp $scpoptions' --sftp-command 'sftp $sftpoptions' "
+      execstr_options="${execstr_options} --scp-command 'scp $scpoptions' --sftp-command 'sftp $sftpoptions'"
    fi
 fi
 
-# deal with symmetric or asymmetric (public/private key pair) encryption
+### Symmetric or asymmetric (public/private key pair) encryption
 if [ -n "$encryptkey" ]; then
-    execstr="${execstr}--encrypt-key $encryptkey "
-    debug "Data will be encrypted with the GnuPG key $encryptkey."
+   execstr_options="${execstr_options} --encrypt-key $encryptkey"
+   debug "Data will be encrypted with the GnuPG key $encryptkey."
 else
-    debug "Data will be encrypted using symmetric encryption."
+   debug "Data will be encrypted using symmetric encryption."
 fi
 
-# deal with data signing
+### Data signing (or not)
 if [ "$sign" == yes ]; then
-    # duplicity is not able to sign data when using symmetric encryption
-    [ -n "$encryptkey" ] || fatal "The encryptkey option must be set when signing."
-    # if needed, initialize signkey to a value that is not empty (checked above)
-    [ -n "$signkey" ] || signkey="$encryptkey"
-    execstr="${execstr}--sign-key $signkey "
-    debug "Data will be signed will the GnuPG key $signkey."
+   # duplicity is not able to sign data when using symmetric encryption
+   [ -n "$encryptkey" ] || fatal "The encryptkey option must be set when signing."
+   # if needed, initialize signkey to a value that is not empty (checked above)
+   [ -n "$signkey" ] || signkey="$encryptkey"
+   execstr_options="${execstr_options} --sign-key $signkey"
+   debug "Data will be signed will the GnuPG key $signkey."
 else
-    debug "Data won't be signed."
+   debug "Data won't be signed."
 fi
 
-# deal with GnuPG passphrase
-[ -n "$password" ] || fatal "The password option must be set."
-
-if [ "$keep" != "yes" ]; then
-    if [ "`echo $keep | tr -d 0-9`" == "" ]; then
-	keep="${keep}D"
-    fi
-    execstr="${execstr}--remove-older-than $keep "
-fi
-
+### Incremental or full backup mode
+# If incremental==yes, use the default duplicity behaviour: perform an
+# incremental backup if old signatures can be found, else switch to
+# full backup.
+# If incremental==no, force a full backup anyway.
 if [ "$incremental" == "no" ]; then
-    execstr="${execstr}--full "
+   # before 0.4.4, full was an option and not a command
+   if [ "$duplicity_major" -le 0 -a "$duplicity_minor" -le 4 -a "$duplicity_sub" -lt 4 ]; then   
+      execstr_options="${execstr_options} --full"
+   else
+      execstr_command="full"
+   fi
 fi
 
-execstr_serverpart="scp://$destuser@$desthost/$destdir"
-execstr_clientpart="/"
-
-### SOURCE ###
-
-set -o noglob
-
-# excludes
-for i in $exclude; do
-   str="${i//__star__/*}"
-   execstr="${execstr}--exclude '$str' "
-done
-	
-# includes 
-for i in $include; do
-   [ "$i" != "/" ] || fatal "Sorry, you cannot use 'include = /'"
-   str="${i//__star__/*}"
-   execstr="${execstr}--include '$str' "
-done
-
-# vsincludes
-if [ $usevserver = yes ]; then
-   for vserver in $vsnames; do
-      for vi in $vsinclude; do
-	 str="${vi//__star__/*}"
-	 str="$VROOTDIR/$vserver$str"
-	 execstr="${execstr}--include '$str' "
-      done
-   done
-fi
-
-set +o noglob
-
-### deal with tmpdir ###
+### Temporary directory
 precmd=
 if [ -n "$tmpdir" ]; then
    if [ ! -d "$tmpdir" ]; then
@@ -184,24 +156,108 @@ if [ -n "$tmpdir" ]; then
    precmd="${precmd}TMPDIR=$tmpdir "
 fi
 
-### EXECUTE ###
+### Cleanup old backup sets (or not)
+if [ "$keep" != "yes" ]; then
+   if [ "`echo $keep | tr -d 0-9`" == "" ]; then
+      keep="${keep}D"
+   fi
+   # before 0.4.4, remove-older-than was an option and not a command
+   if [ "$duplicity_major" -le 0 -a "$duplicity_minor" -le 4 -a "$duplicity_sub" -lt 4 ]; then
+      execstr_options="${execstr_options} --remove-older-than $keep"
+   fi
+fi
 
-execstr=${execstr//\\*/\\\\\\*}
+### Source
 
-debug "$precmd duplicity $execstr --exclude '**' / $execstr_serverpart"
+set -o noglob
+
+# excludes
+for i in $exclude; do
+   str="${i//__star__/*}"
+   execstr_source="${execstr_source} --exclude '$str'"
+done
+
+# includes
+for i in $include; do
+   [ "$i" != "/" ] || fatal "Sorry, you cannot use 'include = /'"
+   str="${i//__star__/*}"
+   execstr_source="${execstr_source} --include '$str'"
+done
+
+# vsincludes
+if [ $usevserver = yes ]; then
+   for vserver in $vsnames; do
+      for vi in $vsinclude; do
+	 str="${vi//__star__/*}"
+	 str="$VROOTDIR/$vserver$str"
+	 execstr_source="${execstr_source} --include '$str'"
+      done
+   done
+fi
+
+set +o noglob
+
+### EXECUTE ####################################################################
+
+execstr_source=${execstr_source//\\*/\\\\\\*}
+
+### Cleanup commands (duplicity >= 0.4.4)
+
+# cleanup
+if [ "$duplicity_major" -ge 0 -a "$duplicity_minor" -ge 4 -a "$duplicity_sub" -ge 4 ]; then
+   debug "$precmd duplicity cleanup $execstr_options $execstr_serverpart"
+   if [ ! $test ]; then
+      export PASSPHRASE=$password
+      output=`nice -n $nicelevel \
+         su -c \
+         "$precmd duplicity cleanup $execstr_options $execstr_serverpart 2>&1"`
+      exit_code=$?
+      if [ $exit_code -eq 0 ]; then
+	 debug $output
+	 info "Duplicity cleanup finished successfully."
+      else
+	 debug $output
+	 warning "Duplicity cleanup failed."
+      fi
+   fi
+fi
+
+# remove-older-than
+if [ "$keep" != "yes" ]; then
+   if [ "$duplicity_major" -ge 0 -a "$duplicity_minor" -ge 4 -a "$duplicity_sub" -ge 4 ]; then
+      debug "$precmd duplicity remove-older-than $keep $execstr_options $execstr_serverpart"
+      if [ ! $test ]; then
+         export PASSPHRASE=$password
+	 output=`nice -n $nicelevel \
+                   su -c \
+                      "$precmd duplicity remove-older-than $keep $execstr_options $execstr_serverpart 2>&1"`
+	 exit_code=$?
+	 if [ $exit_code -eq 0 ]; then
+	    debug $output
+	    info "Duplicity remove-older-than finished successfully."
+	 else
+	    debug $output
+	    warning "Duplicity remove-older-than failed."
+	 fi
+      fi
+   fi
+fi
+
+### Backup command
+debug "$precmd duplicity $execstr_command $execstr_options $execstr_source --exclude '**' / $execstr_serverpart"
 if [ ! $test ]; then
-        export PASSPHRASE=$password
-	output=`nice -n $nicelevel \
-                  su -c \
-                    "$precmd duplicity $execstr --exclude '**' / $execstr_serverpart 2>&1"`
-	code=$?
-	if [ $code -eq 0 ]; then
-		debug $output
-		info "Duplicity finished successfully."
-	else
-		debug $output
-		fatal "Duplicity failed."
-	fi
-fi	
+   export PASSPHRASE=$password
+   output=`nice -n $nicelevel \
+             su -c \
+                "$precmd duplicity $execstr_command $execstr_options $execstr_source --exclude '**' / $execstr_serverpart 2>&1"`
+   exit_code=$?
+   if [ $exit_code -eq 0 ]; then
+      debug $output
+      info "Duplicity finished successfully."
+   else
+      debug $output
+      fatal "Duplicity failed."
+   fi
+fi
 
 return 0
