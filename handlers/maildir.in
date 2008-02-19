@@ -118,7 +118,7 @@ function do_remove() {
 			[ "$deluser" != "" ] || continue
 			info "removing $destuser@$desthost:$destdir/$i/$deluser/"
 			ssh -p $destport $destuser@$desthost mv "$destdir/$i/$deluser/" "$destdir/deleted"
-			ssh -p $destport $destuser@$desthost "date > '$destdir/$i/$deluser/deleted_on'"
+			ssh -p $destport $destuser@$desthost "date +%c%n%s > '$destdir/$i/$deluser/deleted_on'"
 		done
 	done
 	rm $tmp1
