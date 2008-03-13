@@ -1,6 +1,6 @@
 version 0.9.6 -- unreleased
     backupninja changes
-
+	fix bug in cstream definition, thanks Jamie McClelland
     handler changes
 	dup:
 	 . General cleanup
