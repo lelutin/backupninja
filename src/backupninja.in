@@ -379,8 +379,8 @@ while [ $# -ge 1 ]; do
 				singlerun=$2
 				processnow=1
 			else
-				echo "--run option must be fallowed by a backupninja action file"
-				fatal "--run option must be fallowed by a backupninja action file"
+				echo "--run option must be followed by a backupninja action file"
+				fatal "--run option must be followed by a backupninja action file"
 				usage
 			fi
 			shift
