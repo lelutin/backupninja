@@ -49,6 +49,7 @@ getconf destdir
 getconf desthost
 getconf destport 22
 getconf destuser
+getconf destid_file /root/.ssh/id_rsa
 
 getconf multiconnection notset
 
@@ -66,7 +67,7 @@ if [ $test ]; then
    testflags="--dry-run -v"
 fi
 
-rsyncflags="$testflags -e 'ssh -p $destport' -r -v --ignore-existing --delete --size-only --bwlimit=$speedlimit"
+rsyncflags="$testflags -e 'ssh -p $destport -i $destid_file' -r -v --ignore-existing --delete --size-only --bwlimit=$speedlimit"
 excludes="--exclude '.Trash/\*' --exclude '.Mistakes/\*' --exclude '.Spam/\*'"
 
 ##################################################################
@@ -84,7 +85,7 @@ function do_user() {
     fi
 
 	debug "syncing"
-	ret=`$RSYNC -e "ssh -p $destport" -r \
+	ret=`$RSYNC -e "ssh -p $destport -i $destid_file" -r \
 		--links --ignore-existing --delete --size-only --bwlimit=$speedlimit \
 		--exclude '.Trash/*' --exclude '.Mistakes/*' --exclude '.Spam/*' \
 		$source $destuser@$desthost:$target \
@@ -99,7 +100,7 @@ function do_user() {
 			fatal "100 rsync errors -- something is not working right. bailing out."
 		fi
 	fi
-	ssh -o PasswordAuthentication=no $desthost -l $destuser "date +%c%n%s > $target/created"
+	ssh -o PasswordAuthentication=no $desthost -l $destuser -i $destid_file "date +%c%n%s > $target/created"
 }
 
 # remove any maildirs from backup which might have been deleted
@@ -110,15 +111,15 @@ function do_remove() {
 	local tmp1=`maketemp maildir-tmp-file`
 	local tmp2=`maketemp maildir-tmp-file`
 	
-	ssh -p $destport $destuser@$desthost mkdir -p "$destdir/deleted"
+	ssh -p $destport -i $estid_file $destuser@$desthost mkdir -p "$destdir/deleted"
 	for i in 0 1 2 3 4 5 6 7 8 9 a b c d e f g h i j k l m n o p q r s t u v w x y z; do
 		ls -1 "$srcdir/$i/" | sort > $tmp1
 		ssh -p $destport $destuser@$desthost ls -1 "$destdir/$i/" | sort > $tmp2
 		for deluser in `join -v 2 $tmp1 $tmp2`; do
 			[ "$deluser" != "" ] || continue
 			info "removing $destuser@$desthost:$destdir/$i/$deluser/"
-			ssh -p $destport $destuser@$desthost mv "$destdir/$i/$deluser/" "$destdir/deleted"
-			ssh -p $destport $destuser@$desthost "date +%c%n%s > '$destdir/$i/$deluser/deleted_on'"
+			ssh -p $destport -i $destid_file $destuser@$desthost mv "$destdir/$i/$deluser/" "$destdir/deleted"
+			ssh -p $destport -i $destid_file $destuser@$desthost "date +%c%n%s > '$destdir/$i/$deluser/deleted_on'"
 		done
 	done
 	rm $tmp1
@@ -131,7 +132,7 @@ function do_rotate() {
 	local letter=${user:0:1}
 	local backuproot="$destdir/$letter/$user"
 (
-	ssh -T -o PasswordAuthentication=no $desthost -l $destuser <<EOF
+	ssh -T -o PasswordAuthentication=no $desthost -l $destuser -i $destid_file <<EOF
 ##### BEGIN REMOTE SCRIPT #####
 	seconds_daily=86400
 	seconds_weekly=604800
@@ -230,7 +231,7 @@ function setup_remote_dirs() {
 	local dir="$destdir/$letter/$user/$backuptype"
 	local tmpdir="$destdir/$letter/$user/rotate.tmp"
 (
-	ssh -T -o PasswordAuthentication=no $desthost -l $destuser <<EOF
+	ssh -T -o PasswordAuthentication=no $desthost -l $destuser -i $destid_file <<EOF
 		if [ ! -d $destdir ]; then
 			echo "Fatal: Destination directory $destdir does not exist on host $desthost."
 			exit 1
@@ -275,7 +276,7 @@ EOF
 function start_mux() {
 	if [ "$multiconnection" == "yes" ]; then
 		debug "Starting dummy ssh connection"
-		ssh -p $destport $destuser@$desthost sleep 1d &
+		ssh -p $destport -i $destid_file $destuser@$desthost sleep 1d &
         sleep 1
 	fi
 }
@@ -283,7 +284,7 @@ function start_mux() {
 function end_mux() {
 	if [ "$multiconnection" == "yes" ]; then
 		debug "Stopping dummy ssh connection"
-		ssh -p $destport $destuser@$desthost pkill sleep
+		ssh -p $destport -i $destid_file $destuser@$desthost pkill sleep
 	fi
 }
 
@@ -291,11 +292,11 @@ function end_mux() {
 ##################################################################
 
 # see if we can login
-debug "ssh -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1'"
+debug "ssh -o PasswordAuthentication=no $desthost -l $destuser -i $destid_file 'echo -n 1'"
 if [ ! $test ]; then
-	result=`ssh -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1' 2>&1`
+	result=`ssh -o PasswordAuthentication=no $desthost -l $destuser -i $destid_file 'echo -n 1' 2>&1`
 	if [ "$result" != "1" ]; then
-		fatal "Can't connect to $desthost as $destuser."
+		fatal "Can't connect to $desthost as $destuser using $destid_file."
 	fi
 fi
 
@@ -303,7 +304,7 @@ end_mux
 start_mux
 
 ## SANITY CHECKS ##
-status=`ssh -p $destport $destuser@$desthost "[ -d \"$destdir\" ] && echo 'ok'"`
+status=`ssh -p $destport -i $destid_file $destuser@$desthost "[ -d \"$destdir\" ] && echo 'ok'"`
 if [ "$status" != "ok" ]; then
 	end_mux
 	fatal "Destination directory $destdir doesn't exist!"
