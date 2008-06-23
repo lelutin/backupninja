@@ -11,7 +11,8 @@ version 0.9.6 -- unreleased
 	   from being done. Also migrated full/incremental backup switch to the
 	   new syntax.
 	ldap:
-	 . support HDB backend just as the BDB one (Closes: #476910)
+	 . support HDB backend just as the BDB one, and make message clearer
+	   when no supported backend is found (Closes: #476910)
 	rdiff:
 	 . Fixed ignore_version default value missing
 	 . Add patch from Matthew Palmer to rdiff handler to incorporate sshoptions

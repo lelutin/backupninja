@@ -84,7 +84,7 @@ ldap_wizard() {
      _RESTART=yes
      ldap_create_file
    else
-     msgBox "ldap action wizard" "I couldn't find any backends in your slapd.conf. Bailing out." 
+     msgBox "ldap action wizard" "I couldn't find any supported backend in your slapd.conf. Bailing out." 
      return
    fi
 }
