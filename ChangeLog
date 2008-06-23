@@ -10,6 +10,8 @@ version 0.9.6 -- unreleased
 	   only trigger a warning on failure, since they should not stop backups
 	   from being done. Also migrated full/incremental backup switch to the
 	   new syntax.
+	ldap:
+	 . support HDB backend just as the BDB one (Closes: #476910)
 	rdiff:
 	 . Fixed ignore_version default value missing
 	 . Add patch from Matthew Palmer to rdiff handler to incorporate sshoptions

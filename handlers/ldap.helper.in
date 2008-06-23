@@ -61,19 +61,24 @@ done
 
 ldap_wizard() {
    bdb=no
+   hdb=no
    ldbm=no
    for backend in `grep -e "^backend" /etc/ldap/slapd.conf | @AWK@ '{print $2}'`; do
-      if [ "$backend" == "bdb" -a "$bdb" == "no" ]; then
+      if [ "$backend" == "bdb" ]; then
          bdb=yes
-      elif [ "$backend" == "ldbm" -a "$ldbm" == "no" ]; then
+      elif [ "$backend" == "hdb" ]; then
+         hdb=yes
+      elif [ "$backend" == "ldbm" ]; then
          ldbm=yes
       fi
    done    
 
-   if [ "$bdb" == "yes" -a "$ldbm" == "no" ]; then
-     msgBox "ldap action wizard" "It looks like the backend in your slapd.conf is set to BDB. If this is not the case, exit this wizard! From this point on, we will assume BDB backend, which might have disasterious consequences if this is incorrect."
-     _RESTART=no
-     ldap_create_file
+   if [ "$bdb" == "yes" -o "$hdb" == "yes" ]; then
+      if [ "$ldbm" == "no" ]; then
+         msgBox "ldap action wizard" "It looks like the backend in your slapd.conf is set to BDB or HDB. If this is not the case, exit this wizard! From this point on, we will assume BDB or HDB backend, which might have disasterious consequences if this is incorrect."
+         _RESTART=no
+         ldap_create_file
+      fi
    elif [ "$ldbm" == "yes" ]; then
      msgBox "ldap action wizard" "It looks like the backend in your slapd.conf is set to LDBM. Because of this, you will have less options (because it is not safe to use slapcat while slapd is running LDBM)." 
      _RESTART=yes
@@ -83,4 +88,3 @@ ldap_wizard() {
      return
    fi
 }
-
