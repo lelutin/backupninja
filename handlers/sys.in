@@ -188,10 +188,12 @@ catiffile () {
 } 
 
 catifexec () {
-   echo $HASHES >> $sysreportfile
-   echo "# $STATUS" >> $sysreportfile
-   echo $HASHES >> $sysreportfile
-   $1  >> $sysreportfile 2>&1 || info "executing of $1 failed"
+   if [ -x $1 ]; then
+      echo $HASHES >> $sysreportfile
+      echo "# $STATUS" >> $sysreportfile
+      echo $HASHES >> $sysreportfile
+      $*  >> $sysreportfile 2>&1 || info "executing of $1 failed"
+   fi
 }
    
 

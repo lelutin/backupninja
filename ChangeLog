@@ -47,6 +47,8 @@ version 0.9.6 -- unreleased
 	   dup handler, with the new vsnames configuration option ; (Closes: Trac#45)
 	 . add support for capturing the package debconf selection states using
 	   debconf-get-selections
+	 . fixed catifexec function to actually work, also now passes the arguments
+	   given to catifexec() to the called command (Thanks John Hallam!)
 
 version 0.9.5 -- December 2, 2007
     backupninja changes
