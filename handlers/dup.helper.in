@@ -398,8 +398,8 @@ incremental = $dup_incremental
 keep = $dup_keep
 
 # full destination URL, in duplicity format; if set, desturl overrides
-# sshoptions, destdir, desthost and destuser, and disables testconnect
-# For details, see duplicity manpage, section "URL FORMAT".
+# sshoptions, destdir, desthost and destuser; it also disables testconnect and
+# bandwithlimit. For details, see duplicity manpage, section "URL FORMAT".
 #desturl = file:///usr/local/backup
 #desturl = rsync://user@other.host//var/backup/bla
 
