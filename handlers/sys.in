@@ -73,11 +73,18 @@ getconf HWINFO `which hwinfo`
 getconf sfdisk_options ""
 getconf hwinfo_options ""
 
-# See if vservers are configured
+getconf vsnames all
+
+# If vservers are configured, check that the ones listed in $vsnames are running.
 local usevserver=no
-if [ $vservers_are_available = yes ]
-then
-   info "vserver method enabled"
+if [ $vservers_are_available = yes ]; then
+   if [ "$vsnames" = all ]; then
+      vsnames="$found_vservers"
+   fi
+   if ! vservers_running "$vsnames" ; then
+      fatal "At least one of the vservers listed in vsnames ($vsnames) is not running."
+   fi
+   info "Using vservers '$vsnames'"
    usevserver=yes
 fi
 
@@ -91,7 +98,7 @@ if [ "$packages" == "yes" ]; then
 
    if [ $usevserver = yes ]; then
       info "vserver root directory set to: $VROOTDIR"
-      for vserver in $found_vservers; do
+      for vserver in $vsnames; do
          info "examining vserver: $vserver"
          # is it running ?
          vservers_running $vserver

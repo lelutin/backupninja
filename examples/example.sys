@@ -39,3 +39,6 @@
 # hardwarefile = /var/backups/hardware.txt
 # dohwinfo = yes
 
+# If vservers = yes in /etc/backupninja.conf then the following variables can
+# be used:
+# vsnames = all | <vserver1> <vserver2> ... (default = all)

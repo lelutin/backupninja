@@ -32,6 +32,10 @@ $hardware
 # packagesfile = /var/backups/dpkg-selections.txt
 # partitionsfile = /var/backups/partitions.__star__.txt
 # hardwarefile = /var/backups/hardware.txt
+
+# If vservers = yes in /etc/backupninja.conf then the following variables can
+# be used:
+# vsnames = all | <vserver1> <vserver2> ... (default = all)
 EOF
    chmod 600 $next_filename
 }
