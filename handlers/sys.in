@@ -94,7 +94,7 @@ if [ "$packages" == "yes" ]; then
       for vserver in $found_vservers; do
          info "examining vserver: $vserver"
          # is it running ?
-         $VSERVERINFO -q $vserver RUNNING
+         vservers_running $vserver
          if [ $? -ne 0 ]; then
             warning "The vserver $vserver is not running."
             continue

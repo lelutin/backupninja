@@ -95,6 +95,20 @@ vservers_exist() {
 }
 
 ##
+## If all the arguments are running vservers names, returns 0.
+## Else, returns 1. Also returns 1 if no argument is given.
+##
+vservers_running() {
+   [ $# -ge 1 ] || return 1
+   local args="$1"
+   local vserver
+   for vserver in $args ; do
+      $VSERVERINFO -q $vserver RUNNING || return 1
+   done
+   return 0
+}
+
+##
 ## If the argument is the name of a vserver selected by the current helper,
 ## echoes 'on' and returns 0.
 ## Else, echoes 'off' and returns 1.
