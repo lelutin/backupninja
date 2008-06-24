@@ -29,7 +29,7 @@ function setupcolors () {
 	RED="\033[31;01m"
 	OFF="\033[0m"
 	CYAN="\033[36;01m"
-	COLORS=($BLUE $GREEN $YELLOW $RED $PURPLE)
+	COLORS=($BLUE $GREEN $YELLOW $RED $PURPLE $CYAN)
 }
 
 function colorize () {
@@ -40,6 +40,7 @@ function colorize () {
 		[ "$typestr" == "Warning" ] && type=2
 		[ "$typestr" == "Error" ] && type=3
 		[ "$typestr" == "Fatal" ] && type=4
+		[ "$typestr" == "Halt" ] && type=5
 		color=${COLORS[$type]}
 		endcolor=$OFF
 		echo -e "$color$@$endcolor"
@@ -54,6 +55,7 @@ function colorize () {
 # 2 - warnings - yellow
 # 3 - errors - red
 # 4 - fatal - purple
+# 5 - halt - cyan
 # First variable passed is the error level, all others are printed
 
 # if 1, echo out all warnings, errors, or fatal
@@ -74,9 +76,10 @@ function printmsg() {
 		[ "$typestr" == "Warning" ] && type=2
 		[ "$typestr" == "Error" ] && type=3
 		[ "$typestr" == "Fatal" ] && type=4
+		[ "$typestr" == "Halt" ] && type=5
 		typestr=""
 	else
-		types=(Debug Info Warning Error Fatal)
+		types=(Debug Info Warning Error Fatal Halt)
 		typestr="${types[$type]}: "
 	fi
 	
@@ -116,6 +119,10 @@ function error() {
 }
 function fatal() {
 	printmsg 4 "$@"
+	exit 2
+}
+function halt() {
+	printmsg 5 "$@"
 	exit 2
 }
 
@@ -252,19 +259,20 @@ The following options are available:
                      
 When in debug mode, output to the console will be colored:
 EOF
-	debug=1
-	debug   "Debugging info (when run with -d)"
-	info    "Informational messages (verbosity level 4)"
-	warning "Warnings (verbosity level 3 and up)"
-	error   "Errors (verbosity level 2 and up)"
-	fatal   "Fatal, halting errors (always shown)"
+	usecolors=yes
+	colorize "Debug: Debugging info (when run with -d)"
+	colorize "Info: Informational messages (verbosity level 4)"
+	colorize "Warning: Warnings (verbosity level 3 and up)"
+	colorize "Error: Errors (verbosity level 2 and up)"
+	colorize "Fatal: Errors which halt a given backup action (always shown)"
+	colorize "Halt: Errors which halt the whole backupninja run (always shown)"
 }
 
 ##
 ## this function handles the running of a backup action
 ##
 ## these globals are modified:
-## fatals, errors, warnings, actions_run, errormsg
+## halts, fatals, errors, warnings, actions_run, errormsg
 ##
 
 function process_action() {
@@ -322,10 +330,15 @@ function process_action() {
 	_warnings=`cat $bufferfile | grep "^Warning: " | wc -l`
 	_errors=`cat $bufferfile | grep "^Error: " | wc -l`
 	_fatals=`cat $bufferfile | grep "^Fatal: " | wc -l`
+	_halts=`cat $bufferfile | grep "^Halt: " | wc -l`
 	
-	ret=`grep "\(^Warning: \|^Error: \|^Fatal: \)" $bufferfile`
+	ret=`grep "\(^Warning: \|^Error: \|^Fatal: \|Halt: \)" $bufferfile`
 	rm $bufferfile
-	if [ $_fatals != 0 ]; then
+	if [ $_halts != 0 ]; then
+		msg "*halt* -- $file"
+		errormsg="$errormsg\n== halt request from $file==\n\n$ret\n"
+		passthru "Halt: <<<< finished action $file: FAILED"
+	elif [ $_fatals != 0 ]; then
 		msg "*failed* -- $file"
 		errormsg="$errormsg\n== fatal errors from $file ==\n\n$ret\n"
 		passthru "Fatal: <<<< finished action $file: FAILED"
@@ -342,6 +355,7 @@ function process_action() {
 		info "<<<< finished action $file: SUCCESS"
 	fi
 
+	let "halts += _halts"
 	let "fatals += _fatals"
 	let "errors += _errors"
 	let "warnings += _warnings"	
@@ -482,6 +496,7 @@ fi
 umask 077
 
 # these globals are set by process_action()
+halts=0
 fatals=0
 errors=0
 warnings=0
@@ -500,6 +515,7 @@ fi
 
 for file in $files; do
 	[ -f "$file" ] || continue
+	[ "$halts" = "0" ] || continue
 
         check_perms ${file%/*} # check containing dir
 	check_perms $file
@@ -556,6 +572,9 @@ fi
 
 if [ $actions_run != 0 ]; then
 	info "FINISHED: $actions_run actions run. $fatals fatal. $errors error. $warnings warning."
+	if [ "$halts" != "0" ]; then
+		info "Backup was halted prematurely.  Some actions may not have run."
+	fi
 fi
 
 if [ -n "$reporthost" ]; then
