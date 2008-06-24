@@ -57,7 +57,7 @@ fi
 # create backup dir, the vroot variable will be empty if no vsname was specified
 # and will proceed to operate on the host
 [ -d $vroot$backupdir ] || (debug "mkdir -p $vroot$backupdir"; mkdir -p $vroot$backupdir)
-[ -d $vroot$backupdir ] || fatal "Backup directory '$vroot$backupdir'"
+[ -d $vroot$backupdir ] || fatal "Backup directory '$vroot$backupdir' does not exist, and could not be created."
 
 # give backup dir the good uid and permissions
 # (in respect to the vserver, if $usevserver = yes)
