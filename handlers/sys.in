@@ -54,7 +54,7 @@ then
    getconf packagemgr   `which dpkg`
    getconf packagemgroptions ' --get-selections *'
    getconf selectionsfile $parentir/debconfsel.txt
-   getconf debconfgetselections `debconf-get-selections`
+   getconf debconfgetselections `which debconf-get-selections`
 elif [ $os = "redhat" ]
 then
    getconf packagesfile  $parentdir/rpmpackages.txt 
