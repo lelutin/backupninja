@@ -180,7 +180,7 @@ function check_perms() {
 
 # simple lowercase function
 function tolower() {
-	echo "$1" | tr [:upper:] [:lower:]
+	echo "$1" | tr '[:upper:]' '[:lower:]'
 }
 
 # simple to integer function
