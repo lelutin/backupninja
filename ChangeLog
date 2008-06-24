@@ -15,6 +15,7 @@ version 0.9.6 -- unreleased
 	   new syntax.
 	 . Support every duplicity-supported transport with new configuration
 	   option desturl (Closes: #483712, #346040, Trac#2).
+	 . Actually allow to backup only VServers, by relaxing $include test.
 	ldap:
 	 . support HDB backend just as the BDB one, and make message clearer
 	   when no supported backend is found (Closes: #476910)

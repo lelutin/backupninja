@@ -35,7 +35,7 @@ destdir=${destdir%/}
 ### SANITY CHECKS ##############################################################
 
 [ -n "$desturl" -o -n "$destdir" ]  || fatal "The destination directory (destdir) must be set when desturl is not used."
-[ -n "$include" ]  || fatal "No source includes specified"
+[ -n "$include" -o -n "$vsinclude" ]  || fatal "No source includes specified"
 [ -n "$password" ] || fatal "The password option must be set."
 
 ### VServers
