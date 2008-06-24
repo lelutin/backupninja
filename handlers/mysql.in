@@ -31,10 +31,7 @@ if [ $vservers_are_available = yes ]; then
          fatal "The vserver given in vsname ($vsname) does not exist."
       fi
       # is it running ?
-      $VSERVERINFO -q $vsname RUNNING
-      if [ $? -ne 0 ]; then
-         fatal "The vserver $vsname is not running."
-      fi
+      vservers_running $vsname || fatal "The vserver $vsname is not running."
       # everything ok
       info "Using vserver '$vsname'."
       usevserver=yes
