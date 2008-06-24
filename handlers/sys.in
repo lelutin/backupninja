@@ -382,7 +382,7 @@ STATUS="Gathering information about your ide drivers:"
 catiffile "/proc/ide"
 
 STATUS="Gathering information about your bus:"
-catifexec lspci
+catifexec "/usr/bin/lspci"
 catiffile "/proc/bus"
 
 echo
@@ -393,7 +393,7 @@ STATUS="Collecting information from /etc/fstab:"
 catiffile "/etc/fstab"
 
 STATUS="Collecting disk partition information:"
-catifexec "fdisk -l"
+catifexec "/sbin/fdisk -l"
 
 STATUS="Checking mounted file systems (mount) "
 catifexec "/bin/mount"
@@ -409,6 +409,9 @@ catiffile "/etc/raidtab"
 
 STATUS="Collecting Software RAID information (/etc/mdadm.conf)"
 catiffile "/etc/mdadm.conf"
+
+STATUS="Collecting Software RAID information (/sbin/mdadm -Q)"
+catifexec "/sbin/mdadm" "-Q" "--detail" '/dev/md?*'
 
 STATUS="Collecting Automount information (auto.master)"
 catiffile "/etc/auto.master"
