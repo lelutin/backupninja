@@ -36,6 +36,11 @@ if test x$MD5SUM = "xno"; then
     AC_MSG_ERROR([md5sum is required])
 fi
 
+AC_PATH_PROGS(MKTEMP, mktemp, "no")
+if test x$MKTEMPT = "xno"; then
+    AC_MSG_ERROR([mktemp is required])
+fi
+
 AC_CHECK_PROG(ac_cv_have_rpm, rpm, "yes", "no")
 if test "x$ac_cv_have_rpm" = "xyes"; then
         rpm --define '_topdir /tmp' > /dev/null 2>&1

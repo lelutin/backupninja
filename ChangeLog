@@ -7,6 +7,9 @@ version 0.9.6 -- unreleased
     lib changes
 	vserver:
 	 . added vservers_running function
+	tools
+	 . mktemp is now required to run backupninja, removed less secure
+	   fall-back if mktemp did not exist on the system
     handler changes
 	dup:
 	 . General cleanup

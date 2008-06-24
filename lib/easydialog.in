@@ -48,7 +48,7 @@ gaugeBox() {
 }
 
 inputBox() {
-    local temp=$(mktemp -t backupninja.XXXXXX) || exit 1
+    local temp=$(@MKTEMP@ -t backupninja.XXXXXX) || exit 1
     trap "rm -f $temp" 0
     REPLY=
     $DIALOG --backtitle "$BACKTITLE" --title "$1" \
@@ -80,7 +80,7 @@ _genericListBox() {
     local title=$1
     local text=$2
     shift 2
-    local temp=$(mktemp -t backupninja.XXXXXX) || exit 1
+    local temp=$(@MKTEMP@ -t backupninja.XXXXXX) || exit 1
     trap "rm -f $temp" 0
     REPLY=
     $DIALOG $HELP $_DEFAULT --backtitle "$BACKTITLE" --title "$title" \
@@ -133,7 +133,7 @@ textBox() {
 }
 
 passwordBox() {
-    local temp=$(mktemp -t backupninja.XXXXXX) || exit 1
+    local temp=$(@MKTEMP@ -t backupninja.XXXXXX) || exit 1
     trap "rm -f $temp" 0
     REPLY=
     $DIALOG --backtitle "$BACKTITLE" --title "$1" \
@@ -175,7 +175,7 @@ listItem() {
 ##
 listDisplay() {
    boxtype=$1
-   local temp=$(mktemp -t backupninja.XXXXXX) || exit 1
+   local temp=$(@MKTEMP@ -t backupninja.XXXXXX) || exit 1
    trap "rm -f $temp" 0
    
    local label
@@ -221,7 +221,7 @@ formItem() {
 }
     
 formDisplay() {
-   local temp=$(mktemp -t backupninja.XXXXXX) || exit 1
+   local temp=$(@MKTEMP@ -t backupninja.XXXXXX) || exit 1
    
    max_length=0
    for ((i=0; i < ${#_form_labels[@]} ; i++)); do

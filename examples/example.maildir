@@ -35,10 +35,12 @@ keepweekly = 3
 keepmonthly = 1
 
 # directory which contains all the maildirs
-# this directory is expected to have subdirectories lettered a-z and
-# in each letter subdirectory are the users Maildirs which start with 
-# those letters
 srcdir = /maildir/riseup.net
+
+# the srcdir is expected to contain the following subdirectories. Each
+# of these will contain the user's Maildirs which start with these
+# letters
+srcsubdirs = 0 1 2 3 4 5 6 7 8 9 a b c d e f g h i j k l m n o p q r s t u v w x y z
 
 # put the backups under this directory
 destdir = /crypta/maildir/riseup.net
