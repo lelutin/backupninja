@@ -275,9 +275,6 @@ for x  in $(/sbin/lsmod | /bin/cut -f1 -d" " 2>/dev/null | /bin/grep -v Module 2
   catifexec "/sbin/modinfo  $x"
 done
 
-STATUS="Currently getting ksysms information:"
-catifexec "/sbin/ksyms"
-
 STATUS="Gathering information about your filesystems:"
 catiffile "/proc/filesystems"
 
@@ -288,7 +285,7 @@ STATUS="Gathering information about your partitions:"
 catiffile "/proc/partitions"
 
 STATUS="Gathering information about your ksyms:"
-catiffile "/proc/ksyms"
+catiffile "/proc/kallsyms"
 
 STATUS="Gathering information about slabinfo:"
 catiffile "/proc/slabinfo"

@@ -30,6 +30,9 @@ version 0.9.6 -- unreleased
 	 . make deleted maildirs record the date they were deleted
 	 . add destid_file configuration option to enable you to specify an alternate
 	   ssh public key authentication file (defaulting to /root/.ssh/id_rsa)
+	sys:
+	 . update for 2.6 kernels: use /proc/kallsyms instead of /proc/ksyms
+	   (Closes: Trac#39)
 
 version 0.9.5 -- December 2, 2007
     backupninja changes
