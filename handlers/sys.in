@@ -3,18 +3,25 @@
 # this handler will save various reports of vital system information.
 # by default, all the reports are enabled and are saved in /var/backups.
 #
-# (1) a list of all the packages installed and removed.
+# (1) a capture of the debconf package selection states. This file
+#     can be used to restore the answers to debconf questions for
+#     packages that you will be installing through (2) below. To
+#     do this, run: "debconf-set-selections < debconfsel.txt"
+#
+# (2) a list of all the packages installed and removed.
 #     this file can be used to restore the state of installed packages
-#     by running "dpkg --set-selections < dpkg-selections.txt
+#     by running "dpkg --set-selections < dpkg-selections.txt and
+#     then run "apt-get -u dselect-upgrade". If you have the 
+#     debconf-set-selections file from (1), you should restore those first.
 # 
-# (2) the partition table of all disks. 
+# (3) the partition table of all disks. 
 #     this partition table can be used to format another disk of
 #     the same size. this can be handy if using software raid and 
 #     you have a disk go bad. just replace the disk and partition it
 #     by running "sfdisk /dev/sdb < partitions.sdb.txt"
 #     (MAKE SURE YOU PARTITION THE CORRECT DISK!!!)
 #
-# (3) hardware information. 
+# (4) hardware information. 
 #     write to a text file the important things which hwinfo can gleen.
 #
 
@@ -46,6 +53,8 @@ then
    getconf packagesfile $parentdir/dpkg-selections.txt
    getconf packagemgr   `which dpkg`
    getconf packagemgroptions ' --get-selections *'
+   getconf selectionsfile $parentir/debconfsel.txt
+   getconf debconfgetselections `debconf-get-selections`
 elif [ $os = "redhat" ]
 then
    getconf packagesfile  $parentdir/rpmpackages.txt 
@@ -109,13 +118,20 @@ if [ "$packages" == "yes" ]; then
          # is $packagemgr available inside $vserver ?
          if [ ! -x "$VROOTDIR/$vserver`$VSERVER $vserver exec which $packagemgr`" ]; then
             warning "can't find $packagemgr in vserver $vserver, skipping installed packages report."
-            continue
+         else
+            # don't expand * since it can be used in $packagemgroptions
+            set -o noglob
+            debug "$VSERVER $vserver exec $packagemgr $packagemgroptions > $VROOTDIR/$vserver$packagesfile"
+	    $VSERVER $vserver exec $packagemgr $packagemgroptions > $VROOTDIR/$vserver$packagesfile || fatal "can not save $packagemgr info to $packagesfile"
+            set +o noglob
          fi
-         # don't expand * since it can be used in $packagemgroptions
-         set -o noglob
-	 debug "$VSERVER $vserver exec $packagemgr $packagemgroptions > $VROOTDIR/$vserver$packagesfile"
-	 $VSERVER $vserver exec $packagemgr $packagemgroptions > $VROOTDIR/$vserver$packagesfile || fatal "can not save $packagemgr info to $packagesfile"
-         set +o noglob
+         # is $debconfgetselections available inside $vserver ?
+         if [ ! -x "$VROOTDIR/$vserver`$VSERVER $vserver exec which $debconfgetselections`" ]; then
+            warning "can't find $debconfgetselections in vserver $vserver, skipping package selection states."
+         else
+            debug "$VSERVER $vserver exec $debconfgetselections > $VROOTDIR/$vserver$selectionsfile"
+            $VSERVER $vserver exec $debconfgetselections > $VROOTDIR/$vserver$selectionsfile || fatal "can not save $debconfgetselections info to $selectionsfile"
+         fi
       done
    fi
    
@@ -129,7 +145,12 @@ if [ "$packages" == "yes" ]; then
       $packagemgr $packagemgroptions > $packagesfile || fatal "can not save $packagemgr info to $packagesfile"
       set +o noglob
    fi
-
+   if [ -z "$debconfgetselections" ]; then
+      warning "can't find ${debconfgetselections}, skilling package selection states."
+   else
+      debug "$debconfgetselections > $selectionsfile"
+      $debconfgetselections > $selectionsfile || fatal "can not save $debconfgetselections info to $selectionsfile"
+   fi
 fi
 
 ## System report ##############################

@@ -3,7 +3,7 @@
 HELPERS="$HELPERS sys:general_hardware_and_system_info"
 
 sys_wizard() {
-   require_packages hwinfo
+   require_packages hwinfo debconf-utils
    checkBox "new sys action" "check options" \
        "packages" "list of all installed packages." on \
        "partitions" "the partition table of all disks." on  \
@@ -30,6 +30,7 @@ $partitions
 $sfdisk
 $hardware
 # packagesfile = /var/backups/dpkg-selections.txt
+# selectionsfile = /var/backups/debconfsel.txt
 # partitionsfile = /var/backups/partitions.__star__.txt
 # hardwarefile = /var/backups/hardware.txt
 

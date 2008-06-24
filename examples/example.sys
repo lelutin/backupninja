@@ -2,20 +2,27 @@
 # this config file will save various reports of vital system information.
 # by default, all the reports are enabled and are saved in /var/backups.
 #
-# requires dpkg, sfdisk, and hwinfo
+# requires dpkg, debconf-utils, sfdisk, and hwinfo
 #
-# (1) a list of all the packages installed and removed.
+# (1) a capture of the debconf package selection states. This file
+#     can be used to restore the answers to debconf questions for
+#     packages that you will be installing through (2) below. To
+#     do this, run: "debconf-set-selections < debconfsel.txt"
+#
+# (2) a list of all the packages installed and removed.
 #     this file can be used to restore the state of installed packages
-#     by running "dpkg --set-selections < dpkg-selections.txt
+#     by running "dpkg --set-selections < dpkg-selections.txt and
+#     then run "apt-get -u dselect-upgrade". If you have the 
+#     debconf-set-selections file from (1), you should restore those first.
 # 
-# (2) the partition table of all disks. 
+# (3) the partition table of all disks. 
 #     this partition table can be used to format another disk of
 #     the same size. this can be handy if using software raid and 
 #     you have a disk go bad. just replace the disk and partition it
 #     by running "sfdisk /dev/sdb < partitions.sdb.txt"
 #     (MAKE SURE YOU PARTITION THE CORRECT DISK!!!)
 #
-# (3) hardware information. 
+# (4) hardware information. 
 #     detailed information on most important aspects of the hardware.
 #
 
@@ -25,6 +32,7 @@
 # parentdir = /var/backups
 # packages = yes
 # packagesfile = /var/backups/dpkg-selections.txt
+# selectionsfile = /var/backups/debconfsel.txt
 
 # partitions = yes
 # NOTE: the __star__ below will be replaced by the disks found on the

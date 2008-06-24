@@ -45,6 +45,8 @@ version 0.9.6 -- unreleased
 	   (Closes: Trac#39)
 	 . support selection of VServers to run on, in the same way as in the
 	   dup handler, with the new vsnames configuration option ; (Closes: Trac#45)
+	 . add support for capturing the package debconf selection states using
+	   debconf-get-selections
 
 version 0.9.5 -- December 2, 2007
     backupninja changes
