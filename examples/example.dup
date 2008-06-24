@@ -120,6 +120,12 @@ exclude = /home/*/.gnupg
 #keep = 60
 #keep = yes
 
+# full destination URL, in duplicity format; if set, desturl overrides
+# sshoptions, destdir, desthost and destuser, and disables testconnect
+# For details, see duplicity manpage, section "URL FORMAT".
+#desturl = file:///usr/local/backup
+#desturl = rsync://user@other.host//var/backup/bla
+
 # bandwith limit, in kbit/s ; default is 0, i.e. no limit
 #bandwidthlimit = 128
 

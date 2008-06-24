@@ -24,6 +24,7 @@ getconf exclude
 setsection dest
 getconf incremental yes
 getconf keep 60
+getconf desturl
 getconf sshoptions
 getconf bandwidthlimit 0
 getconf desthost
@@ -33,7 +34,7 @@ destdir=${destdir%/}
 
 ### SANITY CHECKS ##############################################################
 
-[ -n "$destdir" ]  || fatal "Destination directory not set"
+[ -n "$desturl" -o -n "$destdir" ]  || fatal "The destination directory (destdir) must be set when desturl is not used."
 [ -n "$include" ]  || fatal "No source includes specified"
 [ -n "$password" ] || fatal "The password option must be set."
 
@@ -58,13 +59,17 @@ fi
 
 ### See if we can login on $desthost
 if [ "$testconnect" == "yes" ]; then
-   debug "ssh $sshoptions -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1'"
-   if [ ! $test ]; then
-      result=`ssh $sshoptions -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1'`
-      if [ "$result" != "1" ]; then
-	 fatal "Can't connect to $desthost as $destuser."
-      else
-	 debug "Connected to $desthost as $destuser successfully"
+   if [ -n "$desturl" ]; then
+      warning 'testconnect can not be used when desturl is set'
+   else
+      debug "ssh $sshoptions -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1'"
+      if [ ! $test ]; then
+         result=`ssh $sshoptions -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1'`
+         if [ "$result" != "1" ]; then
+	    fatal "Can't connect to $desthost as $destuser."
+         else
+	    debug "Connected to $desthost as $destuser successfully"
+         fi
       fi
    fi
 fi
@@ -75,7 +80,14 @@ fi
 execstr_command=
 execstr_options="$options --no-print-statistics"
 execstr_source=
-execstr_serverpart="scp://$destuser@$desthost/$destdir"
+if [ -n "$desturl" ]; then
+   [ -z "$destuser" ] || warning 'the configured destuser is ignored since desturl is set'
+   [ -z "$desthost" ] || warning 'the configured desthost is ignored since desturl is set'
+   [ -z "$destdir" ] || warning 'the configured destdir is ignored since desturl is set'
+   execstr_serverpart="$desturl"
+else
+   execstr_serverpart="scp://$destuser@$desthost/$destdir"
+fi
 
 ### duplicity version
 duplicity_version="`duplicity --version | @AWK@ '{print $2}'`"
