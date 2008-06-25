@@ -10,14 +10,7 @@
 # create a temporary file in a secure way.
 #
 function maketemp() {
-	if [ -x /bin/mktemp ]
-	then
-		local tempfile=`mktemp /tmp/$1.XXXXXXXX`
-	else
-		DATE=`date`
-		sectmp=`echo $DATE | @MD5SUM@ | cut -d- -f1`
-		local tempfile=/tmp/$1.$sectmp
-	fi
+	local tempfile=`mktemp /tmp/$1.XXXXXXXX`
 	echo $tempfile
 }
 
