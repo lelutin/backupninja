@@ -9,7 +9,6 @@ getconf src /var/lib/trac
 getconf dest /var/backups/trac
 getconf tmp /var/backups/trac.tmp
 
-error=0
 cd $src
 for repo in `find . -name VERSION`
 do
@@ -38,19 +37,14 @@ do
     fi
     if [ $code != 0 ]; then
        error "command failed -- trac-admin $src/$repo hotcopy $tmp/$repo"
-       error=1
     fi
 done
 
-if [ $error -eq 1 ]; then
-    echo "Error: because of earlier errors, we are leaving trac backups in $tmp instead of $dest"
-else
-    if [ -d $dest -a -d $tmp ]; then
-        rm -rf $dest
-    fi
-    if [ -d $tmp ]; then
-        mv $tmp $dest
-    fi
+if [ -d $dest -a -d $tmp ]; then
+     rm -rf $dest
+fi
+if [ -d $tmp ]; then
+     mv $tmp $dest
 fi
 
 exit 0

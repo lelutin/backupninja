@@ -52,6 +52,9 @@ version 0.9.6 -- unreleased
 	 . Added more robust software RAID information capture by running mdadm
 	   -Q --detail /dev/md?* because some people may have empty mdadm.conf files
 	   (Thanks to John Hallam).
+	trac:
+	 . stop failing on all the trac backups if just one fails, this means
+	   removing the temporary trac backup directories if they fail
 
 version 0.9.5 -- December 2, 2007
     backupninja changes
