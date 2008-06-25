@@ -31,11 +31,6 @@ else
    export AWK
 fi
 
-AC_PATH_PROGS(MD5SUM, md5sum, "no")
-if test x$MD5SUM = "xno"; then
-    AC_MSG_ERROR([md5sum is required])
-fi
-
 AC_PATH_PROGS(MKTEMP, mktemp, "no")
 if test x$MKTEMPT = "xno"; then
     AC_MSG_ERROR([mktemp is required])

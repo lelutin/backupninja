@@ -9,7 +9,6 @@ edit = sed \
     -e "s,@BASH\@,$(BASH),g" \
     -e "s,@AWK\@,$(AWK),g" \
     -e "s,@SED\@,$(SED),g" \
-    -e "s,@MD5SUM\@,$(MD5SUM),g" \
     -e "s,@MKTEMP\@,$(MKTEMP),g" \
     -e "s,@libdir\@,$(pkglibdir),g" 
 
