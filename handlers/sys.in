@@ -217,7 +217,7 @@ catifexec "/bin/df" "-al"
 
 STATUS="Collecting what services run at what run level:"
 if [ $os = "redhat" ]; then
-   catifexec "/sbin/chkconfig --list"
+   catifexec "/sbin/chkconfig" "--list"
    STATUS="Collecting information about /etc/rc.d:"
    catiffile "/bin/ls /etc/rc.d/rc*.d/"
 
@@ -236,7 +236,7 @@ elif [ $os = "debian" ]; then
 fi
 
 STATUS="Getting bootloader information:"
-catifexec "/bin/ls -alR /boot"
+catifexec "/bin/ls" "-alR /boot"
 
 # This covers sparc, alpha, and intel (respectively)
 # updated for grub -mpg
@@ -251,7 +251,7 @@ fi
 if [ -f /etc/lilo.conf ]; then
   STATUS="Collecting information about the boot process (lilo):"
   catiffile "/etc/lilo.conf"
-  catifexec "/sbin/lilo -q"
+  catifexec "/sbin/lilo" "-q"
 fi
 if [ -d /boot/grub -a -f /boot/grub/grub.conf -a -f /boot/grub/device.map ]; then
   STATUS="Collecting information about the boot process (grub.conf):"
@@ -277,13 +277,13 @@ STATUS="Gathering sysctl information (/etc/sysctl.conf):"
 catiffile "/etc/sysctl.conf"
 
 STATUS="Gathering IP information (/sbin/ifconfig):"
-catifexec "/sbin/ifconfig -a"
+catifexec "/sbin/ifconfig" "-a"
 
 STATUS="Gathering additional IP information (/bin/ip addr list):"
-catifexec "/bin/ip addr list"
+catifexec "/bin/ip" "addr list"
 
 STATUS="Checking network routes:"
-catifexec "/sbin/route -n"
+catifexec "/sbin/route" "-n"
 
 STATUS="Collecting Name Service Switch config information:"
 catiffile "/etc/nsswitch.conf"
@@ -302,7 +302,7 @@ catifexec "/sbin/lsmod"
 for x  in $(/sbin/lsmod | /bin/cut -f1 -d" " 2>/dev/null | /bin/grep -v Module 2>/dev/null 
 ) ; do
   STATUS="Checking module information $x:"
-  catifexec "/sbin/modinfo  $x"
+  catifexec "/sbin/modinfo" "$x"
 done
 
 STATUS="Gathering information about your filesystems:"
@@ -393,7 +393,7 @@ STATUS="Collecting information from /etc/fstab:"
 catiffile "/etc/fstab"
 
 STATUS="Collecting disk partition information:"
-catifexec "/sbin/fdisk -l"
+catifexec "/sbin/fdisk" "-l"
 
 STATUS="Checking mounted file systems (mount) "
 catifexec "/bin/mount"
