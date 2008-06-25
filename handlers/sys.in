@@ -126,11 +126,11 @@ if [ "$packages" == "yes" ]; then
             set +o noglob
          fi
          # is $debconfgetselections available inside $vserver ?
-         if [ ! -x "$VROOTDIR/$vserver`$VSERVER $vserver exec which $debconfgetselections`" ]; then
-            warning "can't find $debconfgetselections in vserver $vserver, skipping package selection states."
+         if [ -z "`$VSERVER $vserver exec which debconf-get-selections`" ]; then
+            warning "can't find debconf-get-selections in vserver $vserver, skipping package selection states."
          else
             debug "$VSERVER $vserver exec $debconfgetselections > $VROOTDIR/$vserver$selectionsfile"
-            $VSERVER $vserver exec $debconfgetselections > $VROOTDIR/$vserver$selectionsfile || fatal "can not save $debconfgetselections info to $selectionsfile"
+            $VSERVER $vserver exec $debconfgetselections > $VROOTDIR/$vserver$selectionsfile || fatal "can not save debconf-get-selections info to $selectionsfile"
          fi
       done
    fi
