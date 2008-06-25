@@ -146,7 +146,7 @@ if [ "$packages" == "yes" ]; then
       set +o noglob
    fi
    if [ -z "$debconfgetselections" ]; then
-      warning "can't find ${debconfgetselections}, skipping package selection states."
+      warning "can't find debconf-get-selections, skipping package selection states."
    else
       debug "$debconfgetselections > $selectionsfile"
       $debconfgetselections > $selectionsfile || fatal "can not save $debconfgetselections info to $selectionsfile"
