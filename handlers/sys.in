@@ -53,7 +53,7 @@ then
    getconf packagesfile $parentdir/dpkg-selections.txt
    getconf packagemgr   `which dpkg`
    getconf packagemgroptions ' --get-selections *'
-   getconf selectionsfile $parentir/debconfsel.txt
+   getconf selectionsfile $parentdir/debconfsel.txt
    getconf debconfgetselections `which debconf-get-selections`
 elif [ $os = "redhat" ]
 then
