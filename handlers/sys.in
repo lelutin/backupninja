@@ -135,7 +135,7 @@ if [ "$packages" == "yes" ]; then
             [ -n "`$VSERVER $vserver exec which debconf-get-selections`" ] && found=yes
          fi
          if [ "$found" != yes ]; then
-            warning "can't find debconf-get-selections in vserver $vserver, skipping package selection states."
+            warning "can't find debconf-get-selections in vserver $vserver, skipping package selection states. You may want to install the debconf-utils package."
          else
             debug "$VSERVER $vserver exec $debconfgetselections > $VROOTDIR/$vserver$selectionsfile"
             $VSERVER $vserver exec $debconfgetselections > $VROOTDIR/$vserver$selectionsfile || fatal "can not save debconf-get-selections info to $selectionsfile"
@@ -155,7 +155,7 @@ if [ "$packages" == "yes" ]; then
       set +o noglob
    fi
    if [ -z "$debconfgetselections" ]; then
-      warning "can't find debconf-get-selections, skipping package selection states."
+      warning "can't find debconf-get-selections, skipping package selection states. You might want to install the debconf-utils package."
    else
       debug "$debconfgetselections > $selectionsfile"
       $debconfgetselections > $selectionsfile || fatal "can not save $debconfgetselections info to $selectionsfile"
