@@ -56,7 +56,7 @@ compress    = yes
 # nodata = < table1 table2 table3 > (no default)
 # only dump the structure for the database tables listed here, this means
 # no data contained in these tables will be dumped. This is very useful
-# to backup databases that have tables with cache stored in tables that
+# to backup databases that have tables with large amounts of cache data that
 # isn't necessary to backup, but you still need the structure to exist
 # on a restore
 #
