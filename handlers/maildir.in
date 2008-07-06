@@ -6,16 +6,34 @@
 #  to a remote server. It is designed to be run with low overhead
 #  in terms of cpu and bandwidth so it runs pretty slow.
 #  Hardlinking is used to save storage space.
+# 
+#  This handler expects that your maildir directory structure is
+#  either one of the following:
+# 
+#  1. /$srcdir/[a-zA-Z0-9]/$user for example: 
+#  /var/maildir/a/anarchist
+#  /var/maildir/a/arthur
+#  ...
+#  /var/maildir/Z/Zaphod
+#  /var/maildir/Z/Zebra
+#  
+#  2. or the following:
+#  /var/maildir/domain.org/user1
+#  /var/maildir/domain.org/user2
+#  ...
+#  /var/maildir/anotherdomain.org/user1
+#  /var/maildir/anotherdomain.org/user2
+#  ...
 #
-#  each users maildir will contain these files:
+#  if the configuration is setup to have keepdaily at 3, 
+#  keepweekly is 2, and keepmonthly is 1, then each user's
+#  maildir backup snapshot directory will contain these files:
 #    daily.1
 #    daily.2
 #    daily.3
 #    weekly.1
 #    weekly.2
 #    monthly.1
-#  if keepdaily is 3, keepweekly is 2, and keepmonthly is 1. 
-#  the actual maildir is stored within each snapshot directory.
 #
 #  The basic algorithm is to rsync each maildir individually,
 #  and to use hard links for retaining historical data.
@@ -53,7 +71,6 @@ getconf destid_file /root/.ssh/id_rsa
 
 getconf multiconnection notset
 
-letters="0 1 2 3 4 5 6 7 8 9 a b c d e f g h i j k l m n o p q r s t u v w x y z"
 failedcount=0
 # strip trailing /
 destdir=${destdir%/}
@@ -76,9 +93,9 @@ excludes="--exclude '.Trash/\*' --exclude '.Mistakes/\*' --exclude '.Spam/\*'"
 function do_user() {
 	local user=$1
 	local btype=$2
-	local letter=${user:0:1}
-	local source="$srcdir/$letter/$user/"
-	local target="$destdir/$letter/$user/$btype.1"
+        local userdir=${3%/}
+        local source="$srcdir/$userdir/$user/"
+        local target="$destdir/$userdir/$user/$btype.1"
 	if [ ! -d $source ]; then
 	  warning "maildir $source not found"
 	  return
@@ -111,15 +128,16 @@ function do_remove() {
 	local tmp1=`maketemp maildir-tmp-file`
 	local tmp2=`maketemp maildir-tmp-file`
 	
-	ssh -p $destport -i $estid_file $destuser@$desthost mkdir -p "$destdir/deleted"
-	for i in 0 1 2 3 4 5 6 7 8 9 a b c d e f g h i j k l m n o p q r s t u v w x y z; do
-		ls -1 "$srcdir/$i/" | sort > $tmp1
-		ssh -p $destport $destuser@$desthost ls -1 "$destdir/$i/" | sort > $tmp2
+	ssh -p $destport -i $destid_file $destuser@$desthost mkdir -p "$destdir/deleted"
+        cd "$srcdir" 
+        for userdir in `ls -d1 */`; do
+           ls -1 "$srcdir/$userdir" | sort > $tmp1
+           ssh -p $destport $destuser@$desthost ls -1 "$destdir/$userdir" | sort > $tmp2
 		for deluser in `join -v 2 $tmp1 $tmp2`; do
 			[ "$deluser" != "" ] || continue
-			info "removing $destuser@$desthost:$destdir/$i/$deluser/"
-			ssh -p $destport -i $destid_file $destuser@$desthost mv "$destdir/$i/$deluser/" "$destdir/deleted"
-			ssh -p $destport -i $destid_file $destuser@$desthost "date +%c%n%s > '$destdir/$i/$deluser/deleted_on'"
+                        info "removing $destuser@$desthost:$destdir/$userdir$deluser/"
+                        ssh -p $destport $destuser@$desthost mv "$destdir/$userdir$deluser/" "$destdir/deleted"
+			ssh -p $destport -i $destid_file $destuser@$desthost "date +%c%n%s > '$destdir/$userdir$deluser/deleted_on'"
 		done
 	done
 	rm $tmp1
@@ -129,8 +147,8 @@ function do_remove() {
 function do_rotate() {
 	[ "$rotate" == "yes" ] || return;
 	local user=$1
-	local letter=${user:0:1}
-	local backuproot="$destdir/$letter/$user"
+        local userdir=${2%/}
+        local backuproot="$destdir/$userdir/$user"
 (
 	ssh -T -o PasswordAuthentication=no $desthost -l $destuser -i $destid_file <<EOF
 ##### BEGIN REMOTE SCRIPT #####
@@ -227,9 +245,9 @@ EOF
 function setup_remote_dirs() {
 	local user=$1
 	local backuptype=$2
-	local letter=${user:0:1}
-	local dir="$destdir/$letter/$user/$backuptype"
-	local tmpdir="$destdir/$letter/$user/rotate.tmp"
+        local userdir=${3%/}
+        local dir="$destdir/$userdir/$user/$backuptype"
+        local tmpdir="$destdir/$userdir/$user/rotate.tmp"
 (
 	ssh -T -o PasswordAuthentication=no $desthost -l $destuser -i $destid_file <<EOF
 		if [ ! -d $destdir ]; then
@@ -331,16 +349,18 @@ if [ "$backup" == "yes" ]; then
 		setup_remote_dirs $testuser $btype
 		do_user $testuser $btype
 	else
-		for i in $letters; do
-			[ -d "$srcdir/$i" ] || fatal "directory $srcdir/$i not found."
-			cd "$srcdir/$i"
-			debug $i
+                [ -d "$srcdir" ] || fatal "directory $srcdir not found."
+                cd "$srcdir"
+                for userdir in `ls -d1 */`; do
+                   [ -d "$srcdir/$userdir" ] || fatal "directory $srcdir/$userdir not found."
+                   cd "$srcdir/$userdir"
+                   debug $userdir
 			for user in `ls -1`; do
 				[ "$user" != "" ] || continue
-				debug $user
-				do_rotate $user
-				setup_remote_dirs $user $btype
-				do_user $user $btype
+                                debug "$user $userdir"
+                                do_rotate $user $userdir
+                                setup_remote_dirs $user $btype $userdir
+                                do_user $user $btype $userdir
 			done
 		done
 	fi

@@ -34,7 +34,10 @@ version 0.9.6 -- unreleased
 	 . New handler from rhatto designed to incrementally pull content from
 	   a website to a local folder, based on the rsync handler
 	maildir:
-	 . fixed bug where maildirs that start with a number were skipped.
+	 . fixed bug where maildirs that start with a number were skipped
+	 . make maildir helper look in every subdirectory of the source directory for
+	   maildirs, rather than just looking in the directories [a-zA-Z0-9], thanks
+	   for the patch from chris@cenolan.com (Trac#43).
 	 . make deleted maildirs record the date they were deleted
 	 . add destid_file configuration option to enable you to specify an alternate
 	   ssh public key authentication file (defaulting to /root/.ssh/id_rsa)
