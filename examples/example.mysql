@@ -53,12 +53,14 @@ compress    = yes
 # which databases to backup. should either be the word 'all' or a 
 # space separated list of database names.
 #
-# nodata = < table1 table2 table3 > (no default)
+# nodata = < db.table1 db.table2 db.table3 > (no default)
 # only dump the structure for the database tables listed here, this means
 # no data contained in these tables will be dumped. This is very useful
 # to backup databases that have tables with large amounts of cache data that
 # isn't necessary to backup, but you still need the structure to exist
-# on a restore
+# on a restore. You *must* specify the table as part of a database, such
+# as "drupal.cache", where the database name is "drupal" and the table that
+# you do not want to dump the data for is called "cache". 
 #
 # backupdir = < path/to/destination > (default = /var/backups/mysql)
 # where to dump the backups. hotcopy backups will be in a subdirectory 
