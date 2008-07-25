@@ -58,6 +58,8 @@ version 0.9.6 -- July 21, 2008
 	trac:
 	 . stop failing on all the trac backups if just one fails, this means
 	   removing the temporary trac backup directories if they fail
+	makecd
+	 . updated handler for new toolset (genisoimage and wodim)
 
 version 0.9.5 -- December 2, 2007
     backupninja changes

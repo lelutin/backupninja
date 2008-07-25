@@ -13,10 +13,9 @@ getconf device
 getconf nicelevel 0
 
 # define needed executables:
-MKISOFS="/usr/bin/mkisofs"
+MKISOFS="/usr/bin/genisoimage"
 GROWISOFS="/usr/bin/growisofs"
-#CDRECORD="/usr/bin/cdrecord"
-CDRECORD="/usr/bin/cdrecord.mmap"
+CDRECORD="/usr/bin/wodim"
 CDRDAO="/usr/bin/cdrdao"
 DVDINFO="/usr/bin/dvd+rw-mediainfo"
 
@@ -26,10 +25,10 @@ DVDINFO="/usr/bin/dvd+rw-mediainfo"
 [ -d $backupdir ] || fatal "Backup directory '$backupdir'"
 [ -e "$target" ]  || fatal "target does not exist "
 
-[ -x "$MKISOFS" ]   || debug 3 "echo executable mkisofs not present"
-[ -x "$GROWISOFS" ] || debug 3 "echo executable growisofs not present"
-[ -x "$CDRECORD" ]  || debug 3 "echo executable cdrecord not present"
-[ -x "$CDRDAO" ]    || debug 3 "echo executable cdrdao not present"
+[ -x "$MKISOFS" ]   || debug 3 "echo executable $MKISOFS not present"
+[ -x "$GROWISOFS" ] || debug 3 "echo executable $GROWISOFS not present"
+[ -x "$CDRECORD" ]  || debug 3 "echo executable $CDRECORD not present"
+[ -x "$CDRDAO" ]    || debug 3 "echo executable $CDRDAO not present"
 
 if [ "$isoonly" == "no" ]; then
 	[ -e $device ] || fatal "No Burner device available"
@@ -86,3 +85,4 @@ if [ "$isoonly" == "no" ]; then
 	fi
 fi
 return 0
+
