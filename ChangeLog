@@ -1,3 +1,7 @@
+version 0.9.7 -- UNRELEASED
+    backupninja changes
+	 . fix bug in reportspace, thanks Dan Garthwaite
+
 version 0.9.6 -- July 21, 2008
     backupninja changes
 	 . fix bug in cstream definition, thanks Jamie McClelland

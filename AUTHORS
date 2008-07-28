@@ -27,3 +27,4 @@ Matthew Palmer -- mysql enhancements
 romain.tartiere@healthgrid.org -- ldap fixes
 Adam Monsen - spec file updates
 Matthew Palmer <mpalmer@debian.org> -- halt loglevel feature
+dan@garthwaite.org -- reportspace bugfix
