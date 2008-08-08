@@ -1,6 +1,10 @@
 version 0.9.7 -- UNRELEASED
     backupninja changes
 	 . fix bug in reportspace, thanks Dan Garthwaite
+    handler changes
+	maildir:
+	 . fix location of deleted_on file
+	 . add missing destid_file options to ssh connections
 
 version 0.9.6 -- July 21, 2008
     backupninja changes
@@ -216,7 +220,7 @@ version 0.9.4 -- October 6th, 2006
            sshoptions (Closes: #388543)
 	 . Now forbid to (try to) include /.
 	sys:
-	 . Many more system checks were added, (thanks to Petr Klíma)
+	 . Many more system checks were added, (thanks to Petr KlÃ­ma)
 	 . Added warning if no devices were found (thanks Ranier Zocholl)
 	 . Enhanced debian package selections to include purged packages (thanks
 	   Tom Hoover)
@@ -337,7 +341,7 @@ version 0.9.2 -- December 29, 2005
 
 version 0.9.1 -- November 05 2005
     rearranged source so that it is relocatable with autotools
-        (thanks to Petr Klíma petr.klima@madeta-group.cz)
+        (thanks to Petr KlÃ­ma petr.klima@madeta-group.cz)
     fixed many bugs in rdiff helper
     rdiff handler does not require 'label' (for real this time?)
     added makecd ninjahelper
