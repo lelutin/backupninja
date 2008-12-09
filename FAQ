@@ -1,0 +1,19 @@
+Q: duplicity works fine when run standalone, but complains about gpg
+"public key not found" when run from backupninja
+
+A: We bet you're using sudo to run both duplicity and backupninja, and have been
+using sudo as well when generating the GnuPG key pair used by duplicity.
+
+Quick fix: generate a new GnuPG key pair in a root shell, or using
+"sudo -H" instead of plain sudo.
+
+Another solution: import the GnuPG keypair into the root user's keyring, taking
+care of running "gpg --update-trustdb" in a root shell or using "sudo -H"
+afterwards, in order to tag this keypair as "ultimately trusted".
+
+Detailed explanation: sudo does not change $HOME by default, so GnuPG saved the
+newly generated key pair to your own keyring, rather than to the root user's
+keyring. Running "sudo duplicity" hides the problem, as it uses your own
+keyring. Running "sudo backupninja" reveals the problem, as backupninja uses
+"su" to make sure it runs duplicity in a real root environment, i.e. using the
+root user's GnuPG keyring.
