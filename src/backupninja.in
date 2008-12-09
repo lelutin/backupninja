@@ -98,7 +98,7 @@ function printmsg() {
 
 function logmsg() {
 	if [ -w "$logfile" ]; then
-		echo -e `date "+%h %d %H:%M:%S"` "$@" >> $logfile
+		echo -e `LC_ALL=C date "+%h %d %H:%M:%S"` "$@" >> $logfile
 	fi
 }
 
@@ -200,9 +200,9 @@ function toint() {
 
 # we grab the current time once, since processing
 # all the configs might take more than an hour.
-nowtime=`date +%H`
-nowday=`date +%d`
-nowdayofweek=`date +%A`
+nowtime=`LC_ALL=C date +%H`
+nowday=`LC_ALL=C date +%d`
+nowdayofweek=`LC_ALL=C date +%A`
 nowdayofweek=`tolower "$nowdayofweek"`
 
 function isnow() {

@@ -1,6 +1,7 @@
 version 0.9.7 -- UNRELEASED
     backupninja changes
 	 . fix bug in reportspace, thanks Dan Garthwaite
+	 . do not assume English locale when using date (Closes: #465837)
     handler changes
 	maildir:
 	 . fix location of deleted_on file
