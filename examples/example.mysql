@@ -73,6 +73,10 @@ compress    = yes
 # make a backup using mysqldump. this creates text files with sql commands
 # sufficient to recontruct the database.
 #
+# sqldumpoptions = <options>
+# (default = --lock-tables --complete-insert --add-drop-table --quick --quote-names)
+# arguments to pass to mysqldump
+#
 # compress = < yes | no > (default = yes)
 # if yes, compress the sqldump output. 
 #

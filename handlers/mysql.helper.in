@@ -94,6 +94,11 @@ $hotcopy
 #
 $sqldump
 
+# sqldumpoptions = <options>
+# (default = --lock-tables --complete-insert --add-drop-table --quick --quote-names)
+# arguments to pass to mysqldump
+# sqldumpoptions = --add-drop-table --quick --quote-names
+
 # compress = < yes | no > (default = yes)
 # if yes, compress the sqldump output.
 $compress

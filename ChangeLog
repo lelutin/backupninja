@@ -6,6 +6,10 @@ version 0.9.7 -- UNRELEASED
 	maildir:
 	 . fix location of deleted_on file
 	 . add missing destid_file options to ssh connections
+	mysql:
+	 . Options passed to mysqldump are now customizable with the new
+	   sqldumpoptions configuration variable. Thanks to Chris Lamb for his
+	   preliminary patch (Closes: #502966)
 
 version 0.9.6 -- July 21, 2008
     backupninja changes
