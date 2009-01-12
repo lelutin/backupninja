@@ -208,6 +208,9 @@ nowdayofweek=`tolower "$nowdayofweek"`
 function isnow() {
 	local when="$1"
 	set -- $when
+
+	[ "$when" == "manual" ] && return 0
+
 	whendayofweek=$1; at=$2; whentime=$3;
 	whenday=`toint "$whendayofweek"`
 	whendayofweek=`tolower "$whendayofweek"`
@@ -298,9 +301,9 @@ function process_action() {
 			ret=$?
 			IFS=$'\t\n'
 			if [ $ret == 0 ]; then
-				debug "skipping $file because it is not $w"
+				debug "skipping $file because current time does not match $w"
 			else
-				info ">>>> starting action $file (because it is $w)"
+				info ">>>> starting action $file (because current time matches $w)"
 				run="yes"
 			fi
 		done

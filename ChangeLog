@@ -2,6 +2,9 @@ version 0.9.7 -- UNRELEASED
     backupninja changes
 	 . fix bug in reportspace, thanks Dan Garthwaite
 	 . do not assume English locale when using date (Closes: #465837)
+	 . add 'when = manual' option, that can be used in the global config
+	   file or in a given backup action file. Thanks Tuomas Jormola for the
+	   preliminary patch (Closes: #511299)
     handler changes
 	maildir:
 	 . fix location of deleted_on file
