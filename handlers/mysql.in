@@ -266,9 +266,9 @@ then
 		if [ $usevserver = yes ]
 		then
                    # Test to make sure mysqld is running, if it is not sqldump will not work
-                   $VSERVER $vsname exec su $user -c "$MYSQLADMIN $defaultsfile ping"
+                   $VSERVER $vsname exec su $user -c "$MYSQLADMIN $defaultsfile ping 2>&1 >/dev/null"
                    if [ $? -ne 0 ]; then
-                      fatal "Either you have an authentication problem, or mysqld doesn't appear to be running!"
+                      fatal "mysqld doesn't appear to be running!"
                    fi
                    if [ "$compress" == "yes" ]; then
                       execstr="$VSERVER $vsname exec $DUMP | $GZIP > $vroot$dumpdir/${db}.sql.gz"
@@ -277,9 +277,9 @@ then
                    fi
 		else
                    # Test to make sure mysqld is running, if it is not sqldump will not work
-                   su $user -c "$MYSQLADMIN $defaultsfile ping"
+                   su $user -c "$MYSQLADMIN $defaultsfile ping 2>&1 >/dev/null"
                    if [ $? -ne 0 ]; then
-                      fatal "Either you have an authentication problem, or mysqld doesn't appear to be running!"
+                      fatal "mysqld doesn't appear to be running!"
                    fi
                    if [ "$compress" == "yes" ]; then
                       execstr="$DUMP | $GZIP > $dumpdir/${db}.sql.gz"

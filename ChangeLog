@@ -13,6 +13,11 @@ version 0.9.7 -- UNRELEASED
 	 . Options passed to mysqldump are now customizable with the new
 	   sqldumpoptions configuration variable. Thanks to Chris Lamb for his
 	   preliminary patch (Closes: #502966)
+	 . Hide 'mysqladmin ping' output, to prevent confusing the user in
+	   case mysqld is running but the authentication fails, which apparently
+	   does not prevent mysqldump to work.
+	 . Fix the error message displayed when mysqld is not running:
+	   mysqladmin ping indeed returns 0 when authentication fails.
 
 version 0.9.6 -- July 21, 2008
     backupninja changes
