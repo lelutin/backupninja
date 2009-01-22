@@ -8,19 +8,22 @@ sys_wizard() {
        "packages" "list of all installed packages." on \
        "partitions" "the partition table of all disks." on  \
        "sfdisk" "use sfdisk to get partition information." on \
-       "hardware" "detailed hardware information" on
+       "hardware" "detailed hardware information" on \
+       "luksheaders" "Luks headers of all Luks partitions." off
    [ $? = 1 ] && return;    
    result="$REPLY"
    packages="packages = no"
    partitions="partitions = no"
    sfdisk="dosfdisk = no"
    hardware="hardware = no"
+   luksheaders="luksheaders = no"
    for opt in $result; do
       case $opt in
         '"packages"') packages="packages = yes";;
         '"partitions"') partitions="partitions = yes";;
         '"sfdisk"') sfdisk="dosfdisk = yes";;
         '"hardware"') hardware="hardware = yes";;
+        '"luksheaders"') luksheaders="luksheaders = yes";;
       esac
    done
    get_next_filename $configdirectory/10.sys
@@ -29,10 +32,13 @@ $packages
 $partitions
 $sfdisk
 $hardware
+$luksheaders
+
 # packagesfile = /var/backups/dpkg-selections.txt
 # selectionsfile = /var/backups/debconfsel.txt
 # partitionsfile = /var/backups/partitions.__star__.txt
 # hardwarefile = /var/backups/hardware.txt
+# luksheadersfile = /var/backups/luksheader.__star__.bin
 
 # If vservers = yes in /etc/backupninja.conf then the following variables can
 # be used:

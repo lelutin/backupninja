@@ -1,7 +1,7 @@
 # -*- mode: sh; sh-basic-offset: 3; indent-tabs-mode: nil; -*-
 #
 # this handler will save various reports of vital system information.
-# by default, all the reports are enabled and are saved in /var/backups.
+# by default, all the reports are saved in /var/backups.
 #
 # (1) a capture of the debconf package selection states. This file
 #     can be used to restore the answers to debconf questions for
@@ -23,6 +23,12 @@
 #
 # (4) hardware information. 
 #     write to a text file the important things which hwinfo can gleen.
+#
+# (5) the Luks header of every Luks block device, if option luksheaders
+#     is enabled.
+#     in case you (have to) scramble such a Luks header (for some time),
+#     and restore it later by running "dd if=luksheader.sda2.bin of=/dev/sda2"
+#     (MAKE SURE YOU PASS THE CORRECT DEVICE AS of= !!!)
 #
 
 if [ -f /etc/debian_version ]
@@ -82,6 +88,11 @@ getconf HWINFO `which hwinfo`
 getconf sfdisk_options ""
 getconf hwinfo_options ""
 
+getconf CRYPTSETUP `which cryptsetup`
+getconf DD `which dd`
+getconf luksheaders no
+getconf luksheadersfile $parentdir/luksheader.__star__.bin
+
 getconf vsnames all
 
 # If vservers are configured, check that the ones listed in $vsnames are running.
@@ -95,6 +106,19 @@ if [ $vservers_are_available = yes ]; then
    fi
    info "Using vservers '$vsnames'"
    usevserver=yes
+fi
+
+## SANITY CHECKS #########################
+
+if [ "$luksheaders" == "yes" ]; then
+   if [ ! -x "$DD" ]; then
+      warning "can't find dd, skipping backup of Luks headers."
+      luksheaders="no"
+   fi
+   if [ ! -x "$CRYPTSETUP" ]; then
+      warning "can't find cryptsetup, skipping backup of Luks headers."
+      luksheaders="no"
+   fi
 fi
 
 ## PACKAGES ##############################
@@ -540,4 +564,43 @@ if [ "$partitions" == "yes" ]; then
       echo -e "\n\n====================== $disk ======================\n" >>  $hardwarefile
       $HWINFO --disk >> $hardwarefile
    fi
+fi
+
+if [ "$luksheaders" == "yes" ]; then
+   devices=`LC_ALL=C $SFDISK -l 2>/dev/null | grep "^Disk /dev" | @AWK@ '{print $2}' | cut -d: -f1`
+   [ -n "$devices" ] || warning "No block device found"
+   targetdevices=""
+   for dev in $devices; do
+      [ -b $dev ] || continue
+      debug "$CRYPTSETUP isLuks $dev"
+      $CRYPTSETUP isLuks $dev
+      [ $? -eq 0 ] && targetdevices="$targetdevices $dev"
+   done
+   for dev in $targetdevices; do
+      label=${dev#/dev/}
+      label=${label//\//-}
+      outputfile=${luksheadersfile//__star__/$label}
+      # the following sizes are expressed in terms of 512-byte sectors
+      debug "Let us find out the Luks header size for $dev"
+      debug "$CRYPTSETUP luksDump \"$dev\" | grep '^Payload offset:' | @AWK@ '{print $3}'"
+      headersize=`$CRYPTSETUP luksDump "$dev" | grep '^Payload offset:' | @AWK@ '{print $3}'`
+      if [ $? -ne 0 ]; then
+         warning "Could not compute the size of Luks header, skipping device $dev"
+         continue
+      elif [ -z "$headersize" -o -n "`echo \"$headersize\" | sed 's/[0-9]*//g'`" ]; then
+         warning "The computed size of Luks header is not an integer, skipping device $dev"
+         continue
+      fi
+      debug "Let us backup the Luks header of device $dev"
+      debug "$DD if=\"${dev}\" of=\"${outputfile}\" bs=512 count=\"${headersize}\""
+      output=`$DD if="${dev}" of="${outputfile}" bs=512 count="${headersize}" 2>&1`
+      exit_code=$?
+      if [ $exit_code -eq 0 ]; then
+         debug $output
+         info "The Luks header of $dev was saved to $outputfile."
+      else
+         debug $output
+         fatal "The Luks header of $dev could not be saved."
+      fi
+   done
 fi

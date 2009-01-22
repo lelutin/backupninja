@@ -1,6 +1,6 @@
 #
 # this config file will save various reports of vital system information.
-# by default, all the reports are enabled and are saved in /var/backups.
+# by default, all the reports are saved in /var/backups.
 #
 # requires dpkg, debconf-utils, sfdisk, and hwinfo
 #
@@ -25,6 +25,12 @@
 # (4) hardware information. 
 #     detailed information on most important aspects of the hardware.
 #
+# (5) the Luks header of every Luks block device, if option luksheaders
+#     is enabled.
+#     in case you (have to) scramble such a Luks header (for some time),
+#     and restore it later by running "dd if=luksheader.sda2.bin of=/dev/sda2"
+#     (MAKE SURE YOU PASS THE CORRECT DEVICE AS of= !!!)
+#
 
 # here are the defaults, commented out:
 
@@ -46,6 +52,14 @@
 # hardware = yes
 # hardwarefile = /var/backups/hardware.txt
 # dohwinfo = yes
+
+# luksheaders = no
+# NOTE: the __star__ below will be replaced by the Luks partitions found on the
+# system (e.g. luksheader.sda2.bin, luksheader.sdb3.bin). If you change 
+# the luksheadersfile default below, be sure to include the __star__ 
+# replacement in the filename, or you will get one file for only one partition,
+# the others being written to the same file, and then overwritten by the next.
+# luksheadersfile = /var/backups/luksheader.__star__.bin
 
 # If vservers = yes in /etc/backupninja.conf then the following variables can
 # be used:
