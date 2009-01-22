@@ -31,6 +31,8 @@
 #     and restore it later by running "dd if=luksheader.sda2.bin of=/dev/sda2"
 #     (MAKE SURE YOU PASS THE CORRECT DEVICE AS of= !!!)
 #
+# (6) LVM metadata for every detected volume group, if "lvm = yes"
+#
 
 # here are the defaults, commented out:
 
@@ -60,6 +62,8 @@
 # replacement in the filename, or you will get one file for only one partition,
 # the others being written to the same file, and then overwritten by the next.
 # luksheadersfile = /var/backups/luksheader.__star__.bin
+
+# lvm = no
 
 # If vservers = yes in /etc/backupninja.conf then the following variables can
 # be used:

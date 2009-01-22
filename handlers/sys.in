@@ -30,6 +30,8 @@
 #     and restore it later by running "dd if=luksheader.sda2.bin of=/dev/sda2"
 #     (MAKE SURE YOU PASS THE CORRECT DEVICE AS of= !!!)
 #
+# (6) LVM metadata for every detected volume group, if "lvm = yes"
+#
 
 if [ -f /etc/debian_version ]
 then
@@ -93,6 +95,10 @@ getconf DD `which dd`
 getconf luksheaders no
 getconf luksheadersfile $parentdir/luksheader.__star__.bin
 
+getconf VGS `which vgs`
+getconf VGCFGBACKUP `which vgcfgbackup`
+getconf lvm no
+
 getconf vsnames all
 
 # If vservers are configured, check that the ones listed in $vsnames are running.
@@ -118,6 +124,17 @@ if [ "$luksheaders" == "yes" ]; then
    if [ ! -x "$CRYPTSETUP" ]; then
       warning "can't find cryptsetup, skipping backup of Luks headers."
       luksheaders="no"
+   fi
+fi
+
+if [ "$lvm" == "yes" ]; then
+   if [ ! -x "$VGS" ]; then
+      warning "can't find vgs, skipping backup of LVM metadata"
+      lvm="no"
+   fi
+   if [ ! -x "$VGCFGBACKUP" ]; then
+      warning "can't find vgcfgbackup, skipping backup of LVM metadata"
+      lvm="no"
    fi
 fi
 
@@ -534,7 +551,6 @@ if [ "$hardware" == "yes" ]; then
    fi
 fi
 
-
 ## PARTITIONS #############################
 
 # here we use sfdisk to dump a listing of all the partitions. 
@@ -603,4 +619,61 @@ if [ "$luksheaders" == "yes" ]; then
          fatal "The Luks header of $dev could not be saved."
       fi
    done
+fi
+
+## LVM ####################################
+
+# returns 0 on success, 1 on error, 2 if not tried
+# outputs error message if error, reason if not tried
+function doLvmBackup () {
+   local lvmdir="$1"
+   if [ ! -d "$lvmdir" ]; then
+      if ! mkdir "$lvmdir"; then
+         echo "could not create $lvmdir"
+         return 2
+      else
+         info "successfully created $lvmdir"
+      fi
+   fi
+   if [ ! -w "$lvmdir" ]; then
+         echo "can not write to directory $lvmdir"
+         return 2
+   fi
+   debug "Let's try to gather the list of LVM volume groups"
+   debug "$VGS --options vg_name --noheadings | @SED@ 's/^[ ]*//' | @SED@ 's/[ ]*$//' | tr '\n' ' '"
+   vgs=`$VGS --options vg_name --noheadings | @SED@ 's/^[ ]*//' | @SED@ 's/[ ]*$//' | tr '\n' ' '`
+   debug "Let's try to backup LVM metadata for detected volume groups: $vgs"
+   debug "$VGCFGBACKUP --file \"${lvmdir}\"/\'%s\' $vgs"
+   output=`$VGCFGBACKUP --file "${lvmdir}"/'%s' $vgs`
+   exit_code=$?
+   debug $output
+   case $exit_code in
+      0)
+         info "LVM metadata was saved to $lvmdir for volume groups: $vgs"
+         return 0
+         ;;
+      *)
+         echo "LVM metadata could not be saved for at least one of these volume groups: $vgs"
+         return 1
+         ;;
+   esac
+}
+
+if [ "$lvm" == "yes" ]; then
+   output=`doLvmBackup "${parentdir}/lvm"`
+   exit_code=$?
+   case $exit_code in
+      0) # success. info message has already been displayed
+         true
+         ;;
+      1) # error
+         fatal "$output"
+         ;;
+      2) # could not even try
+         fatal "LVM metadata backup was not tried: $output"
+         ;;
+      *) # should never happen
+         fatal "Unhandled error ($exit_code) while trying to backup LVM metadata, please report a bug"
+         ;;
+   esac
 fi

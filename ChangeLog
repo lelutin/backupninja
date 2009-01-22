@@ -21,6 +21,8 @@ version 0.9.7 -- UNRELEASED
 	sys:
 	 . New luksheaders option (default=disabled) to backup the Luks header
 	   of every Luks device.
+	 . New lvm option (default=disabled) to backup LVM metadata for every
+	   detected volume group.
 
 version 0.9.6 -- July 21, 2008
     backupninja changes

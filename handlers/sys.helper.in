@@ -9,7 +9,8 @@ sys_wizard() {
        "partitions" "the partition table of all disks." on  \
        "sfdisk" "use sfdisk to get partition information." on \
        "hardware" "detailed hardware information" on \
-       "luksheaders" "Luks headers of all Luks partitions." off
+       "luksheaders" "Luks headers of all Luks partitions." off \
+       "lvm" "LVM metadata for all volume groups." off
    [ $? = 1 ] && return;    
    result="$REPLY"
    packages="packages = no"
@@ -17,6 +18,7 @@ sys_wizard() {
    sfdisk="dosfdisk = no"
    hardware="hardware = no"
    luksheaders="luksheaders = no"
+   lvm="lvm = no"
    for opt in $result; do
       case $opt in
         '"packages"') packages="packages = yes";;
@@ -24,6 +26,7 @@ sys_wizard() {
         '"sfdisk"') sfdisk="dosfdisk = yes";;
         '"hardware"') hardware="hardware = yes";;
         '"luksheaders"') luksheaders="luksheaders = yes";;
+        '"lvm"') lvm="lvm = yes";;
       esac
    done
    get_next_filename $configdirectory/10.sys
@@ -33,6 +36,7 @@ $partitions
 $sfdisk
 $hardware
 $luksheaders
+$lvm
 
 # packagesfile = /var/backups/dpkg-selections.txt
 # selectionsfile = /var/backups/debconfsel.txt
