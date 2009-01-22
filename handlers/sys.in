@@ -478,6 +478,9 @@ if [ $os = "redhat" ]; then
 elif [ $os = "debian" ]; then
    catifexec "/sbin/vgdisplay" "-vv"
 fi
+
+STATUS="Collecting device-mapper (dm) information:"
+catifexec '/sbin/dmsetup' 'info'
    
 STATUS="Collecting SCSI Tape information (/etc/stinit.def)"
 catiffile "/etc/stinit.def"
