@@ -1,5 +1,6 @@
 #!@BASH@
 # -*- mode: sh; sh-basic-offset: 3; indent-tabs-mode: nil; -*-
+# vim: set filetype=sh sw=3 sts=3 expandtab autoindent:
 
 # copyright 2002 lmoore@tump.com under the terms of the GNU LGPL.
 # additions 2005 collective@riseup.net

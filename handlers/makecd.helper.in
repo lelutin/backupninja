@@ -1,4 +1,5 @@
 # -*- mode: sh; sh-basic-offset: 3; indent-tabs-mode: nil; -*-
+# vim: set filetype=sh sw=3 sts=3 expandtab autoindent:
 
 HELPERS="$HELPERS makecd:makecd_backup"
 wizardname="makecd action wizard"
