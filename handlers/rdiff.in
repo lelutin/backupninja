@@ -7,68 +7,68 @@
 ### FUNCTIONS ###
 
 function test_connection() {
-	# given a user and host,
-	# tests the connection.
-	# if user or host is missing, returns 0
-	# (ie, assume it's a local connection).
-	if [ $# -lt 2 ]; then
-		debug "(local is assumed to be a good connection)"
-		return 0
-	fi
-	local user=$1
-	local host=$2
-	debug "ssh $sshoptions -o PasswordAuthentication=no $host -l $user 'echo -n 1'"
-	local ret=`ssh $sshoptions -o PasswordAuthentication=no $host -l $user 'echo -n host is alive'`
-	if echo $ret | grep "host is alive"; then
-		debug "Connected to $host as $user successfully"
-	else
-		fatal "Can't connect to $host as $user."
-	fi
+   # given a user and host,
+   # tests the connection.
+   # if user or host is missing, returns 0
+   # (ie, assume it's a local connection).
+   if [ $# -lt 2 ]; then
+      debug "(local is assumed to be a good connection)"
+      return 0
+   fi
+   local user=$1
+   local host=$2
+   debug "ssh $sshoptions -o PasswordAuthentication=no $host -l $user 'echo -n 1'"
+   local ret=`ssh $sshoptions -o PasswordAuthentication=no $host -l $user 'echo -n host is alive'`
+   if echo $ret | grep "host is alive"; then
+      debug "Connected to $host as $user successfully"
+   else
+      fatal "Can't connect to $host as $user."
+   fi
 }
 
 function get_version() {
-	# given no arguments, returns the local version.
-	# given a user and host, returns the remote version.
-	# if user or host is missing, returns the local version.
-	if [ "$#" -lt 2 ]; then
-		debug "$RDIFFBACKUP -V"
-		echo `$RDIFFBACKUP -V`
-	else
-		local user=$1
-		local host=$2
-		debug "ssh $sshoptions $host -l $user '$RDIFFBACKUP -V'"
-		echo `ssh $sshoptions $host -l $user "$RDIFFBACKUP -V | grep rdiff-backup"`
-	fi
+   # given no arguments, returns the local version.
+   # given a user and host, returns the remote version.
+   # if user or host is missing, returns the local version.
+   if [ "$#" -lt 2 ]; then
+      debug "$RDIFFBACKUP -V"
+      echo `$RDIFFBACKUP -V`
+   else
+      local user=$1
+      local host=$2
+      debug "ssh $sshoptions $host -l $user '$RDIFFBACKUP -V'"
+      echo `ssh $sshoptions $host -l $user "$RDIFFBACKUP -V | grep rdiff-backup"`
+   fi
 }
 
 function check_consistency() {
-	local section=$1
-	local type=$2
-	local user=$3
-	local host=$4
-	if [ "$type" == "local" ]; then
-		if [ "$user" != "" ]; then
-			warning "User should not be specified for local $section."
-		fi
-		if [ "$host" != "" ]; then
-			warning "Host should not be specified for local $section."
-		fi
-	fi
-	if [ "$type" == "remote" ]; then
-		if [ "$user" == "" ]; then
-			fatal "User must be specified for remote $section."
-		fi
-		if [ "host" == "" ]; then
-			fatal "Host must be specifed for remote $section."
-		fi
-	fi
+   local section=$1
+   local type=$2
+   local user=$3
+   local host=$4
+   if [ "$type" == "local" ]; then
+      if [ "$user" != "" ]; then
+         warning "User should not be specified for local $section."
+      fi
+      if [ "$host" != "" ]; then
+         warning "Host should not be specified for local $section."
+      fi
+   fi
+   if [ "$type" == "remote" ]; then
+      if [ "$user" == "" ]; then
+         fatal "User must be specified for remote $section."
+      fi
+      if [ "host" == "" ]; then
+         fatal "Host must be specifed for remote $section."
+      fi
+   fi
 }
 
 function check_cstream() {
-	local cstream=$1
-	if [ ! -x $cstream ]; then
-		fatal "Can't find your cstream binary (trying: $cstream). If you use bwlimit you must have cstream installed."
-	fi
+   local cstream=$1
+   if [ ! -x $cstream ]; then
+      fatal "Can't find your cstream binary (trying: $cstream). If you use bwlimit you must have cstream installed."
+   fi
 }
 
 ### GET CONFIG ###
@@ -102,7 +102,7 @@ getconf sshoptions
 check_consistency "destination" "$type" "$user" "$host"
 
 if [ -n "$sshoptions" ] && echo $options | grep -qv "remote-schema"; then
-	options="$options --remote-schema 'ssh -C $sshoptions %s rdiff-backup --server'"
+   options="$options --remote-schema 'ssh -C $sshoptions %s rdiff-backup --server'"
 fi
 
 ### CHECK CONFIG ###
@@ -114,7 +114,7 @@ if [ $vservers_are_available = yes ]; then
       vsnames="$found_vservers"
    else
       if ! vservers_exist "$vsnames" ; then
-            fatal "At least one of the vservers listed in vsnames ($vsnames) does not exist."
+         fatal "At least one of the vservers listed in vsnames ($vsnames) does not exist."
       fi
    fi
    if [ -n "$vsinclude" ]; then
@@ -128,40 +128,40 @@ fi
 # check the connection at the source and destination
 [ -n "$test" ] || test=0
 if [ "$testconnect" = "yes" ] || [ "${test}" -eq 1 ]; then
-	test_connection $sourceuser $sourcehost
-	test_connection $destuser $desthost
+   test_connection $sourceuser $sourcehost
+   test_connection $destuser $desthost
 fi
 
 if [ "$ignore_version" != "yes" ]; then
-	# see that rdiff-backup has the same version at the source and destination
-	sourceversion=`get_version $sourceuser $sourcehost`
-	destversion=`get_version $destuser $desthost`
-	if [ "$sourceversion" != "$destversion" ]; then
-		fatal "rdiff-backup does not have the same version at the source and at the destination."
-	fi
+   # see that rdiff-backup has the same version at the source and destination
+   sourceversion=`get_version $sourceuser $sourcehost`
+   destversion=`get_version $destuser $desthost`
+   if [ "$sourceversion" != "$destversion" ]; then
+      fatal "rdiff-backup does not have the same version at the source and at the destination."
+   fi
 fi
 
 # source specific checks
-case $sourcetype in 
-	remote ) execstr_sourcepart="$sourceuser@$sourcehost::/" ;;
-	local  ) execstr_sourcepart="/" ;;
-	*      ) fatal "sourcetype '$sourcetype' is neither local nor remote" ;;
+case $sourcetype in
+   remote ) execstr_sourcepart="$sourceuser@$sourcehost::/" ;;
+   local  ) execstr_sourcepart="/" ;;
+   *      ) fatal "sourcetype '$sourcetype' is neither local nor remote" ;;
 esac
 
 # destination specific checks
 [ "$destdir" != "" ] || fatal "Destination directory not set"
-case $desttype in 
-	remote ) execstr_destpart="$destuser@$desthost::$destdir/$label" ;;
-	local  ) execstr_destpart="$destdir/$label" ;;
-	*      ) fatal "desttype '$desttype' is neither local nor remote" ;;
+case $desttype in
+   remote ) execstr_destpart="$destuser@$desthost::$destdir/$label" ;;
+   local  ) execstr_destpart="$destdir/$label" ;;
+   *      ) fatal "desttype '$desttype' is neither local nor remote" ;;
 esac
-	
+
 ### REMOVE OLD BACKUPS ###
 
 if [ "$keep" != yes ]; then
 
    if [ "`echo $keep | tr -d 0-9`" == "" ]; then
-	# add D if no other date unit is specified
+   # add D if no other date unit is specified
       keep="${keep}D"
    fi
 
@@ -175,27 +175,27 @@ if [ "$keep" != yes ]; then
    if [ $test = 0 ]; then
       output="`su -c "$removestr" 2>&1`"
       if [ $? = 0 ]; then
-	 debug $output
-	 info "Removing backups older than $keep days succeeded."
+         debug $output
+         info "Removing backups older than $keep days succeeded."
       else
-	 warning $output
-	 warning "Failed removing backups older than $keep."
+         warning $output
+         warning "Failed removing backups older than $keep."
       fi
    fi
 
 fi
 
-# Add cstream 
+# Add cstream
 
 if [ ! -z $bwlimit ]; then
-	check_cstream $CSTREAM;
-	if [ "$desttype" = "remote" ]; then
-		RDIFFBACKUP="$RDIFFBACKUP --remote-schema 'cstream -t $bwlimit | ssh %s \''rdiff-backup --server\'''"
-	elif [ "$sourcetype" = "remote" ]; then
-		RDIFFBACKUP="$RDIFFBACKUP --remote-schema 'ssh %s \''rdiff-backup --server\'' | cstream -t $bwlimit'"
-	else
-		fatal "You specified a bandwidth limit but neither your source nor destination types are remote."
-	fi
+   check_cstream $CSTREAM;
+   if [ "$desttype" = "remote" ]; then
+      RDIFFBACKUP="$RDIFFBACKUP --remote-schema 'cstream -t $bwlimit | ssh %s \''rdiff-backup --server\'''"
+   elif [ "$sourcetype" = "remote" ]; then
+      RDIFFBACKUP="$RDIFFBACKUP --remote-schema 'ssh %s \''rdiff-backup --server\'' | cstream -t $bwlimit'"
+   else
+      fatal "You specified a bandwidth limit but neither your source nor destination types are remote."
+   fi
 fi
 
 ### EXECUTE ###
@@ -212,7 +212,7 @@ for i in $exclude; do
    str="${i//__star__/*}"
    execstr="${execstr}--exclude '$str' "
 done
-# includes 
+# includes
 for i in $include; do
    [ "$i" != "/" ] || fatal "Sorry, you cannot use 'include = /'"
    str="${i//__star__/*}"
@@ -223,10 +223,10 @@ done
 if [ $usevserver = yes ]; then
    for vserver in $vsnames; do
       for vi in $vsinclude; do
-	 str="${vi//__star__/*}"
-	 str="$VROOTDIR/$vserver$str"
+         str="${vi//__star__/*}"
+         str="$VROOTDIR/$vserver$str"
          if [ -n "$str" ]; then
-	    execstr="${execstr}--include '$str' "
+            execstr="${execstr}--include '$str' "
          else
             warning "vsinclude statement '${vi//__star__/*}' will be ignored for VServer $vserver. $symlinks_warning"
          fi
@@ -238,20 +238,20 @@ set +o noglob
 
 # exclude everything else
 [ "$include" != "" -o "$vsinclude" != "" ] && execstr="${execstr}--exclude '/*' "
-		
+
 # include client-part and server-part
 execstr="${execstr}$execstr_sourcepart $execstr_destpart"
 
 debug "$execstr"
 if [ $test = 0 ]; then
-	output=`nice -n $nicelevel su -c "$execstr" 2>&1`
-	if [ $? = 0 ]; then
-		debug $output
-		info "Successfully finished backing up source $label"
-	else
-		warning $output
-		warning "Failed backup up source $label"
-	fi
-fi	
+   output=`nice -n $nicelevel su -c "$execstr" 2>&1`
+   if [ $? = 0 ]; then
+      debug $output
+      info "Successfully finished backing up source $label"
+   else
+      warning $output
+      warning "Failed backup up source $label"
+   fi
+fi
 
 return 0

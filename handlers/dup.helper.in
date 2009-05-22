@@ -13,11 +13,11 @@ do_dup_host_includes() {
          [ -z "$dup_includes" ] && dup_includes="$dup_default_includes"
          for i in $dup_includes; do
             formItem include "$i"
-	 done
-	 formItem include ""
-	 formItem include ""
-	 formItem include ""
-	 formDisplay
+         done
+         formItem include ""
+         formItem include ""
+         formItem include ""
+         formDisplay
       [ $? = 0 ] || return 1
       dup_includes="$REPLY"
    done
@@ -37,10 +37,10 @@ do_dup_vserver() {
          [ -z "$dup_vsincludes" ] && dup_vsincludes="$dup_default_includes"
          for i in $dup_vsincludes; do
             formItem include "$i"
-	 done
-	 formItem include ""
-	 formItem include ""
-	 formItem include ""
+         done
+         formItem include ""
+         formItem include ""
+         formItem include ""
       formDisplay
       [ $? = 0 ] || return 1
       dup_vsincludes="$REPLY"
@@ -69,26 +69,26 @@ do_dup_src() {
    [ $? = 0 ] || return 1
    case $host_or_vservers in
       'host')
-	 do_dup_host_includes
-	 [ $? = 0 ] || return 1
-	 ;;
+         do_dup_host_includes
+         [ $? = 0 ] || return 1
+         ;;
       'vservers')
-	 do_dup_vserver
-	 [ $? = 0 ] || return 1
-	 ;;
+         do_dup_vserver
+         [ $? = 0 ] || return 1
+         ;;
       'both')
-	 do_dup_host_includes
-	 [ $? = 0 ] || return 1
-	 do_dup_vserver
-	 [ $? = 0 ] || return 1
-	 ;;
+         do_dup_host_includes
+         [ $? = 0 ] || return 1
+         do_dup_vserver
+         [ $? = 0 ] || return 1
+         ;;
       *)
-	 return 1
-	 ;;
+         return 1
+         ;;
    esac
    do_dup_excludes
    [ $? = 0 ] || return 1
-   
+
    _src_done="(DONE)"
    setDefault dest
 }
@@ -102,13 +102,13 @@ do_dup_dest() {
    REPLY=
    while [ -z "$REPLY" -o -z "$dup_destdir" -o -z "$dup_desthost" -o -z "$dup_destuser" ]; do
       formBegin "$dup_title - destination: first three items are compulsory"
-	formItem "desthost" "$dup_desthost"
-	formItem "destuser" "$dup_destuser"
-	formItem "destdir" "$dup_destdir"
-	formItem "keep" "$dup_keep"
+        formItem "desthost" "$dup_desthost"
+        formItem "destuser" "$dup_destuser"
+        formItem "destdir" "$dup_destdir"
+        formItem "keep" "$dup_keep"
         formItem "incremental" "$dup_incremental"
-	formItem "bandwidthlimit" "$dup_bandwidth"
-	formItem "sshoptions" "$dup_sshoptions"
+        formItem "bandwidthlimit" "$dup_bandwidth"
+        formItem "sshoptions" "$dup_sshoptions"
       formDisplay
       [ $? = 0 ] || return 1
 
@@ -117,7 +117,7 @@ do_dup_dest() {
       IFS=$':'
       thereply=($replyconverted)
       IFS=$' \t\n'
-      
+
       dup_desthost=${thereply[0]}
       dup_destuser=${thereply[1]}
       dup_destdir=${thereply[2]}
@@ -165,9 +165,9 @@ do_dup_gpg_signkey() {
       # signkey ?
       REPLY=
       while [ -z "$REPLY" -o -z "$dup_gpg_signkey" ]; do
-	 inputBox "$dup_title - GnuPG" "Enter the ID of the private GnuPG key to be used to sign the backups:" "$dup_gpg_signkey"
-	 [ $? = 0 ] || return 1
-	 dup_gpg_signkey="$REPLY"
+         inputBox "$dup_title - GnuPG" "Enter the ID of the private GnuPG key to be used to sign the backups:" "$dup_gpg_signkey"
+         [ $? = 0 ] || return 1
+         dup_gpg_signkey="$REPLY"
       done
    fi
 }
@@ -183,7 +183,7 @@ do_dup_gpg_passphrase() {
 }
 
 do_dup_gpg() {
-   
+
    # symmetric or public key encryption ?
    booleanBox "$dup_title - GnuPG" "Use public key encryption? Otherwise, symmetric encryption will be used, and data signing will be impossible." "$dup_gpg_asymmetric_encryption"
    if [ $? = 0 ]; then
@@ -197,7 +197,7 @@ do_dup_gpg() {
       do_dup_gpg_encryptkey ; [ $? = 0 ] || return 1
       do_dup_gpg_sign ; [ $? = 0 ] || return 1
       if [ "$dup_gpg_sign" == yes ]; then
-	 do_dup_gpg_signkey ; [ $? = 0 ] || return 1
+         do_dup_gpg_signkey ; [ $? = 0 ] || return 1
       fi
    else
       dup_gpg_sign=no
@@ -334,7 +334,7 @@ EOF
    if [ "$host_or_vservers" == host -o "$host_or_vservers" == both ]; then
       set -o noglob
       for i in $dup_includes; do
-	 echo "include = $i" >> $next_filename
+         echo "include = $i" >> $next_filename
       done
       set +o noglob
    fi
@@ -432,49 +432,49 @@ EOF
 
 dup_main_menu() {
 
-  while true; do
-     srcitem="choose files to include & exclude $_src_done"
-     destitem="configure backup destination $_dest_done"
-     gpgitem="configure GnuPG encryption/signing $_gpg_done"
-     conitem="set up ssh keys and test remote connection $_con_done"
-     advitem="edit advanced settings $_adv_done"
-     # TODO: add the following to the menu when do_dup_conn is written
-     # conn "$conitem" \
-     menuBox "$dup_title" "choose a step:" \
-        src "$srcitem" \
-        dest "$destitem" \
-        gpg "$gpgitem" \
-	adv "$advitem" \
-        finish "finish and create config file"
-     [ $? = 0 ] || return 1
-     result="$REPLY"
+   while true; do
+      srcitem="choose files to include & exclude $_src_done"
+      destitem="configure backup destination $_dest_done"
+      gpgitem="configure GnuPG encryption/signing $_gpg_done"
+      conitem="set up ssh keys and test remote connection $_con_done"
+      advitem="edit advanced settings $_adv_done"
+      # TODO: add the following to the menu when do_dup_conn is written
+      # conn "$conitem" \
+      menuBox "$dup_title" "choose a step:" \
+         src "$srcitem" \
+         dest "$destitem" \
+         gpg "$gpgitem" \
+         adv "$advitem" \
+         finish "finish and create config file"
+      [ $? = 0 ] || return 1
+      result="$REPLY"
 
-     case "$result" in
-	"src") do_dup_src;;
-	"dest") do_dup_dest;;
-	"gpg") do_dup_gpg;;
-	# TODO: enable the following when do_dup_conn is written
-	# "conn") do_dup_conn;;
-	"adv") do_dup_adv;;
-	"finish")
-           if [[ "$_dest_done$_gpg_done$_src_done" != "(DONE)(DONE)(DONE)" ]]; then
-	   # TODO: replace the previous test by the following when do_dup_conn is written
-           # if [[ "$_con_done$_dest_done$_gpg_done$_src_done" != "(DONE)(DONE)(DONE)(DONE)" ]]; then
-              msgBox "$dup_title" "You cannot create the configuration file until the four first steps are completed."
-           else
-              do_dup_finish
-              break
-           fi
-           ;;
-     esac
+      case "$result" in
+         "src") do_dup_src;;
+         "dest") do_dup_dest;;
+         "gpg") do_dup_gpg;;
+         # TODO: enable the following when do_dup_conn is written
+         # "conn") do_dup_conn;;
+         "adv") do_dup_adv;;
+         "finish")
+            if [[ "$_dest_done$_gpg_done$_src_done" != "(DONE)(DONE)(DONE)" ]]; then
+            # TODO: replace the previous test by the following when do_dup_conn is written
+            # if [[ "$_con_done$_dest_done$_gpg_done$_src_done" != "(DONE)(DONE)(DONE)(DONE)" ]]; then
+               msgBox "$dup_title" "You cannot create the configuration file until the four first steps are completed."
+            else
+               do_dup_finish
+               break
+            fi
+            ;;
+      esac
 
-  done
+   done
 }
 
 ### Main function
 
 dup_wizard() {
-   
+
    require_packages duplicity
 
    # Global variables

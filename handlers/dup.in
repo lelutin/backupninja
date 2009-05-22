@@ -66,9 +66,9 @@ if [ "$testconnect" == "yes" ]; then
       if [ ! $test ]; then
          result=`ssh $sshoptions -o PasswordAuthentication=no $desthost -l $destuser 'echo -n 1'`
          if [ "$result" != "1" ]; then
-	    fatal "Can't connect to $desthost as $destuser."
+            fatal "Can't connect to $desthost as $destuser."
          else
-	    debug "Connected to $desthost as $destuser successfully"
+            debug "Connected to $desthost as $destuser successfully"
          fi
       fi
    fi
@@ -152,7 +152,7 @@ fi
 # If incremental==no, force a full backup anyway.
 if [ "$incremental" == "no" ]; then
    # before 0.4.4, full was an option and not a command
-   if [ "$duplicity_major" -le 0 -a "$duplicity_minor" -le 4 -a "$duplicity_sub" -lt 4 ]; then   
+   if [ "$duplicity_major" -le 0 -a "$duplicity_minor" -le 4 -a "$duplicity_sub" -lt 4 ]; then
       execstr_options="${execstr_options} --full"
    else
       execstr_command="full"
@@ -204,9 +204,9 @@ done
 if [ $usevserver = yes ]; then
    for vserver in $vsnames; do
       for vi in $vsinclude; do
-	 str="${vi//__star__/*}"
-	 str="$VROOTDIR/$vserver$str"
-	 execstr_source="${execstr_source} --include '$str'"
+         str="${vi//__star__/*}"
+         str="$VROOTDIR/$vserver$str"
+         execstr_source="${execstr_source} --include '$str'"
       done
    done
 fi
@@ -229,11 +229,11 @@ if [ "$duplicity_major" -ge 0 -a "$duplicity_minor" -ge 4 -a "$duplicity_sub" -g
          "$precmd duplicity cleanup --force $execstr_options $execstr_serverpart 2>&1"`
       exit_code=$?
       if [ $exit_code -eq 0 ]; then
-	 debug $output
-	 info "Duplicity cleanup finished successfully."
+         debug $output
+         info "Duplicity cleanup finished successfully."
       else
-	 debug $output
-	 warning "Duplicity cleanup failed."
+         debug $output
+         warning "Duplicity cleanup failed."
       fi
    fi
 fi
@@ -244,17 +244,17 @@ if [ "$keep" != "yes" ]; then
       debug "$precmd duplicity remove-older-than $keep --force $execstr_options $execstr_serverpart"
       if [ ! $test ]; then
          export PASSPHRASE=$password
-	 output=`nice -n $nicelevel \
+         output=`nice -n $nicelevel \
                    su -c \
                       "$precmd duplicity remove-older-than $keep --force $execstr_options $execstr_serverpart 2>&1"`
-	 exit_code=$?
-	 if [ $exit_code -eq 0 ]; then
-	    debug $output
-	    info "Duplicity remove-older-than finished successfully."
-	 else
-	    debug $output
-	    warning "Duplicity remove-older-than failed."
-	 fi
+         exit_code=$?
+         if [ $exit_code -eq 0 ]; then
+            debug $output
+            info "Duplicity remove-older-than finished successfully."
+         else
+            debug $output
+            warning "Duplicity remove-older-than failed."
+         fi
       fi
    fi
 fi

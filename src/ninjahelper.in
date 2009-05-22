@@ -27,7 +27,7 @@ get_next_filename() {
 require_packages() {
    for pkg in "$@"; do
       installed=`dpkg -s $pkg | grep 'ok installed'`
-      if [ -z "$installed" ]; then 
+      if [ -z "$installed" ]; then
          booleanBox "install $pkg?" "This backup action requires package $pkg. Do you want to install it now?"
          if [ $? = 0 ]; then
             apt-get install $pkg
@@ -54,7 +54,7 @@ donew() {
       listItem $helper_function "$helper_info"
    done
    listDisplay menu
-    
+
    [ $? = 1 ] && return
    result="$REPLY"
    [ "$result" = "return" -o "$result" = "" ] && return
@@ -62,10 +62,10 @@ donew() {
    $run_wizard
    result=$?
    # 0 is ok, 1 is cancel, anything else is bad.
-   if [ $result != 1 -a $result != 0 ]; then    
+   if [ $result != 1 -a $result != 0 ]; then
       echo "An error occurred ($result), bailing out. Hit return to continue."
       read
-   fi 
+   fi
 }
 
 do_rm_action() {
@@ -84,17 +84,17 @@ do_run() {
 do_xedit() {
    if [ -z "$EDITOR" -o ! -x "`which $EDITOR`" ]; then
       if [ -h /etc/alternatives/editor -a -x "`readlink /etc/alternatives/editor`" ]; then
-	 EDITOR="`readlink /etc/alternatives/editor`"
+    EDITOR="`readlink /etc/alternatives/editor`"
       elif [ -x "`which nano`" ]; then
-	 EDITOR="`which nano`"
+    EDITOR="`which nano`"
       elif [ -x "`which vim`" ]; then
-	 EDITOR="`which vim`"
+    EDITOR="`which vim`"
       elif [ -x "`which vi`" ]; then
-	 EDITOR="`which vi`"
+    EDITOR="`which vi`"
       else
-	 echo "No suitable editor found."
-	 echo "Please define $EDITOR or configure /etc/alternatives/editor."
-	 exit
+    echo "No suitable editor found."
+    echo "Please define $EDITOR or configure /etc/alternatives/editor."
+    exit
       fi
    fi
    $EDITOR $1
@@ -138,17 +138,17 @@ doaction() {
          name "change the filename" \
          run "run this action now" \
          test "do a test run" \
-         kill "remove this action" 
+         kill "remove this action"
       [ $? = 1 ] && return;
       result="$REPLY"
       case "$result" in
-         "view") dialog --textbox $action 0 0;; 
+         "view") dialog --textbox $action 0 0;;
          "xedit") do_xedit $action;;
          "disable") do_disable $action; return;;
          "enable") do_enable $action; return;;
          "name") do_rename $action; return;;
          "run") do_run $action;;
-         "test") do_run_test $action;; 
+         "test") do_run_test $action;;
          "kill") do_rm_action $action; return;;
          "main") return;;
       esac
@@ -178,7 +178,7 @@ fi
 # bootstrap
 conffile="@CFGDIR@/backupninja.conf"
 if [ ! -r "$conffile" ]; then
-   echo "Configuration file $conffile not found." 
+   echo "Configuration file $conffile not found."
    exit 1
 fi
 
@@ -188,12 +188,12 @@ if [ -z "$libdirectory" ]; then
    if [ -d "@libdir@" ]; then
       libdirectory="@libdir@"
    else
-      echo "Could not find entry 'libdirectory' in $conffile." 
+      echo "Could not find entry 'libdirectory' in $conffile."
       exit 1
    fi
 else
    if [ ! -d "$libdirectory" ]; then
-      echo "Lib directory $libdirectory not found." 
+      echo "Lib directory $libdirectory not found."
       exit 1
    fi
 fi
@@ -247,7 +247,7 @@ done
 
 menuBox "main menu" "Select a backup action for more options, or create a new action:" $menulist \
   new "create a new backup action" \
-  quit "leave ninjahelper" 
+  quit "leave ninjahelper"
 
 [ $? = 1 -o $? = 255 ] && exit 0;
 

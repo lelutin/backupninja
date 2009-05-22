@@ -13,43 +13,43 @@ do_mysql_databases() {
    while [ -z "$REPLY" ]; do
       formBegin "$mysql_title: databases"
          formItem "Database:"
-	 formItem "Database:"
-	 formItem "Database:"
-	 formItem "Database:"
-	 formItem "Database:"
-	 formItem "Database:"
-	 formItem "Database:"
-	 formItem "Database:"
-	 formItem "Database:"
-	 formItem "Database:"
+         formItem "Database:"
+         formItem "Database:"
+         formItem "Database:"
+         formItem "Database:"
+         formItem "Database:"
+         formItem "Database:"
+         formItem "Database:"
+         formItem "Database:"
+         formItem "Database:"
       formDisplay
       [ $? = 0 ] || return 1
       mysql_databases="databases = "
       for i in $REPLY; do
-	 [ -n "$i" ] && mysql_databases="$mysql_databases $i"
+         [ -n "$i" ] && mysql_databases="$mysql_databases $i"
       done
    done
 }
 
 do_mysql_password() {
-  inputBox "$mysql_title" "specify a mysql user:"
-  [ $? = 1 ] && return
-  user=$REPLY
-  inputBox "$mysql_title" "specify the mysql user's password:"
-  [ $? = 1 ] && return
-  password=$REPLY
-  do_mysql_final "dbusername = $user\ndbpassword = $password"
+   inputBox "$mysql_title" "specify a mysql user:"
+   [ $? = 1 ] && return
+   user=$REPLY
+   inputBox "$mysql_title" "specify the mysql user's password:"
+   [ $? = 1 ] && return
+   password=$REPLY
+   do_mysql_final "dbusername = $user\ndbpassword = $password"
 }
 
 do_mysql_debian() {
-  _DISABLE_HOTCOPY=yes
-  do_mysql_final "configfile = /etc/mysql/debian.cnf"
+   _DISABLE_HOTCOPY=yes
+   do_mysql_final "configfile = /etc/mysql/debian.cnf"
 }
 
 do_mysql_user() {
-  inputBox "$mysql_title" "what system user does mysql backup use?"
-  [ $? = 1 ] && return
-  do_mysql_final "user = $REPLY"
+   inputBox "$mysql_title" "what system user does mysql backup use?"
+   [ $? = 1 ] && return
+   do_mysql_final "user = $REPLY"
 }
 
 do_mysql_final() {
@@ -69,18 +69,18 @@ do_mysql_final() {
       hotcopy="hotcopy = no"
    fi
 
-   [ $status = 1 ] && return;    
+   [ $status = 1 ] && return;
    result="$REPLY"
    compress="compress = no"
    for opt in $result; do
       case $opt in
-        '"sqldump"') sqldump="sqldump = yes";;
-        '"hotcopy"') hotcopy="hotcopy = yes";;
-        '"compress"') compress="compress = yes";;
+         '"sqldump"') sqldump="sqldump = yes";;
+         '"hotcopy"') hotcopy="hotcopy = yes";;
+         '"compress"') compress="compress = yes";;
       esac
    done
    get_next_filename $configdirectory/20.mysql
-   
+
    cat >> $next_filename <<EOF
 ### backupninja MySQL config file ###
 
@@ -114,7 +114,7 @@ EOF
 $mysql_backupdir
 
 # databases = <all | db1 db2 db3 > (default = all)
-# which databases to backup. should either be the word 'all' or a 
+# which databases to backup. should either be the word 'all' or a
 # space separated list of database names.
 $mysql_databases
 
@@ -122,43 +122,43 @@ EOF
 
 if [ $host_or_vservers == vservers ]
    then
-       cat >> $next_filename <<EOF
+      cat >> $next_filename <<EOF
 #
 # vsname = <vserver> (no default)
-# vsname indicates which vserver to operate on, this is only used if 
+# vsname indicates which vserver to operate on, this is only used if
 # vserver is set to yes in /etc/backupninja.conf
 # NOTE: if you do not specify a vsname the host will be operated on
-# alsoNOTE: if operating on a vserver, $VROOTDIR will be 
+# alsoNOTE: if operating on a vserver, $VROOTDIR will be
 # prepended to backupdir.
 EOF
    echo -e "$mysql_vsname\n" >> $next_filename
 fi
 
    echo -e $@ >> $next_filename
-   
+
    chmod 600 $next_filename
 }
 
 mysql_wizard() {
-   
+
    # Global variables
    mysql_title="MySQL action wizard"
-   
+
    # backup the host system or a Vserver?
    choose_host_or_one_vserver "$mysql_title"
    [ $? = 0 ] || return 1
    if [ $host_or_vservers == vservers ]
    then
-       do_mysql_vserver
-       [ $? = 0 ] || return 1
+      do_mysql_vserver
+      [ $? = 0 ] || return 1
    fi
-      
+
    # backupdir
    if [ $host_or_vservers == vservers ]
    then
-       inputBox "$mysql_title" "Directory where to store the backups:`echo \"\n(Relative to chosen vserver's root directory)\"`" "/var/backups/mysql"
+      inputBox "$mysql_title" "Directory where to store the backups:`echo \"\n(Relative to chosen vserver's root directory)\"`" "/var/backups/mysql"
    else
-       inputBox "$mysql_title" "Directory where to store the backups" "/var/backups/mysql"
+      inputBox "$mysql_title" "Directory where to store the backups" "/var/backups/mysql"
    fi
    [ $? = 1 ] && return
    mysql_backupdir="backupdir = $REPLY"
@@ -171,23 +171,23 @@ mysql_wizard() {
       do_mysql_databases
       [ $? = 0 ] || return 1
    fi
-   
+
    while true; do
       _DISABLE_HOTCOPY=
       menuBoxHelpFile "$mysql_title" "choose a mysql authentication method:" \
-        user "change to a linux user first." \
-        password "manually specify mysql user and password." \
-        debian "use default mysql user debian-sys-maint." 
+         user "change to a linux user first." \
+         password "manually specify mysql user and password." \
+         debian "use default mysql user debian-sys-maint."
       status=$?
       if [ $status = 2 ]; then
-	       # show help.
-          helptmp="/tmp/backupninja.help.$$"
-          cat > $helptmp <<EOF
+         # show help.
+         helptmp="/tmp/backupninja.help.$$"
+         cat > $helptmp <<EOF
 To connect to mysql, backupninja must authenticate.
 There are three possible authentication methods:
 
 USER
-With this method, you specify a system user. Backupninja  will
+With this method, you specify a system user. Backupninja will
 then become this user before running mysqldump or mysqlhotcopy.
 The result is that ~/.my.cnf is used for authentication.
 
@@ -199,11 +199,11 @@ DEBIAN
 With this method, we use the debian-sys-maint user which is
 already defined in /etc/mysql/debian.cnf. If you are running
 debian, this is recommended, because no further configuration
-is needed. The drawback is that this is incompatible with 
+is needed. The drawback is that this is incompatible with
 mysqlhotcopy: you must use mysqldump.
 EOF
-          dialog --textbox $helptmp 0 0
-          rm $helptmp
+         dialog --textbox $helptmp 0 0
+         rm $helptmp
       fi
 
       [ $status = 1 ] && return;
@@ -213,5 +213,5 @@ EOF
          "password") do_mysql_password;return;;
          "debian") do_mysql_debian;return;;
       esac
-   done   
+   done
 }

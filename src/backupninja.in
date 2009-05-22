@@ -22,31 +22,31 @@
 ## FUNCTIONS
 
 function setupcolors () {
-	BLUE="\033[34;01m"
-	GREEN="\033[32;01m"
-	YELLOW="\033[33;01m"
-	PURPLE="\033[35;01m"
-	RED="\033[31;01m"
-	OFF="\033[0m"
-	CYAN="\033[36;01m"
-	COLORS=($BLUE $GREEN $YELLOW $RED $PURPLE $CYAN)
+   BLUE="\033[34;01m"
+   GREEN="\033[32;01m"
+   YELLOW="\033[33;01m"
+   PURPLE="\033[35;01m"
+   RED="\033[31;01m"
+   OFF="\033[0m"
+   CYAN="\033[36;01m"
+   COLORS=($BLUE $GREEN $YELLOW $RED $PURPLE $CYAN)
 }
 
 function colorize () {
-	if [ "$usecolors" == "yes" ]; then
-		local typestr=`echo "$@" | @SED@ 's/\(^[^:]*\).*$/\1/'`
-		[ "$typestr" == "Debug" ] && type=0
-		[ "$typestr" == "Info" ] && type=1
-		[ "$typestr" == "Warning" ] && type=2
-		[ "$typestr" == "Error" ] && type=3
-		[ "$typestr" == "Fatal" ] && type=4
-		[ "$typestr" == "Halt" ] && type=5
-		color=${COLORS[$type]}
-		endcolor=$OFF
-		echo -e "$color$@$endcolor"
-	else
-		echo -e "$@"
-	fi
+   if [ "$usecolors" == "yes" ]; then
+      local typestr=`echo "$@" | @SED@ 's/\(^[^:]*\).*$/\1/'`
+      [ "$typestr" == "Debug" ] && type=0
+      [ "$typestr" == "Info" ] && type=1
+      [ "$typestr" == "Warning" ] && type=2
+      [ "$typestr" == "Error" ] && type=3
+      [ "$typestr" == "Fatal" ] && type=4
+      [ "$typestr" == "Halt" ] && type=5
+      color=${COLORS[$type]}
+      endcolor=$OFF
+      echo -e "$color$@$endcolor"
+   else
+      echo -e "$@"
+   fi
 }
 
 # We have the following message levels:
@@ -65,71 +65,71 @@ echo_debug_msg=0
 usecolors=yes
 
 function printmsg() {
-	[ ${#@} -gt 1 ] || return
+   [ ${#@} -gt 1 ] || return
 
-	type=$1
-	shift
-	if [ $type == 100 ]; then
-		typestr=`echo "$@" | @SED@ 's/\(^[^:]*\).*$/\1/'`
-		[ "$typestr" == "Debug" ] && type=0
-		[ "$typestr" == "Info" ] && type=1
-		[ "$typestr" == "Warning" ] && type=2
-		[ "$typestr" == "Error" ] && type=3
-		[ "$typestr" == "Fatal" ] && type=4
-		[ "$typestr" == "Halt" ] && type=5
-		typestr=""
-	else
-		types=(Debug Info Warning Error Fatal Halt)
-		typestr="${types[$type]}: "
-	fi
-	
-	print=$[4-type]
-	
-	if [ $echo_debug_msg == 1 ]; then
-		echo -e "$typestr$@" >&2
-	elif [ $debug ]; then
-		colorize "$typestr$@" >&2
-	fi
-	
-	if [ $print -lt $loglevel ]; then
-		logmsg "$typestr$@"
-	fi
+   type=$1
+   shift
+   if [ $type == 100 ]; then
+      typestr=`echo "$@" | @SED@ 's/\(^[^:]*\).*$/\1/'`
+      [ "$typestr" == "Debug" ] && type=0
+      [ "$typestr" == "Info" ] && type=1
+      [ "$typestr" == "Warning" ] && type=2
+      [ "$typestr" == "Error" ] && type=3
+      [ "$typestr" == "Fatal" ] && type=4
+      [ "$typestr" == "Halt" ] && type=5
+      typestr=""
+   else
+      types=(Debug Info Warning Error Fatal Halt)
+      typestr="${types[$type]}: "
+   fi
+
+   print=$[4-type]
+
+   if [ $echo_debug_msg == 1 ]; then
+      echo -e "$typestr$@" >&2
+   elif [ $debug ]; then
+      colorize "$typestr$@" >&2
+   fi
+
+   if [ $print -lt $loglevel ]; then
+      logmsg "$typestr$@"
+   fi
 }
 
 function logmsg() {
-	if [ -w "$logfile" ]; then
-		echo -e `LC_ALL=C date "+%h %d %H:%M:%S"` "$@" >> $logfile
-	fi
+   if [ -w "$logfile" ]; then
+      echo -e `LC_ALL=C date "+%h %d %H:%M:%S"` "$@" >> $logfile
+   fi
 }
 
 function passthru() {
-	printmsg 100 "$@"
+   printmsg 100 "$@"
 }
 function debug() {
-	printmsg 0 "$@"
+   printmsg 0 "$@"
 }
 function info() {
-	printmsg 1 "$@"
+   printmsg 1 "$@"
 }
 function warning() {
-	printmsg 2 "$@"
+   printmsg 2 "$@"
 }
 function error() {
-	printmsg 3 "$@" 
+   printmsg 3 "$@"
 }
 function fatal() {
-	printmsg 4 "$@"
-	exit 2
+   printmsg 4 "$@"
+   exit 2
 }
 function halt() {
-	printmsg 5 "$@"
-	exit 2
+   printmsg 5 "$@"
+   exit 2
 }
 
 msgcount=0
 function msg {
-	messages[$msgcount]=$1
-	let "msgcount += 1"
+   messages[$msgcount]=$1
+   let "msgcount += 1"
 }
 
 #
@@ -158,7 +158,7 @@ function check_perms() {
       echo "Configuration files must be owned by root! Dying on file $file"
       fatal "Configuration files must be owned by root! Dying on file $file"
    fi
-   
+
    if [ "$wperm" != '---' ]; then
       echo "Configuration files must not be world writable/readable! Dying on file $file"
       fatal "Configuration files must not be world writable/readable! Dying on file $file"
@@ -180,12 +180,12 @@ function check_perms() {
 
 # simple lowercase function
 function tolower() {
-	echo "$1" | tr '[:upper:]' '[:lower:]'
+   echo "$1" | tr '[:upper:]' '[:lower:]'
 }
 
 # simple to integer function
 function toint() {
-	echo "$1" | tr -d '[:alpha:]'
+   echo "$1" | tr -d '[:alpha:]'
 }
 
 #
@@ -206,39 +206,39 @@ nowdayofweek=`LC_ALL=C date +%A`
 nowdayofweek=`tolower "$nowdayofweek"`
 
 function isnow() {
-	local when="$1"
-	set -- $when
+   local when="$1"
+   set -- $when
 
-	[ "$when" == "manual" ] && return 0
+   [ "$when" == "manual" ] && return 0
 
-	whendayofweek=$1; at=$2; whentime=$3;
-	whenday=`toint "$whendayofweek"`
-	whendayofweek=`tolower "$whendayofweek"`
-	whentime=`echo "$whentime" | @SED@ 's/:[0-9][0-9]$//' | @SED@ -r 's/^([0-9])$/0\1/'`
+   whendayofweek=$1; at=$2; whentime=$3;
+   whenday=`toint "$whendayofweek"`
+   whendayofweek=`tolower "$whendayofweek"`
+   whentime=`echo "$whentime" | @SED@ 's/:[0-9][0-9]$//' | @SED@ -r 's/^([0-9])$/0\1/'`
 
-	if [ "$whendayofweek" == "everyday" -o "$whendayofweek" == "daily" ]; then
-		whendayofweek=$nowdayofweek
-	fi
+   if [ "$whendayofweek" == "everyday" -o "$whendayofweek" == "daily" ]; then
+      whendayofweek=$nowdayofweek
+   fi
 
-	if [ "$whenday" == "" ]; then
-		if [ "$whendayofweek" != "$nowdayofweek" ]; then
-			whendayofweek=${whendayofweek%s}
-			if [ "$whendayofweek" != "$nowdayofweek" ]; then
-				return 0
-			fi
-		fi
-	elif [ "$whenday" != "$nowday" ]; then
-		return 0
-	fi
+   if [ "$whenday" == "" ]; then
+      if [ "$whendayofweek" != "$nowdayofweek" ]; then
+         whendayofweek=${whendayofweek%s}
+         if [ "$whendayofweek" != "$nowdayofweek" ]; then
+            return 0
+         fi
+      fi
+   elif [ "$whenday" != "$nowday" ]; then
+      return 0
+   fi
 
-	[ "$at" == "at" ] || return 0
-	[ "$whentime" == "$nowtime" ] || return 0
+   [ "$at" == "at" ] || return 0
+   [ "$whentime" == "$nowtime" ] || return 0
 
-	return 1
+   return 1
 }
 
 function usage() {
-	cat << EOF
+   cat << EOF
 $0 usage:
 This script allows you to coordinate system backup by dropping a few
 simple configuration files into @CFGDIR@/backup.d/. Typically, this
@@ -257,18 +257,18 @@ The following options are available:
 -n, --now            Perform actions now, instead of when they might
                      be scheduled. No output will be created unless also
                      run with -d.
-    --run FILE       Execute the specified action file and then exit.    
+    --run FILE       Execute the specified action file and then exit.
                      Also puts backupninja in debug mode.
-                     
+
 When in debug mode, output to the console will be colored:
 EOF
-	usecolors=yes
-	colorize "Debug: Debugging info (when run with -d)"
-	colorize "Info: Informational messages (verbosity level 4)"
-	colorize "Warning: Warnings (verbosity level 3 and up)"
-	colorize "Error: Errors (verbosity level 2 and up)"
-	colorize "Fatal: Errors which halt a given backup action (always shown)"
-	colorize "Halt: Errors which halt the whole backupninja run (always shown)"
+   usecolors=yes
+   colorize "Debug: Debugging info (when run with -d)"
+   colorize "Info: Informational messages (verbosity level 4)"
+   colorize "Warning: Warnings (verbosity level 3 and up)"
+   colorize "Error: Errors (verbosity level 2 and up)"
+   colorize "Fatal: Errors which halt a given backup action (always shown)"
+   colorize "Halt: Errors which halt the whole backupninja run (always shown)"
 }
 
 ##
@@ -279,89 +279,89 @@ EOF
 ##
 
 function process_action() {
-	local file="$1"
-	local suffix="$2"
-	local run="no"
-	setfile $file
+   local file="$1"
+   local suffix="$2"
+   local run="no"
+   setfile $file
 
-	# skip over this config if "when" option
-	# is not set to the current time.
-	getconf when "$defaultwhen"
-	if [ "$processnow" == 1 ]; then
-		info ">>>> starting action $file (because of --now)"
-		run="yes"
-	elif [ "$when" == "hourly" ]; then
-		info ">>>> starting action $file (because 'when = hourly')"
-		run="yes"
-	else
-		IFS=$'\t\n'
-		for w in $when; do
-			IFS=$' \t\n'
-			isnow "$w"
-			ret=$?
-			IFS=$'\t\n'
-			if [ $ret == 0 ]; then
-				debug "skipping $file because current time does not match $w"
-			else
-				info ">>>> starting action $file (because current time matches $w)"
-				run="yes"
-			fi
-		done
-		IFS=$' \t\n'
-	fi
-	debug $run
-	[ "$run" == "no" ] && return
-	
-	let "actions_run += 1"
+   # skip over this config if "when" option
+   # is not set to the current time.
+   getconf when "$defaultwhen"
+   if [ "$processnow" == 1 ]; then
+      info ">>>> starting action $file (because of --now)"
+      run="yes"
+   elif [ "$when" == "hourly" ]; then
+      info ">>>> starting action $file (because 'when = hourly')"
+      run="yes"
+   else
+      IFS=$'\t\n'
+      for w in $when; do
+         IFS=$' \t\n'
+         isnow "$w"
+         ret=$?
+         IFS=$'\t\n'
+         if [ $ret == 0 ]; then
+            debug "skipping $file because current time does not match $w"
+         else
+            info ">>>> starting action $file (because current time matches $w)"
+            run="yes"
+         fi
+      done
+      IFS=$' \t\n'
+   fi
+   debug $run
+   [ "$run" == "no" ] && return
 
-	# call the handler:
-	local bufferfile=`maketemp backupninja.buffer`
-	echo "" > $bufferfile
-	echo_debug_msg=1
-	(
-		. $scriptdirectory/$suffix $file
-	) 2>&1 | (
-		while read a; do
-			echo $a >> $bufferfile
-			[ $debug ] && colorize "$a"
-		done
-	)
-	retcode=$?
-	# ^^^^^^^^ we have a problem! we can't grab the return code "$?". grrr.
-	echo_debug_msg=0
+   let "actions_run += 1"
 
-	_warnings=`cat $bufferfile | grep "^Warning: " | wc -l`
-	_errors=`cat $bufferfile | grep "^Error: " | wc -l`
-	_fatals=`cat $bufferfile | grep "^Fatal: " | wc -l`
-	_halts=`cat $bufferfile | grep "^Halt: " | wc -l`
-	
-	ret=`grep "\(^Warning: \|^Error: \|^Fatal: \|Halt: \)" $bufferfile`
-	rm $bufferfile
-	if [ $_halts != 0 ]; then
-		msg "*halt* -- $file"
-		errormsg="$errormsg\n== halt request from $file==\n\n$ret\n"
-		passthru "Halt: <<<< finished action $file: FAILED"
-	elif [ $_fatals != 0 ]; then
-		msg "*failed* -- $file"
-		errormsg="$errormsg\n== fatal errors from $file ==\n\n$ret\n"
-		passthru "Fatal: <<<< finished action $file: FAILED"
-	elif [ $_errors != 0 ]; then
-		msg "*error* -- $file"
-		errormsg="$errormsg\n== errors from $file ==\n\n$ret\n"
-		error "<<<< finished action $file: ERROR"
-	elif [ $_warnings != 0 ]; then
-		msg "*warning* -- $file"
-		errormsg="$errormsg\n== warnings from $file ==\n\n$ret\n"
-		warning "<<<< finished action $file: WARNING"
-	else
-		msg "success -- $file"
-		info "<<<< finished action $file: SUCCESS"
-	fi
+   # call the handler:
+   local bufferfile=`maketemp backupninja.buffer`
+   echo "" > $bufferfile
+   echo_debug_msg=1
+   (
+      . $scriptdirectory/$suffix $file
+   ) 2>&1 | (
+      while read a; do
+         echo $a >> $bufferfile
+         [ $debug ] && colorize "$a"
+      done
+   )
+   retcode=$?
+   # ^^^^^^^^ we have a problem! we can't grab the return code "$?". grrr.
+   echo_debug_msg=0
 
-	let "halts += _halts"
-	let "fatals += _fatals"
-	let "errors += _errors"
-	let "warnings += _warnings"	
+   _warnings=`cat $bufferfile | grep "^Warning: " | wc -l`
+   _errors=`cat $bufferfile | grep "^Error: " | wc -l`
+   _fatals=`cat $bufferfile | grep "^Fatal: " | wc -l`
+   _halts=`cat $bufferfile | grep "^Halt: " | wc -l`
+
+   ret=`grep "\(^Warning: \|^Error: \|^Fatal: \|Halt: \)" $bufferfile`
+   rm $bufferfile
+   if [ $_halts != 0 ]; then
+      msg "*halt* -- $file"
+      errormsg="$errormsg\n== halt request from $file==\n\n$ret\n"
+      passthru "Halt: <<<< finished action $file: FAILED"
+   elif [ $_fatals != 0 ]; then
+      msg "*failed* -- $file"
+      errormsg="$errormsg\n== fatal errors from $file ==\n\n$ret\n"
+      passthru "Fatal: <<<< finished action $file: FAILED"
+   elif [ $_errors != 0 ]; then
+      msg "*error* -- $file"
+      errormsg="$errormsg\n== errors from $file ==\n\n$ret\n"
+      error "<<<< finished action $file: ERROR"
+   elif [ $_warnings != 0 ]; then
+      msg "*warning* -- $file"
+      errormsg="$errormsg\n== warnings from $file ==\n\n$ret\n"
+      warning "<<<< finished action $file: WARNING"
+   else
+      msg "success -- $file"
+      info "<<<< finished action $file: SUCCESS"
+   fi
+
+   let "halts += _halts"
+   let "fatals += _fatals"
+   let "errors += _errors"
+   let "warnings += _warnings"
 }
 
 #####################################################
@@ -374,71 +374,71 @@ loglevel=3
 ## process command line options
 
 while [ $# -ge 1 ]; do
-	case $1 in
-		-h|--help) usage;;
-		-d|--debug) debug=1;;
-		-t|--test) test=1;debug=1;;
-		-n|--now) processnow=1;;
-		-f|--conffile)
-			if [ -f $2 ]; then
-				conffile=$2
-			else
-				echo "-f|--conffile option must be followed by an existing filename"
-				fatal "-f|--conffile option must be followed by an existing filename"
-				usage
-			fi
-			# we shift here to avoid processing the file path 
-			shift
-			;;
-		--run)
-			debug=1
-			if [ -f $2 ]; then
-				singlerun=$2
-				processnow=1
-			else
-				echo "--run option must be followed by a backupninja action file"
-				fatal "--run option must be followed by a backupninja action file"
-				usage
-			fi
-			shift
-			;;
-		*)
-			debug=1
-			echo "Unknown option $1"
-			fatal "Unknown option $1"
-			usage
-			exit
-			;;
-	esac
-	shift
-done																										
+   case $1 in
+      -h|--help) usage;;
+      -d|--debug) debug=1;;
+      -t|--test) test=1;debug=1;;
+      -n|--now) processnow=1;;
+      -f|--conffile)
+         if [ -f $2 ]; then
+            conffile=$2
+         else
+            echo "-f|--conffile option must be followed by an existing filename"
+            fatal "-f|--conffile option must be followed by an existing filename"
+            usage
+         fi
+         # we shift here to avoid processing the file path
+         shift
+         ;;
+      --run)
+         debug=1
+         if [ -f $2 ]; then
+            singlerun=$2
+            processnow=1
+         else
+            echo "--run option must be followed by a backupninja action file"
+            fatal "--run option must be followed by a backupninja action file"
+            usage
+         fi
+         shift
+         ;;
+      *)
+         debug=1
+         echo "Unknown option $1"
+         fatal "Unknown option $1"
+         usage
+         exit
+         ;;
+   esac
+   shift
+done
 
 #if [ $debug ]; then
-#	usercolors=yes
+#   usercolors=yes
 #fi
 
 ## Load and confirm basic configuration values
 
 # bootstrap
 if [ ! -r "$conffile" ]; then
-	echo "Configuration file $conffile not found." 
-	fatal "Configuration file $conffile not found."
+   echo "Configuration file $conffile not found."
+   fatal "Configuration file $conffile not found."
 fi
 
 # find $libdirectory
 libdirectory=`grep '^libdirectory' $conffile | @AWK@ '{print $3}'`
 if [ -z "$libdirectory" ]; then
-        if [ -d "@libdir@" ]; then
-	   libdirectory="@libdir@"
-	else
-	   echo "Could not find entry 'libdirectory' in $conffile." 
-	   fatal "Could not find entry 'libdirectory' in $conffile." 
-	fi
+   if [ -d "@libdir@" ]; then
+      libdirectory="@libdir@"
+   else
+      echo "Could not find entry 'libdirectory' in $conffile."
+      fatal "Could not find entry 'libdirectory' in $conffile."
+   fi
 else
-        if [ ! -d "$libdirectory" ]; then
-	   echo "Lib directory $libdirectory not found." 
-	   fatal "Lib directory $libdirectory not found." 
-	fi
+   if [ ! -d "$libdirectory" ]; then
+      echo "Lib directory $libdirectory not found."
+      fatal "Lib directory $libdirectory not found."
+   fi
 fi
 
 # include shared functions
@@ -482,15 +482,15 @@ getconf admingroup root
 init_vservers nodialog
 
 if [ ! -d "$configdirectory" ]; then
-	echo "Configuration directory '$configdirectory' not found."
-	fatal "Configuration directory '$configdirectory' not found."
+   echo "Configuration directory '$configdirectory' not found."
+   fatal "Configuration directory '$configdirectory' not found."
 fi
 
 [ -f "$logfile" ] || touch $logfile
 
 if [ "$UID" != "0" ]; then
-	echo "`basename $0` can only be run as root"
-	exit 1
+   echo "`basename $0` can only be run as root"
+   exit 1
 fi
 
 ## Process each configuration file
@@ -507,34 +507,34 @@ actions_run=0
 errormsg=""
 
 if [ "$singlerun" ]; then
-	files=$singlerun
+   files=$singlerun
 else
-	files=`find $configdirectory -follow -mindepth 1 -maxdepth 1 -type f ! -name '.*.swp' | sort -n`
+   files=`find $configdirectory -follow -mindepth 1 -maxdepth 1 -type f ! -name '.*.swp' | sort -n`
 
-	if [ -z "$files" ]; then
-		fatal "No backup actions configured in '$configdirectory', run ninjahelper!"
-	fi
+   if [ -z "$files" ]; then
+      fatal "No backup actions configured in '$configdirectory', run ninjahelper!"
+   fi
 fi
 
 for file in $files; do
-	[ -f "$file" ] || continue
-	[ "$halts" = "0" ] || continue
+   [ -f "$file" ] || continue
+   [ "$halts" = "0" ] || continue
 
-        check_perms ${file%/*} # check containing dir
-	check_perms $file
-	suffix="${file##*.}"
-	base=`basename $file`
-	if [ "${base:0:1}" == "0" -o "$suffix" == "disabled" ]; then
-		info "Skipping $file"
-		continue
-	fi
+   check_perms ${file%/*} # check containing dir
+   check_perms $file
+   suffix="${file##*.}"
+   base=`basename $file`
+   if [ "${base:0:1}" == "0" -o "$suffix" == "disabled" ]; then
+      info "Skipping $file"
+      continue
+   fi
 
-	if [ -e "$scriptdirectory/$suffix" ]; then
-		process_action $file $suffix
-	else
-		error "Can't process file '$file': no handler script for suffix '$suffix'"
-		msg "*missing handler* -- $file"
-	fi
+   if [ -e "$scriptdirectory/$suffix" ]; then
+      process_action $file $suffix
+   else
+      error "Can't process file '$file': no handler script for suffix '$suffix'"
+      msg "*missing handler* -- $file"
+   fi
 done
 
 ## mail the messages to the report address
@@ -549,38 +549,38 @@ else doit=0
 fi
 
 if [ $doit == 1 ]; then
-	debug "send report to $reportemail"
-	hostname=`hostname`
-	[ $warnings == 0 ] || subject="WARNING"
-	[ $errors == 0 ] || subject="ERROR"
-	[ $fatals == 0 ] || subject="FAILED"
-	
-	{
-		for ((i=0; i < ${#messages[@]} ; i++)); do
-	 		echo ${messages[$i]}
-		done
-		echo -e "$errormsg"
-		if [ "$reportspace" == "yes" ]; then
-			previous=""
-			for i in $(ls "$configdirectory"); do
-			backuploc=$(grep ^directory "$configdirectory"/"$i" | @AWK@ '{print $3}')
-			if [ "$backuploc" != "$previous" -a -n "$backuploc" ]; then
-				df -h "$backuploc"
-				previous="$backuploc"
-			fi
-			done
-		fi
-	} | mail -s "backupninja: $hostname $subject" $reportemail
+   debug "send report to $reportemail"
+   hostname=`hostname`
+   [ $warnings == 0 ] || subject="WARNING"
+   [ $errors == 0 ] || subject="ERROR"
+   [ $fatals == 0 ] || subject="FAILED"
+
+   {
+      for ((i=0; i < ${#messages[@]} ; i++)); do
+          echo ${messages[$i]}
+      done
+      echo -e "$errormsg"
+      if [ "$reportspace" == "yes" ]; then
+         previous=""
+         for i in $(ls "$configdirectory"); do
+         backuploc=$(grep ^directory "$configdirectory"/"$i" | @AWK@ '{print $3}')
+         if [ "$backuploc" != "$previous" -a -n "$backuploc" ]; then
+            df -h "$backuploc"
+            previous="$backuploc"
+         fi
+         done
+      fi
+   } | mail -s "backupninja: $hostname $subject" $reportemail
 fi
 
 if [ $actions_run != 0 ]; then
-	info "FINISHED: $actions_run actions run. $fatals fatal. $errors error. $warnings warning."
-	if [ "$halts" != "0" ]; then
-		info "Backup was halted prematurely.  Some actions may not have run."
-	fi
+   info "FINISHED: $actions_run actions run. $fatals fatal. $errors error. $warnings warning."
+   if [ "$halts" != "0" ]; then
+      info "Backup was halted prematurely.  Some actions may not have run."
+   fi
 fi
 
 if [ -n "$reporthost" ]; then
-	debug "send $logfile to $reportuser@$reporthost:$reportdirectory"
-	rsync -qt $logfile $reportuser@$reporthost:$reportdirectory
+   debug "send $logfile to $reportuser@$reporthost:$reportdirectory"
+   rsync -qt $logfile $reportuser@$reporthost:$reportdirectory
 fi

@@ -3,7 +3,7 @@
 HELPERS="$HELPERS ldap:ldap_database_backup"
 
 ldap_create_file() {
-while true; do
+   while true; do
       checkBox "ldap action wizard" "check options (slapcat OR ldapsearch)" \
          "slapcat" "export ldif using slapcat" yes \
          "ldapsearch" "export ldif using ldapsearch" no \
@@ -22,21 +22,21 @@ while true; do
       result="$REPLY"
       for opt in $result; do
          case $opt in
-           '"compress"') compress="compress = yes";;
-           '"slapcat"')
-              method="method = slapcat"
-              [ "$_RESTART" == "yes" ] && restart="restart = yes"
-              ;;
-           '"ldapsearch"')
-              method="method = ldapsearch"
-              inputBox "ldap action wizard" "ldapsearch requires authentication. Specify here what password file to use. It must have the password with no trailing return and it should not be world readable."
-              [ $? = 1 ] && return
-              passwordfile="passwordfile = $REPLY"
-              inputBox "ldap action wizard" "ldapsearch requires authentication. Specify here what DN to bind as:"
-              [ $? = 1 ] && return
-              binddn="binddn = $REPLY"
-              require_packages ldap-utils
-              ;;
+            '"compress"') compress="compress = yes";;
+            '"slapcat"')
+               method="method = slapcat"
+               [ "$_RESTART" == "yes" ] && restart="restart = yes"
+               ;;
+            '"ldapsearch"')
+               method="method = ldapsearch"
+               inputBox "ldap action wizard" "ldapsearch requires authentication. Specify here what password file to use. It must have the password with no trailing return and it should not be world readable."
+               [ $? = 1 ] && return
+               passwordfile="passwordfile = $REPLY"
+               inputBox "ldap action wizard" "ldapsearch requires authentication. Specify here what DN to bind as:"
+               [ $? = 1 ] && return
+               binddn="binddn = $REPLY"
+               require_packages ldap-utils
+               ;;
             '"ssl"') ssl="ssl = yes";;
             '"tls"') tls="tls = yes";;
          esac
@@ -54,9 +54,9 @@ $tls
 # conf = /etc/ldap/slapd.conf
 # databases = all
 EOF
-     chmod 600 $next_filename
-     return
-done
+      chmod 600 $next_filename
+      return
+   done
 }
 
 ldap_wizard() {
@@ -71,7 +71,7 @@ ldap_wizard() {
       elif [ "$backend" == "ldbm" ]; then
          ldbm=yes
       fi
-   done    
+   done
 
    if [ "$bdb" == "yes" -o "$hdb" == "yes" ]; then
       if [ "$ldbm" == "no" ]; then
@@ -80,11 +80,11 @@ ldap_wizard() {
          ldap_create_file
       fi
    elif [ "$ldbm" == "yes" ]; then
-     msgBox "ldap action wizard" "It looks like the backend in your slapd.conf is set to LDBM. Because of this, you will have less options (because it is not safe to use slapcat while slapd is running LDBM)." 
-     _RESTART=yes
-     ldap_create_file
+      msgBox "ldap action wizard" "It looks like the backend in your slapd.conf is set to LDBM. Because of this, you will have less options (because it is not safe to use slapcat while slapd is running LDBM)."
+      _RESTART=yes
+      ldap_create_file
    else
-     msgBox "ldap action wizard" "I couldn't find any supported backend in your slapd.conf. Bailing out." 
-     return
+      msgBox "ldap action wizard" "I couldn't find any supported backend in your slapd.conf. Bailing out."
+      return
    fi
 }

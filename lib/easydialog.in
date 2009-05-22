@@ -20,43 +20,43 @@ DIALOG=dialog
 HELP=
 
 setApplicationTitle() {
-    BACKTITLE=$*
+   BACKTITLE=$*
 }
 
 setHelp() {
-    HELP="$@"
+   HELP="$@"
 }
 
 setDimension() {
-    WIDTH=$1
-    HEIGHT=$2
+   WIDTH=$1
+   HEIGHT=$2
 }
 
 booleanBox() {
-    $DIALOG --backtitle "$BACKTITLE" --title "$1" \
-        `[ "$3" == no ] && echo '--defaultno'` --yesno "$2" $HEIGHT $WIDTH
+   $DIALOG --backtitle "$BACKTITLE" --title "$1" \
+      `[ "$3" == no ] && echo '--defaultno'` --yesno "$2" $HEIGHT $WIDTH
 }
 
 msgBox() {
-    $DIALOG --backtitle "$BACKTITLE" --title "$1" \
-        --msgbox "$2" $HEIGHT $WIDTH
+   $DIALOG --backtitle "$BACKTITLE" --title "$1" \
+      --msgbox "$2" $HEIGHT $WIDTH
 }
 
 gaugeBox() {
-    $DIALOG --backtitle "$BACKTITLE" --title "$1" \
-        --gauge "$2" $HEIGHT $WIDTH 0
+   $DIALOG --backtitle "$BACKTITLE" --title "$1" \
+      --gauge "$2" $HEIGHT $WIDTH 0
 }
 
 inputBox() {
-    local temp=$(@MKTEMP@ -t backupninja.XXXXXX) || exit 1
-    trap "rm -f $temp" 0
-    REPLY=
-    $DIALOG --backtitle "$BACKTITLE" --title "$1" \
-        --inputbox "$2" $HEIGHT $WIDTH "$3" 2> $temp
-    local status=$?
-    [ $status = 0 ] && REPLY=$(cat $temp)
-    rm -f $temp
-    return $status
+   local temp=$(@MKTEMP@ -t backupninja.XXXXXX) || exit 1
+   trap "rm -f $temp" 0
+   REPLY=
+   $DIALOG --backtitle "$BACKTITLE" --title "$1" \
+      --inputbox "$2" $HEIGHT $WIDTH "$3" 2> $temp
+   local status=$?
+   [ $status = 0 ] && REPLY=$(cat $temp)
+   rm -f $temp
+   return $status
 }
 
 # Xdialog and {dialog,whiptail} use different mechanism to "qoute" the
@@ -67,7 +67,7 @@ inputBox() {
 # mechanism to the standard double-quoting one.  it receives two
 # arguements, the file that has the data and the box type.
 _listReplyHook() {
-    cat $1
+   cat $1
 }
 
 # this is the base implementation of all the list based boxes, it works
@@ -75,79 +75,79 @@ _listReplyHook() {
 # this function with an extra argument specifying the actual box that
 # needs to be rendered.
 _genericListBox() {
-    local box=$1
-    shift 1
-    local title=$1
-    local text=$2
-    shift 2
-    local temp=$(@MKTEMP@ -t backupninja.XXXXXX) || exit 1
-    trap "rm -f $temp" 0
-    REPLY=
-    $DIALOG $HELP $_DEFAULT --backtitle "$BACKTITLE" --title "$title" \
-        $box "$text" $HEIGHT $WIDTH 10 \
-	"$@" 2> $temp
-    local status=$?
-    [ $status = 0 ] && REPLY=$(_listReplyHook $temp $box)
-    rm -f $temp
-    _DEFAULT=
-    return $status
+   local box=$1
+   shift 1
+   local title=$1
+   local text=$2
+   shift 2
+   local temp=$(@MKTEMP@ -t backupninja.XXXXXX) || exit 1
+   trap "rm -f $temp" 0
+   REPLY=
+   $DIALOG $HELP $_DEFAULT --backtitle "$BACKTITLE" --title "$title" \
+      $box "$text" $HEIGHT $WIDTH 10 \
+      "$@" 2> $temp
+   local status=$?
+   [ $status = 0 ] && REPLY=$(_listReplyHook $temp $box)
+   rm -f $temp
+   _DEFAULT=
+   return $status
 }
 
 setDefault() {
-  _DEFAULT="--default-item $1"
+   _DEFAULT="--default-item $1"
 }
 
 menuBox() {
-    _genericListBox --menu "$@"
+   _genericListBox --menu "$@"
 }
 
 ## a menu box with additional help info displayed
 ## at the bottom of the window when an item is selected
 menuBoxHelp() {
-	HELP="--item-help"
-	_genericListBox --menu "$@"
-	status=$?
-	HELP=
-	return $status
+   HELP="--item-help"
+   _genericListBox --menu "$@"
+   status=$?
+   HELP=
+   return $status
 }
 
 ## a menu box with an addition button 'help'
 menuBoxHelpFile() {
-	HELP="--help-button"
-	_genericListBox --menu "$@"
-	status=$?
-	HELP=
-	return $status
+   HELP="--help-button"
+   _genericListBox --menu "$@"
+   status=$?
+   HELP=
+   return $status
 }
 
 checkBox() {
-    _genericListBox --checklist "$@"
+   _genericListBox --checklist "$@"
 }
 
 radioBox() {
-    _genericListBox --radiolist "$@"
+   _genericListBox --radiolist "$@"
 }
 
 textBox() {
-    $DIALOG --backtitle "$BACKTITLE" --title "$1" --textbox "$2" $HEIGHT $WIDTH
+   $DIALOG --backtitle "$BACKTITLE" --title "$1" --textbox "$2" $HEIGHT $WIDTH
 }
 
 passwordBox() {
-    local temp=$(@MKTEMP@ -t backupninja.XXXXXX) || exit 1
-    trap "rm -f $temp" 0
-    REPLY=
-    $DIALOG --backtitle "$BACKTITLE" --title "$1" \
-        --passwordbox "$2" $HEIGHT $WIDTH 2> $temp
-    local status=$?
-    [ $status = 0 ] && REPLY=$(cat $temp)
-    rm -f $temp
-    return $status
+   local temp=$(@MKTEMP@ -t backupninja.XXXXXX) || exit 1
+   trap "rm -f $temp" 0
+   REPLY=
+   $DIALOG --backtitle "$BACKTITLE" --title "$1" \
+      --passwordbox "$2" $HEIGHT $WIDTH 2> $temp
+   local status=$?
+   [ $status = 0 ] && REPLY=$(cat $temp)
+   rm -f $temp
+   return $status
 }
 
 
 #########################################################
 ## begin-item-display style lists
-## 
+##
 ## these lists are built by calling fuctions multiple times.
 ## this can make it easier to build your list in a loop
 ##
@@ -177,7 +177,7 @@ listDisplay() {
    boxtype=$1
    local temp=$(@MKTEMP@ -t backupninja.XXXXXX) || exit 1
    trap "rm -f $temp" 0
-   
+
    local label
    local text
    local status
@@ -188,13 +188,13 @@ listDisplay() {
       echo -ne " --$boxtype '$_menu_msg' "
       echo -ne " $HEIGHT $WIDTH 10 "
       for ((i=0; i < $_menu_items ; i++)); do
-        label=${_menu_labels[$i]}
-        text=${_menu_text[$i]}
-	status=${_menu_status[$i]}
-        echo -ne " $label '$text' $status "
+         label=${_menu_labels[$i]}
+         text=${_menu_text[$i]}
+         status=${_menu_status[$i]}
+         echo -ne " $label '$text' $status "
       done
    ) | xargs $DIALOG 2> $temp
-   
+
    local status=$?
    REPLY=""
    [ $status = 0 ] && REPLY=`cat $temp`
@@ -219,10 +219,10 @@ formItem() {
    _form_text[$_form_items]=$2
    let "_form_items += 1"
 }
-    
+
 formDisplay() {
    local temp=$(@MKTEMP@ -t backupninja.XXXXXX) || exit 1
-   
+
    max_length=0
    for ((i=0; i < ${#_form_labels[@]} ; i++)); do
       label=${_form_labels[$i]}
@@ -232,19 +232,19 @@ formDisplay() {
       fi
    done
    let "max_length += 2"
-    
+
    local xpos=1
    (
       echo -n -e "--form '$_form_title' 0 0 20"
       for ((i=0; i < $_form_items ; i++)); do
-        label=${_form_labels[$i]}
-        text=${_form_text[$i]}
-        echo -n -e " $label $xpos 1 '$text' $xpos $max_length 30 30"
-        let "xpos += _form_gap"
+         label=${_form_labels[$i]}
+         text=${_form_text[$i]}
+         echo -n -e " $label $xpos 1 '$text' $xpos $max_length 30 30"
+         let "xpos += _form_gap"
       done
    ) | xargs $DIALOG 2> $temp
    local status=$?
-   
+
    ##
    ## the exit status is meaningless, it is always 0.
    ## i can't figure out how to get the exit status of dialog
@@ -254,7 +254,7 @@ formDisplay() {
    ## swallowed by xargs. xargs should return different exit status
    ## depending on the exit status of the command run, but i have
    ## never been able to get that to work.
-   ## 
+   ##
 
    REPLY=
    if [ $status = 0 ]; then

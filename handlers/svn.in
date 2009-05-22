@@ -7,7 +7,7 @@ getconf src /var/lib/svn
 getconf dest /var/backups/svn
 getconf tmp /var/backups/svn.tmp
 getconf HOTBACKUP "/usr/bin/svnadmin hotcopy"
-getconf vsname	
+getconf vsname
 
 error=0
 
@@ -35,43 +35,43 @@ fi
 cd $vroot$src
 for repo in `find . -name svnserve.conf`
 do
-    repo=`dirname $repo`
-    repo=`dirname $repo`
+   repo=`dirname $repo`
+   repo=`dirname $repo`
 
-    ret=`mkdir -p $vroot$tmp/$repo 2>&1`
-    code=$?
-    if [ "$ret" ]; then
-       debug "$ret"
-    fi
-    if [ $code != 0 ]; then   
-       error "command failed mkdir -p $vroot$tmp/$repo"
-    fi
+   ret=`mkdir -p $vroot$tmp/$repo 2>&1`
+   code=$?
+   if [ "$ret" ]; then
+      debug "$ret"
+   fi
+   if [ $code != 0 ]; then
+      error "command failed mkdir -p $vroot$tmp/$repo"
+   fi
 
-    if [ $usevserver = yes ]
-    then
-	ret=`$VSERVER $vsname exec $HOTBACKUP $src/$repo $tmp/$repo 2>&1`
-    else
-	ret=`$HOTBACKUP $src/$repo $tmp/$repo 2>&1`
-    fi
-    code=$?
-    if [ "$ret" ]; then
-       debug "$ret"
-    fi
-    if [ $code != 0 ]; then
-       error "command failed -- $HOTBACKUP $vroot$src/$repo $vroot$tmp/$repo"
-       error=1
-    fi
+   if [ $usevserver = yes ]
+   then
+      ret=`$VSERVER $vsname exec $HOTBACKUP $src/$repo $tmp/$repo 2>&1`
+   else
+      ret=`$HOTBACKUP $src/$repo $tmp/$repo 2>&1`
+   fi
+   code=$?
+   if [ "$ret" ]; then
+      debug "$ret"
+   fi
+   if [ $code != 0 ]; then
+      error "command failed -- $HOTBACKUP $vroot$src/$repo $vroot$tmp/$repo"
+      error=1
+   fi
 done
 
 if [ $error -eq 1 ]; then
-    echo "Error: because of earlier errors, we are leaving svn backups in $vroot$tmp instead of $vroot$dest"
+   echo "Error: because of earlier errors, we are leaving svn backups in $vroot$tmp instead of $vroot$dest"
 else
-    if [ -d $vroot$dest -a -d $vroot$tmp ]; then
-        rm -rf $vroot$dest
-    fi
-    if [ -d $vroot$tmp ]; then
-        mv $vroot$tmp $vroot$dest
-    fi
+   if [ -d $vroot$dest -a -d $vroot$tmp ]; then
+      rm -rf $vroot$dest
+   fi
+   if [ -d $vroot$tmp ]; then
+      mv $vroot$tmp $vroot$dest
+   fi
 fi
 
 exit 0

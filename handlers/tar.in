@@ -2,16 +2,16 @@
 #
 # tar handler script for backupninja
 
-getconf backupname 	`hostname --fqdn`
-getconf backupdir 	/var/backups/`hostname --fqdn`
-getconf compress	bzip
-getconf includes	"/etc /home /usr/local"
-getconf excludes	"/tmp /proc /dev /sys /net /misc /media /srv /selinux"
+getconf backupname      `hostname --fqdn`
+getconf backupdir       /var/backups/`hostname --fqdn`
+getconf compress        bzip
+getconf includes        "/etc /home /usr/local"
+getconf excludes        "/tmp /proc /dev /sys /net /misc /media /srv /selinux"
 
-getconf TAR		`which tar`
-getconf EXTENSION	tar
-getconf DATE		`which date`
-getconf DATEFORMAT	"%Y.%m.%d-%H%M"		
+getconf TAR             `which tar`
+getconf EXTENSION       tar
+getconf DATE            `which date`
+getconf DATEFORMAT      "%Y.%m.%d-%H%M"
 
 # See if vservers are configured
 if [ "$vservers" = "yes" ]
@@ -65,7 +65,7 @@ done
 
 debug "Running backup: " $TAR -c -p -v $compress_option $exclude_options \
    -f "$backupdir/$backupname-"`$DATE "+$DATEFORMAT"`".$EXTENSION" \
-   $includes 
+   $includes
 
 $TAR -c -p -v $compress_option $exclude_options \
    -f "$backupdir/$backupname-"`$DATE "+$DATEFORMAT"`".$EXTENSION" \
@@ -73,7 +73,7 @@ $TAR -c -p -v $compress_option $exclude_options \
    > "$backupdir/$backupname-"`$DATE "+$DATEFORMAT"`.list \
    2> "$backupdir/$backupname-"`$DATE "+$DATEFORMAT"`.err
 
-[ $? -ne 0 ] && fatal "Tar backup failed" 
+[ $? -ne 0 ] && fatal "Tar backup failed"
 
 
 

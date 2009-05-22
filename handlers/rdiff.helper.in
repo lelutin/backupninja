@@ -18,9 +18,9 @@ do_rdiff_host_includes() {
          for ((i=0; i < ${#rdiff_includes[@]} ; i++)); do
             formItem include ${rdiff_includes[$i]}
          done
-         formItem include 
-         formItem include 
-         formItem include 
+         formItem include
+         formItem include
+         formItem include
       formDisplay
       [ $? = 0 ] || return
       unset rdiff_includes
@@ -41,7 +41,7 @@ do_rdiff_vserver() {
    while [ -z "$REPLY" ]; do
       formBegin "$rdiff_title - vsincludes (backup these directories from every vserver)"
          [ -z "$rdiff_vsincludes" ] && rdiff_vsincludes="$rdiff_default_includes"
-   
+
          for i in $rdiff_vsincludes; do
             formItem include "$i"
          done
@@ -52,19 +52,19 @@ do_rdiff_vserver() {
       [ $? = 0 ] || return 1
       rdiff_vsincludes=($REPLY)
    done
-   
+
    set +o noglob
 }
 
 do_rdiff_excludes() {
    set -o noglob
-   formBegin "$rdiff_title: excludes" 
+   formBegin "$rdiff_title: excludes"
      for ((i=0; i < ${#rdiff_excludes[@]} ; i++))
      do
        formItem exclude ${rdiff_excludes[$i]}
      done
-     formItem exclude 
-     formItem exclude 
+     formItem exclude
+     formItem exclude
    formDisplay
    [ $? = 0 ] || return
    unset rdiff_excludes
@@ -102,10 +102,10 @@ do_rdiff_src() {
 
 do_rdiff_dest() {
    declare -a tmp_array
-   
+
    set -o noglob
    REPLY=
-   while [ -z "$REPLY" -o -z "$rdiff_directory" -o -z "$rdiff_host" -o -z "$rdiff_user" ] 
+   while [ -z "$REPLY" -o -z "$rdiff_directory" -o -z "$rdiff_host" -o -z "$rdiff_user" ]
    do
      formBegin "$rdiff_title - destination: last three items are required"
         formItem "keep" "$rdiff_keep"
@@ -119,11 +119,11 @@ do_rdiff_dest() {
      rdiff_keep=${tmp_array[0]}
      rdiff_directory=${tmp_array[1]}
      rdiff_host=${tmp_array[2]}
-     rdiff_user=${tmp_array[3]}  
+     rdiff_user=${tmp_array[3]}
      rdiff_type=${tmp_array[4]}
   done
   set +o noglob
-  
+
   _dest_done="(DONE)"
   setDefault conn
 }
@@ -155,7 +155,7 @@ do_rdiff_ssh_con() {
       echo "Done. hit return to continue"
       read
    fi
-  
+
    ssh -o PreferredAuthentications=publickey $rdiff_host -l $rdiff_user "exit" 2> /dev/null
    if [ $? -ne 0 ]; then
       echo "Copying root's public ssh key to authorized_keys of $rdiff_user@$rdiff_host. When prompted, specify the password for user $rdiff_user@$rdiff_host."
@@ -171,7 +171,7 @@ do_rdiff_ssh_con() {
             1 )   msgBox "$rdiff_title: error" "Connected successfully to $rdiff_user@$rdiff_host, but unable to write. Check ownership and modes of ~$rdiff_user on $rdiff_host." ;;
             255 ) msgBox "$rdiff_title: error" "Failed to connect to $rdiff_user@$rdiff_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host." ;;
             * )   msgBox "$rdiff_title: error" "Unexpected error." ;;
-         esac 
+         esac
          return
       else
          echo "Done. hit return to continue"
@@ -195,20 +195,20 @@ do_rdiff_ssh_con() {
    else
       booleanBox "Remote directory does not exist" "The destination backup directory does not exist, do you want me to create it for you?"
       if [ $? = 0 ]; then
-	 ssh $rdiff_user@$rdiff_host "mkdir -p ${rdiff_directory}"
+    ssh $rdiff_user@$rdiff_host "mkdir -p ${rdiff_directory}"
          result=$?
          case $result in
             0) msgBox "$rdiff_title: success" "Creation of the remote destination directory was a success!";;
-            1) msgBox "$rdiff_title: error" "Connected successfully to $rdiff_user@$rdiff_host, but was unable to create the destination directory, check the directory permissions." 
+            1) msgBox "$rdiff_title: error" "Connected successfully to $rdiff_user@$rdiff_host, but was unable to create the destination directory, check the directory permissions."
                remote_status=failed;;
-            255) msgBox "$rdiff_title: error" "Failed to connect to $rdiff_user@$rdiff_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host." 
+            255) msgBox "$rdiff_title: error" "Failed to connect to $rdiff_user@$rdiff_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host."
                remote_status=failed;;
-            *) msgBox "$rdiff_title: error" "Unexpected error." 
+            *) msgBox "$rdiff_title: error" "Unexpected error."
                remote_status=failed;;
          esac
       fi
    fi
-  
+
    if [ "$remote_status" = "ok" ]; then
       do_rdiff_con
    fi
@@ -231,12 +231,12 @@ do_rdiff_con() {
                echo "Hit return to continue."
                read
                case $result in
-                  0) msgBox "$rdiff_title: success" "Installation of rdiff-backup was a success!" 
+                  0) msgBox "$rdiff_title: success" "Installation of rdiff-backup was a success!"
                      do_rdiff_con;;
                   1) msgBox "$rdiff_title: error" "Connected successfully to $rdiff_user@$rdiff_host, but was unable to install the package for some reason.";;
                   255) msgBox "$rdiff_title: error" "Failed to connect to $rdiff_user@$rdiff_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host.";;
                   *) msgBox "$rdiff_title: error" "Unexpected error.";;
-               esac 
+               esac
                return
             fi
          else
@@ -256,9 +256,9 @@ do_rdiff_con() {
          fi
       fi
    else
- 	echo "SUCCESS: Everything looks good!"
-	echo "Hit return to continue."
-	read
+    echo "SUCCESS: Everything looks good!"
+   echo "Hit return to continue."
+   read
    fi
 
    _con_done="(DONE)"
@@ -298,11 +298,11 @@ EOF
       set -o noglob
       for ((i=0; i < ${#rdiff_includes[@]} ; i++)); do
          echo "include = ${rdiff_includes[$i]}" >> $next_filename
-      done       
+      done
       set +o noglob
    fi
 
-   if [ "$host_or_vservers" == vservers -o "$host_or_vservers" == both ]; then      
+   if [ "$host_or_vservers" == vservers -o "$host_or_vservers" == both ]; then
       cat >> $next_filename <<EOF
 #
 # If vservers = yes in /etc/backupninja.conf then the following variables can
@@ -328,7 +328,7 @@ EOF
       done
       set +o noglob
    fi
-   
+
    ## excludes ##
    set -o noglob
    for ((i=0; i < ${#rdiff_excludes[@]} ; i++)); do
@@ -340,7 +340,7 @@ EOF
 ######################################################
 ## destination section
 ## (where the files are copied to)
-  
+
 [dest]
 type = remote
 directory = $rdiff_directory
@@ -382,7 +382,7 @@ rdiff_main_menu() {
 }
 
 rdiff_wizard() {
- 
+
    # Global variables
    rdiff_title="rdiff-backup action wizard"
    _src_done=
@@ -401,7 +401,7 @@ rdiff_wizard() {
    rdiff_excludes=(/home/*/.gnupg /home/*/.local/share/Trash /home/*/.Trash /home/*/.thumbnails /home/*/.beagle /home/*/.aMule /home/*/gtk-gnutella-downloads)
    rdiff_vsincludes=
    set +o noglob
-  
+
    rdiff_main_menu
 }
 

@@ -14,7 +14,7 @@ tar_wizard() {
    inputBox "$tar_title" "\"Name\" of backups" "$backupname"
    [ $? = 1 ] && return
    tar_backupname="backupname = $REPLY"
-   backupname="$REPLY"   
+   backupname="$REPLY"
 
    inputBox "$tar_title" "Directory where to store the backups" "/net/backups/$backupname"
    [ $? = 1 ] && return
@@ -24,8 +24,8 @@ tar_wizard() {
        "none"     "do not filter trough" off \
        "compress" "filter trough compress" off \
        "gzip"     "filter trough gzip" off \
-       "bzip"     "filter trough bzip" on 
-   [ $? = 1 ] && return;    
+       "bzip"     "filter trough bzip" on
+   [ $? = 1 ] && return;
    result="$REPLY"
    tar_compress="compress = $REPLY "
 
@@ -47,14 +47,14 @@ tar_wizard() {
       [ $? = 0 ] || return 1
       tar_includes="includes = "
       for i in $REPLY; do
-	 [ -n "$i" ] && tar_includes="$tar_includes $i"
+         [ -n "$i" ] && tar_includes="$tar_includes $i"
       done
    done
 
    REPLY=
    while [ -z "$REPLY" ]; do
       formBegin "$tar_title: Excludes"
-         formItem "Exclude:" /tmp 
+         formItem "Exclude:" /tmp
          formItem "Exclude:" /proc
          formItem "Exclude:" /sys
          formItem "Exclude:" /dev
@@ -63,17 +63,17 @@ tar_wizard() {
          formItem "Exclude:" /misc
          formItem "Exclude:" /net
          formItem "Exclude:" /selinux
-         formItem "Exclude:" 
+         formItem "Exclude:"
          formItem "Exclude:"
       formDisplay
       [ $? = 0 ] || return 1
       tar_excludes="excludes = "
       for i in $REPLY; do
-	 [ -n "$i" ] && tar_excludes="$tar_excludes $i"
+         [ -n "$i" ] && tar_excludes="$tar_excludes $i"
       done
    done
 
-# Save the config 
+# Save the config
    get_next_filename $configdirectory/10.tar
    cat > $next_filename <<EOF
 $tar_when_run
@@ -85,8 +85,8 @@ $tar_excludes
 
 # tar binary - have to be GNU tar
 #TAR=/bin/tar
-#DATE		/bin/date
-#DATEFORMAT	"%Y.%m.%d-%H%M"
+#DATE           /bin/date
+#DATEFORMAT     "%Y.%m.%d-%H%M"
 
 EOF
    chmod 600 $next_filename

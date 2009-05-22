@@ -77,84 +77,82 @@ getconf folder
 
 function rotate {
 
-  if [[ "$2" < 4 ]]; then
-    error "Rotate: minimum of 4 rotations"
-    exit 1
-  fi
+   if [[ "$2" < 4 ]]; then
+      error "Rotate: minimum of 4 rotations"
+      exit 1
+   fi
 
-  if [ -d $1.$2 ]; then
-    $nice $mv /$1.$2 /$1.tmp
-  fi
+   if [ -d $1.$2 ]; then
+      $nice $mv /$1.$2 /$1.tmp
+   fi
 
-  for ((n=`echo "$2 - 1" | bc`; n >= 0; n--)); do
-    if [ -d $1.$n ]; then
-      dest=`echo "$n + 1" | bc`
-      $nice $mv /$1.$n /$1.$dest
-      $touch /$1.$dest
-    fi
-  done
+   for ((n=`echo "$2 - 1" | bc`; n >= 0; n--)); do
+      if [ -d $1.$n ]; then
+         dest=`echo "$n + 1" | bc`
+         $nice $mv /$1.$n /$1.$dest
+         $touch /$1.$dest
+      fi
+   done
 
-  if [ -d $1.tmp ]; then
-    $nice $mv /$1.tmp /$1.0
-  fi
+   if [ -d $1.tmp ]; then
+      $nice $mv /$1.tmp /$1.0
+   fi
 
-  if [ -d $1.1 ]; then
-    $nice $cp -alf /$1.1/. /$1.0
-  fi
+   if [ -d $1.1 ]; then
+      $nice $cp -alf /$1.1/. /$1.0
+   fi
 
 }
 
 function move_files {
-
- ref=$tmp/makesnapshot-mymv-$$;
- $touch -r $1 $ref;
- $mv $1 $2;
- $touch -r $ref $2;
- $rm $ref;
-
+   ref=$tmp/makesnapshot-mymv-$$;
+   $touch -r $1 $ref;
+   $mv $1 $2;
+   $touch -r $ref $2;
+   $rm $ref;
 }
 
 backupdir="$mountpoint/$backupdir"
 
 # does $backupdir exists?
 
-if [ ! -d "$backupdir" ]; then 
-  error "Backupdir $backupdir does not exist"
-  exit 1
+if [ ! -d "$backupdir" ]; then
+   error "Backupdir $backupdir does not exist"
+   exit 1
 fi
 
 # setup number of increments
 
 if [ -z "$days" ]; then
-  keep="4"
+   keep="4"
 else
-  keep="`echo $days - 1 | bc -l`"
+   keep="`echo $days - 1 | bc -l`"
 fi
 
 # lockfile setup
 
 if [ ! -z "$lockfile" ]; then
-  $touch $lockfile || warning "Could not create lockfile $lockfile"
+   $touch $lockfile || warning "Could not create lockfile $lockfile"
 fi
 
 # nicelevel setup
 
-if [ ! -z "$nicelevel" ]; then 
-  nice="nice -n $nicelevel"
-else 
-  nice=""
+if [ ! -z "$nicelevel" ]; then
+   nice="nice -n $nicelevel"
+else
+   nice=""
 fi
 
 # set mv procedure
 
 if [ $enable_mv_timestamp_bug == "yes" ]; then
-  mv=move_files
+   mv=move_files
 fi
 
 # set excludes
 
 for path in $exclude; do
-  EXCLUDES="$EXCLUDES --exclude=$path"
+   EXCLUDES="$EXCLUDES --exclude=$path"
 done
 
 echo "Starting backup at `date`" >> $log
@@ -162,19 +160,19 @@ echo "Starting backup at `date`" >> $log
 # mount backup destination folder as read-write
 
 if [ "$read_only" == "1" ] || [ "$read_only" == "yes" ]; then
-  if [ -d "$mountpoint" ]; then
-    mount -o remount,rw $mountpoint
-    if (($?)); then
-      error "Could not mount $mountpoint"
-      exit 1
-    fi
-  fi
+   if [ -d "$mountpoint" ]; then
+      mount -o remount,rw $mountpoint
+      if (($?)); then
+         error "Could not mount $mountpoint"
+         exit 1
+      fi
+   fi
 fi
 
 # the backup procedure
 
 if [ ! -d "$backupdir/$folder/$folder.0" ]; then
-  mkdir -p $backupdir/$folder/$folder.0
+   mkdir -p $backupdir/$folder/$folder.0
 fi
 
 info "Rotating $backupdir/$folder/$folder..."
@@ -183,7 +181,7 @@ rotate $backupdir/$folder/$folder $keep
 info "Wget'ing $SECTION on $backupdir/$folder/$folder.0..."
 
 if [ ! -z "$badnwidth" ]; then
-  limit_rate="--limit-rate=$badnwidth""k"
+   limit_rate="--limit-rate=$badnwidth""k"
 fi
 
 cd $backupdir/$folder/$folder.0
@@ -195,25 +193,25 @@ $touch $backupdir/$folder/$folder.0
 # remount backup destination as read-only
 
 if [ "$read_only" == "1" ] || [ "$read_only" == "yes" ]; then
-  mount -o remount,ro $mountpoint
+   mount -o remount,ro $mountpoint
 fi
 
 # check partition for errors
 
 if [ "$fscheck" == "1" ] || [ "$fscheck" == "yes" ]; then
-  umount $mountpoint
-  if (($?)); then
-    warning "Could not umount $mountpoint to run fsck"
-  else
-    $nice $fsck -v -y $partition >> $log
-    mount $mountpoint
-  fi
+   umount $mountpoint
+   if (($?)); then
+      warning "Could not umount $mountpoint to run fsck"
+   else
+      $nice $fsck -v -y $partition >> $log
+      mount $mountpoint
+   fi
 fi
 
 # removes the lockfile
 
 if [ ! -z "$lockfile" ]; then
-  $rm $lockfile || warning "Could not remove lockfile $lockfile"
+   $rm $lockfile || warning "Could not remove lockfile $lockfile"
 fi
 
 echo "Finnishing backup at `date`" >> $log

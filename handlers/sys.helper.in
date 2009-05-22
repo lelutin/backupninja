@@ -5,13 +5,13 @@ HELPERS="$HELPERS sys:general_hardware_and_system_info"
 sys_wizard() {
    require_packages hwinfo debconf-utils
    checkBox "new sys action" "check options" \
-       "packages" "list of all installed packages." on \
-       "partitions" "the partition table of all disks." on  \
-       "sfdisk" "use sfdisk to get partition information." on \
-       "hardware" "detailed hardware information" on \
-       "luksheaders" "Luks headers of all Luks partitions." off \
-       "lvm" "LVM metadata for all volume groups." off
-   [ $? = 1 ] && return;    
+      "packages" "list of all installed packages." on \
+      "partitions" "the partition table of all disks." on  \
+      "sfdisk" "use sfdisk to get partition information." on \
+      "hardware" "detailed hardware information" on \
+      "luksheaders" "Luks headers of all Luks partitions." off \
+      "lvm" "LVM metadata for all volume groups." off
+   [ $? = 1 ] && return;
    result="$REPLY"
    packages="packages = no"
    partitions="partitions = no"
@@ -21,12 +21,12 @@ sys_wizard() {
    lvm="lvm = no"
    for opt in $result; do
       case $opt in
-        '"packages"') packages="packages = yes";;
-        '"partitions"') partitions="partitions = yes";;
-        '"sfdisk"') sfdisk="dosfdisk = yes";;
-        '"hardware"') hardware="hardware = yes";;
-        '"luksheaders"') luksheaders="luksheaders = yes";;
-        '"lvm"') lvm="lvm = yes";;
+         '"packages"') packages="packages = yes";;
+         '"partitions"') partitions="partitions = yes";;
+         '"sfdisk"') sfdisk="dosfdisk = yes";;
+         '"hardware"') hardware="hardware = yes";;
+         '"luksheaders"') luksheaders="luksheaders = yes";;
+         '"lvm"') lvm="lvm = yes";;
       esac
    done
    get_next_filename $configdirectory/10.sys

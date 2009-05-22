@@ -36,18 +36,18 @@ if [ $usevserver = yes ]; then
    debug "Examining vserver '$vsname'."
    if [ "$databases" == "all" ]; then
       [ -x "$vroot`$VSERVER $vsname exec which $PGSQLDUMPALL`" ] || \
-	 fatal "Can't find $PGSQLDUMPALL in vserver $vsname."
+         fatal "Can't find $PGSQLDUMPALL in vserver $vsname."
    else
       [ -x "$vroot`$VSERVER $vsname exec which $PGSQLDUMP`" ] || \
-	 fatal "Can't find $PGSQLDUMP in vserver $vsname."
+         fatal "Can't find $PGSQLDUMP in vserver $vsname."
    fi
 else
    if [ "$databases" == "all" ]; then
       [ -x "`which $PGSQLDUMPALL`" ] || \
-	 fatal "Can't find $PGSQLDUMPALL."
+         fatal "Can't find $PGSQLDUMPALL."
    else
       [ -x "`which $PGSQLDUMP`" ] || \
-	 fatal "Can't find $PGSQLDUMP."
+         fatal "Can't find $PGSQLDUMP."
    fi
 fi
 
@@ -64,7 +64,7 @@ else
    pguid=`getent passwd $PGSQLUSER | @AWK@ -F: '{print $3}'`
 fi
 [ -n "$pguid" ] || \
-    fatal "No user called $PGSQLUSER`[ $usevserver = no ] || echo \" on vserver $vsname\"`."
+   fatal "No user called $PGSQLUSER`[ $usevserver = no ] || echo \" on vserver $vsname\"`."
 debug "chown $pguid $vroot$backupdir"
 chown $pguid $vroot$backupdir
 debug "chmod 700 $vroot$backupdir"
@@ -72,61 +72,61 @@ chmod 700 $vroot$backupdir
 
 # if $databases = all, use pg_dumpall
 if [ "$databases" == "all" ]; then
-    if [ $usevserver = yes ]; then
-       if [ "$compress" == "yes" ]; then          
-          execstr="$VSERVER $vsname exec su - $PGSQLUSER -c \"$PGSQLDUMPALL | $GZIP > $backupdir/${vsname}.sql.gz\""
-       else
-          execstr="$VSERVER $vsname exec su - $PGSQLUSER -c \"$PGSQLDUMPALL > $backupdir/${vsname}.sql\""
-       fi
-    else
-       if [ "$compress" == "yes" ]; then
-          execstr="su - $PGSQLUSER -c \"$PGSQLDUMPALL | $GZIP > $backupdir/${localhost}-all.sql.gz\""
-       else
-	execstr="su - $PGSQLUSER -c \"$PGSQLDUMPALL > $backupdir/${localhost}-all.sql\""
-       fi
-    fi
-    debug "$execstr"
-    if [ ! $test ]; then
-       output=`eval $execstr 2>&1`
-       code=$?
-	if [ "$code" == "0" ]; then
-	    debug $output
-	    info "Successfully finished dump of pgsql cluster"
-	else
-	    warning $output
-	    warning "Failed to dump pgsql cluster"
-	fi
-    fi
-    
+   if [ $usevserver = yes ]; then
+      if [ "$compress" == "yes" ]; then
+         execstr="$VSERVER $vsname exec su - $PGSQLUSER -c \"$PGSQLDUMPALL | $GZIP > $backupdir/${vsname}.sql.gz\""
+      else
+         execstr="$VSERVER $vsname exec su - $PGSQLUSER -c \"$PGSQLDUMPALL > $backupdir/${vsname}.sql\""
+      fi
+   else
+      if [ "$compress" == "yes" ]; then
+         execstr="su - $PGSQLUSER -c \"$PGSQLDUMPALL | $GZIP > $backupdir/${localhost}-all.sql.gz\""
+      else
+         execstr="su - $PGSQLUSER -c \"$PGSQLDUMPALL > $backupdir/${localhost}-all.sql\""
+      fi
+   fi
+   debug "$execstr"
+   if [ ! $test ]; then
+      output=`eval $execstr 2>&1`
+      code=$?
+      if [ "$code" == "0" ]; then
+         debug $output
+         info "Successfully finished dump of pgsql cluster"
+      else
+         warning $output
+         warning "Failed to dump pgsql cluster"
+      fi
+   fi
+
 # else use pg_dump on each specified database
 else
-    for db in $databases; do
-	if [ $usevserver = yes ]; then
-           if [ "$compress" == "yes" ]; then
-              execstr="$VSERVER $vsname exec su - $PGSQLUSER -c \"$PGSQLDUMP $db | $GZIP > $backupdir/${db}.sql.gz\""
-           else
-              execstr="$VSERVER $vsname exec su - $PGSQLUSER -c \"$PGSQLDUMP $db | > $backupdir/${db}.sql\""
-           fi
-	else
-           if [ "$compress" == "yes" ]; then
-              execstr="su - $PGSQLUSER -c \"$PGSQLDUMP $db | $GZIP > $backupdir/${db}.sql.gz\""
-           else
-              execstr="su - $PGSQLUSER -c \"$PGSQLDUMP $db > $backupdir/${db}.sql\""
-           fi
-	fi
-	debug "$execstr"
-	if [ ! $test ]; then
-	    output=`eval $execstr 2>&1`
-	    code=$?
-	    if [ "$code" == "0" ]; then
-		debug $output
-		info "Successfully finished dump of pgsql database ${db}"
-	    else
-		warning $output
-		warning "Failed to dump pgsql database ${db}"
-	    fi
-	fi
-    done
+   for db in $databases; do
+      if [ $usevserver = yes ]; then
+         if [ "$compress" == "yes" ]; then
+            execstr="$VSERVER $vsname exec su - $PGSQLUSER -c \"$PGSQLDUMP $db | $GZIP > $backupdir/${db}.sql.gz\""
+         else
+            execstr="$VSERVER $vsname exec su - $PGSQLUSER -c \"$PGSQLDUMP $db | > $backupdir/${db}.sql\""
+         fi
+      else
+         if [ "$compress" == "yes" ]; then
+            execstr="su - $PGSQLUSER -c \"$PGSQLDUMP $db | $GZIP > $backupdir/${db}.sql.gz\""
+         else
+            execstr="su - $PGSQLUSER -c \"$PGSQLDUMP $db > $backupdir/${db}.sql\""
+         fi
+      fi
+      debug "$execstr"
+      if [ ! $test ]; then
+         output=`eval $execstr 2>&1`
+         code=$?
+         if [ "$code" == "0" ]; then
+            debug $output
+            info "Successfully finished dump of pgsql database ${db}"
+         else
+            warning $output
+            warning "Failed to dump pgsql database ${db}"
+         fi
+      fi
+   done
 fi
 
 return 0

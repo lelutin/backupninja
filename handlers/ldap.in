@@ -35,25 +35,25 @@ dbsuffixes=(`@AWK@ 'BEGIN {OFS=":"} /[:space:]*^database[:space:]*\w*/ {db=$2}; 
 if [ "$ldif" == "yes" ]; then
    dumpdir="$backupdir"
    [ -d $dumpdir ] || mkdir -p $dumpdir
-   
+
    if [ "$databases" == 'all' ]; then
       dbcount=`grep '^database' $conf | wc -l`
       let "dbcount = dbcount - 1"
       databases=`seq 0 $dbcount`;
-   fi	
-   
+   fi
+
    for db in $databases; do
       if [ `expr index "$db" "="` == "0" ]; then
-			# db is a number, get the suffix.
+                        # db is a number, get the suffix.
          dbsuffix=${dbsuffixes[$db]/*:/}
       else
          dbsuffix=$db
       fi
-		# some databases don't have suffix (like monitor), skip these
+                # some databases don't have suffix (like monitor), skip these
       if [ "$dbsuffix" == "" ]; then
          continue;
       fi
-      
+
       if [ "$method" == "slapcat" ]; then
          execstr="$SLAPCAT -f $conf -b $dbsuffix"
       else
@@ -74,16 +74,16 @@ if [ "$ldif" == "yes" ]; then
             debug "Shutting down ldap server..."
             /etc/init.d/slapd stop
          fi
-         
-	 ext=
-	 if [ "$compress" == "yes" ]; then
-	    ext=".gz"
-	 fi
+
+         ext=
+         if [ "$compress" == "yes" ]; then
+            ext=".gz"
+         fi
          touch $dumpdir/$dbsuffix.ldif$ext
          if [ ! -f $dumpdir/$dbsuffix.ldif$ext ]; then
             fatal "Couldn't create ldif dump file: $dumpdir/$dbsuffix.ldif$ext"
          fi
-         
+
          if [ "$compress" == "yes" ]; then
             execstr="$execstr | $GZIP > $dumpdir/$dbsuffix.ldif.gz"
          else
@@ -99,13 +99,13 @@ if [ "$ldif" == "yes" ]; then
             warning $output
             warning "Failed ldif export of $dbsuffix"
          fi
-         
+
          if [ "$restart" == "yes" ]; then
             debug "Starting ldap server..."
             /etc/init.d/slapd start
          fi
       fi
-   done	
+   done
 fi
 
 return 0

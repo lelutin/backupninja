@@ -11,17 +11,17 @@
 # (2) a list of all the packages installed and removed.
 #     this file can be used to restore the state of installed packages
 #     by running "dpkg --set-selections < dpkg-selections.txt and
-#     then run "apt-get -u dselect-upgrade". If you have the 
+#     then run "apt-get -u dselect-upgrade". If you have the
 #     debconf-set-selections file from (1), you should restore those first.
-# 
-# (3) the partition table of all disks. 
+#
+# (3) the partition table of all disks.
 #     this partition table can be used to format another disk of
-#     the same size. this can be handy if using software raid and 
+#     the same size. this can be handy if using software raid and
 #     you have a disk go bad. just replace the disk and partition it
 #     by running "sfdisk /dev/sdb < partitions.sdb.txt"
 #     (MAKE SURE YOU PARTITION THE CORRECT DISK!!!)
 #
-# (4) hardware information. 
+# (4) hardware information.
 #     write to a text file the important things which hwinfo can gleen.
 #
 # (5) the Luks header of every Luks block device, if option luksheaders
@@ -55,7 +55,7 @@ getconf dohwinfo yes
 if [ ! -d $parentdir ]; then
    mkdir -p $parentdir
 fi
-   
+
 if [ $os = "debian" ]
 then
    getconf packagesfile $parentdir/dpkg-selections.txt
@@ -65,9 +65,9 @@ then
    getconf debconfgetselections `which debconf-get-selections`
 elif [ $os = "redhat" ]
 then
-   getconf packagesfile  $parentdir/rpmpackages.txt 
-   getconf packagemgr	`which rpm`
-   getconf packagemgroptions	' -qa '
+   getconf packagesfile  $parentdir/rpmpackages.txt
+   getconf packagemgr   `which rpm`
+   getconf packagemgroptions   ' -qa '
 
    getconf SYSREPORT `which sysreport`
    getconf sysreport_options ' -norpm '
@@ -163,7 +163,7 @@ if [ "$packages" == "yes" ]; then
             # don't expand * since it can be used in $packagemgroptions
             set -o noglob
             debug "$VSERVER $vserver exec $packagemgr $packagemgroptions > $VROOTDIR/$vserver$packagesfile"
-	    $VSERVER $vserver exec $packagemgr $packagemgroptions > $VROOTDIR/$vserver$packagesfile || fatal "can not save $packagemgr info to $packagesfile"
+       $VSERVER $vserver exec $packagemgr $packagemgroptions > $VROOTDIR/$vserver$packagesfile || fatal "can not save $packagemgr info to $packagesfile"
             set +o noglob
          fi
          # is $debconfgetselections available inside $vserver ?
@@ -184,9 +184,9 @@ if [ "$packages" == "yes" ]; then
          unset found
       done
    fi
-   
+
    # We want to perform this on the host as well
-   if [ -z "$packagemgr" -o ! -x "$packagemgr" ]; then 
+   if [ -z "$packagemgr" -o ! -x "$packagemgr" ]; then
       warning "can't find ${packagemgr}, skipping installed packages report."
    else
       # don't expand * since it can be used in $packagemgroptions
@@ -235,7 +235,7 @@ catiffile () {
       done
    fi
    echo $DASHES >> $sysreportfile
-} 
+}
 
 catifexec () {
    if [ -x $1 ]; then
@@ -245,12 +245,12 @@ catifexec () {
       $*  >> $sysreportfile 2>&1 || info "executing of $1 failed"
    fi
 }
-   
+
 
 STATUS="Determining $os version:"
 catiffile $osversion
 
-STATUS="Determinding your current hostname: " 
+STATUS="Determinding your current hostname: "
 catifexec "/bin/hostname"
 
 STATUS="Getting the date:"
@@ -272,17 +272,17 @@ if [ $os = "redhat" ]; then
    catiffile "/bin/ls /etc/rc.d/rc*.d/"
 
 elif [ $os = "debian" ]; then
-    for level in 0 1 2 3 4 5 6 S; do
-       echo "Level: $level" >> $sysreportfile
-       for f in /etc/rc${level}.d/*; do
-	# Remove /etc/Knn or Snn from beginning
-          ff=$(echo $f | @SED@ 's_/etc/rc..d/[KS][0-9][0-9]__')
-          if [ $f != $ff ]; then
-             echo $ff >> $sysreportfile
-          fi
-       done
-       echo "" >> $sysreportfile
-    done
+   for level in 0 1 2 3 4 5 6 S; do
+      echo "Level: $level" >> $sysreportfile
+      for f in /etc/rc${level}.d/*; do
+         # Remove /etc/Knn or Snn from beginning
+         ff=$(echo $f | @SED@ 's_/etc/rc..d/[KS][0-9][0-9]__')
+         if [ $f != $ff ]; then
+            echo $ff >> $sysreportfile
+         fi
+      done
+      echo "" >> $sysreportfile
+   done
 fi
 
 STATUS="Getting bootloader information:"
@@ -291,34 +291,34 @@ catifexec "/bin/ls" "-alR /boot"
 # This covers sparc, alpha, and intel (respectively)
 # updated for grub -mpg
 if [ -f /etc/silo.conf ]; then
-  STATUS="Collecting information about the boot process (silo):"
-  catiffile "/etc/silo.conf"
+   STATUS="Collecting information about the boot process (silo):"
+   catiffile "/etc/silo.conf"
 fi
 if [ -f /etc/milo.conf ]; then
-  STATUS="Collecting information about the boot process (milo):"
-  catiffile "/etc/milo.conf"
+   STATUS="Collecting information about the boot process (milo):"
+   catiffile "/etc/milo.conf"
 fi
 if [ -f /etc/lilo.conf ]; then
-  STATUS="Collecting information about the boot process (lilo):"
-  catiffile "/etc/lilo.conf"
-  catifexec "/sbin/lilo" "-q"
+   STATUS="Collecting information about the boot process (lilo):"
+   catiffile "/etc/lilo.conf"
+   catifexec "/sbin/lilo" "-q"
 fi
 if [ -d /boot/grub -a -f /boot/grub/grub.conf -a -f /boot/grub/device.map ]; then
-  STATUS="Collecting information about the boot process (grub.conf):"
-  catiffile "/boot/grub/grub.conf"
-  STATUS="Collecting information about the boot process (grub.map):"
-  catiffile "/boot/grub/device.map"
+   STATUS="Collecting information about the boot process (grub.conf):"
+   catiffile "/boot/grub/grub.conf"
+   STATUS="Collecting information about the boot process (grub.map):"
+   catiffile "/boot/grub/device.map"
 fi
 if [ -f /etc/cluster.conf -o -f /etc/cluster.xml ] ; then
-  STATUS="Gathering information on cluster setup"
-  # 2.1 AS
-  if [ -f /etc/cluster.conf ] ; then
-    catiffile "/etc/cluster.conf"
-  fi
-  # Taroon
-  if [ -f /etc/cluster.xml ] ; then
-    catiffile "/etc/cluster.xml"
-  fi
+   STATUS="Gathering information on cluster setup"
+   # 2.1 AS
+   if [ -f /etc/cluster.conf ] ; then
+      catiffile "/etc/cluster.conf"
+   fi
+   # Taroon
+   if [ -f /etc/cluster.xml ] ; then
+      catiffile "/etc/cluster.xml"
+   fi
 fi
 
 STATUS="Gathering sysctl information (sysctl -a):"
@@ -349,10 +349,10 @@ STATUS="Getting kernel version:"
 catifexec "/bin/uname" "-a"
 STATUS="Checking module information:"
 catifexec "/sbin/lsmod"
-for x  in $(/sbin/lsmod | /bin/cut -f1 -d" " 2>/dev/null | /bin/grep -v Module 2>/dev/null 
+for x  in $(/sbin/lsmod | /bin/cut -f1 -d" " 2>/dev/null | /bin/grep -v Module 2>/dev/null
 ) ; do
-  STATUS="Checking module information $x:"
-  catifexec "/sbin/modinfo" "$x"
+   STATUS="Checking module information $x:"
+   catifexec "/sbin/modinfo" "$x"
 done
 
 STATUS="Gathering information about your filesystems:"
@@ -375,27 +375,27 @@ STATUS="Collecting information regarding kernel modules"
 VER=`uname -r`
 catiffile "/lib/modules/$VER/modules.dep"
 if [ -f /etc/conf.modules ]; then
-  STATUS="Collecting information regarding kernel modules (conf.modules)"
-  catiffile "/etc/conf.modules"
+   STATUS="Collecting information regarding kernel modules (conf.modules)"
+   catiffile "/etc/conf.modules"
 fi
 if [ -f /etc/modules.conf ]; then
-  STATUS="Collecting information regarding kernel modules (modules.conf)"
-  catiffile "/etc/modules.conf"
+   STATUS="Collecting information regarding kernel modules (modules.conf)"
+   catiffile "/etc/modules.conf"
 fi
 if [ -f /etc/modprobe.conf ]; then
-  STATUS="Collecting information regarding kernel modules (modeprobe.conf)"
-  catiffile "/etc/modprobe.conf"
+   STATUS="Collecting information regarding kernel modules (modeprobe.conf)"
+   catiffile "/etc/modprobe.conf"
 fi
 
 # dkms status
 if [ -x /usr/sbin/dkms ] ; then
    STATUS="Gathering current status of modules, versions and kernels (dkms):"
-  catifexec "/usr/sbin/dkms" "status"
+   catifexec "/usr/sbin/dkms" "status"
 fi
 
 if [ -f /etc/sysconfig/isdncard ] ; then
-  STATUS="Gathering information about ISDN:"
-  catiffile "/etc/sysconfig/isdncard"
+   STATUS="Gathering information about ISDN:"
+   catiffile "/etc/sysconfig/isdncard"
 fi
 
 STATUS="Collecting information from the proc directory:"
@@ -481,18 +481,18 @@ fi
 
 STATUS="Collecting device-mapper (dm) information:"
 catifexec '/sbin/dmsetup' 'info'
-   
+
 STATUS="Collecting SCSI Tape information (/etc/stinit.def)"
 catiffile "/etc/stinit.def"
 
 if [ -x /sbin/lsusb ] ; then
-  STATUS="Collecting USB devices list (lsusb):"
-  catifexec "/sbin/lsusb"
+   STATUS="Collecting USB devices list (lsusb):"
+   catifexec "/sbin/lsusb"
 fi
 
 if [ -x /usr/bin/lshal ] ; then
-  STATUS="Collecting global devices list (lshal):"
-  catifexec "/usr/bin/lshal"
+   STATUS="Collecting global devices list (lshal):"
+   catifexec "/usr/bin/lshal"
 fi
 
 
@@ -511,24 +511,24 @@ fi
 
 if [ "$partitions" == "yes" ]; then
    if [ "$dosfdisk" == "yes" ]; then
-	if [ ! -x "$SFDISK" ]; then
-		warning "can't find sfdisk, skipping sfdisk report."
-		partitions="no"
-	fi
+      if [ ! -x "$SFDISK" ]; then
+    warning "can't find sfdisk, skipping sfdisk report."
+    partitions="no"
+      fi
    fi
    if [ "$dohwinfo" == "yes" ]; then
-	if [ ! -x "$HWINFO" ]; then
-		warning "can't find hwinfo, skipping partition report."
-		partitions="no"
-	fi
+      if [ ! -x "$HWINFO" ]; then
+    warning "can't find hwinfo, skipping partition report."
+    partitions="no"
+      fi
    fi
 fi
 
 if [ "$hardware" == "yes" ]; then
-	if [ ! -x "$HWINFO" ]; then
-		warning "can't find hwinfo, skipping hardware report."
-		hardware="no"
-	fi
+   if [ ! -x "$HWINFO" ]; then
+      warning "can't find hwinfo, skipping hardware report."
+      hardware="no"
+   fi
 fi
 
 ## HARDWARE #############################
@@ -536,47 +536,47 @@ fi
 #
 # here we use hwinfo to dump a table listing all the
 # information we can find on the hardware of this machine
-# 
+#
 
 if [ "$hardware" == "yes" ]; then
    if [ "dohwinfo" == "yes" ]; then
       if [ -f $hardwarefile ]; then
-	 rm $hardwarefile
+    rm $hardwarefile
       fi
       touch $hardwarefile
       echo -e "\n\n====================== summary ======================\n" >>  $hardwarefile
       debug "$HWINFO --short --cpu --network --disk --pci  >> $hardwarefile"
       $HWINFO --short --cpu --network --disk --pci  >> $hardwarefile
       for flag in cpu network bios pci; do
-	 echo -e "\n\n====================== $flag ======================\n" >>  $hardwarefile
-	 $HWINFO --$flag >> $hardwarefile
+    echo -e "\n\n====================== $flag ======================\n" >>  $hardwarefile
+    $HWINFO --$flag >> $hardwarefile
       done
    fi
 fi
 
 ## PARTITIONS #############################
 
-# here we use sfdisk to dump a listing of all the partitions. 
+# here we use sfdisk to dump a listing of all the partitions.
 # these files can be used to directly partition a disk of the same size.
 
 if [ "$partitions" == "yes" ]; then
    if [ "$dosfdisk" == "yes" ]; then
       devices=`LC_ALL=C $SFDISK -l 2>/dev/null | grep "^Disk /dev" | @AWK@ '{print $2}' | cut -d: -f1`
-	if [ "$devices" == "" ]; then 
-	   warning "No harddisks found" 
-	fi
-	for dev in $devices; do
-                debug "$SFDISK will try to backup partition tables for device $dev"
-		[ -b $dev ] || continue
-		label=${dev#/dev/}
-		label=${label//\//-}
-		outputfile=${partitionsfile//__star__/$label}
-		debug "$SFDISK $sfdisk_options -d $dev > $outputfile 2>/dev/null"
-		$SFDISK $sfdisk_options -d $dev > $outputfile 2>/dev/null
-                if [ $? -ne 0 ]; then
-                   warning "The partition table for $dev could not be saved."
-                fi
-	done
+   if [ "$devices" == "" ]; then
+      warning "No harddisks found"
+   fi
+   for dev in $devices; do
+      debug "$SFDISK will try to backup partition tables for device $dev"
+      [ -b $dev ] || continue
+      label=${dev#/dev/}
+      label=${label//\//-}
+      outputfile=${partitionsfile//__star__/$label}
+      debug "$SFDISK $sfdisk_options -d $dev > $outputfile 2>/dev/null"
+      $SFDISK $sfdisk_options -d $dev > $outputfile 2>/dev/null
+      if [ $? -ne 0 ]; then
+         warning "The partition table for $dev could not be saved."
+      fi
+   done
    fi
    if [ "$dohwinfo" == "yes" ]; then
       debug "Using $HWINFO to get all available disk information"
@@ -639,8 +639,8 @@ function doLvmBackup () {
       fi
    fi
    if [ ! -w "$lvmdir" ]; then
-         echo "can not write to directory $lvmdir"
-         return 2
+      echo "can not write to directory $lvmdir"
+      return 2
    fi
    debug "Let's try to gather the list of LVM volume groups"
    debug "$VGS --options vg_name --noheadings | @SED@ 's/^[ ]*//' | @SED@ 's/[ ]*$//' | tr '\n' ' '"

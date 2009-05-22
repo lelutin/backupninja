@@ -13,20 +13,20 @@ do_pgsql_databases() {
    while [ -z "$REPLY" ]; do
       formBegin "$pgsql_title: databases"
          formItem "Database:"
-	 formItem "Database:"
-	 formItem "Database:"
-	 formItem "Database:"
-	 formItem "Database:"
-	 formItem "Database:"
-	 formItem "Database:"
-	 formItem "Database:"
-	 formItem "Database:"
-	 formItem "Database:"
+         formItem "Database:"
+         formItem "Database:"
+         formItem "Database:"
+         formItem "Database:"
+         formItem "Database:"
+         formItem "Database:"
+         formItem "Database:"
+         formItem "Database:"
+         formItem "Database:"
       formDisplay
       [ $? = 0 ] || return 1
       pgsql_databases="databases = "
       for i in $REPLY; do
-	 [ -n "$i" ] && pgsql_databases="$pgsql_databases $i"
+         [ -n "$i" ] && pgsql_databases="$pgsql_databases $i"
       done
    done
 }
@@ -86,14 +86,14 @@ EOF
 $pgsql_backupdir
 
 # databases = < all | db1 db2 db3 > (default = all)
-# which databases to backup. should either be the word 'all' or a 
+# which databases to backup. should either be the word 'all' or a
 # space separated list of database names.
 # Note: when using 'all', pg_dumpall is used instead of pg_dump, which means
 # that cluster-wide data (such as users and groups) are saved.
 $pgsql_databases
 
 # compress = < yes | no > (default = yes)
-# if yes, compress the pg_dump/pg_dumpall output. 
+# if yes, compress the pg_dump/pg_dumpall output.
 $pgsql_compress
 
 ### You can also set the following variables in backupninja.conf:

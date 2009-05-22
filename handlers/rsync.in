@@ -102,40 +102,40 @@ getconf service
 
 function rotate {
 
-  if [[ "$2" < 4 ]]; then
-    error "Rotate: minimum of 4 rotations"
-    exit 1
-  fi
+   if [[ "$2" < 4 ]]; then
+      error "Rotate: minimum of 4 rotations"
+      exit 1
+   fi
 
-  if [ -d $1.$2 ]; then
-    $nice $mv /$1.$2 /$1.tmp
-  fi
+   if [ -d $1.$2 ]; then
+      $nice $mv /$1.$2 /$1.tmp
+   fi
 
-  for ((n=`echo "$2 - 1" | bc`; n >= 0; n--)); do
-    if [ -d $1.$n ]; then
-      dest=`echo "$n + 1" | bc`
-      $nice $mv /$1.$n /$1.$dest
-      $touch /$1.$dest
-    fi
-  done
+   for ((n=`echo "$2 - 1" | bc`; n >= 0; n--)); do
+      if [ -d $1.$n ]; then
+         dest=`echo "$n + 1" | bc`
+         $nice $mv /$1.$n /$1.$dest
+         $touch /$1.$dest
+      fi
+   done
 
-  if [ -d $1.tmp ]; then
-    $nice $mv /$1.tmp /$1.0
-  fi
+   if [ -d $1.tmp ]; then
+      $nice $mv /$1.tmp /$1.0
+   fi
 
-  if [ -d $1.1 ]; then
-    $nice $cp -alf /$1.1/. /$1.0
-  fi
+   if [ -d $1.1 ]; then
+      $nice $cp -alf /$1.1/. /$1.0
+   fi
 
 }
 
 function move_files {
 
- ref=$tmp/makesnapshot-mymv-$$;
- $touch -r $1 $ref;
- $mv $1 $2;
- $touch -r $ref $2;
- $rm $ref;
+   ref=$tmp/makesnapshot-mymv-$$;
+   $touch -r $1 $ref;
+   $mv $1 $2;
+   $touch -r $ref $2;
+   $rm $ref;
 
 }
 
@@ -143,54 +143,54 @@ backupdir="$mountpoint/$backupdir"
 
 # does $backupdir exists?
 
-if [ ! -d "$backupdir" ]; then 
-  error "Backupdir $backupdir does not exist"
-  exit 1
+if [ ! -d "$backupdir" ]; then
+   error "Backupdir $backupdir does not exist"
+   exit 1
 fi
 
 # setup number of increments
 
 if [ -z "$days" ]; then
-  keep="4"
+   keep="4"
 else
-  keep="`echo $days - 1 | bc -l`"
+   keep="`echo $days - 1 | bc -l`"
 fi
 
 # lockfile setup
 
 if [ ! -z "$lockfile" ]; then
-  $touch $lockfile || warning "Could not create lockfile $lockfile"
+   $touch $lockfile || warning "Could not create lockfile $lockfile"
 fi
 
 # nicelevel setup
 
-if [ ! -z "$nicelevel" ]; then 
-  nice="nice -n $nicelevel"
-else 
-  nice=""
+if [ ! -z "$nicelevel" ]; then
+   nice="nice -n $nicelevel"
+else
+   nice=""
 fi
 
 # connection test
 
 if [ "$from" == "remote" ] && [ "$testconnect" == "yes" ]; then
-  debug "$ssh -o PasswordAuthentication=no $user@$host 'echo -n 1'"
-  result=`ssh -o PasswordAuthentication=no $user@$host 'echo -n 1'`
-  if [ "$result" != "1" ]; then
-    fatal "Can't connect to $host as $user."
-  else
-    debug "Connected to $srchost successfully"
-  fi
+   debug "$ssh -o PasswordAuthentication=no $user@$host 'echo -n 1'"
+   result=`ssh -o PasswordAuthentication=no $user@$host 'echo -n 1'`
+   if [ "$result" != "1" ]; then
+      fatal "Can't connect to $host as $user."
+   else
+      debug "Connected to $srchost successfully"
+   fi
 fi
 
 # rsync options for local sources
 
 if [ "$from" == "local" ]; then
 
-  rsync_local_options="$rsync_options"
+   rsync_local_options="$rsync_options"
 
-  if [ ! -z "$numericids" ]; then
-    rsync_local_options="$rsync_local_options --numeric-ids "
-  fi
+   if [ ! -z "$numericids" ]; then
+      rsync_local_options="$rsync_local_options --numeric-ids "
+   fi
 
 fi
 
@@ -198,41 +198,41 @@ fi
 
 if [ "$from" == "remote" ]; then
 
-  rsync_remote_options="$rsync_options --rsync-path=$remote_rsync"
+   rsync_remote_options="$rsync_options --rsync-path=$remote_rsync"
 
-  if [ "$compress" == "1" ]; then
-    rsync_remote_options="$rsync_remote_options --compress"
-  fi
+   if [ "$compress" == "1" ]; then
+      rsync_remote_options="$rsync_remote_options --compress"
+   fi
 
-  if [ ! -z "$bandwidthlimit" ]; then
-    rsync_remote_options="$rsync_remote_options --bwlimit=$bandwidthlimit"
-  fi
+   if [ ! -z "$bandwidthlimit" ]; then
+      rsync_remote_options="$rsync_remote_options --bwlimit=$bandwidthlimit"
+   fi
 
-  if [ ! -z "$numericids" ]; then
-    rsync_remote_options="$rsync_remote_options --numeric-ids"
-  fi
+   if [ ! -z "$numericids" ]; then
+      rsync_remote_options="$rsync_remote_options --numeric-ids"
+   fi
 
 fi
 
 # set mv procedure
 
 if [ $enable_mv_timestamp_bug == "yes" ]; then
-  mv=move_files
+   mv=move_files
 fi
 
 # set excludes
 
 for path in $exclude; do
-  EXCLUDES="$EXCLUDES --exclude=$path"
+   EXCLUDES="$EXCLUDES --exclude=$path"
 done
 
 # stop services
 
 if [ ! -z "$service" ]; then
-  for daemon in $service; do
-    info "Stopping service $daemon..."
-    $initscripts/$daemon stop
-  done
+   for daemon in $service; do
+      info "Stopping service $daemon..."
+      $initscripts/$daemon stop
+   done
 fi
 
 echo "Starting backup at `date`" >> $log
@@ -240,110 +240,110 @@ echo "Starting backup at `date`" >> $log
 # mount backup destination folder as read-write
 
 if [ "$read_only" == "1" ] || [ "$read_only" == "yes" ]; then
-  if [ -d "$mountpoint" ]; then
-    mount -o remount,rw $mountpoint
-    if (($?)); then
-      error "Could not mount $mountpoint"
-      exit 1
-    fi
-  fi
+   if [ -d "$mountpoint" ]; then
+      mount -o remount,rw $mountpoint
+      if (($?)); then
+         error "Could not mount $mountpoint"
+         exit 1
+      fi
+   fi
 fi
 
 # add vservers to included folders
 
 if [ "$vservers_are_available" == "yes" ]; then
 
-  # sane permission on backup
-  mkdir -p $backupdir/$VROOTDIR
-  chmod 000 $backupdir/$VROOTDIR
+   # sane permission on backup
+   mkdir -p $backupdir/$VROOTDIR
+   chmod 000 $backupdir/$VROOTDIR
 
-  for candidate in $found_vservers; do
-    candidate="`basename $candidate`"
-    found_excluded_vserver="0"
-    for excluded_vserver in $exclude_vserver; do
-      if [ "$excluded_vserver" == "$candidate" ]; then
-        found_excluded_vserver="1"
-        break
+   for candidate in $found_vservers; do
+      candidate="`basename $candidate`"
+      found_excluded_vserver="0"
+      for excluded_vserver in $exclude_vserver; do
+         if [ "$excluded_vserver" == "$candidate" ]; then
+            found_excluded_vserver="1"
+            break
+         fi
+      done
+      if [ "$found_excluded_vserver" == "0" ]; then
+         include="$include $VROOTDIR/$candidate"
       fi
-    done
-    if [ "$found_excluded_vserver" == "0" ]; then
-      include="$include $VROOTDIR/$candidate"
-    fi
-  done
+   done
 fi
 
 # the backup procedure
 
 for SECTION in $include; do
 
-  section="`basename $SECTION`"
+   section="`basename $SECTION`"
 
-  if [ ! -d "$backupdir/$SECTION/$section.0" ]; then
-    mkdir -p $backupdir/$SECTION/$section.0
-  fi
- 
-  info "Rotating $backupdir/$SECTION/$section..."
-  echo "Rotating $backupdir/$SECTION/$section..." >> $log
-  rotate $backupdir/$SECTION/$section $keep
-  info "Syncing $SECTION on $backupdir/$SECTION/$section.0..."
+   if [ ! -d "$backupdir/$SECTION/$section.0" ]; then
+      mkdir -p $backupdir/$SECTION/$section.0
+   fi
 
-  if [ "$from" == "local" ]; then
-    debug $rsync $rsync_local_options $EXCLUDES /$SECTION/ $backupdir/$SECTION/$section.0/ 
-    $nice $rsync $rsync_local_options $EXCLUDES /$SECTION/ $backupdir/$SECTION/$section.0/ >> $log
-    if [ "$?" != "0" ]; then
-      warning "Rsync error when trying to transfer $SECTION"
-    fi
-  elif [ "$from" == "remote" ]; then
-    if [ -z "$user" ] || [ -z "$host" ]; then
-      error "Config file error: either user or host was not specified"
-      exit 1
-    else
-      debug $nice $rsync $rsync_remote_options $EXCLUDES -e "$ssh" $user@$host:/$SECTION/ $backupdir/$SECTION/$section.0
-      $nice $rsync $rsync_remote_options $EXCLUDES -e "$ssh" $user@$host:/$SECTION/ $backupdir/$SECTION/$section.0 >> $log
+   info "Rotating $backupdir/$SECTION/$section..."
+   echo "Rotating $backupdir/$SECTION/$section..." >> $log
+   rotate $backupdir/$SECTION/$section $keep
+   info "Syncing $SECTION on $backupdir/$SECTION/$section.0..."
+
+   if [ "$from" == "local" ]; then
+      debug $rsync $rsync_local_options $EXCLUDES /$SECTION/ $backupdir/$SECTION/$section.0/
+      $nice $rsync $rsync_local_options $EXCLUDES /$SECTION/ $backupdir/$SECTION/$section.0/ >> $log
       if [ "$?" != "0" ]; then
-        warning "Rsync error when trying to transfer $SECTION"
+         warning "Rsync error when trying to transfer $SECTION"
       fi
-    fi
-  else
-    error "Invalid source $from"
-    exit 1
-  fi
+   elif [ "$from" == "remote" ]; then
+      if [ -z "$user" ] || [ -z "$host" ]; then
+         error "Config file error: either user or host was not specified"
+         exit 1
+      else
+         debug $nice $rsync $rsync_remote_options $EXCLUDES -e "$ssh" $user@$host:/$SECTION/ $backupdir/$SECTION/$section.0
+         $nice $rsync $rsync_remote_options $EXCLUDES -e "$ssh" $user@$host:/$SECTION/ $backupdir/$SECTION/$section.0 >> $log
+         if [ "$?" != "0" ]; then
+            warning "Rsync error when trying to transfer $SECTION"
+            fi
+      fi
+   else
+      error "Invalid source $from"
+      exit 1
+   fi
 
-  $touch $backupdir/$SECTION/$section.0
+   $touch $backupdir/$SECTION/$section.0
 
 done
 
 # remount backup destination as read-only
 
 if [ "$read_only" == "1" ] || [ "$read_only" == "yes" ]; then
-  mount -o remount,ro $mountpoint
+   mount -o remount,ro $mountpoint
 fi
 
 # check partition for errors
 
 if [ "$fscheck" == "1" ] || [ "$fscheck" == "yes" ]; then
-  umount $mountpoint
-  if (($?)); then
-    warning "Could not umount $mountpoint to run fsck"
-  else
-    $nice $fsck -v -y $partition >> $log
-    mount $mountpoint
-  fi
+   umount $mountpoint
+   if (($?)); then
+      warning "Could not umount $mountpoint to run fsck"
+   else
+      $nice $fsck -v -y $partition >> $log
+      mount $mountpoint
+   fi
 fi
 
 # restart services
 
 if [ ! -z "$service" ]; then
-  for daemon in $service; do
-    info "Starting service $daemon..."
-    $initscripts/$daemon start
-  done
+   for daemon in $service; do
+      info "Starting service $daemon..."
+      $initscripts/$daemon start
+   done
 fi
 
 # removes the lockfile
 
 if [ ! -z "$lockfile" ]; then
-  $rm $lockfile || warning "Could not remove lockfile $lockfile"
+   $rm $lockfile || warning "Could not remove lockfile $lockfile"
 fi
 
 echo "Finnishing backup at `date`" >> $log

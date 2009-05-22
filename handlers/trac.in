@@ -12,39 +12,38 @@ getconf tmp /var/backups/trac.tmp
 cd $src
 for repo in `find . -name VERSION`
 do
+   repo=`dirname $repo`
+   if [ "$repo" == "." ]
+   then
+      repo=""
+   fi
 
-    repo=`dirname $repo`
-    if [ "$repo" == "." ]
-    then 
-       repo="" 
-    fi
+   # Just make the parent directory for $tmp/$repo
+   parentdir=`dirname $tmp/$repo`
+   ret=`mkdir -p $parentdir 2>&1`
+   code=$?
+   if [ "$ret" ]; then
+      debug "$ret"
+   fi
+   if [ $code != 0 ]; then
+      error "command failed mkdir -p $parentdir"
+   fi
 
-    # Just make the parent directory for $tmp/$repo
-    parentdir=`dirname $tmp/$repo`
-    ret=`mkdir -p $parentdir 2>&1`
-    code=$?
-    if [ "$ret" ]; then
-       debug "$ret"
-    fi
-    if [ $code != 0 ]; then
-       error "command failed mkdir -p $parentdir"
-    fi
-
-    ret=`trac-admin $src/$repo hotcopy $tmp/$repo 2>&1`
-    code=$?
-    if [ "$ret" ]; then
-       debug "$ret"
-    fi
-    if [ $code != 0 ]; then
-       error "command failed -- trac-admin $src/$repo hotcopy $tmp/$repo"
-    fi
+   ret=`trac-admin $src/$repo hotcopy $tmp/$repo 2>&1`
+   code=$?
+   if [ "$ret" ]; then
+      debug "$ret"
+   fi
+   if [ $code != 0 ]; then
+      error "command failed -- trac-admin $src/$repo hotcopy $tmp/$repo"
+   fi
 done
 
 if [ -d $dest -a -d $tmp ]; then
-     rm -rf $dest
+   rm -rf $dest
 fi
 if [ -d $tmp ]; then
-     mv $tmp $dest
+   mv $tmp $dest
 fi
 
 exit 0
