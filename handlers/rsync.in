@@ -1,13 +1,26 @@
-# -*- mode: sh; sh-basic-offset: 3; indent-tabs-mode: nil; -*-
-# vim: set filetype=sh sw=3 sts=3 expandtab autoindent:
 #
-# backupninja handler to do incremental backups using
-# rsync and hardlinks, based on
+# backupninja handler for incremental backups using rsync and hardlinks
+# feedback: rhatto at riseup.net
 #
-#   http://www.mikerubel.org/computers/rsync_snapshots/
+#  rsync handler is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License as published by the Free
+#  Software Foundation; either version 2 of the License, or any later version.
 #
-# feedback: rhatto at riseup.net | gpl
-# lot of enhancements grabbed from "rsnap" handler by paulv at bikkel.org
+#  rsync handler is distributed in the hope that it will be useful, but WITHOUT
+#  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+#  more details.
+#
+#  You should have received a copy of the GNU General Public License along with
+#  this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+#  Place - Suite 330, Boston, MA 02111-1307, USA
+#
+# Inspiration
+# -----------
+#
+#  - http://www.mikerubel.org/computers/rsync_snapshots/
+#  - rsnap handler by paulv at bikkel.org
+#  - maildir handler from backupninja
 #
 # Config file options
 # -------------------
@@ -17,21 +30,29 @@
 #   partition = partition where the backup lives
 #   fscheck = set to 1 if fsck should run on $partition after the backup is made
 #   read_only = set to 1 if $partition is mounted read-only
-#   mountpoint = backup partition mountpoint or backup main folder
-#   backupdir = folder relative do $mountpoint where the backup should be stored
-#   days = number of backup increments (min = 5)
+#   mountpoint = backup partition mountpoint or backup main folder (either local or remote)
+#   backupdir = folder relative do $mountpoint where the backup should be stored (local or remote)
+#   format = specify backup storage format: short, long or mirror (i.e, no rotations)
+#   days = for short storage format, specify the number of backup increments (min = 5)
+#   keepdaily = for long storage format, specify the number of daily backup increments
+#   keepweekly = for long storage format, specify the number of weekly backup increments
+#   keepmonthly = for long storage format, specify the number of monthly backup increments
 #   lockfile = lockfile to be kept during backup execution
 #   nicelevel = rsync command nice level
 #   enable_mv_timestamp_bug = set to "yes" if your system isnt handling timestamps correctly
 #   tmp = temp folder
+#   multiconnection = set to "yes" if you want to use multiconnection ssh support
 #
 #   [source]
 #   from = local or remote
 #   host = source hostname or ip, if remote backup
+#   port = remote port number (remote source only)
+#   user = remote user name (remote source only)
 #   testconnect = when "yes", test the connection for a remote source before backup
 #   include = include folder on backup
 #   exclude = exclude folder on backup
-#   ssh = ssh command line (remote only)
+#   ssh = ssh command line (remote source only)
+#   protocol = ssh or rsync (remote source only)
 #   rsync = rsync program
 #   rsync_options = rsync command options
 #   exclude_vserver = vserver-name (valid only if vservers = yes on backupninja.conf)
@@ -39,6 +60,28 @@
 #   compress = if set to 1, compress data on rsync (remote source only)
 #   bandwidthlimit = set a badnwidth limit in kbps (remote source only)
 #   remote_rsync = remote rsync program (remote source only)
+#   id_file = ssh key file (remote source only)
+#   batch = set to "yes" to rsync use a batch file as source
+#   batchbase = folder where the batch file is located
+#   filelist = set yes if you want rsync to use a file list source
+#   filelistbase = folder where the file list is placed
+#
+#   [dest]
+#   dest = backup destination type (local or remote)
+#   testconnect = when "yes", test the connection for a remote source before backup
+#   ssh = ssh command line (remote dest only)
+#   protocol = ssh or rsync (remote dest only)
+#   numericids = when set to 1, use numeric ids instead of user/group mappings on rsync
+#   compress = if set to 1, compress data on rsync (remote source only)
+#   host = destination host name (remote destination only)
+#   port = remote port number (remote destination only)
+#   user = remote user name (remote destination only)
+#   id_file = ssh key file (remote destination only)
+#   bandwidthlimit = set a badnwidth limit in kbps (remote destination only)
+#   remote_rsync = remote rsync program (remote dest only)
+#   batch = set to "yes" to rsync write a batch file from the changes
+#   batchbase = folder where the batch file should be written
+#   fakesuper = set to yes so rsync use the --fake-super flag (remote destination only)
 #
 #   [services]
 #   initscripts = absolute path where scripts are located
@@ -56,297 +99,982 @@
 # You dont need to manually specify vservers using "include = /vservers".
 # They are automatically backuped if vserver is set to "yes" on you backupninja.conf.
 #
-
-# config file evaluation
-
-setsection system
-getconf rm rm
-getconf cp cp
-getconf touch touch
-getconf mv mv
-getconf fsck fsck
-
-setsection general
-getconf log /var/log/backup/rsync.log
-getconf partition
-getconf fscheck
-getconf read_only
-getconf mountpoint
-getconf backupdir
-getconf rotate
-getconf days
-getconf lockfile
-getconf nicelevel 0
-getconf enable_mv_timestamp_bug no
-getconf tmp /tmp
-
-setsection source
-getconf from local
-getconf testconnect no
-getconf rsync $RSYNC
-getconf rsync_options "-av --delete"
-getconf ssh ssh
-getconf user
-getconf host
-getconf include
-getconf exclude
-getconf exclude_vserver
-getconf numericids 0
-getconf compress 0
-getconf bandwidthlimit
-getconf remote_rsync rsync
-
-setsection services
-getconf initscripts
-getconf service
+# Changelog
+# ---------
+# 
+# 20090329 - rhatto at riseup.net
+#
+#   - Added support for: 
+#     - Remote destinations
+#     - Long rotation format similar to maildir handler
+#     - Batch files through --read-batch and --write-batch
+#     - Custom file list using --files-from
+#     - SSH persistent connection using ControlMaster
+#     - The rsync:// protocol
+#   - Metadata folder for each backup folder
+#   - General refactoring
+#   - Code cleanup
+#
 
 # function definitions
 
-function rotate {
+function eval_config {
+  
+  # system section
+  
+  setsection system
+  getconf rm rm
+  getconf cp cp
+  getconf touch touch
+  getconf mv mv
+  getconf fsck fsck
+  
+  # general section
+  
+  setsection general
+  getconf log /var/log/backup/rsync.log
+  getconf partition
+  getconf fscheck
+  getconf read_only
+  getconf mountpoint
+  getconf backupdir
+  getconf format short
+  getconf days
+  getconf keepdaily 5
+  getconf keepweekly 3
+  getconf keepmonthly 1
+  getconf lockfile
+  getconf nicelevel 0
+  getconf enable_mv_timestamp_bug no
+  getconf tmp /tmp
+  getconf multiconnection no
+  
+  # source section
+  
+  setsection source
+  getconf from local
+  getconf rsync $RSYNC
+  getconf rsync_options "-av --delete --recursive"
+  
+  if [ "$from" == "remote" ]; then
+    getconf testconnect no
+    getconf protocol ssh
+    getconf ssh ssh
+    getconf host
 
-   if [[ "$2" < 4 ]]; then
-      error "Rotate: minimum of 4 rotations"
-      exit 1
-   fi
+    if [ "$protocol" == "ssh" ]; then
+      # sshd default listen port
+      getconf port 22
+    else
+      # rsyncd default listen port
+      getconf port 873
+    fi
 
-   if [ -d $1.$2 ]; then
-      $nice $mv /$1.$2 /$1.tmp
-   fi
+    getconf user
+    getconf bandwidthlimit
+    getconf remote_rsync rsync
+    getconf id_file /root/.ssh/id_dsa
+  fi
+  
+  getconf batch no
 
-   for ((n=`echo "$2 - 1" | bc`; n >= 0; n--)); do
-      if [ -d $1.$n ]; then
-         dest=`echo "$n + 1" | bc`
-         $nice $mv /$1.$n /$1.$dest
-         $touch /$1.$dest
+  if [ "$batch" == "yes" ]; then
+    getconf batchbase
+    if [ ! -z "$batchbase" ]; then
+      batch="read"
+    fi
+  fi
+
+  getconf filelist no
+  getconf filelistbase
+  getconf include
+  getconf exclude
+  getconf exclude_vserver
+  getconf numericids 0
+  getconf compress 0
+  
+  # dest section
+  
+  setsection dest
+  getconf dest local
+  getconf fakesuper no
+  
+  if [ "$dest" == "remote" ]; then
+    getconf testconnect no
+    getconf protocol ssh
+    getconf ssh ssh
+    getconf host
+
+    if [ "$protocol" == "ssh" ]; then
+      # sshd default listen port
+      getconf port 22
+    else
+      # rsyncd default listen port
+      getconf port 873
+    fi
+
+    getconf user
+    getconf bandwidthlimit
+    getconf remote_rsync rsync
+    getconf id_file /root/.ssh/id_dsa
+  fi
+  
+  getconf batch no
+
+  if [ "$batch" != "yes" ]; then
+    getconf batch no
+    if [ "$batch" == "yes" ]; then
+      getconf batchbase
+      if [ ! -z "$batchbase" ]; then
+        batch="write"
       fi
-   done
+    fi
+  fi
 
-   if [ -d $1.tmp ]; then
-      $nice $mv /$1.tmp /$1.0
-   fi
+  getconf numericids 0
+  getconf compress 0
+  
+  # services section
+  
+  setsection services
+  getconf initscripts /etc/init.d
+  getconf service
 
-   if [ -d $1.1 ]; then
-      $nice $cp -alf /$1.1/. /$1.0
-   fi
+  # config check
+
+  if [ "$dest" != "local" ] && [ "$from" == "remote" ]; then
+    fatal "When source is remote, destination should be local."
+    exit 1
+  fi
+
+  if [ "$from" != "local" ] && [ "$from" != "remote" ]; then
+    fatal "Invalid source $from"
+    exit 1
+  fi
+
+  backupdir="$mountpoint/$backupdir"
+
+  if [ "$dest" == "local" ] && [ ! -d "$backupdir" ]; then 
+    error "Backupdir $backupdir does not exist"
+    exit 1
+  fi
+
+  if [ ! -z "$log" ]; then
+    mkdir -p `dirname $log`
+  fi
+
+  if [ "$format" == "short" ]; then
+    if [ -z "$days" ]; then
+      keep="4"
+    else
+      keep="`echo $days - 1 | bc -l`"
+    fi
+  fi
+
+  if [ ! -z "$nicelevel" ]; then 
+    nice="nice -n $nicelevel"
+  else 
+    nice=""
+  fi
+
+  ssh_cmd="ssh -T -o PasswordAuthentication=no $host -p $port -l $user -i $id_file"
+
+  if [ "$from" == "remote" ] || [ "$dest" == "remote" ]; then
+    if [ "$testconnect" == "yes" ] && [ "$protocol" == "ssh" ]; then
+      test_connect $host $port $user $id_file
+    fi
+  fi
+
+  if [ "$multiconnection" == "yes" ]; then
+    ssh_cmd="$ssh_cmd -S $tmp/%r@%h:%p"
+  fi
+
+  if [ $enable_mv_timestamp_bug == "yes" ]; then
+    mv=move_files
+  fi
+
+  for path in $exclude; do
+    excludes="$excludes --exclude=$path"
+  done
+
+}
+
+function rotate_short {
+
+  local dest
+  local folder="$1"
+  local keep="$2"
+  local metadata="`dirname $folder`/metadata"
+
+  if [[ "$keep" < 4 ]]; then
+    error "Rotate: minimum of 4 rotations"
+    exit 1
+  fi
+
+  if [ -d $folder.$keep ]; then
+    $nice $mv /$folder.$keep /$folder.tmp
+  fi
+
+  for ((n=`echo "$keep - 1" | bc`; n >= 0; n--)); do
+    if [ -d $folder.$n ]; then
+      dest=`echo "$n + 1" | bc`
+      $nice $mv /$folder.$n /$folder.$dest
+      $touch /$folder.$dest
+      mkdir -p $metadata/`basename $folder`.$dest
+      date +%c%n%s > $metadata/`basename $folder`.$dest/rotated
+    fi
+  done
+
+  if [ -d $folder.tmp ]; then
+    $nice $mv /$folder.tmp /$folder.0
+  fi
+
+  if [ -d $folder.1 ]; then
+    $nice $cp -alf /$folder.1/. /$folder.0
+  fi
+
+}
+
+function rotate_short_remote {
+
+  local folder="$1"
+  local metadata="`dirname $folder`/metadata"
+  local keep="$2"
+
+  if [[ "$2" < 4 ]]; then
+    error "Rotate: minimum of 4 rotations"
+    exit 1
+  fi
+
+(
+  $ssh_cmd <<EOF
+  ##### BEGIN REMOTE SCRIPT #####
+
+  if [ -d $folder.$keep ]; then
+    $nice mv /$folder.$keep /$folder.tmp
+  fi
+
+  for ((n=$(($keep - 1)); n >= 0; n--)); do
+    if [ -d $folder.\$n ]; then
+      dest=\$((\$n + 1))
+      $nice mv /$folder.\$n /$folder.\$dest
+      touch /$folder.\$dest
+      mkdir -p $metadata/`basename $folder`.\$dest
+      date +%c%n%s > $metadata/`basename $folder`.\$dest/rotated
+    fi
+  done
+
+  if [ -d $folder.tmp ]; then
+    $nice mv /$folder.tmp /$folder.0
+  fi
+
+  if [ -d $folder.1 ]; then
+    $nice $cp -alf /$folder.1/. /$folder.0
+  fi
+  ##### END REMOTE SCRIPT #######
+EOF
+) | (while read a; do passthru $a; done)
+
+}
+
+function rotate_long {
+
+  backuproot="$1"
+  seconds_daily=86400
+  seconds_weekly=604800
+  seconds_monthly=2628000
+  keepdaily=$keepdaily
+  keepweekly=$keepweekly
+  keepmonthly=$keepmonthly
+  now=`date +%s`
+
+  local metadata
+
+  if [ ! -d "$backuproot" ]; then
+    echo "Debug: skipping rotate of $backuproot as it doesn't exist."
+    exit
+  fi
+
+  for rottype in daily weekly monthly; do
+    seconds=$((seconds_${rottype}))
+
+    dir="$backuproot/$rottype"
+    metadata="$backuproot/metadata/$rottype.1"
+    mkdir -p $metadata
+    if [ ! -d $dir.1 ]; then
+      echo "Debug: $dir.1 does not exist, skipping."
+      continue 1
+    elif [ ! -f $metadata/created ] && [ ! -f $metadata/rotated ]; then
+      echo "Warning: metadata does not exist for $dir.1. This backup may be only partially completed. Skipping rotation."
+      continue 1
+    fi
+    
+    # Rotate the current list of backups, if we can.
+    oldest=`find $backuproot -maxdepth 1 -type d -name $rottype'.*' | @SED@ 's/^.*\.//' | sort -n | tail -1`
+    [ "$oldest" == "" ] && oldest=0
+    for (( i=$oldest; i > 0; i-- )); do
+      if [ -d $dir.$i ]; then
+        if [ -f $metadata/created ]; then
+          created=`tail -1 $metadata/created`
+        elif [ -f $metadata/rotated ]; then
+          created=`tail -1 $metadata/rotated`
+        else
+          created=0
+        fi
+        cutoff_time=$(( now - (seconds*(i-1)) ))
+        if [ ! $created -gt $cutoff_time ]; then
+          next=$(( i + 1 ))
+          if [ ! -d $dir.$next ]; then
+            echo "Debug: $rottype.$i --> $rottype.$next"
+            $nice mv $dir.$i $dir.$next
+            mkdir -p $backuproot/metadata/$rottype.$next
+            date +%c%n%s > $backuproot/metadata/$rottype.$next/rotated
+          else
+            echo "Debug: skipping rotation of $dir.$i because $dir.$next already exists."
+          fi
+        else
+          echo "Debug: skipping rotation of $dir.$i because it was created" $(( (now-created)/86400)) "days ago ("$(( (now-cutoff_time)/86400))" needed)."
+        fi
+      fi
+    done
+  done
+
+  max=$((keepdaily+1))
+  if [ $keepweekly -gt 0 -a -d $backuproot/daily.$max -a ! -d $backuproot/weekly.1 ]; then
+    echo "Debug: daily.$max --> weekly.1"
+    $nice mv $backuproot/daily.$max $backuproot/weekly.1
+    mkdir -p $backuproot/metadata/weekly.1
+    date +%c%n%s > $backuproot/metadata/weekly.1/rotated
+  fi
+
+  max=$((keepweekly+1))
+  if [ $keepmonthly -gt 0 -a -d $backuproot/weekly.$max -a ! -d $backuproot/monthly.1 ]; then
+    echo "Debug: weekly.$max --> monthly.1"
+    $nice mv $backuproot/weekly.$max $backuproot/monthly.1
+    mkdir -p $backuproot/metadata/monthly.1
+    date +%c%n%s > $backuproot/metadata/monthly.1/rotated
+  fi
+
+  for rottype in daily weekly monthly; do
+    max=$((keep${rottype}+1))
+    dir="$backuproot/$rottype"
+    oldest=`find $backuproot -maxdepth 1 -type d -name $rottype'.*' | @SED@ 's/^.*\.//' | sort -n | tail -1`
+    [ "$oldest" == "" ] && oldest=0 
+    # if we've rotated the last backup off the stack, remove it.
+    for (( i=$oldest; i >= $max; i-- )); do
+      if [ -d $dir.$i ]; then
+        if [ -d $backuproot/rotate.tmp ]; then
+          echo "Debug: removing rotate.tmp"
+          $nice rm -rf $backuproot/rotate.tmp
+        fi
+        echo "Debug: moving $rottype.$i to rotate.tmp"
+        $nice mv $dir.$i $backuproot/rotate.tmp
+      fi
+    done
+  done
+
+}
+
+function rotate_long_remote {
+
+  local backuproot="$1"
+
+(
+  $ssh_cmd <<EOF
+  ##### BEGIN REMOTE SCRIPT #####
+
+  seconds_daily=86400
+  seconds_weekly=604800
+  seconds_monthly=2628000
+  keepdaily=$keepdaily
+  keepweekly=$keepweekly
+  keepmonthly=$keepmonthly
+  now=\`date +%s\`
+
+  if [ ! -d "$backuproot" ]; then
+    echo "Debug: skipping rotate of $backuproot as it doesn't exist."
+    exit
+  fi
+
+  for rottype in daily weekly monthly; do
+    seconds=\$((seconds_\${rottype}))
+
+    dir="$backuproot/\$rottype"
+    metadata="$backuproot/metadata/\$rottype.1"
+    mkdir -p \$metadata
+    if [ ! -d \$dir.1 ]; then
+      echo "Debug: \$dir.1 does not exist, skipping."
+      continue 1
+    elif [ ! -f \$metadata/created ] && [ ! -f \$metadata/rotated ]; then
+      echo "Warning: metadata does not exist for \$dir.1. This backup may be only partially completed. Skipping rotation."
+      continue 1
+    fi
+    
+    # Rotate the current list of backups, if we can.
+    oldest=\`find $backuproot -maxdepth 1 -type d -name \$rottype'.*' | @SED@ 's/^.*\.//' | sort -n | tail -1\`
+    [ "\$oldest" == "" ] && oldest=0
+    for (( i=\$oldest; i > 0; i-- )); do
+      if [ -d \$dir.\$i ]; then
+        if [ -f \$metadata/created ]; then
+          created=\`tail -1 \$metadata/created\`
+        elif [ -f \$metadata/rotated ]; then
+          created=\`tail -1 \$metadata/rotated\`
+        else
+          created=0
+        fi
+        cutoff_time=\$(( now - (seconds*(i-1)) ))
+        if [ ! \$created -gt \$cutoff_time ]; then
+          next=\$(( i + 1 ))
+          if [ ! -d \$dir.\$next ]; then
+            echo "Debug: \$rottype.\$i --> \$rottype.\$next"
+            $nice mv \$dir.\$i \$dir.\$next
+            mkdir -p $backuproot/metadata/\$rottype.\$next
+            date +%c%n%s > $backuproot/metadata/\$rottype.\$next/rotated
+          else
+            echo "Debug: skipping rotation of \$dir.\$i because \$dir.\$next already exists."
+          fi
+        else
+          echo "Debug: skipping rotation of \$dir.\$i because it was created" \$(( (now-created)/86400)) "days ago ("\$(( (now-cutoff_time)/86400))" needed)."
+        fi
+      fi
+    done
+  done
+
+  max=\$((keepdaily+1))
+  if [ \$keepweekly -gt 0 -a -d $backuproot/daily.\$max -a ! -d \$backuproot/weekly.1 ]; then
+    echo "Debug: daily.\$max --> weekly.1"
+    $nice mv $backuproot/daily.\$max $backuproot/weekly.1
+    mkdir -p $backuproot/metadata/weekly.1
+    date +%c%n%s > $backuproot/metadata/weekly.1/rotated
+  fi
+
+  max=\$((keepweekly+1))
+  if [ \$keepmonthly -gt 0 -a -d $backuproot/weekly.\$max -a ! -d $backuproot/monthly.1 ]; then
+    echo "Debug: weekly.\$max --> monthly.1"
+    $nice mv $backuproot/weekly.\$max $backuproot/monthly.1
+    mkdir -p $backuproot/metadata/monthly.1
+    date +%c%n%s > $backuproot/metadata/monthly.1/rotated
+  fi
+
+  for rottype in daily weekly monthly; do
+    max=\$((keep\${rottype}+1))
+    dir="$backuproot/\$rottype"
+    oldest=\`find $backuproot -maxdepth 1 -type d -name \$rottype'.*' | @SED@ 's/^.*\.//' | sort -n | tail -1\`
+    [ "\$oldest" == "" ] && oldest=0 
+    # if we've rotated the last backup off the stack, remove it.
+    for (( i=\$oldest; i >= \$max; i-- )); do
+      if [ -d \$dir.\$i ]; then
+        if [ -d $backuproot/rotate.tmp ]; then
+          echo "Debug: removing rotate.tmp"
+          $nice rm -rf $backuproot/rotate.tmp
+        fi
+        echo "Debug: moving \$rottype.\$i to rotate.tmp"
+        $nice mv \$dir.\$i $backuproot/rotate.tmp
+      fi
+    done
+  done
+  ##### END REMOTE SCRIPT #######
+EOF
+) | (while read a; do passthru $a; done)
+
+}
+
+function setup_long_dirs {
+
+  local destdir=$1
+  local backuptype=$2
+  local dir="$destdir/$backuptype"
+  local tmpdir="$destdir/rotate.tmp"
+  local metadata="$destdir/metadata/$backuptype.1"
+
+  if [ ! -d $destdir ]; then
+    echo "Creating destination directory $destdir..."
+    mkdir -p $destdir
+  fi
+
+  if [ -d $dir.1 ]; then
+    if [ -f $metadata/created ]; then
+      echo "Warning: $dir.1 already exists. Overwriting contents."
+    else
+      echo "Warning: we seem to be resuming a partially written $dir.1"
+    fi
+  else
+    if [ -d $tmpdir ]; then
+      mv $tmpdir $dir.1
+      if [ $? == 1 ]; then
+        echo "Fatal: could mv $destdir/rotate.tmp $dir.1 on host $host"
+        exit 1
+      fi
+    else
+      mkdir --parents $dir.1
+      if [ $? == 1 ]; then
+        echo "Fatal: could not create directory $dir.1 on host $host"
+        exit 1
+      fi
+    fi
+    if [ -d $dir.2 ]; then
+      echo "Debug: update links $backuptype.2 --> $backuptype.1"
+      cp -alf $dir.2/. $dir.1
+      #if [ $? == 1 ]; then
+      #  echo "Fatal: could not create hard links to $dir.1 on host $host"
+      #  exit 1
+      #fi
+    fi
+  fi
+  [ -f $metadata/created ] && rm $metadata/created
+  [ -f $metadata/rotated ] && rm $metadata/rotated
+
+}
+
+function setup_long_dirs_remote {
+
+  local destdir=$1
+  local backuptype=$2
+  local dir="$destdir/$backuptype"
+  local tmpdir="$destdir/rotate.tmp"
+  local metadata="$destdir/metadata/$backuptype.1"
+
+(
+  $ssh_cmd <<EOF
+  ##### BEGIN REMOTE SCRIPT #####
+  if [ ! -d $destdir ]; then
+    echo "Creating destination directory $destdir on $host..."
+    mkdir -p $destdir
+  fi
+
+  if [ -d $dir.1 ]; then
+    if [ -f $metadata/created ]; then
+      echo "Warning: $dir.1 already exists. Overwriting contents."
+    else
+      echo "Warning: we seem to be resuming a partially written $dir.1"
+    fi
+  else
+    if [ -d $tmpdir ]; then
+      mv $tmpdir $dir.1
+      if [ \$? == 1 ]; then
+        echo "Fatal: could mv $destdir/rotate.tmp $dir.1 on host $host"
+        exit 1
+      fi
+    else
+      mkdir --parents $dir.1
+      if [ \$? == 1 ]; then
+        echo "Fatal: could not create directory $dir.1 on host $host"
+        exit 1
+      fi
+    fi
+    if [ -d $dir.2 ]; then
+      echo "Debug: update links $backuptype.2 --> $backuptype.1"
+      cp -alf $dir.2/. $dir.1
+      #if [ \$? == 1 ]; then
+      #  echo "Fatal: could not create hard links to $dir.1 on host $host"
+      #  exit 1
+      #fi
+    fi
+  fi
+  [ -f $metadata/created ] && rm $metadata/created
+  [ -f $metadata/rotated ] && rm $metadata/rotated
+  ##### END REMOTE SCRIPT #######
+EOF
+) | (while read a; do passthru $a; done)
 
 }
 
 function move_files {
 
-   ref=$tmp/makesnapshot-mymv-$$;
-   $touch -r $1 $ref;
-   $mv $1 $2;
-   $touch -r $ref $2;
-   $rm $ref;
+  ref=$tmp/makesnapshot-mymv-$$;
+  $touch -r $1 $ref;
+  $mv $1 $2;
+  $touch -r $ref $2;
+  $rm $ref;
 
 }
 
-backupdir="$mountpoint/$backupdir"
+function prepare_storage {
 
-# does $backupdir exists?
+  section="`basename $SECTION`"
 
-if [ ! -d "$backupdir" ]; then
-   error "Backupdir $backupdir does not exist"
-   exit 1
-fi
+  if [ "$format" == "short" ]; then
 
-# setup number of increments
+    suffix="$section.0"
+    info "Rotating $backupdir/$SECTION..."
+    echo "Rotating $backupdir/$SECTION..." >> $log
 
-if [ -z "$days" ]; then
-   keep="4"
-else
-   keep="`echo $days - 1 | bc -l`"
-fi
+    if [ "$dest" == "remote" ]; then
+      rotate_short_remote $backupdir/$SECTION/$section $keep
+    else
+      rotate_short $backupdir/$SECTION/$section $keep
+      if [ ! -d "$backupdir/$SECTION/$section.0" ]; then
+        mkdir -p $backupdir/$SECTION/$section.0
+      fi
+    fi
 
-# lockfile setup
+  elif [ "$format" == "long" ]; then
 
-if [ ! -z "$lockfile" ]; then
-   $touch $lockfile || warning "Could not create lockfile $lockfile"
-fi
+    if [ $keepdaily -gt 0 ]; then
+      btype=daily
+    elif [ $keepweekly -gt 0 ]; then
+      btype=weekly
+    elif [ $keepmonthly -gt 0 ]; then
+      btype=monthly
+    else
+      fatal "keeping no backups";
+      exit 1
+    fi
 
-# nicelevel setup
+    suffix="$btype.1"
+    info "Rotating $backupdir/$SECTION/..."
+    echo "Rotating $backupdir/$SECTION/..." >> $log
 
-if [ ! -z "$nicelevel" ]; then
-   nice="nice -n $nicelevel"
-else
-   nice=""
-fi
+    if [ "$dest" == "remote" ]; then
+      rotate_long_remote $backupdir/$SECTION
+      setup_long_dirs_remote $backupdir/$SECTION $btype
+    else
+      rotate_long $backupdir/$SECTION
+      setup_long_dirs $backupdir/$SECTION $btype
+    fi
 
-# connection test
+  elif [ "$format" == "mirror" ]; then
+    suffix=""
+  else
+    fatal "Invalid backup format $format"
+    exit 1
+  fi
 
-if [ "$from" == "remote" ] && [ "$testconnect" == "yes" ]; then
-   debug "$ssh -o PasswordAuthentication=no $user@$host 'echo -n 1'"
-   result=`ssh -o PasswordAuthentication=no $user@$host 'echo -n 1'`
-   if [ "$result" != "1" ]; then
-      fatal "Can't connect to $host as $user."
-   else
-      debug "Connected to $srchost successfully"
-   fi
-fi
+}
 
-# rsync options for local sources
+function set_orig {
 
-if [ "$from" == "local" ]; then
+  if [ "$from" == "local" ]; then
+    orig="/$SECTION/"
+  elif [ "$from" == "remote" ]; then
+    if [ "$protocol" == "rsync" ]; then
+      orig="rsync://$user@$host:$port/$SECTION/"
+    else
+      orig="$user@$host:/$SECTION/"
+    fi
+  fi
 
-   rsync_local_options="$rsync_options"
+}
 
-   if [ ! -z "$numericids" ]; then
-      rsync_local_options="$rsync_local_options --numeric-ids "
-   fi
+function set_dest { 
 
-fi
+  if [ "$dest" == "local" ]; then
+    dest_path="$backupdir/$SECTION/$suffix/"
+  else
+    if [ "$protocol" == "rsync" ]; then
+      dest_path="rsync://$user@$host:$port/$backupdir/$SECTION/$suffix/"
+    else
+      dest_path="$user@$host:$backupdir/$SECTION/$suffix/"
+    fi
+  fi
 
-# rsync options for remote sources
+}
 
-if [ "$from" == "remote" ]; then
+function set_batch_mode {
 
-   rsync_remote_options="$rsync_options --rsync-path=$remote_rsync"
+  local batch_file="$batchbase/$SECTION/$suffix"
 
-   if [ "$compress" == "1" ]; then
-      rsync_remote_options="$rsync_remote_options --compress"
-   fi
+  if [ "$batch" == "read" ]; then
+    if [ -e "$batch_file" ]; then
+      orig=""
+      excludes=""
+      batch_option="--read-batch=$batch_file"
+    else
+      fatal "Batch file not found: $batch_file"
+      exit 1
+    fi
+  elif [ "$batch" == "write" ]; then
+    mkdir -p `dirname $batch_file`
+    batch_option="--write-batch=$batch_file"
+  fi
 
-   if [ ! -z "$bandwidthlimit" ]; then
-      rsync_remote_options="$rsync_remote_options --bwlimit=$bandwidthlimit"
-   fi
+}
 
-   if [ ! -z "$numericids" ]; then
-      rsync_remote_options="$rsync_remote_options --numeric-ids"
-   fi
+function update_metadata {
 
-fi
+  local metadata
+  local folder
 
-# set mv procedure
+  if [ "$dest" == "local" ]; then
+    metadata="`dirname $dest_path`/metadata/`basename $dest_path`"
+    mkdir -p $metadata
+    date +%c%n%s > $metadata/created
+    $touch $backupdir/$SECTION/$suffix
+  else
+    folder="`echo $dest_path | cut -d : -f 2`"
+    metadata="`dirname $folder`/metadata/`basename $folder`"
 
-if [ $enable_mv_timestamp_bug == "yes" ]; then
-   mv=move_files
-fi
+(
+  $ssh_cmd <<EOF
+    ##### BEGIN REMOTE SCRIPT #####
+    mkdir -p $metadata
+    date +%c%n%s > $metadata/created
+    ##### END REMOTE SCRIPT #######
+EOF
+) | (while read a; do passthru $a; done)
 
-# set excludes
+  fi
 
-for path in $exclude; do
-   EXCLUDES="$EXCLUDES --exclude=$path"
-done
+}
 
-# stop services
+function test_connect {
 
-if [ ! -z "$service" ]; then
-   for daemon in $service; do
+  local host="$1"
+  local port="$2"
+  local user="$3"
+  local id_file="$4"
+
+  if [ -z "$host" ] || [ -z "$user" ]; then
+    fatal "Remote host or user not set"
+    exit 1
+  fi
+
+  debug "$ssh_cmd 'echo -n 1'"
+  result=`$ssh_cmd 'echo -n 1'`
+
+  if [ "$result" != "1" ]; then
+    fatal "Can't connect to $host as $user."
+    exit 1
+  else
+    debug "Connected to $host successfully"
+  fi
+
+}
+
+function set_lockfile {
+
+  if [ ! -z "$lockfile" ]; then
+    $touch $lockfile || warning "Could not create lockfile $lockfile"
+  fi
+
+}
+
+function unset_lockfile {
+
+  if [ ! -z "$lockfile" ]; then
+    $rm $lockfile || warning "Could not remove lockfile $lockfile"
+  fi
+
+}
+
+function set_filelist {
+
+  filelist_flag=""
+
+  if [ "$filelist" == "yes" ]; then
+    if [ ! -z "$filelistbase" ]; then
+      if [ -e "$filelistbase/$SECTION/$suffix" ]; then
+        filelist_flag="--files-from=$filelistbase/$SECTION/$suffix"
+      else
+        warning "File list $filelistbase/$SECTION/$suffix not found."
+      fi
+    else
+      warning "No filelistbase set."
+    fi
+  fi
+
+}
+
+function set_rsync_options {
+
+  if [ ! -z "$numericids" ]; then
+    rsync_options="$rsync_options --numeric-ids"
+  fi
+
+  if [ "$from" == "local" ] || [ "$dest" == "local" ]; then
+    # rsync options for local sources or destinations
+    rsync_options="$rsync_options"
+  fi
+
+  if [ "$from" == "remote" ] || [ "$dest" == "remote" ]; then
+
+    # rsync options for remote sources or destinations
+
+    if [ "$compress" == "1" ]; then
+      rsync_options="$rsync_options --compress"
+    fi
+
+    if [ ! -z "$bandwidthlimit" ]; then
+      rsync_options="$rsync_options --bwlimit=$bandwidthlimit"
+    fi
+    
+    if [ "$fakesuper" == "yes" ]; then
+      remote_rsync="$remote_rsync --fake-super"
+    fi
+
+    rsync_options=($rsync_options --rsync-path="$remote_rsync")
+
+    if [ "$protocol" == "ssh" ]; then
+      if [ ! -e "$id_file" ]; then
+        fatal "SSH Identity file $id_file not found"
+        exit 1
+      else
+        debug RSYNC_RSH=\"$ssh_cmd\"
+        echo RSYNC_RSH=\"$ssh_cmd\" >> $log
+        RSYNC_RSH="$ssh_cmd"
+      fi
+    fi
+
+  fi
+
+  include_vservers
+
+}
+
+function stop_services {
+
+  if [ ! -z "$service" ]; then
+    for daemon in $service; do
       info "Stopping service $daemon..."
       $initscripts/$daemon stop
-   done
-fi
+    done
+  fi
 
-echo "Starting backup at `date`" >> $log
+}
 
-# mount backup destination folder as read-write
+function start_services {
 
-if [ "$read_only" == "1" ] || [ "$read_only" == "yes" ]; then
-   if [ -d "$mountpoint" ]; then
-      mount -o remount,rw $mountpoint
-      if (($?)); then
-         error "Could not mount $mountpoint"
-         exit 1
+  # restart services
+
+  if [ ! -z "$service" ]; then
+    for daemon in $service; do
+      info "Starting service $daemon..."
+      $initscripts/$daemon start
+    done
+  fi
+
+}
+
+function mount_rw {
+
+  # mount backup destination folder as read-write
+
+  if [ "$dest" == "local" ]; then
+    if [ "$read_only" == "1" ] || [ "$read_only" == "yes" ]; then
+      if [ -d "$mountpoint" ]; then
+        mount -o remount,rw $mountpoint
+        if (($?)); then
+          error "Could not mount $mountpoint"
+          exit 1
+        fi
       fi
-   fi
-fi
+    fi
+  fi
 
-# add vservers to included folders
+}
 
-if [ "$vservers_are_available" == "yes" ]; then
+function mount_ro {
 
-   # sane permission on backup
-   mkdir -p $backupdir/$VROOTDIR
-   chmod 000 $backupdir/$VROOTDIR
+  # remount backup destination as read-only
 
-   for candidate in $found_vservers; do
+  if [ "$dest" == "local" ]; then
+    if [ "$read_only" == "1" ] || [ "$read_only" == "yes" ]; then
+      mount -o remount,ro $mountpoint
+    fi
+  fi
+
+}
+
+function run_fsck {
+
+  # check partition for errors
+
+  if [ "$dest" == "local" ]; then
+    if [ "$fscheck" == "1" ] || [ "$fscheck" == "yes" ]; then
+      umount $mountpoint
+      if (($?)); then
+        warning "Could not umount $mountpoint to run fsck"
+      else
+        $nice $fsck -v -y $partition >> $log
+        mount $mountpoint
+      fi
+    fi
+  fi
+
+}
+
+function include_vservers {
+
+  # add vservers to included folders
+
+  if [ "$vservers_are_available" == "yes" ]; then
+
+    # sane permission on backup
+    mkdir -p $backupdir/$VROOTDIR
+    chmod 000 $backupdir/$VROOTDIR
+
+    for candidate in $found_vservers; do
       candidate="`basename $candidate`"
       found_excluded_vserver="0"
       for excluded_vserver in $exclude_vserver; do
-         if [ "$excluded_vserver" == "$candidate" ]; then
-            found_excluded_vserver="1"
-            break
-         fi
+        if [ "$excluded_vserver" == "$candidate" ]; then
+          found_excluded_vserver="1"
+          break
+        fi
       done
       if [ "$found_excluded_vserver" == "0" ]; then
-         include="$include $VROOTDIR/$candidate"
+        include="$include $VROOTDIR/$candidate"
       fi
-   done
-fi
+    done
+  fi
+
+}
+
+function start_mux {
+
+  if [ "$multiconnection" == "yes" ]; then
+    debug "Starting master ssh connection"
+    $ssh_cmd -M sleep 1d &
+    sleep 1
+  fi
+
+}
+
+function end_mux {
+
+  if [ "$multiconnection" == "yes" ]; then
+    debug "Stopping master ssh connection"
+    $ssh_cmd pkill sleep
+  fi
+
+}
 
 # the backup procedure
 
+eval_config
+set_lockfile
+set_rsync_options
+start_mux
+stop_services
+mount_rw
+
+echo "Starting backup at `date`" >> $log
+
 for SECTION in $include; do
 
-   section="`basename $SECTION`"
+  prepare_storage
+  set_orig
+  set_batch_mode
+  set_filelist
+  set_dest
 
-   if [ ! -d "$backupdir/$SECTION/$section.0" ]; then
-      mkdir -p $backupdir/$SECTION/$section.0
-   fi
+  info "Syncing $SECTION on $dest_path..."
+  debug $nice $rsync "${rsync_options[@]}" $filelist_flag $excludes $batch_option $orig $dest_path
+  $nice $rsync "${rsync_options[@]}" $filelist_flag $excludes $batch_option $orig $dest_path >> $log
 
-   info "Rotating $backupdir/$SECTION/$section..."
-   echo "Rotating $backupdir/$SECTION/$section..." >> $log
-   rotate $backupdir/$SECTION/$section $keep
-   info "Syncing $SECTION on $backupdir/$SECTION/$section.0..."
+  if [ "$?" != "0" ]; then
+    warning "Rsync error when trying to transfer $SECTION"
+  fi
 
-   if [ "$from" == "local" ]; then
-      debug $rsync $rsync_local_options $EXCLUDES /$SECTION/ $backupdir/$SECTION/$section.0/
-      $nice $rsync $rsync_local_options $EXCLUDES /$SECTION/ $backupdir/$SECTION/$section.0/ >> $log
-      if [ "$?" != "0" ]; then
-         warning "Rsync error when trying to transfer $SECTION"
-      fi
-   elif [ "$from" == "remote" ]; then
-      if [ -z "$user" ] || [ -z "$host" ]; then
-         error "Config file error: either user or host was not specified"
-         exit 1
-      else
-         debug $nice $rsync $rsync_remote_options $EXCLUDES -e "$ssh" $user@$host:/$SECTION/ $backupdir/$SECTION/$section.0
-         $nice $rsync $rsync_remote_options $EXCLUDES -e "$ssh" $user@$host:/$SECTION/ $backupdir/$SECTION/$section.0 >> $log
-         if [ "$?" != "0" ]; then
-            warning "Rsync error when trying to transfer $SECTION"
-            fi
-      fi
-   else
-      error "Invalid source $from"
-      exit 1
-   fi
-
-   $touch $backupdir/$SECTION/$section.0
+  update_metadata
 
 done
 
-# remount backup destination as read-only
-
-if [ "$read_only" == "1" ] || [ "$read_only" == "yes" ]; then
-   mount -o remount,ro $mountpoint
-fi
-
-# check partition for errors
-
-if [ "$fscheck" == "1" ] || [ "$fscheck" == "yes" ]; then
-   umount $mountpoint
-   if (($?)); then
-      warning "Could not umount $mountpoint to run fsck"
-   else
-      $nice $fsck -v -y $partition >> $log
-      mount $mountpoint
-   fi
-fi
-
-# restart services
-
-if [ ! -z "$service" ]; then
-   for daemon in $service; do
-      info "Starting service $daemon..."
-      $initscripts/$daemon start
-   done
-fi
-
-# removes the lockfile
-
-if [ ! -z "$lockfile" ]; then
-   $rm $lockfile || warning "Could not remove lockfile $lockfile"
-fi
+mount_ro
+run_fsck
+start_services
+unset_lockfile
+end_mux
 
 echo "Finnishing backup at `date`" >> $log
 
