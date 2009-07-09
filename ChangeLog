@@ -9,6 +9,8 @@ version 0.9.7 -- UNRELEASED
 	maildir:
 	 . fix location of deleted_on file
 	 . add missing destid_file options to ssh connections
+	 . added sshoptions variable for arbitrary ssh options
+	 . updated example file to include destid_file, destport and sshoptions
 	mysql:
 	 . Options passed to mysqldump are now customizable with the new
 	   sqldumpoptions configuration variable. Thanks to Chris Lamb for his

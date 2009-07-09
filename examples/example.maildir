@@ -50,6 +50,16 @@ desthost = kakapo-pn
 # arbitrary bash commands on the desthost.
 destuser = backer
 
+# For alternate ports from the default 22, specify here
+destport = 4444
+
+# If you need to specify an alternate ssh public key authentication file 
+# do that here. Default: /root/.ssh/id_rsa
+destid_file = /home/backupkeys/.ssh/maildirbackup_id_rsa
+
+# If you need to specify other ssh configuration options, do that here
+sshoptions = "-C -6"
+
 # remove any maildirs from backup which might have been deleted
 remove = yes
 
