@@ -26,6 +26,9 @@ version 0.9.7 -- UNRELEASED
 	 . New lvm option (default=disabled) to backup LVM metadata for every
 	   detected volume group.
 	 . Backup dmsetup info as well, for easier restoring of Luks headers.
+	dup:
+	 . Fixed bandwidthlimit syntax error. Thanks to Ian Beckwith for
+	   the patch.
 
 version 0.9.6 -- July 21, 2008
     backupninja changes

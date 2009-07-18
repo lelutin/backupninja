@@ -106,7 +106,7 @@ duplicity_sub="`echo $duplicity_version | @AWK@ -F '.' '{print $3}'`"
 #    --sftp-command ourselves
 
 scpoptions="$sshoptions"
-if [ "$bandwidthlimit" =! 0 ]; then
+if [ "$bandwidthlimit" != 0 ]; then
    [ -z "$testurl" ] || warning 'The bandwidthlimit option is not used when desturl is set.'
    scpoptions="$scpoptions -l $bandwidthlimit"
 fi
