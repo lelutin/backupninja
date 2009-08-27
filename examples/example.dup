@@ -1,16 +1,32 @@
+## This is an example duplicity configuration file. 
+##
+## Here you can find all the possible duplicity options, details of
+## what the options provide and possible settings. The defaults are set
+## as the commented out option, uncomment and change when
+## necessary. Options which are uncommented in this example do not have
+## defaults, and the settings provided are recommended.
 
-# passed directly to duplicity
-#options = --verbosity 8
+## passed directly to duplicity, e.g. to increase verbosity set this to:
+## options = --verbosity 8
+##
+## Default:
+# options = 
 
-# default is 0, but set to 19 if you want to lower the priority.
-nicelevel = 19
+## default is 0, but set to something like 19 if you want to lower the priority.
+##
+## Default:
+# nicelevel = 0
 
-# default is yes. set to no to skip the test if the remote host is alive
-#testconnect = no
+## test the connection? set to no to skip the test if the remote host is alive
+##
+## Default:
+# testconnect = yes
 
-# temporary directory used by duplicity
-# (default = /tmp or /usr/tmp, depending on the system)
-#tmpdir = /var/tmp/duplicity
+## temporary directory used by duplicity, set to some other location if your /tmp is small
+## default is either /tmp or /usr/tmp, depending on the system
+## 
+## Default:
+# tmpdir = /tmp
 
 ######################################################
 ## gpg section
@@ -35,23 +51,36 @@ nicelevel = 19
 
 [gpg]
 
-# when set to yes, encryptkey variable must be set below; if you want to use
-# two different keys for encryption and signing, you must also set the signkey
-# variable below.
-# default is no, for backwards compatibility with backupninja <= 0.5.
-sign = yes
+## when set to yes, encryptkey variable must be set below; if you want to use
+## two different keys for encryption and signing, you must also set the signkey
+## variable below.
+## default is set to no, for backwards compatibility with backupninja <= 0.5.
+##
+## Default:
+# sign = no
 
-# ID of the GnuPG public key used for data encryption.
-# if not set, symmetric encryption is used, and data signing is not possible.
-encryptkey = 04D9EA79
+## ID of the GnuPG public key used for data encryption.
+## if not set, symmetric encryption is used, and data signing is not possible.
+## an example setting would be:
+## encryptkey = 04D9EA79
+##
+## Default:
+# encryptkey = 
 
-# ID of the GnuPG private key used for data signing.
-# if not set, encryptkey will be used.
-#signkey = 04D9EA79
+## ID of the GnuPG private key used for data signing.
+## if not set, encryptkey will be used, an example setting would be:
+## signkey = 04D9EA79
+## 
+## Default:
+# signkey = 
 
-# password
-# NB: neither quote this, nor should it contain any quotes
-password = a_very_complicated_passphrase
+## password
+## NB: neither quote this, nor should it contain any quotes, 
+## an example setting would be:
+## password = a_very_complicated_passphrase
+##
+## Default:
+# password = 
 
 ######################################################
 ## source section
@@ -59,23 +88,23 @@ password = a_very_complicated_passphrase
 
 [source]
 
-# A few notes about includes and excludes:
-# 1. include, exclude and vsinclude statements support globbing with '*'
-# 2. Symlinks are not dereferenced. Moreover, an include line whose path
-#    contains, at any level, a symlink to a directory, will only have the
-#    symlink backed-up, not the target directory's content. Yes, you have to
-#    dereference yourself the symlinks, or to use 'mount --bind' instead.
-#    Example: let's say /home is a symlink to /mnt/crypt/home ; the following
-#    line will only backup a "/home" symlink ; neither /home/user nor
-#    /home/user/Mail will be backed-up :
-#      include = /home/user/Mail
-#    A workaround is to 'mount --bind /mnt/crypt/home /home' ; another one is to
-#    write :
-#      include = /mnt/crypt/home/user/Mail
-# 3. All the excludes come after all the includes. The order is not otherwise
-#    taken into account.
+## A few notes about includes and excludes:
+## 1. include, exclude and vsinclude statements support globbing with '*'
+## 2. Symlinks are not dereferenced. Moreover, an include line whose path
+##    contains, at any level, a symlink to a directory, will only have the
+##    symlink backed-up, not the target directory's content. Yes, you have to
+##    dereference yourself the symlinks, or to use 'mount --bind' instead.
+##    Example: let's say /home is a symlink to /mnt/crypt/home ; the following
+##    line will only backup a "/home" symlink ; neither /home/user nor
+##    /home/user/Mail will be backed-up :
+##      include = /home/user/Mail
+##    A workaround is to 'mount --bind /mnt/crypt/home /home' ; another one is to
+##    write :
+##      include = /mnt/crypt/home/user/Mail
+## 3. All the excludes come after all the includes. The order is not otherwise
+##    taken into account.
 
-# files to include in the backup
+## files to include in the backup
 include = /var/spool/cron/crontabs
 include = /var/backups
 include = /etc
@@ -86,20 +115,20 @@ include = /usr/local/sbin
 include = /var/lib/dpkg/status
 include = /var/lib/dpkg/status-old
 
-# If vservers = yes in /etc/backupninja.conf then the following variables can
-# be used:
-# vsnames = all | <vserver1> <vserver2> ... (default = all)
-# vsinclude = <path>
-# vsinclude = <path>
-# ...
-# Any path specified in vsinclude is added to the include list for each vserver
-# listed in vsnames (or all if vsnames = all, which is the default).
-#
-# For example, vsinclude = /home will backup the /home directory in every
-# vserver listed in vsnames. If you have 'vsnames = foo bar baz', this
-# vsinclude will add to the include list /vservers/foo/home, /vservers/bar/home
-# and /vservers/baz/home.
-# Vservers paths are derived from $VROOTDIR.
+## If vservers = yes in /etc/backupninja.conf then the following variables can
+## be used:
+## vsnames = all | <vserver1> <vserver2> ... (default = all)
+## vsinclude = <path>
+## vsinclude = <path>
+## ...
+## Any path specified in vsinclude is added to the include list for each vserver
+## listed in vsnames (or all if vsnames = all, which is the default).
+##
+## For example, vsinclude = /home will backup the /home directory in every
+## vserver listed in vsnames. If you have 'vsnames = foo bar baz', this
+## vsinclude will add to the include list /vservers/foo/home, /vservers/bar/home
+## and /vservers/baz/home.
+## Vservers paths are derived from $VROOTDIR.
 
 # files to exclude from the backup
 exclude = /home/*/.gnupg
@@ -110,38 +139,67 @@ exclude = /home/*/.gnupg
 
 [dest]
 
-# perform an incremental backup? (default = yes)
-# if incremental = no, perform a full backup in order to start a new backup set
-#incremental = yes
+## perform an incremental backup? (default = yes)
+## if incremental = no, perform a full backup in order to start a new backup set
+##
+## Default: 
+# incremental = yes
 
-# how many days of data to keep ; default is 60 days.
-# (you can also use the time format of duplicity)
-# 'keep = yes' means : do not delete old data, the remote host will take care of this
-#keep = 60
-#keep = yes
+## how many days of data to keep ; default is 60 days.
+## (you can also use the time format of duplicity)
+## 'keep = yes' means : do not delete old data, the remote host will take care of this
+##
+## Default:
+# keep = 60
 
-# full destination URL, in duplicity format; if set, desturl overrides
-# sshoptions, destdir, desthost and destuser; it also disables testconnect and
-# bandwithlimit. For details, see duplicity manpage, section "URL FORMAT".
-#desturl = file:///usr/local/backup
-#desturl = rsync://user@other.host//var/backup/bla
+## full destination URL, in duplicity format; if set, desturl overrides
+## sshoptions, destdir, desthost and destuser; it also disables testconnect and
+## bandwithlimit. For details, see duplicity manpage, section "URL FORMAT", some
+## examples include:
+## desturl = file:///usr/local/backup
+## desturl = rsync://user@other.host//var/backup/bla
+## the default value of this configuration option is not set:
+##
+## Default:
+# desturl = 
 
-# bandwith limit, in kbit/s ; default is 0, i.e. no limit
-#bandwidthlimit = 128
+## bandwith limit, in kbit/s ; default is 0, i.e. no limit an example
+## setting would be:
+## bandwidthlimit = 128
+##
+## Default:
+# bandwidthlimit = 0
 
-# passed directly to ssh, scp (and sftp in duplicity >=0.4.2)
-# warning: sftp does not support all scp options, especially -i; as
-# a workaround, you can use "-o <SSHOPTION>"
-sshoptions = -o IdentityFile=/root/.ssh/id_dsa_duplicity
+## passed directly to ssh, scp (and sftp in duplicity >=0.4.2)
+## warning: sftp does not support all scp options, especially -i; as
+## a workaround, you can use "-o <SSHOPTION>"
+## an example setting would be:
+## sshoptions = -o IdentityFile=/root/.ssh/id_dsa_duplicity
+##
+## Default:
+# sshoptions = 
 
-# put the backups under this directory
-destdir = /backups
+## put the backups under this directory, this must be set!
+## an example setting would be:
+## destdir = /backups
+## 
+## Default:
+# destdir = 
 
-# the machine which will receive the backups
-desthost = backuphost
+## the machine which will receive the backups, this must be set!
+## an example setting would be:
+## desthost = backuphost
+## 
+## Default: 
+# desthost = 
 
-# make the files owned by this user
-# note: you must be able to ssh backupuser@backhost
-# without specifying a password (if type = remote).
-destuser = backupuser
+## make the files owned by this user
+## note: you must be able to ssh backupuser@backhost
+## without specifying a password (if type = remote).
+## an example setting would be:
+## destuser = backupuser
+##
+## Default:
+# destuser =
+
 

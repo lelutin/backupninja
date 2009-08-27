@@ -1,16 +1,33 @@
 ##
 ## This is an example rdiff-backup configuration file.
-## The defaults are useful in most cases, just make sure
-## to configure the destination host and user.
+##
+## Here you can find all the possible duplicity options, details of
+## what the options provide and possible settings. The defaults are set
+## as the commented out option, uncomment and change when
+## necessary. Options which are uncommented in this example do not have
+## defaults, and the settings provided are recommended.
+## 
+## The defaults are useful in most cases, just make sure to configure the 
+## destination host and user.
 ##
 
 ## passed directly to rdiff-backup
-# options = --force
+## an example setting would be:
+## options = --force
+## 
+## Default:
+# options = 
 
 ## default is 0, but set to 19 if you want to lower the priority.
-# nicelevel = 19
+## an example setting would be:
+## nicelevel = 19
+##
+## Default
+# nicelevel = 0
 
 ## default is yes. set to no to skip the test if the remote host is alive
+##
+## Default:
 # testconnect = no
 
 ## default is not to limit bandwidth. 
@@ -18,7 +35,11 @@
 ## number to set a limit that will never be exceeded, or a positive number 
 ## to set a target average bandwidth use. cstream is required. See cstream's 
 ## -t option for more information. 62500 bytes = 500 Kb (.5 Mb)
-# bwlimit = 62500
+## an example setting would be:
+## bwlimit = 62500
+##
+## Default:
+# bwlimit = 0
 
 ## should backupninja ignore the version differences between source and remote
 ## rdiff-backup? (default: no)
@@ -28,6 +49,8 @@
 ## An example usage could be the remote side has its authorized_keys configured
 ## with command="rdiff-backup --server" to allow for restricted yet automated 
 ## password-less backups
+## 
+## Default:
 # ignore_version = no
 
 ######################################################
@@ -36,39 +59,42 @@
 
 [source]
 
-# an optional subdirectory below 'directory' (see [dest])
+## an optional subdirectory below 'directory' (see [dest])
 label = thishostname
 
-# type can be "local" or "remote"
+## type can be "local" or "remote"
 type = local
 
-# only use if '[source] type = remote'
-#host = srchost
-#user = srcuser
+## only use if '[source] type = remote'
+# host = srchost
+# user = srcuser
 
-# how many days of data to keep
-# (you can also use the time format of rdiff-backup, e.g. 6D5h)
-# (to keep everything, set this to yes)
-#keep = yes
-keep = 60
+## how many days of data to keep
+## (you can also use the time format of rdiff-backup, e.g. 6D5h)
+## (to keep everything, set this to yes)
+## an example setting would be:
+##keep = yes
+##
+## Default:
+# keep = 60
 
-# A few notes about includes and excludes:
-# 1. include, exclude and vsinclude statements support globbing with '*'
-# 2. Symlinks are not dereferenced. Moreover, an include line whose path
-#    contains, at any level, a symlink to a directory, will only have the
-#    symlink backed-up, not the target directory's content. Yes, you have to
-#    dereference yourself the symlinks, or to use 'mount --bind' instead.
-#    Example: let's say /home is a symlink to /mnt/crypt/home ; the following
-#    line will only backup a "/home" symlink ; neither /home/user nor
-#    /home/user/Mail will be backed-up :
-#      include = /home/user/Mail
-#    A workaround is to 'mount --bind /mnt/crypt/home /home' ; another one is to
-#    write :
-#      include = /mnt/crypt/home/user/Mail
-# 3. All the excludes come after all the includes. The order is not otherwise
-#    taken into account.
+## A few notes about includes and excludes:
+## 1. include, exclude and vsinclude statements support globbing with '*'
+## 2. Symlinks are not dereferenced. Moreover, an include line whose path
+##    contains, at any level, a symlink to a directory, will only have the
+##    symlink backed-up, not the target directory's content. Yes, you have to
+##    dereference yourself the symlinks, or to use 'mount --bind' instead.
+##    Example: let's say /home is a symlink to /mnt/crypt/home ; the following
+##    line will only backup a "/home" symlink ; neither /home/user nor
+##    /home/user/Mail will be backed-up :
+##      include = /home/user/Mail
+##    A workaround is to 'mount --bind /mnt/crypt/home /home' ; another one is to
+##    write :
+##      include = /mnt/crypt/home/user/Mail
+## 3. All the excludes come after all the includes. The order is not otherwise
+##    taken into account.
 
-# files to include in the backup
+## files to include in the backup
 include = /var/spool/cron/crontabs
 include = /var/backups
 include = /etc
@@ -79,23 +105,23 @@ include = /usr/local/sbin
 include = /var/lib/dpkg/status
 include = /var/lib/dpkg/status-old
 
-# If vservers = yes in /etc/backupninja.conf then the following variables can
-# be used:
-# vsnames = all | <vserver1> <vserver2> ... (default = all)
-# vsinclude = <path>
-# vsinclude = <path>
-# ...
-# Any path specified in vsinclude is added to the include list for each vserver
-# listed in vsnames (or all if vsnames = all, which is the default).
-#
-# For example, vsinclude = /home will backup the /home directory in every
-# vserver listed in vsnames. If you have 'vsnames = foo bar baz', this
-# vsinclude will add to the include list /vservers/foo/home, /vservers/bar/home
-# and /vservers/baz/home.
-# Vservers paths are derived from $VROOTDIR.
+## If vservers = yes in /etc/backupninja.conf then the following variables can
+## be used:
+## vsnames = all | <vserver1> <vserver2> ... (default = all)
+## vsinclude = <path>
+## vsinclude = <path>
+## ...
+## Any path specified in vsinclude is added to the include list for each vserver
+## listed in vsnames (or all if vsnames = all, which is the default).
+##
+## For example, vsinclude = /home will backup the /home directory in every
+## vserver listed in vsnames. If you have 'vsnames = foo bar baz', this
+## vsinclude will add to the include list /vservers/foo/home, /vservers/bar/home
+## and /vservers/baz/home.
+## Vservers paths are derived from $VROOTDIR.
 
-# files to exclude from the backup
-#exclude = /home/*/.gnupg
+## files to exclude from the backup
+exclude = /home/*/.gnupg
 
 ######################################################
 ## destination section
@@ -103,18 +129,35 @@ include = /var/lib/dpkg/status-old
 
 [dest]
 
-# type can be "local" or "remote"
-type = remote
+## type can be "local" or "remote", this must be set!
+## an example configuration would be:
+## type = remote
+##
+## Default:
+# type =
 
-# put the backups under this directory
-directory = /backups
+## put the backups under this directory, this must be set!
+## an example setting would be:
+## directory = /backups
+## 
+## Default:
+# directory =
 
-# the machine which will receive the backups.
-# only use if "[dest] type = remote"
-host = backuphost
+## the machine which will receive the backups.
+## only use if "[dest] type = remote"
+## an example setting would be:
+## host = backuphost
+##
+## Default
+# host =
 
-# make the files owned by this user. you must be able to
-# `su -c "ssh backupuser@backhost"` without specifying a password.
-# only use if "[dest] type = remote"
-user = backupuser
+## make the files owned by this user. you must be able to
+## `su -c "ssh backupuser@backhost"` without specifying a password.
+## only use if "[dest] type = remote"
+## an example setting would be:
+## user = backupuser
+##
+## Default:
+# user =
+
 
