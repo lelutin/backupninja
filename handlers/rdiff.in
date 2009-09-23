@@ -59,7 +59,7 @@ function check_consistency() {
       if [ "$user" == "" ]; then
          fatal "User must be specified for remote $section."
       fi
-      if [ "host" == "" ]; then
+      if [ "$host" == "" ]; then
          fatal "Host must be specifed for remote $section."
       fi
    fi
