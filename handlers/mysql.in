@@ -272,7 +272,7 @@ then
             fatal "mysqld doesn't appear to be running!"
          fi
          if [ "$compress" == "yes" ]; then
-            execstr="$VSERVER $vsname exec $DUMP | $GZIP > $vroot$dumpdir/${db}.sql.gz"
+            execstr="$VSERVER $vsname exec $DUMP | $GZIP --rsyncable > $vroot$dumpdir/${db}.sql.gz"
          else
             execstr="$VSERVER $vsname exec $DUMP -r $vroot$dumpdir/${db}.sql"
          fi
@@ -283,7 +283,7 @@ then
             fatal "mysqld doesn't appear to be running!"
          fi
          if [ "$compress" == "yes" ]; then
-            execstr="$DUMP | $GZIP > $dumpdir/${db}.sql.gz"
+            execstr="$DUMP | $GZIP --rsyncable > $dumpdir/${db}.sql.gz"
          else
             execstr="$DUMP -r $dumpdir/${db}.sql"
          fi
