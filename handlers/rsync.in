@@ -306,7 +306,7 @@ function rotate_short {
   local keep="$2"
   local metadata="`dirname $folder`/metadata"
 
-  if [[ "$keep" < 4 ]]; then
+  if [[ "$keep" -lt 4 ]]; then
     error "Rotate: minimum of 4 rotations"
     exit 1
   fi
@@ -341,7 +341,7 @@ function rotate_short_remote {
   local metadata="`dirname $folder`/metadata"
   local keep="$2"
 
-  if [[ "$2" < 4 ]]; then
+  if [[ "$2" -lt 4 ]]; then
     error "Rotate: minimum of 4 rotations"
     exit 1
   fi
