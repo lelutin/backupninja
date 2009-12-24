@@ -240,7 +240,7 @@ formDisplay() {
       for ((i=0; i < $_form_items ; i++)); do
          label=${_form_labels[$i]}
          text=${_form_text[$i]}
-         echo -n -e " $label $xpos 1 '$text' $xpos $max_length 30 30"
+         echo -n -e " $label $xpos 1 '$text' $xpos $max_length 30 100"
          let "xpos += _form_gap"
       done
    ) | xargs $DIALOG 2> $temp

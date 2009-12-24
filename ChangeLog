@@ -5,6 +5,9 @@ version 0.9.7 -- UNRELEASED
 	 . add 'when = manual' option, that can be used in the global config
 	   file or in a given backup action file. Thanks Tuomas Jormola for the
 	   preliminary patch (Closes: #511299)
+    lib changes
+	easydialog:
+	 . Allow form fields input to grow up to 100 chars (Closes: #562249)
     handler changes
 	ldap:
 	 . Use gzip's --rsyncable option.
