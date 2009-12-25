@@ -13,9 +13,6 @@ you are working on it!
   want local-to-local, or remote-to-local, or pull backups). This has been
   reported for the duplicity handler as Debian bug #346040.
 
-. Make it so backupninja can be run as a regular user, instead of requiring
-  root
-
 . Allow vsnames "all" in the msyql handler.
 
 . Factorize the rdiff.helper's connection-related functions into a lib, so
@@ -25,5 +22,3 @@ you are working on it!
 
 . Add an exclude option to database handlers so you can configure it to backup
   all databases, except for the excluded ones
-
-. Consolidate the 'rsnap' and 'rub' handlers into one rsync snapshot handler
