@@ -36,6 +36,13 @@ if test x$MKTEMPT = "xno"; then
     AC_MSG_ERROR([mktemp is required])
 fi
 
+AC_PATH_PROGS(STAT, stat, "no")
+if test x$STAT = "xno"; then
+    AC_MSG_ERROR([stat is required])
+else
+   export STAT
+fi
+
 AC_CHECK_PROG(ac_cv_have_rpm, rpm, "yes", "no")
 if test "x$ac_cv_have_rpm" = "xyes"; then
         rpm --define '_topdir /tmp' > /dev/null 2>&1

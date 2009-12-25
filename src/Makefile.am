@@ -11,6 +11,7 @@ edit = sed \
     -e "s,@BASH\@,$(BASH),g" \
     -e "s,@AWK\@,$(AWK),g" \
     -e "s,@SED\@,$(SED),g" \
+    -e "s,@STAT\@,$(STAT),g" \
     -e 's,@datadir\@,$(pkgdatadir),g' \
     -e "s,@libdir\@,$(pkglibdir),g" \
     -e 's,@localstatedir\@,$(localstatedir),g' \

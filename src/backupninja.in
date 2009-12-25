@@ -143,14 +143,14 @@ function check_perms() {
    local perms
    local owners
 
-   perms=($(stat -L --format='%A' $file))
+   perms=($(@STAT@ -L --format='%A' $file))
    debug "perms: $perms"
    local gperm=${perms:4:3}
    debug "gperm: $gperm"
    local wperm=${perms:7:3}
    debug "wperm: $wperm"
 
-   owners=($(stat -L --format='%g %G %u %U' $file))
+   owners=($(@STAT@ -L --format='%g %G %u %U' $file))
    local gid=${owners[0]}
    local group=${owners[1]}
    local owner=${owners[2]}

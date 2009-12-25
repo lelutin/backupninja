@@ -41,6 +41,9 @@ version 0.9.7 -- UNRELEASED
 	dup:
 	 . Fixed bandwidthlimit syntax error. Thanks to Ian Beckwith for
 	   the patch.
+    autotools
+	 . Added the stat command to the automagically replaced ones, hoping it
+	   will help supporting *BSD some day.
 
 version 0.9.6 -- July 21, 2008
     backupninja changes
