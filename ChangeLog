@@ -26,8 +26,12 @@ version 0.9.7 -- UNRELEASED
 	 . Fix the error message displayed when mysqld is not running:
 	   mysqladmin ping indeed returns 0 when authentication fails.
 	 . Use gzip's --rsyncable option.
+	 . Quote output filenames to support shell meta-characters in
+	   database names.
 	pgsql:
 	 . Use gzip's --rsyncable option.
+	 . Quote output filenames to support shell meta-characters in
+	   database names.
 	sys:
 	 . New luksheaders option (default=disabled) to backup the Luks header
 	   of every Luks device.

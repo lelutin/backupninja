@@ -272,9 +272,9 @@ then
             fatal "mysqld doesn't appear to be running!"
          fi
          if [ "$compress" == "yes" ]; then
-            execstr="$VSERVER $vsname exec $DUMP | $GZIP --rsyncable > $vroot$dumpdir/${db}.sql.gz"
+            execstr="$VSERVER $vsname exec $DUMP | $GZIP --rsyncable > '$vroot$dumpdir/${db}.sql.gz'"
          else
-            execstr="$VSERVER $vsname exec $DUMP -r $vroot$dumpdir/${db}.sql"
+            execstr="$VSERVER $vsname exec $DUMP -r '$vroot$dumpdir/${db}.sql'"
          fi
       else
          # Test to make sure mysqld is running, if it is not sqldump will not work
@@ -283,9 +283,9 @@ then
             fatal "mysqld doesn't appear to be running!"
          fi
          if [ "$compress" == "yes" ]; then
-            execstr="$DUMP | $GZIP --rsyncable > $dumpdir/${db}.sql.gz"
+            execstr="$DUMP | $GZIP --rsyncable > '$dumpdir/${db}.sql.gz'"
          else
-            execstr="$DUMP -r $dumpdir/${db}.sql"
+            execstr="$DUMP -r '$dumpdir/${db}.sql'"
          fi
       fi
       debug "su $user -c \"$execstr\""

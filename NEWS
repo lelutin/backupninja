@@ -1,3 +1,12 @@
+backupninja (0.9.7-1) UNRELEASED
+
+	* mysql: output filenames to support shell meta-characters in
+	  database names. This change was not heavily tested, please
+	  report any breakage.
+	* pgsql: output filenames to support shell meta-characters in
+	  database names. This change was not heavily tested, please
+	  report any breakage.
+
 backupninja (0.9.4-1) UNRELEASED
 
 	* duplicity: Old (pre-0.9.4) example.dup file used to give false
