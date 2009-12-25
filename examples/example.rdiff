@@ -1,7 +1,7 @@
 ##
 ## This is an example rdiff-backup configuration file.
 ##
-## Here you can find all the possible duplicity options, details of
+## Here you can find all the possible rdiff-backup options, details of
 ## what the options provide and possible settings. The defaults are set
 ## as the commented out option, uncomment and change when
 ## necessary. Options which are uncommented in this example do not have
