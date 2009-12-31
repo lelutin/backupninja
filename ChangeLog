@@ -41,6 +41,10 @@ version 0.9.7 -- UNRELEASED
 	dup:
 	 . Fixed bandwidthlimit syntax error. Thanks to Ian Beckwith for
 	   the patch.
+    helper changes
+	dup:
+	 . Do not propose to exclude /home/*/.gnupg twice anymore
+	   (Closes: #563044)
     autotools
 	 . Added the stat command to the automagically replaced ones, hoping it
 	   will help supporting *BSD some day.

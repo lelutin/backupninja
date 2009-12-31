@@ -508,7 +508,7 @@ dup_wizard() {
    # Global variables whose '*' shall not be expanded
    set -o noglob
    dup_default_includes="/var/spool/cron/crontabs /var/backups /etc /root /home /usr/local/*bin /var/lib/dpkg/status*"
-   dup_default_excludes="/home/*/.gnupg /home/*/.gnupg /home/*/.local/share/Trash /home/*/.Trash /home/*/.thumbnails /home/*/.beagle /home/*/.aMule /home/*/gtk-gnutella-downloads"
+   dup_default_excludes="/home/*/.gnupg /home/*/.local/share/Trash /home/*/.Trash /home/*/.thumbnails /home/*/.beagle /home/*/.aMule /home/*/gtk-gnutella-downloads"
    set +o noglob
 
    dup_main_menu
