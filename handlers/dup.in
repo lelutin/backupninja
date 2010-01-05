@@ -271,7 +271,7 @@ if [ ! $test ]; then
    exit_code=$?
    debug $output
    cat $outputfile | (while read output ; do
-                         debug $output
+                         info $output
                       done
    )
    if [ $exit_code -eq 0 ]; then
