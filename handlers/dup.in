@@ -263,18 +263,23 @@ fi
 ### Backup command
 debug "$precmd duplicity $execstr_command $execstr_options $execstr_source --exclude '**' / $execstr_serverpart"
 if [ ! $test ]; then
+   outputfile=`maketemp backupout`
    export PASSPHRASE=$password
    output=`nice -n $nicelevel \
              su -c \
-                "$precmd duplicity $execstr_command $execstr_options $execstr_source --exclude '**' / $execstr_serverpart 2>&1"`
+                "$precmd duplicity $execstr_command $execstr_options $execstr_source --exclude '**' / $execstr_serverpart >$outputfile 2>&1"`
    exit_code=$?
+   debug $output
+   cat $outputfile | (while read output ; do
+                         debug $output
+                      done
+   )
    if [ $exit_code -eq 0 ]; then
-      debug $output
       info "Duplicity finished successfully."
    else
-      debug $output
       fatal "Duplicity failed."
    fi
+   rm $outputfile
 fi
 
 return 0
