@@ -41,6 +41,8 @@ version 0.9.7 -- UNRELEASED
 	dup:
 	 . Fixed bandwidthlimit syntax error. Thanks to Ian Beckwith for
 	   the patch.
+	 . Send duplicity output to debug line by line instead of as a whole at
+	   one time (Closes: #536360)
     helper changes
 	dup:
 	 . Do not propose to exclude /home/*/.gnupg twice anymore
