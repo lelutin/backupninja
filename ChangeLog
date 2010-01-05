@@ -45,6 +45,8 @@ version 0.9.7 -- UNRELEASED
 	   the patch.
 	 . Send duplicity output to debug line by line instead of as a whole at
 	   one time (Closes: #536360)
+	 . Report duplicity output as "info" so that it can be included in
+	   report e-mail when reportinfo is on (Closes: #563734)
     helper changes
 	dup:
 	 . Do not propose to exclude /home/*/.gnupg twice anymore
