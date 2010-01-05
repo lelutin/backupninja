@@ -569,11 +569,11 @@ if [ $doit == 1 ]; then
       if [ "$reportspace" == "yes" ]; then
          previous=""
          for i in $(ls "$configdirectory"); do
-         backuploc=$(grep ^directory "$configdirectory"/"$i" | @AWK@ '{print $3}')
-         if [ "$backuploc" != "$previous" -a -n "$backuploc" ]; then
-            df -h "$backuploc"
-            previous="$backuploc"
-         fi
+            backuploc=$(grep ^directory "$configdirectory"/"$i" | @AWK@ '{print $3}')
+            if [ "$backuploc" != "$previous" -a -n "$backuploc" ]; then
+               df -h "$backuploc"
+               previous="$backuploc"
+            fi
          done
       fi
    } | mail -s "backupninja: $hostname $subject" $reportemail
