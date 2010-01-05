@@ -30,4 +30,4 @@ Matthew Palmer <mpalmer@debian.org> -- halt loglevel feature
 dan@garthwaite.org -- reportspace bugfix
 Tuomas Jormola <tj@solitudo.net> -- "when = manual" option
 Ian Beckwith <ianb@erislabs.net> -- dup bandwidthlimit fix
-Olivier Berger <oberger@ouvaton.org> -- dup debug output bugfix
+Olivier Berger <oberger@ouvaton.org> -- dup debug output bugfix, reportinfo option

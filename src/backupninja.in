@@ -335,8 +335,9 @@ function process_action() {
    _errors=`cat $bufferfile | grep "^Error: " | wc -l`
    _fatals=`cat $bufferfile | grep "^Fatal: " | wc -l`
    _halts=`cat $bufferfile | grep "^Halt: " | wc -l`
+   _infos=`cat $bufferfile | grep "^Info: " | wc -l`
 
-   ret=`grep "\(^Warning: \|^Error: \|^Fatal: \|Halt: \)" $bufferfile`
+   ret=`grep "\(^Info: \|^Warning: \|^Error: \|^Fatal: \|Halt: \)" $bufferfile`
    rm $bufferfile
    if [ $_halts != 0 ]; then
       msg "*halt* -- $file"
@@ -356,6 +357,9 @@ function process_action() {
       warning "<<<< finished action $file: WARNING"
    else
       msg "success -- $file"
+      if [ $_infos != 0 -a "$reportinfo" == "yes" ]; then
+         errormsg="$errormsg\n== infos from $file ==\n\n$ret\n"
+      fi
       info "<<<< finished action $file: SUCCESS"
    fi
 
@@ -456,6 +460,7 @@ getconf reportemail
 getconf reporthost
 getconf reportspace
 getconf reportsuccess yes
+getconf reportinfo no
 getconf reportuser
 getconf reportwarning yes
 getconf loglevel 3

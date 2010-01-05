@@ -21,6 +21,10 @@ reportemail = root
 # even if all modules reported success. (default = yes)
 reportsuccess = yes
 
+# if set to 'yes', info messages from handlers will be 
+# sent into the email (default = no)
+reportinfo = no
+
 # if set to 'yes', a report email will be generated
 # even if there was no error. (default = yes)
 reportwarning = yes
