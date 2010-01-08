@@ -42,6 +42,8 @@ version 0.9.7 -- UNRELEASED
 	   database names.
 	 . Use bash pipefail option when needed so that failed dumps are
 	   reported as such.
+	rdiff:
+	 . Fix include/exclude paths with spaces (Closes: #398435)
 	sys:
 	 . New luksheaders option (default=disabled) to backup the Luks header
 	   of every Luks device.
@@ -55,6 +57,7 @@ version 0.9.7 -- UNRELEASED
 	   one time (Closes: #536360)
 	 . Report duplicity output as "info" so that it can be included in
 	   report e-mail when reportinfo is on (Closes: #563734)
+	 . Fix include/exclude paths with spaces
     helper changes
 	dup:
 	 . Do not propose to exclude /home/*/.gnupg twice anymore

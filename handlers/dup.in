@@ -189,26 +189,35 @@ fi
 set -o noglob
 
 # excludes
+SAVEIFS=$IFS
+IFS=$(echo -en "\n\b")
 for i in $exclude; do
    str="${i//__star__/*}"
    execstr_source="${execstr_source} --exclude '$str'"
 done
+IFS=$SAVEIFS
 
 # includes
+SAVEIFS=$IFS
+IFS=$(echo -en "\n\b")
 for i in $include; do
    [ "$i" != "/" ] || fatal "Sorry, you cannot use 'include = /'"
    str="${i//__star__/*}"
    execstr_source="${execstr_source} --include '$str'"
 done
+IFS=$SAVEIFS
 
 # vsincludes
 if [ $usevserver = yes ]; then
    for vserver in $vsnames; do
+      SAVEIFS=$IFS
+      IFS=$(echo -en "\n\b")
       for vi in $vsinclude; do
          str="${vi//__star__/*}"
          str="$VROOTDIR/$vserver$str"
          execstr_source="${execstr_source} --include '$str'"
       done
+      IFS=$SAVEIFS
    done
 fi
 

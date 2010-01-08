@@ -209,20 +209,28 @@ symlinks_warning="Maybe you have mixed symlinks and '*' in this statement, which
 
 # TODO: order the includes and excludes
 # excludes
+SAVEIFS=$IFS
+IFS=$(echo -en "\n\b")
 for i in $exclude; do
    str="${i//__star__/*}"
    execstr="${execstr}--exclude '$str' "
 done
+IFS=$SAVEIFS
 # includes
+SAVEIFS=$IFS
+IFS=$(echo -en "\n\b")
 for i in $include; do
    [ "$i" != "/" ] || fatal "Sorry, you cannot use 'include = /'"
    str="${i//__star__/*}"
    execstr="${execstr}--include '$str' "
 done
+IFS=$SAVEIFS
 
 # vsinclude
 if [ $usevserver = yes ]; then
    for vserver in $vsnames; do
+      SAVEIFS=$IFS
+      IFS=$(echo -en "\n\b")
       for vi in $vsinclude; do
          str="${vi//__star__/*}"
          str="$VROOTDIR/$vserver$str"
@@ -232,6 +240,7 @@ if [ $usevserver = yes ]; then
             warning "vsinclude statement '${vi//__star__/*}' will be ignored for VServer $vserver. $symlinks_warning"
          fi
       done
+      IFS=$SAVEIFS
    done
 fi
 
