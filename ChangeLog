@@ -15,6 +15,8 @@ version 0.9.7 -- UNRELEASED
     handler changes
 	ldap:
 	 . Use gzip's --rsyncable option.
+	 . Use bash pipefail option when needed so that failed dumps are
+	   reported as such.
 	maildir:
 	 . fix location of deleted_on file
 	 . add missing destid_file options to ssh connections
@@ -32,10 +34,14 @@ version 0.9.7 -- UNRELEASED
 	 . Use gzip's --rsyncable option.
 	 . Quote output filenames to support shell meta-characters in
 	   database names.
+	 . Use bash pipefail option when needed so that failed dumps are
+	   reported as such.
 	pgsql:
 	 . Use gzip's --rsyncable option.
 	 . Quote output filenames to support shell meta-characters in
 	   database names.
+	 . Use bash pipefail option when needed so that failed dumps are
+	   reported as such.
 	sys:
 	 . New luksheaders option (default=disabled) to backup the Luks header
 	   of every Luks device.

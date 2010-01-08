@@ -237,14 +237,14 @@ then
    then
       if [ $usevserver = yes ]
       then
-         debug 'echo show databases | $VSERVER $vsname exec su $user -c \"$MYSQL $defaultsfile\" | grep -v Database'
-         databases=`echo 'show databases' | $VSERVER $vsname exec su $user -c "$MYSQL $defaultsfile" | grep -v Database`
+         debug 'set -o pipefail ; echo show databases | $VSERVER $vsname exec su $user -c \"$MYSQL $defaultsfile\" | grep -v Database'
+         databases=`set -o pipefail ; echo 'show databases' | $VSERVER $vsname exec su $user -c "$MYSQL $defaultsfile" | grep -v Database`
          if [ $? -ne 0 ]
          then
             fatal "Authentication problem, maybe user/password is wrong or mysqld is not running?"
          fi
       else
-         databases=$(su $user -c "$MYSQL $defaultsfile -N -B -e 'show databases'" | sed 's/|//g;/\+----/d')
+         databases=$(set -o pipefail ; su $user -c "$MYSQL $defaultsfile -N -B -e 'show databases'" | sed 's/|//g;/\+----/d')
          if [ $? -ne 0 ]
          then
             fatal "Authentication problem, maybe user/password is wrong or mysqld is not running?"
@@ -298,7 +298,7 @@ then
       debug "su $user -c \"$execstr\""
       if [ ! $test ]
       then
-         output=`su $user -c "$execstr" 2>&1`
+         output=`su $user -c "set -o pipefail ; $execstr" 2>&1`
          code=$?
          if [ "$code" == "0" ]
          then

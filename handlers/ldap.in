@@ -91,7 +91,7 @@ if [ "$ldif" == "yes" ]; then
             execstr="$execstr > $dumpdir/$dbsuffix.ldif"
          fi
          debug "$execstr"
-         output=`su root -c "$execstr" 2>&1`
+         output=`su root -c "set -o pipefail ; $execstr" 2>&1`
          code=$?
          if [ "$code" == "0" ]; then
             debug $output

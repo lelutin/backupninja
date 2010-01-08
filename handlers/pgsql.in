@@ -75,13 +75,13 @@ chmod 700 $vroot$backupdir
 if [ "$databases" == "all" ]; then
    if [ $usevserver = yes ]; then
       if [ "$compress" == "yes" ]; then
-         execstr="$VSERVER $vsname exec su - $PGSQLUSER -c \"$PGSQLDUMPALL | $GZIP --rsyncable > '$backupdir/${vsname}.sql.gz'\""
+         execstr="$VSERVER $vsname exec su - $PGSQLUSER -c \"set -o pipefail ; $PGSQLDUMPALL | $GZIP --rsyncable > '$backupdir/${vsname}.sql.gz'\""
       else
          execstr="$VSERVER $vsname exec su - $PGSQLUSER -c \"$PGSQLDUMPALL > '$backupdir/${vsname}.sql'\""
       fi
    else
       if [ "$compress" == "yes" ]; then
-         execstr="su - $PGSQLUSER -c \"$PGSQLDUMPALL | $GZIP --rsyncable > '$backupdir/${localhost}-all.sql.gz'\""
+         execstr="su - $PGSQLUSER -c \"set -o pipefail ; $PGSQLDUMPALL | $GZIP --rsyncable > '$backupdir/${localhost}-all.sql.gz'\""
       else
          execstr="su - $PGSQLUSER -c \"$PGSQLDUMPALL > '$backupdir/${localhost}-all.sql'\""
       fi
@@ -104,13 +104,13 @@ else
    for db in $databases; do
       if [ $usevserver = yes ]; then
          if [ "$compress" == "yes" ]; then
-            execstr="$VSERVER $vsname exec su - $PGSQLUSER -c \"$PGSQLDUMP $db | $GZIP --rsyncable > '$backupdir/${db}.sql.gz'\""
+            execstr="$VSERVER $vsname exec su - $PGSQLUSER -c \"set -o pipefail ; $PGSQLDUMP $db | $GZIP --rsyncable > '$backupdir/${db}.sql.gz'\""
          else
             execstr="$VSERVER $vsname exec su - $PGSQLUSER -c \"$PGSQLDUMP $db | > '$backupdir/${db}.sql'\""
          fi
       else
          if [ "$compress" == "yes" ]; then
-            execstr="su - $PGSQLUSER -c \"$PGSQLDUMP $db | $GZIP --rsyncable > '$backupdir/${db}.sql.gz'\""
+            execstr="su - $PGSQLUSER -c \"set -o pipefail ; $PGSQLDUMP $db | $GZIP --rsyncable > '$backupdir/${db}.sql.gz'\""
          else
             execstr="su - $PGSQLUSER -c \"$PGSQLDUMP $db > '$backupdir/${db}.sql'\""
          fi
