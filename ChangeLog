@@ -59,6 +59,7 @@ version 0.9.7 -- UNRELEASED
 	 . Report duplicity output as "info" so that it can be included in
 	   report e-mail when reportinfo is on (Closes: #563734)
 	 . Fix include/exclude paths with spaces
+	 . Support backups to Amazon S3 buckets, thanks to stefan for the patch.
     helper changes
 	dup:
 	 . Do not propose to exclude /home/*/.gnupg twice anymore

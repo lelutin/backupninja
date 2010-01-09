@@ -182,6 +182,16 @@ blank by hitting return.
 The included helper program "ninjahelper" will walk you through creating
 an rdiff-backup configuration, and will set up the ssh keys for you.
 
+
+Amazon Simple Storage Service (S3)
+==================================
+
+Duplicity can store backups on Amazon S3 buckets, taking care of encryption.
+Since it performs incremental backups it minimizes the number of request per
+operation therefore reducing the costs. The boto Python interface to Amazon
+Web Services is needed to use duplicity with S3 (Debian package: python-boto).
+
+
 INSTALLATION
 ============
    

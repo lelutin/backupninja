@@ -26,6 +26,8 @@ setsection dest
 getconf incremental yes
 getconf keep 60
 getconf desturl
+getconf awsaccesskeyid
+getconf awssecretaccesskey
 getconf sshoptions
 getconf bandwidthlimit 0
 getconf desthost
@@ -38,6 +40,9 @@ destdir=${destdir%/}
 [ -n "$desturl" -o -n "$destdir" ]  || fatal "The destination directory (destdir) must be set when desturl is not used."
 [ -n "$include" -o -n "$vsinclude" ]  || fatal "No source includes specified"
 [ -n "$password" ] || fatal "The password option must be set."
+if [ "`echo $desturl | @AWK@ -F ':' '{print $1}'`" == "s3+http" ]; then
+   [ -n "$awsaccesskeyid" -a -n "$awssecretaccesskey" ]  || fatal "AWS access keys must be set for S3 backups."
+fi
 
 ### VServers
 # If vservers are configured, check that the ones listed in $vsnames do exist.
@@ -226,6 +231,12 @@ set +o noglob
 ### EXECUTE ####################################################################
 
 execstr_source=${execstr_source//\\*/\\\\\\*}
+
+### If desturl is an S3 URL export the AWS environment variables
+if [ "`echo $desturl | @AWK@ -F ':' '{print $1}'`" == "s3+http" ]; then
+   export AWS_ACCESS_KEY_ID="$awsaccesskeyid"
+   export AWS_SECRET_ACCESS_KEY="$awssecretaccesskey"
+fi
 
 ### Cleanup commands (duplicity >= 0.4.4)
 

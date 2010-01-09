@@ -403,6 +403,12 @@ keep = $dup_keep
 # bandwithlimit. For details, see duplicity manpage, section "URL FORMAT".
 #desturl = file:///usr/local/backup
 #desturl = rsync://user@other.host//var/backup/bla
+#desturl = s3+http://your_bucket
+
+# Amazon Web Services Access Key ID and Secret Access Key, needed for backups
+# to S3 buckets.
+#awsaccesskeyid = YOUR_AWS_ACCESS_KEY_ID
+#awssecretaccesskey = YOUR_AWS_SECRET_KEY
 
 # bandwith limit, in kbit/s ; default is 0, i.e. no limit
 #bandwidthlimit = 128

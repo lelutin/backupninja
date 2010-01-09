@@ -8,6 +8,8 @@
 
 ## passed directly to duplicity, e.g. to increase verbosity set this to:
 ## options = --verbosity 8
+## when using the Amazon S3 backend to create buckets in Europe:
+## options = --s3-european-buckets --s3-use-new-style
 ##
 ## Default:
 # options = 
@@ -158,10 +160,20 @@ exclude = /home/*/.gnupg
 ## examples include:
 ## desturl = file:///usr/local/backup
 ## desturl = rsync://user@other.host//var/backup/bla
+## desturl = s3+http://
 ## the default value of this configuration option is not set:
 ##
 ## Default:
 # desturl = 
+
+## Amazon Web Services Access Key ID and Secret Access Key, needed for backups
+## to S3 buckets.
+## awsaccesskeyid = YOUR_AWS_ACCESS_KEY_ID
+## awssecretaccesskey = YOUR_AWS_SECRET_KEY
+##
+## Default:
+# awsaccesskeyid = 
+# awssecretaccesskey = 
 
 ## bandwith limit, in kbit/s ; default is 0, i.e. no limit an example
 ## setting would be:
