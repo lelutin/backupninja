@@ -45,6 +45,7 @@ version 0.9.7 -- UNRELEASED
 	   reported as such.
 	rdiff:
 	 . Fix include/exclude paths with spaces (Closes: #398435)
+	 . Fix confusing error if rdiff-backup cannot be found on remote server.
 	sys:
 	 . New luksheaders option (default=disabled) to backup the Luks header
 	   of every Luks device.

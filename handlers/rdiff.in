@@ -31,6 +31,7 @@ function get_version() {
    # given no arguments, returns the local version.
    # given a user and host, returns the remote version.
    # if user or host is missing, returns the local version.
+   local version
    if [ "$#" -lt 2 ]; then
       debug "$RDIFFBACKUP -V"
       echo `$RDIFFBACKUP -V`
@@ -38,7 +39,12 @@ function get_version() {
       local user=$1
       local host=$2
       debug "ssh $sshoptions $host -l $user '$RDIFFBACKUP -V'"
-      echo `ssh $sshoptions $host -l $user "$RDIFFBACKUP -V | grep rdiff-backup"`
+      version=`ssh $sshoptions $host -l $user "$RDIFFBACKUP -V"`
+      if [ $? = 127 ]; then
+         fatal "Unable to execute rdiff-backup on remote server. It probably isn't installed"
+      else
+         echo "$version" | grep rdiff-backup
+      fi
    fi
 }
 
