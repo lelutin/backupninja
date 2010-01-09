@@ -381,7 +381,7 @@ loglevel=3
 while [ $# -ge 1 ]; do
    case $1 in
       -h|--help) usage;;
-      -d|--debug) debug=1;;
+      -d|--debug) debug=1; export BACKUPNINJA_DEBUG=yes;;
       -t|--test) test=1;debug=1;;
       -n|--now) processnow=1;;
       -f|--conffile)

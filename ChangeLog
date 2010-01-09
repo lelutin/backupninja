@@ -9,6 +9,7 @@ version 0.9.7 -- UNRELEASED
 	   "info" are included in the report e-mail (closes #563734)
 	 . reportspace: skip non-directories and places that don't exist on the
 	   local filesystem (Closes: #536049)
+	 . set BACKUPNINJA_DEBUG when invoked with -d (Closes: #537266)
     lib changes
 	easydialog:
 	 . Allow form fields input to grow up to 100 chars (Closes: #562249)
