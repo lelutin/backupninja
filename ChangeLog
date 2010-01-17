@@ -23,6 +23,7 @@ version 0.9.7 -- UNRELEASED
 	 . add missing destid_file options to ssh connections
 	 . added sshoptions variable for arbitrary ssh options
 	 . updated example file to include destid_file, destport and sshoptions
+	 . use any subdirectories not just "a" to "z". Thanks Chris Nolan! (Redmine#606)
 	mysql:
 	 . Options passed to mysqldump are now customizable with the new
 	   sqldumpoptions configuration variable. Thanks to Chris Lamb for his

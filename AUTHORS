@@ -33,3 +33,4 @@ Ian Beckwith <ianb@erislabs.net> -- dup bandwidthlimit fix
 Olivier Berger <oberger@ouvaton.org> -- dup debug output bugfix, reportinfo option
 stefan <s.freudenberg@jpberlin.de> -- dup support for Amazon S3 buckets
 maniacmartin <martin@maniacmartin.com> -- rdiff confusing error message fix
+Chris Nolan <chris@cenolan.com> -- maildir subdirectory expansion
