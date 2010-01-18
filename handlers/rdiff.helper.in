@@ -22,6 +22,11 @@ do_rdiff_host_includes() {
          formItem include
          formItem include
          formItem include
+         formItem include
+         formItem include
+         formItem include
+         formItem include
+         formItem include
       formDisplay
       [ $? = 0 ] || return
       unset rdiff_includes
@@ -49,6 +54,11 @@ do_rdiff_vserver() {
          formItem include ""
          formItem include ""
          formItem include ""
+         formItem include ""
+         formItem include ""
+         formItem include ""
+         formItem include ""
+         formItem include ""
       formDisplay
       [ $? = 0 ] || return 1
       rdiff_vsincludes=($REPLY)
@@ -64,6 +74,12 @@ do_rdiff_excludes() {
      do
        formItem exclude ${rdiff_excludes[$i]}
      done
+     formItem exclude
+     formItem exclude
+     formItem exclude
+     formItem exclude
+     formItem exclude
+     formItem exclude
      formItem exclude
      formItem exclude
    formDisplay

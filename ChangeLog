@@ -47,6 +47,7 @@ version 0.9.7 -- UNRELEASED
 	rdiff:
 	 . Fix include/exclude paths with spaces (Closes: #398435)
 	 . Fix confusing error if rdiff-backup cannot be found on remote server.
+	 . Increased element number in include/exclude and vserver ninjahelper interface
 	sys:
 	 . New luksheaders option (default=disabled) to backup the Luks header
 	   of every Luks device.

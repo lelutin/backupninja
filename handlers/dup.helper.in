@@ -18,6 +18,11 @@ do_dup_host_includes() {
          formItem include ""
          formItem include ""
          formItem include ""
+         formItem include ""
+         formItem include ""
+         formItem include ""
+         formItem include ""
+         formItem include ""
          formDisplay
       [ $? = 0 ] || return 1
       dup_includes="$REPLY"
@@ -42,6 +47,11 @@ do_dup_vserver() {
          formItem include ""
          formItem include ""
          formItem include ""
+         formItem include ""
+         formItem include ""
+         formItem include ""
+         formItem include ""
+         formItem include ""
       formDisplay
       [ $? = 0 ] || return 1
       dup_vsincludes="$REPLY"
@@ -56,6 +66,11 @@ do_dup_excludes() {
      for i in $dup_excludes; do
         formItem exclude "$i"
      done
+     formItem exclude ""
+     formItem exclude ""
+     formItem exclude ""
+     formItem exclude ""
+     formItem exclude ""
      formItem exclude ""
      formItem exclude ""
      formItem exclude ""
