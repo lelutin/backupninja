@@ -1,7 +1,7 @@
 
-EXAMPLES = example.dup example.ldap example.makecd example.mysql \
-		example.pgsql example.rdiff example.sh example.rsync \
-		example.svn example.sys example.trac example.maildir
+EXAMPLES = example.dup example.ldap example.maildir example.makecd example.mysql \
+		example.pgsql example.rdiff example.rsync example.sh  \
+		example.svn example.sys example.trac
 
 EXTRA_DIST = $(EXAMPLES)
 
