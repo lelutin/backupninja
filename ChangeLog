@@ -1,4 +1,4 @@
-version 0.9.7 -- UNRELEASED
+version 0.9.7 -- January 27, 2010
     backupninja changes
 	 . fix bug in reportspace, thanks Dan Garthwaite
 	 . do not assume English locale when using date (Closes: #465837)

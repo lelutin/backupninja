@@ -3,7 +3,7 @@
 
 # The maintainer mode is causing me grief with newest versions of autotools
 #AM_MAINTAINER_MODE
-AC_INIT([backupninja],[0.9.6],[backupninja@lists.riseup.net])
+AC_INIT([backupninja],[0.9.7],[backupninja@lists.riseup.net])
 AC_CONFIG_SRCDIR([src/backupninja.in])
 AM_INIT_AUTOMAKE
 
