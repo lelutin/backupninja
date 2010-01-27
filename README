@@ -46,6 +46,37 @@ The following options are available:
 --run FILE           Runs the specified action FILE (e.g. one of the /etc/backup.d/ files).
                      Also puts backupninja in debug mode.
 
+NINJAHELPER
+===========
+
+Ninjahelper is an additional script which will walk you through the process of
+configuring backupninja. Ninjahelper has a menu driven curses based interface
+(using dialog). 
+
+To add an additional 'wizard' to ninjahelper, follow these steps:
+
+(1) to add a helper for the handler "blue", create the file
+    blue.helper in the directory where the handlers live.
+    (ie /usr/share/backupninja).
+
+(2) next, you need to add your helper to the global HELPERS variable
+    and define the main function for your helper (the function name
+    is always <helper>_wizard). for example, blue.helper:
+       HELPERS="$HELPERS blue:description_of_this_helper"
+       blue_wizard() {
+         ... do work here ...
+       }
+
+(3) look at the existing helpers to see how they are written. Try to re-use
+    functions, such as the dialog functions that are defined in easydialog.sh,
+    or the vserver functions defined in lib/vserver.
+
+(4) test, re-test, and test again. Try to break the helper by going backwards,
+    try to think like someone who has no idea how to configure your handler
+    would think, try to make your helper as simple as possible. Walk like a cat,
+    become your shadow, don't let your senses betray you.
+
+
 CONFIGURATION FILES
 ===================
 
@@ -192,38 +223,6 @@ operation therefore reducing the costs. The boto Python interface to Amazon
 Web Services is needed to use duplicity with S3 (Debian package: python-boto).
 
 
-INSTALLATION
-============
-   
-Requirements:
-  apt-get install bash gawk
-
-Recommended: 
-  apt-get install rdiff-backup gzip hwinfo
-
-Files:
-  /usr/sbin/backupninja        -- main script
-  /etc/cron.d/backupninja      -- runs main script nightly
-  /etc/logrotate.d/backupninja -- rotates backupninja.log
-  /etc/backup.d/               -- directory for configuration files
-  /etc/backupninja.conf        -- general options 
-  /usr/share/backupninja       -- handler scripts which do the actual work
-
-Installation:
-  There is no install script, but you just need to move files to the
-  correct locations. All files should be owned by root.
- 
-  # tar xvzf backupninja.tar.gz
-  # cd backupninja
-  # mv backupninja /usr/sbin/backupninja
-  # mv ninjahelper /usr/sbin/ninjahelper
-  # mv etc/logrotate.d/backupninja /etc/logrotate.d/backupninja
-  # mv etc/cron.d/backupninja /etc/cron.d/backupninja
-  # mkdir /etc/backup.d/
-  # mv etc/backupninja.conf /etc/backupninja.conf
-  # mv handlers /usr/share/backupninja
-
-
 VSERVERS
 ========
 
@@ -242,32 +241,3 @@ VSERVERINFO (default: /usr/sbin/vserver-info)
 VSERVER (default: /usr/sbin/vserver)
 VROOTDIR (default: `$VSERVERINFO info SYSINFO |grep vserver-Rootdir | awk '{print $2}'`)
 
-NINJAHELPER
-===========
-
-Ninjahelper is an additional script which will walk you through the process of
-configuring backupninja. Ninjahelper has a menu driven curses based interface
-(using dialog). 
-
-To add an additional 'wizard' to ninjahelper, follow these steps:
-
-(1) to add a helper for the handler "blue", create the file
-    blue.helper in the directory where the handlers live.
-    (ie /usr/share/backupninja).
-
-(2) next, you need to add your helper to the global HELPERS variable
-    and define the main function for your helper (the function name
-    is always <helper>_wizard). for example, blue.helper:
-       HELPERS="$HELPERS blue:description_of_this_helper"
-       blue_wizard() {
-         ... do work here ...
-       }
-
-(3) look at the existing helpers to see how they are written. Try to re-use
-    functions, such as the dialog functions that are defined in easydialog.sh,
-    or the vserver functions defined in lib/vserver.
-
-(4) test, re-test, and test again. Try to break the helper by going backwards,
-    try to think like someone who has no idea how to configure your handler
-    would think, try to make your helper as simple as possible. Walk like a cat,
-    become your shadow, don't let your senses betray you.
