@@ -165,6 +165,11 @@ if [ "$incremental" == "no" ]; then
    fi
 fi
 
+### Cleanup options
+if [ "$duplicity_major" -ge 0 -a "$duplicity_minor" -ge 6 -a "$duplicity_sub" -ge 1 ]; then
+   execstr_options="${execstr_options} --extra-clean"
+fi
+
 ### Temporary directory
 precmd=
 if [ -n "$tmpdir" ]; then
