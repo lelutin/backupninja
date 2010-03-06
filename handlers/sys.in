@@ -462,7 +462,9 @@ STATUS="Collecting Software RAID information (/etc/mdadm.conf)"
 catiffile "/etc/mdadm.conf"
 
 STATUS="Collecting Software RAID information (/sbin/mdadm -Q)"
-catifexec "/sbin/mdadm" "-Q" "--detail" '/dev/md?*'
+if ls /dev/md?* >/dev/null 2>&1; then
+   catifexec "/sbin/mdadm" "-Q" "--detail" '/dev/md?*'
+fi
 
 STATUS="Collecting Automount information (auto.master)"
 catiffile "/etc/auto.master"

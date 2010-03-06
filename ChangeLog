@@ -1,3 +1,8 @@
+version 0.9.8 -- UNRELEASED
+    handler changes
+	sys:
+	 . Only run mdadm if RAID devices actually exist (Closes: #572450)
+
 version 0.9.7 -- January 27, 2010
     backupninja changes
 	 . fix bug in reportspace, thanks Dan Garthwaite
