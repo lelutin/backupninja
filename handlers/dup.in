@@ -95,8 +95,8 @@ else
    execstr_serverpart="scp://$destuser@$desthost/$destdir"
 fi
 
-### duplicity version
-duplicity_version="`duplicity --version | @AWK@ '{print $2}'`"
+### duplicity version (ignore anything else than 0-9 and ".")
+duplicity_version="`duplicity --version | @AWK@ '{print $2}' | @SED@ 's/[^.[:digit:]]//g'`"
 duplicity_major="`echo $duplicity_version | @AWK@ -F '.' '{print $1}'`"
 duplicity_minor="`echo $duplicity_version | @AWK@ -F '.' '{print $2}'`"
 duplicity_sub="`echo $duplicity_version | @AWK@ -F '.' '{print $3}'`"
