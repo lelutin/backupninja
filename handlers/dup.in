@@ -24,6 +24,7 @@ getconf exclude
 
 setsection dest
 getconf incremental yes
+getconf increments 30
 getconf keep 60
 getconf desturl
 getconf awsaccesskeyid
@@ -164,14 +165,13 @@ if [ "$incremental" == "no" ]; then
       execstr_command="full"
    fi
 else
-   if [ "$keep" != "yes" ]; then
-      fullifolderthan="30D"
-      if [ "`echo $keep | tr -d 0-9`" == "" ]; then
-         #let "fullifolderthan = keep / 2"
-         fullifolderthan=$(($keep / 2))
-         fullifolderthan="${fullifolderthan}D"
+   # we're in incremental mode
+   if [ "$increments" != "keep" ]; then
+      # if we don't want to keep every increments
+      if [ "`echo $increments | tr -d 0-9`" == "" ]; then
+         increments="${increments}D"
       fi
-      execstr_options="${execstr_options} --full-if-older-than $fullifolderthan"
+      execstr_options="${execstr_options} --full-if-older-than $increments"
    fi
 fi
 

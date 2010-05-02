@@ -123,6 +123,7 @@ do_dup_dest() {
         formItem "destdir" "$dup_destdir"
         formItem "keep" "$dup_keep"
         formItem "incremental" "$dup_incremental"
+        formItem "increments" "$dup_increments"
         formItem "bandwidthlimit" "$dup_bandwidth"
         formItem "sshoptions" "$dup_sshoptions"
       formDisplay
@@ -139,8 +140,9 @@ do_dup_dest() {
       dup_destdir=${thereply[2]}
       dup_keep=${thereply[3]}
       dup_incremental=${thereply[4]}
-      dup_bandwidth=${thereply[5]}
-      dup_sshoptions=${thereply[6]}
+      dup_increments=${thereply[5]}
+      dup_bandwidth=${thereply[6]}
+      dup_sshoptions=${thereply[7]}
 
    done
    set +o noglob
@@ -406,6 +408,14 @@ EOF
 # if incremental = no, perform a full backup in order to start a new backup set
 incremental = $dup_incremental
 
+# how many days of incremental backups before doing a full backup again ; default is 30 days.
+# (you can also use the time format of duplicity)
+# if 'increments = keep' is set : do not start another full backup,
+# but keep doing incremental backups
+#increments = 30
+#increments = keep
+increments = $dup_increments
+
 # how many days of data to keep ; default is 60 days.
 # (you can also use the time format of duplicity)
 # 'keep = yes' means : do not delete old data, the remote host will take care of this
@@ -510,6 +520,7 @@ dup_wizard() {
    dup_excludes=
    dup_vsincludes=
    dup_incremental=yes
+   dup_increments=30
    dup_keep=60
    dup_bandwidth=
    dup_sshoptions=
