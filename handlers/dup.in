@@ -163,6 +163,16 @@ if [ "$incremental" == "no" ]; then
    else
       execstr_command="full"
    fi
+else
+   if [ "$keep" != "yes" ]; then
+      fullifolderthan="30D"
+      if [ "`echo $keep | tr -d 0-9`" == "" ]; then
+         #let "fullifolderthan = keep / 2"
+         fullifolderthan=$(($keep / 2))
+         fullifolderthan="${fullifolderthan}D"
+      fi
+      execstr_options="${execstr_options} --full-if-older-than $fullifolderthan"
+   fi
 fi
 
 ### Cleanup options
