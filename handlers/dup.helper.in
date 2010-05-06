@@ -408,10 +408,10 @@ EOF
 # if incremental = no, perform a full backup in order to start a new backup set
 incremental = $dup_incremental
 
-# how many days of incremental backups before doing a full backup again ; default is 30 days.
-# (you can also use the time format of duplicity)
-# if 'increments = keep' is set : do not start another full backup,
-# but keep doing incremental backups
+# how many days of incremental backups before doing a full backup again ;
+# default is 30 days (one can also use the time format of duplicity).
+# if increments = keep, never automatically perform a new full backup ; 
+# only perform incremental backups.
 #increments = 30
 #increments = keep
 increments = $dup_increments

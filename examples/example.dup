@@ -147,6 +147,14 @@ exclude = /home/*/.gnupg
 ## Default: 
 # incremental = yes
 
+## how many days of incremental backups before doing a full backup again ;
+## default is 30 days (one can also use the time format of duplicity).
+## if increments = keep, never automatically perform a new full backup ; 
+## only perform incremental backups.
+##
+## Default:
+# increments = 30
+
 ## how many days of data to keep ; default is 60 days.
 ## (you can also use the time format of duplicity)
 ## 'keep = yes' means : do not delete old data, the remote host will take care of this
