@@ -170,7 +170,7 @@ exclude = /home/*/.gnupg
 ## desturl = file:///usr/local/backup
 ## desturl = rsync://user@other.host//var/backup/bla
 ## desturl = s3+http://
-## desturl = ftp://myftpuser[:myftppassword]@ftp.example.org/remote/ftp/path
+## desturl = ftp://myftpuser@ftp.example.org/remote/ftp/path
 ## the default value of this configuration option is not set:
 ##
 ## Default:
@@ -184,6 +184,11 @@ exclude = /home/*/.gnupg
 ## Default:
 # awsaccesskeyid = 
 # awssecretaccesskey = 
+
+## FTP password, needed for backups using desturl = ftp://...
+##
+## Default:
+# ftp_password = 
 
 ## bandwith limit, in kbit/s ; default is 0, i.e. no limit
 ## if using 'desturl' above, 'bandwidthlimit' must not be set

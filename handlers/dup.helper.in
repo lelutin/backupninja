@@ -430,12 +430,15 @@ keep = $dup_keep
 #desturl = file:///usr/local/backup
 #desturl = rsync://user@other.host//var/backup/bla
 #desturl = s3+http://your_bucket
-#desturl = ftp://myftpuser[:myftppassword]@ftp.example.org/remote/ftp/path
+#desturl = ftp://myftpuser@ftp.example.org/remote/ftp/path
 
 # Amazon Web Services Access Key ID and Secret Access Key, needed for backups
 # to S3 buckets.
 #awsaccesskeyid = YOUR_AWS_ACCESS_KEY_ID
 #awssecretaccesskey = YOUR_AWS_SECRET_KEY
+
+# FTP password, needed for backups using desturl = ftp://...
+#ftp_password = 
 
 # bandwith limit, in kbit/s ; default is 0, i.e. no limit
 # if using 'desturl' above, 'bandwidthlimit' must not be set

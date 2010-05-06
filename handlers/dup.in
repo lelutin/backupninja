@@ -29,6 +29,7 @@ getconf keep 60
 getconf desturl
 getconf awsaccesskeyid
 getconf awssecretaccesskey
+getconf ftp_password
 getconf sshoptions
 getconf bandwidthlimit 0
 getconf desthost
@@ -43,6 +44,9 @@ destdir=${destdir%/}
 [ -n "$password" ] || fatal "The password option must be set."
 if [ "`echo $desturl | @AWK@ -F ':' '{print $1}'`" == "s3+http" ]; then
    [ -n "$awsaccesskeyid" -a -n "$awssecretaccesskey" ]  || fatal "AWS access keys must be set for S3 backups."
+fi
+if [ "`echo $desturl | @AWK@ -F ':' '{print $1}'`" == "ftp" ]; then
+   [ -n "$ftp_password" ]  || fatal "ftp_password must be set for FTP backups."
 fi
 
 ### VServers
@@ -269,6 +273,7 @@ if [ "$duplicity_major" -ge 0 -a "$duplicity_minor" -ge 4 -a "$duplicity_sub" -g
    debug "$precmd duplicity cleanup --force $execstr_options $execstr_serverpart"
    if [ ! $test ]; then
       export PASSPHRASE=$password
+      export FTP_PASSWORD=$ftp_password
       output=`nice -n $nicelevel \
          su -c \
          "$precmd duplicity cleanup --force $execstr_options $execstr_serverpart 2>&1"`
@@ -289,6 +294,7 @@ if [ "$keep" != "yes" ]; then
       debug "$precmd duplicity remove-older-than $keep --force $execstr_options $execstr_serverpart"
       if [ ! $test ]; then
          export PASSPHRASE=$password
+         export FTP_PASSWORD=$ftp_password
          output=`nice -n $nicelevel \
                    su -c \
                       "$precmd duplicity remove-older-than $keep --force $execstr_options $execstr_serverpart 2>&1"`
@@ -309,6 +315,7 @@ debug "$precmd duplicity $execstr_command $execstr_options $execstr_source --exc
 if [ ! $test ]; then
    outputfile=`maketemp backupout`
    export PASSPHRASE=$password
+   export FTP_PASSWORD=$ftp_password
    output=`nice -n $nicelevel \
              su -c \
                 "$precmd duplicity $execstr_command $execstr_options $execstr_source --exclude '**' / $execstr_serverpart >$outputfile 2>&1"`
