@@ -11,6 +11,9 @@ version 0.9.8 -- UNRELEASED
 	   0.6.01 or newer, that depends on local caching (Closes: #572721)
 	 . dup: ignore anything but digits and "." when comparing versions
 	   (Closes: #578987)
+	 . Put archive directory (cache) into /var/backups/duplicity rather
+	   than the default /root/.cache/duplicity, unless the user
+	   has specified it (Closes: 580213)
 
 version 0.9.7 -- January 27, 2010
     backupninja changes

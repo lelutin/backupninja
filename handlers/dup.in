@@ -193,6 +193,15 @@ if [ -n "$tmpdir" ]; then
    precmd="${precmd}TMPDIR=$tmpdir "
 fi
 
+### Archive directory
+# duplicity >= 0.6.01 enables the archive_dir by default, let's put it into /var/backups
+# unless the user has specified it.
+if [ "$duplicity_major" -ge 0 -a "$duplicity_minor" -ge 6 -a "$duplicity_sub" -ge 1 ]; then
+   if echo "${options}" | grep -qv -- "--archive-dir" ; then
+      execstr_options="${execstr_options} --archive-dir /var/backups/duplicity"
+   fi
+fi
+
 ### Cleanup old backup sets (or not)
 if [ "$keep" != "yes" ]; then
    if [ "`echo $keep | tr -d 0-9`" == "" ]; then
