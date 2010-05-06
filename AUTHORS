@@ -30,7 +30,7 @@ Matthew Palmer <mpalmer@debian.org> -- halt loglevel feature
 dan@garthwaite.org -- reportspace bugfix
 Tuomas Jormola <tj@solitudo.net> -- "when = manual" option
 Ian Beckwith <ianb@erislabs.net> -- dup bandwidthlimit fix
-Olivier Berger <oberger@ouvaton.org> -- dup debug output bugfix, reportinfo option
+Olivier Berger <oberger@ouvaton.org> -- much work on the dup handler
 stefan <s.freudenberg@jpberlin.de> -- dup support for Amazon S3 buckets
 maniacmartin <martin@maniacmartin.com> -- rdiff confusing error message fix
 Chris Nolan <chris@cenolan.com> -- maildir subdirectory expansion

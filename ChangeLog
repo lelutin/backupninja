@@ -3,6 +3,9 @@ version 0.9.8 -- UNRELEASED
 	sys:
 	 . Only run mdadm if RAID devices actually exist (Closes: #572450)
 	dup:
+	 . Now default to use --full-if-older-than; see the new "increments"
+	   option to opt-out or tweak the default (30D) delay between full
+	   backups. Thanks a lot to Olivier Berger (Closes: #535996)
 	 . Use duplicity's --extra-clean option to get rid of unnecessary old
 	   cache files when cleaning up. This is enabled when using duplicity
 	   0.6.01 or newer, that depends on local caching (Closes: #572721)
