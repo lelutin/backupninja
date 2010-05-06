@@ -280,7 +280,8 @@ options = $dup_options
 # default is 0, but set to 19 if you want to lower the priority.
 nicelevel = $dup_nicelevel
 
-# default is yes. set to no to skip the test if the remote host is alive
+# default is yes. set to no to skip the test if the remote host is alive.
+# if 'desturl' is set below, 'testconnect' must be set to 'no' for now.
 testconnect = $dup_testconnect
 
 ######################################################
@@ -429,6 +430,7 @@ keep = $dup_keep
 #desturl = file:///usr/local/backup
 #desturl = rsync://user@other.host//var/backup/bla
 #desturl = s3+http://your_bucket
+#desturl = ftp://myftpuser[:myftppassword]@ftp.example.org/remote/ftp/path
 
 # Amazon Web Services Access Key ID and Secret Access Key, needed for backups
 # to S3 buckets.
@@ -436,6 +438,8 @@ keep = $dup_keep
 #awssecretaccesskey = YOUR_AWS_SECRET_KEY
 
 # bandwith limit, in kbit/s ; default is 0, i.e. no limit
+# if using 'desturl' above, 'bandwidthlimit' must not be set
+# an example setting of 128 kbps would be:
 #bandwidthlimit = 128
 bandwidthlimit = $dup_bandwidth
 
@@ -445,15 +449,20 @@ bandwidthlimit = $dup_bandwidth
 #sshoptions = -o IdentityFile=/root/.ssh/id_dsa_duplicity
 sshoptions = $dup_sshoptions
 
-# put the backups under this directory
+# put the backups under this destination directory
+# if using 'desturl' above, this must not be set
+# in all other cases, this must be set!
 destdir = $dup_destdir
 
 # the machine which will receive the backups
+# if using 'desturl' above, this must not be set
+# in all other cases, this must be set!
 desthost = $dup_desthost
 
 # make the files owned by this user
-# note: you must be able to ssh backupuser@backhost
-# without specifying a password (if type = remote).
+# if using 'desturl' above, this must not be set
+# note: if using an SSH based transport and 'type' is set to 'remote', you must
+#       be able to 'ssh backupuser@backuphost' without specifying a password.
 destuser = $dup_destuser
 
 EOF

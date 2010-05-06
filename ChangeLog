@@ -14,6 +14,7 @@ version 0.9.8 -- UNRELEASED
 	 . Put archive directory (cache) into /var/backups/duplicity rather
 	   than the default /root/.cache/duplicity, unless the user
 	   has specified it (Closes: 580213)
+	 . Better example.dup documentation. Thanks, Alster!
 
 version 0.9.7 -- January 27, 2010
     backupninja changes
