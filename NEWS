@@ -1,3 +1,19 @@
+backupninja (0.9.8-1) UNRELEASED
+
+	* duplicity 0.6.01 and later defaults to using an archive (cache)
+	  directory, which was previously opt-in. Starting with backupninja
+	  0.9.8, the backupninja duplicity handler puts this cache into
+	  /var/backups/duplicity unless specified by the user with the "options"
+	  setting the *.dup job.
+	  When backups have been performed with backupninja older than 0.9.8 in
+	  conjunction with duplicity 0.6.01 or later, e.g. when using Sid or
+	  Squeeze at certain times of the Squeeze release cycle, cache files
+	  were probably saved into /root/.cache/duplicity; one may want to
+	  delete these files, or rather save bandwidth and just move the cache
+	  directory to the new location:
+
+	             mv /root/.cache/duplicity /var/backups/
+
 backupninja (0.9.7-1) UNRELEASED
 
 	* mysql: output filenames to support shell meta-characters in
