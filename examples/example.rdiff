@@ -122,6 +122,7 @@ include = /var/lib/dpkg/status-old
 
 ## files to exclude from the backup
 exclude = /home/*/.gnupg
+exclude = /var/cache/backupninja/duplicity
 
 ######################################################
 ## destination section
