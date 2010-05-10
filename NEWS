@@ -15,6 +15,9 @@ backupninja (0.9.8-1) UNRELEASED
 	             mkdir -p /var/cache/backupninja
 	             mv /root/.cache/duplicity /var/cache/backupninja/
 
+	  It is probably desirable to exclude this cache directory from
+	  duplicity backup sets to avoid some kind of reentrant backup problem.
+
 backupninja (0.9.7-1) UNRELEASED
 
 	* mysql: output filenames to support shell meta-characters in
