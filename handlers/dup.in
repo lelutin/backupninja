@@ -198,11 +198,11 @@ if [ -n "$tmpdir" ]; then
 fi
 
 ### Archive directory
-# duplicity >= 0.6.01 enables the archive_dir by default, let's put it into /var/backups
+# duplicity >= 0.6.01 enables the archive_dir by default, let's put it into /var/cache/backupninja/duplicity
 # unless the user has specified it.
 if [ "$duplicity_major" -ge 0 -a "$duplicity_minor" -ge 6 -a "$duplicity_sub" -ge 1 ]; then
    if echo "${options}" | grep -qv -- "--archive-dir" ; then
-      execstr_options="${execstr_options} --archive-dir /var/backups/duplicity"
+      execstr_options="${execstr_options} --archive-dir /var/cache/backupninja/duplicity"
    fi
 fi
 
