@@ -17,6 +17,9 @@ version 0.9.8 -- UNRELEASED
 	 . Better example.dup documentation. Thanks, Alster!
 	 . Added ftp_password option to securely transmit the FTP password
 	   from backupninja to duplicity.
+    doc changes
+	manpage:
+	 . Fix typo in manpage (Closes: #583778)
 
 version 0.9.7 -- January 27, 2010
     backupninja changes
