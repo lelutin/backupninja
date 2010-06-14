@@ -46,6 +46,11 @@
 ## ldaphost (no default): set this to your ldap host if it is not local
 # ldaphost =
 
-## tls (default yes): if set to 'yes' then TLS connection will be
-## attempted to your ldaphost by using the URI base ldaps: otherwise ldap: will be used
-# tls = yes
+## ssl (default yes): if set to 'yes' then SSL connection will be
+## attempted to your ldaphost by using ldaps://
+# ssl = yes
+
+## tls (default no): if set to 'yes' then TLS connection will be
+## attempted to your ldaphost by using TLS extended operations (RFC2246,
+## RFC2830)
+# tls = no

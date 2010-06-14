@@ -25,6 +25,9 @@ version 0.9.8 -- UNRELEASED
     doc changes
 	manpage:
 	 . Fix typo in manpage (Closes: #583778)
+	ldap:
+	 . Add ssl option description, fix tls option description (Closes
+	   Roundup bug #2407)
 
 version 0.9.7 -- January 27, 2010
     backupninja changes
