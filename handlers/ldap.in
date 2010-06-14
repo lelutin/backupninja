@@ -86,7 +86,7 @@ if [ "$ldif" == "yes" ]; then
          fi
 
          if [ "$compress" == "yes" ]; then
-            execstr="$execstr | $GZIP --rsyncable > $dumpdir/$dbsuffix.ldif.gz"
+            execstr="$execstr | $GZIP $GZIP_OPTS > $dumpdir/$dbsuffix.ldif.gz"
          else
             execstr="$execstr > $dumpdir/$dbsuffix.ldif"
          fi

@@ -480,6 +480,7 @@ getconf PGSQLDUMP /usr/bin/pg_dump
 getconf PGSQLDUMPALL /usr/bin/pg_dumpall
 getconf PGSQLUSER postgres
 getconf GZIP /bin/gzip
+getconf GZIP_OPTS --rsyncable
 getconf RSYNC /usr/bin/rsync
 getconf admingroup root
 

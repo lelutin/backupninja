@@ -1,4 +1,9 @@
 version 0.9.8 -- UNRELEASED
+    backupninja changes
+	 . Added GZIP_OPTS option, defaulting to --rsyncable, so that this
+	   option can be disabled on systems that don't support it. This
+	   also allows to use another compression program, such as pbzip2
+	   on SMP machines (Closes Roundup bug #2405)
     handler changes
 	sys:
 	 . Only run mdadm if RAID devices actually exist (Closes: #572450)

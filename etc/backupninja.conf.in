@@ -86,6 +86,7 @@ vservers = no
 # PGSQLDUMP=/usr/bin/pg_dump
 # PGSQLDUMPALL=/usr/bin/pg_dumpall
 # GZIP=/bin/gzip
+# GZIP_OPTS='--rsyncable'
 # RSYNC=/usr/bin/rsync
 # VSERVERINFO=/usr/sbin/vserver-info
 # VSERVER=/usr/sbin/vserver
