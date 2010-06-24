@@ -22,6 +22,9 @@ version 0.9.8 -- UNRELEASED
 	 . Better example.dup documentation. Thanks, Alster!
 	 . Added ftp_password option to securely transmit the FTP password
 	   from backupninja to duplicity.
+	mysql:
+	 . Don't lock tables in the information_schema database
+	   (Closes: #587011)
     doc changes
 	manpage:
 	 . Fix typo in manpage (Closes: #583778)

@@ -255,6 +255,10 @@ then
    for db in $databases
    do
       DUMP_BASE="$MYSQLDUMP $defaultsfile $sqldumpoptions"
+      if [ "$db" = "information_schema" ]
+      then
+         DUMP_BASE="${DUMP_BASE} --skip-lock-tables"
+      fi
 
       # Dumping structure and data
       DUMP="$DUMP_BASE $ignore $db"
