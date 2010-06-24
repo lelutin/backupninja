@@ -25,6 +25,8 @@ version 0.9.8 -- UNRELEASED
 	mysql:
 	 . Don't lock tables in the information_schema database
 	   (Closes: #587011)
+	 . Fix code logic to make dbusername/dbpassword actually usable
+	   (Closes Redmine bug #2264)
     doc changes
 	manpage:
 	 . Fix typo in manpage (Closes: #583778)

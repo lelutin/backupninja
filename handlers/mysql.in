@@ -86,7 +86,7 @@ fi
 
 defaultsfile=""
 
-if [ "$dbusername" != "" -a "$dbpassword" != "" ]
+if [ -n "$dbusername" -a -n "$dbpassword" ]
 then
    if [ $usevserver = yes ]
    then
@@ -140,13 +140,10 @@ password="$dbpassword"
 EOF
    umask $oldmask
    defaultsfile="--defaults-extra-file=$mycnf"
-fi
 
-# if a user is not set, use $configfile, otherwise use $mycnf
-if [ "$user" == "" ]; then
-   user=root;
-   defaultsfile="--defaults-extra-file=$configfile"
-else
+# else, if a user is set use her .my.cnf
+elif [ -n "$user" ]
+then
    userset=true;
    if [ $usevserver = yes ]
    then
@@ -169,6 +166,10 @@ else
 	
    defaultsfile="--defaults-extra-file=$userhome/.my.cnf"
    debug "using $defaultsfile"
+# otherwise use $configfile
+else
+   user=root
+   defaultsfile="--defaults-extra-file=$configfile"
 fi
 
 #######################################################################

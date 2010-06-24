@@ -34,3 +34,4 @@ Olivier Berger <oberger@ouvaton.org> -- much work on the dup handler
 stefan <s.freudenberg@jpberlin.de> -- dup support for Amazon S3 buckets
 maniacmartin <martin@maniacmartin.com> -- rdiff confusing error message fix
 Chris Nolan <chris@cenolan.com> -- maildir subdirectory expansion
+Dan Carley -- mysql bugfix
