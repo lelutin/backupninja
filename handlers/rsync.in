@@ -279,7 +279,7 @@ function eval_config {
     nice=""
   fi
 
-  ssh_cmd="ssh -T -o PasswordAuthentication=no $host -p $port -l $user -i $id_file"
+  ssh_cmd="ssh -T -o PasswordAuthentication=no -o Hostname=$host -p $port -l $user -i $id_file"
 
   if [ "$from" == "remote" ] || [ "$dest" == "remote" ]; then
     if [ "$testconnect" == "yes" ] && [ "$protocol" == "ssh" ]; then
@@ -913,7 +913,7 @@ function set_rsync_options {
       else
         debug RSYNC_RSH=\"$ssh_cmd\"
         echo RSYNC_RSH=\"$ssh_cmd\" >> $log
-        RSYNC_RSH="$ssh_cmd"
+        export RSYNC_RSH="$ssh_cmd"
       fi
     fi
 
