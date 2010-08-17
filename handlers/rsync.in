@@ -279,7 +279,8 @@ function eval_config {
     nice=""
   fi
 
-  ssh_cmd="ssh -T -o PasswordAuthentication=no -o Hostname=$host -p $port -l $user -i $id_file"
+  ssh_cmd_base="ssh -T -o PasswordAuthentication=no -o Hostname=$host -p $port -l $user -i $id_file"
+  ssh_cmd="$ssh_cmd_base $user@$host"
 
   if [ "$from" == "remote" ] || [ "$dest" == "remote" ]; then
     if [ "$testconnect" == "yes" ] && [ "$protocol" == "ssh" ]; then
@@ -911,9 +912,9 @@ function set_rsync_options {
         fatal "SSH Identity file $id_file not found"
         exit 1
       else
-        debug RSYNC_RSH=\"$ssh_cmd\"
-        echo RSYNC_RSH=\"$ssh_cmd\" >> $log
-        export RSYNC_RSH="$ssh_cmd"
+        debug RSYNC_RSH=\"$ssh_cmd_base\"
+        echo RSYNC_RSH=\"$ssh_cmd_base\" >> $log
+        export RSYNC_RSH="$ssh_cmd_base"
       fi
     fi
 
@@ -1062,7 +1063,7 @@ for SECTION in $include; do
 
   info "Syncing $SECTION on $dest_path..."
   debug $nice $rsync "${rsync_options[@]}" $filelist_flag $excludes $batch_option $orig $dest_path
-  $nice $rsync "${rsync_options[@]}" $filelist_flag $excludes $batch_option $orig $dest_path >> $log
+  $nice $rsync "${rsync_options[@]}" $filelist_flag $excludes $batch_option $orig $dest_path | tee -a $log
 
   if [ "$?" != "0" ]; then
     warning "Rsync error when trying to transfer $SECTION"
