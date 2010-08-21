@@ -847,7 +847,13 @@ function test_connect {
 function set_lockfile {
 
   if [ ! -z "$lockfile" ]; then
-    $touch $lockfile || warning "Could not create lockfile $lockfile"
+    mkdir -p `dirname $lockfile`
+    if ( set -o noclobber; echo "$$" > "$lockfile" ) &> /dev/null; then
+      trap 'rm -f "$lockfile"' INT TERM EXIT
+    else
+      info "Could not create lockfile $lockfile, exiting"
+      exit
+    fi
   fi
 
 }
@@ -856,6 +862,23 @@ function unset_lockfile {
 
   if [ ! -z "$lockfile" ]; then
     $rm $lockfile || warning "Could not remove lockfile $lockfile"
+  fi
+
+}
+
+function check_lockfile {
+
+  local pid
+
+  if [ ! -z "$lockfile" ] && [ -f "$lockfile" ]; then
+    pid="`cat $lockfile`"
+    if ps $pid &> /dev/null; then
+      info "Another backup is running for $lockfile, skipping run"
+      exit
+    else
+      info "Found old lockfile $lockfile, removing it"
+      unset_lockfile  
+    fi
   fi
 
 }
@@ -1045,6 +1068,7 @@ function end_mux {
 # the backup procedure
 
 eval_config
+check_lockfile
 set_lockfile
 set_rsync_options
 start_mux
