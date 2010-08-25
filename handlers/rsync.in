@@ -103,7 +103,12 @@
 #
 # Changelog
 # ---------
-# 
+#
+# 20100825 - rhatto at riseup.net
+#
+#   - Fixed lockfile checks for rsync handler
+#   - Fixed ssh_cmd and RSYNC_RSH at rsync handler
+#
 # 20090329 - rhatto at riseup.net
 #
 #   - Added support for: 
