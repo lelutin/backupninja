@@ -284,7 +284,7 @@ function eval_config {
     nice=""
   fi
 
-  ssh_cmd_base="ssh -T -o PasswordAuthentication=no -o Hostname=$host -p $port -l $user -i $id_file"
+  ssh_cmd_base="ssh -T -o PasswordAuthentication=no -p $port -i $id_file"
   ssh_cmd="$ssh_cmd_base $user@$host"
 
   if [ "$from" == "remote" ] || [ "$dest" == "remote" ]; then
