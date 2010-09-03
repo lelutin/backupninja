@@ -27,6 +27,10 @@ version 0.9.8 -- UNRELEASED
 	   (Closes: #587011)
 	 . Fix code logic to make dbusername/dbpassword actually usable
 	   (Closes Redmine bug #2264)
+	rsync:
+	 . Fix lockfile checks. This prevents multiple instances of the same
+	   rsync job to run in parallel.
+	 . Avoid passing the remote user twice to rsync-over-ssh.
     doc changes
 	manpage:
 	 . Fix typo in manpage (Closes: #583778)
