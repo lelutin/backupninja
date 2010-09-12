@@ -219,7 +219,10 @@ SAVEIFS=$IFS
 IFS=$(echo -en "\n\b")
 for i in $exclude; do
    str="${i//__star__/*}"
-   execstr="${execstr}--exclude '$str' "
+   case "$str" in
+      @*) execstr="${execstr}--exclude-globbing-filelist '${str#@}' " ;;
+      *) execstr="${execstr}--exclude '$str' " ;;
+   esac
 done
 IFS=$SAVEIFS
 # includes
@@ -228,7 +231,10 @@ IFS=$(echo -en "\n\b")
 for i in $include; do
    [ "$i" != "/" ] || fatal "Sorry, you cannot use 'include = /'"
    str="${i//__star__/*}"
-   execstr="${execstr}--include '$str' "
+   case "$str" in
+   @*) execstr="${execstr}--include-globbing-filelist '${str#@}' " ;;
+   *) execstr="${execstr}--include '$str' " ;;
+   esac
 done
 IFS=$SAVEIFS
 

@@ -21,7 +21,7 @@ garcondumonde@riseup.net
 Martin Krafft madduck@debian.org -- admingroup patch
 Anarcat -- lotsa patches
 Jamie McClelland -- cstream patches
-ale -- ldap cleanup
+ale -- ldap cleanup, rdiff support for reading include/exclude from files
 Sami Haahtinen <ressu@ressukka.net>
 Matthew Palmer -- mysql enhancements
 romain.tartiere@healthgrid.org -- ldap fixes
