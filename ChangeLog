@@ -1,4 +1,4 @@
-version 0.9.8 -- UNRELEASED
+version 0.9.8 -- September 12, 2010
     backupninja changes
 	 . Added GZIP_OPTS option, defaulting to --rsyncable, so that this
 	   option can be disabled on systems that don't support it. This
