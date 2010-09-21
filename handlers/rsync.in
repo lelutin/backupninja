@@ -384,14 +384,14 @@ function rotate_long {
 
   for rottype in daily weekly monthly; do
     seconds=$((seconds_${rottype}))
-
     dir="$backuproot/$rottype"
-    metadata="$backuproot/metadata/$rottype.1"
-    mkdir -p $metadata
+    metadata="$backuproot/metadata/$rottype"
+
+    mkdir -p $metadata.1
     if [ ! -d $dir.1 ]; then
       echo "Debug: $dir.1 does not exist, skipping."
       continue 1
-    elif [ ! -f $metadata/created ] && [ ! -f $metadata/rotated ]; then
+    elif [ ! -f $metadata.1/created ] && [ ! -f $metadata.1/rotated ]; then
       echo "Warning: metadata does not exist for $dir.1. This backup may be only partially completed. Skipping rotation."
       continue 1
     fi
@@ -401,10 +401,10 @@ function rotate_long {
     [ "$oldest" == "" ] && oldest=0
     for (( i=$oldest; i > 0; i-- )); do
       if [ -d $dir.$i ]; then
-        if [ -f $metadata/created ]; then
-          created=`tail -1 $metadata/created`
-        elif [ -f $metadata/rotated ]; then
-          created=`tail -1 $metadata/rotated`
+        if [ -f $metadata.$i/created ]; then
+          created=`tail -1 $metadata.$i/created`
+        elif [ -f $metadata.$i/rotated ]; then
+          created=`tail -1 $metadata.$i/rotated`
         else
           created=0
         fi
@@ -414,8 +414,9 @@ function rotate_long {
           if [ ! -d $dir.$next ]; then
             echo "Debug: $rottype.$i --> $rottype.$next"
             $nice mv $dir.$i $dir.$next
-            mkdir -p $backuproot/metadata/$rottype.$next
-            date +%c%n%s > $backuproot/metadata/$rottype.$next/rotated
+            mkdir -p $metadata.$next
+            date +%c%n%s > $metadata.$next/rotated
+            rm -f $metadata.$next/created
           else
             echo "Debug: skipping rotation of $dir.$i because $dir.$next already exists."
           fi
@@ -485,14 +486,14 @@ function rotate_long_remote {
 
   for rottype in daily weekly monthly; do
     seconds=\$((seconds_\${rottype}))
-
     dir="$backuproot/\$rottype"
-    metadata="$backuproot/metadata/\$rottype.1"
-    mkdir -p \$metadata
+    metadata="$backuproot/metadata/\$rottype"
+
+    mkdir -p \$metadata.1
     if [ ! -d \$dir.1 ]; then
       echo "Debug: \$dir.1 does not exist, skipping."
       continue 1
-    elif [ ! -f \$metadata/created ] && [ ! -f \$metadata/rotated ]; then
+    elif [ ! -f \$metadata.1/created ] && [ ! -f \$metadata.1/rotated ]; then
       echo "Warning: metadata does not exist for \$dir.1. This backup may be only partially completed. Skipping rotation."
       continue 1
     fi
@@ -502,10 +503,10 @@ function rotate_long_remote {
     [ "\$oldest" == "" ] && oldest=0
     for (( i=\$oldest; i > 0; i-- )); do
       if [ -d \$dir.\$i ]; then
-        if [ -f \$metadata/created ]; then
-          created=\`tail -1 \$metadata/created\`
-        elif [ -f \$metadata/rotated ]; then
-          created=\`tail -1 \$metadata/rotated\`
+        if [ -f \$metadata.\$i/created ]; then
+          created=\`tail -1 \$metadata.\$i/created\`
+        elif [ -f \$metadata.\$i/rotated ]; then
+          created=\`tail -1 \$metadata.\$i/rotated\`
         else
           created=0
         fi
@@ -515,8 +516,9 @@ function rotate_long_remote {
           if [ ! -d \$dir.\$next ]; then
             echo "Debug: \$rottype.\$i --> \$rottype.\$next"
             $nice mv \$dir.\$i \$dir.\$next
-            mkdir -p $backuproot/metadata/\$rottype.\$next
-            date +%c%n%s > $backuproot/metadata/\$rottype.\$next/rotated
+            mkdir -p \$metadata.\$next
+            date +%c%n%s > \$metadata.\$next/rotated
+            rm -f \$metadata.\$next/created
           else
             echo "Debug: skipping rotation of \$dir.\$i because \$dir.\$next already exists."
           fi
@@ -528,7 +530,7 @@ function rotate_long_remote {
   done
 
   max=\$((keepdaily+1))
-  if [ \$keepweekly -gt 0 -a -d $backuproot/daily.\$max -a ! -d \$backuproot/weekly.1 ]; then
+  if [ \$keepweekly -gt 0 -a -d $backuproot/daily.\$max -a ! -d $backuproot/weekly.1 ]; then
     echo "Debug: daily.\$max --> weekly.1"
     $nice mv $backuproot/daily.\$max $backuproot/weekly.1
     mkdir -p $backuproot/metadata/weekly.1
