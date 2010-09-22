@@ -1,4 +1,7 @@
 version 0.9.9 -- UNRELEASED
+    backupninja changes
+	 . Do not error out when no job is configured. Thanks to Jordi Mallach
+	   <jordi@debian.org> for the patch (Closes: #597684)
     handler changes
 	rdiff:
 	 . Support reading include/exclude patterns from files using the
