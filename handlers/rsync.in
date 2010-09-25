@@ -416,7 +416,6 @@ function rotate_long {
             $nice mv $dir.$i $dir.$next
             mkdir -p $metadata.$next
             date +%c%n%s > $metadata.$next/rotated
-            rm -f $metadata.$next/created
           else
             echo "Debug: skipping rotation of $dir.$i because $dir.$next already exists."
           fi
@@ -518,7 +517,6 @@ function rotate_long_remote {
             $nice mv \$dir.\$i \$dir.\$next
             mkdir -p \$metadata.\$next
             date +%c%n%s > \$metadata.\$next/rotated
-            rm -f \$metadata.\$next/created
           else
             echo "Debug: skipping rotation of \$dir.\$i because \$dir.\$next already exists."
           fi
