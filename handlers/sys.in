@@ -649,8 +649,11 @@ function doLvmBackup () {
    debug "$VGS --options vg_name --noheadings | @SED@ 's/^[ ]*//' | @SED@ 's/[ ]*$//' | tr '\n' ' '"
    vgs=`$VGS --options vg_name --noheadings | @SED@ 's/^[ ]*//' | @SED@ 's/[ ]*$//' | tr '\n' ' '`
    debug "Let's try to backup LVM metadata for detected volume groups: $vgs"
-   debug "$VGCFGBACKUP --file \"${lvmdir}\"/\'%s\' $vgs"
-   output=`$VGCFGBACKUP --file "${lvmdir}"/'%s' $vgs`
+   for vg in $vgs
+   do
+      debug "$VGCFGBACKUP --file \"${lvmdir}\"/\'%s\' $vg"
+      output=`$VGCFGBACKUP --file "${lvmdir}"/'%s' $vg`
+   done
    exit_code=$?
    debug $output
    case $exit_code in
