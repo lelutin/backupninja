@@ -7,6 +7,8 @@ version 0.9.9 -- UNRELEASED
 	 . Support reading include/exclude patterns from files using the
 	   "include @/etc/backup_includes" syntax (Closes Roundup bug
 	   #2370). Thanks to ale for the patch.
+	rsync:
+	 . Fix long rotation.
 
 version 0.9.8 -- September 12, 2010
     backupninja changes
