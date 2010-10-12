@@ -6,6 +6,8 @@ version 0.9.9 -- UNRELEASED
 	dup:
 	 . Use --tempdir option rather than TMPDIR environment variable.
 	   (Closes Roundup bug #598)
+	 . Remove support for duplicity < 0.4.4. Even etch-backports has
+	   a newer one.
 	postgresql:
 	 . Support various pg_dump formats in addition to pg_dumpall.
 	   Thanks to Jacob Anawalt <jlanawalt@gmail.com> for the patch.
