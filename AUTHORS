@@ -36,3 +36,4 @@ maniacmartin <martin@maniacmartin.com> -- rdiff confusing error message fix
 Chris Nolan <chris@cenolan.com> -- maildir subdirectory expansion
 Dan Carley -- mysql bugfix
 Jordi Mallach <jordi@debian.org> -- do not error when no jobs are configured
+Jacob Anawalt <jlanawalt@gmail.com> -- pg_dump format option
