@@ -2,7 +2,7 @@
 # vim: set filetype=sh sw=3 sts=3 expandtab autoindent:
 #
 # duplicity script for backupninja
-# requires duplicity >= 0.4.4
+# requires duplicity >= 0.4.4, and >= 0.4.9 when using a custom tmpdir.
 #
 
 getconf options
