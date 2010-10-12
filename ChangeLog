@@ -3,6 +3,10 @@ version 0.9.9 -- UNRELEASED
 	 . Do not error out when no job is configured. Thanks to Jordi Mallach
 	   <jordi@debian.org> for the patch (Closes: #597684)
     handler changes
+	postgresql:
+	 . Support various pg_dump formats in addition to pg_dumpall.
+	   Thanks to Jacob Anawalt <jlanawalt@gmail.com> for the patch.
+	   (Closes Roundup bug #2534)
 	rdiff:
 	 . Support reading include/exclude patterns from files using the
 	   "include @/etc/backup_includes" syntax (Closes Roundup bug
