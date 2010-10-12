@@ -8,6 +8,8 @@ getconf backupdir /var/backups/postgres
 getconf databases all
 getconf compress yes
 getconf vsname
+# format maps to pg_dump --format= option, old/default was plain
+getconf format plain
 
 localhost=`hostname`
 
@@ -35,17 +37,31 @@ fi
 # Make sure that the system to backup has the needed executables
 if [ $usevserver = yes ]; then
    debug "Examining vserver '$vsname'."
-   if [ "$databases" == "all" ]; then
+   if [ "$databases" == "all" ] && [ "$format" = "plain" ]; then
       [ -x "$vroot`$VSERVER $vsname exec which $PGSQLDUMPALL`" ] || \
          fatal "Can't find $PGSQLDUMPALL in vserver $vsname."
+   elif [ "$format" != "plain" ]; then
+      [ -x "$vroot`$VSERVER $vsname exec which $PGSQLDUMPALL`" ] || \
+         fatal "Can't find $PGSQLDUMPALL in vserver $vsname."
+      [ -x "$vroot`$VSERVER $vsname exec which $PGSQLDUMP`" ] || \
+         fatal "Can't find $PGSQLDUMP in vserver $vsname."
+      [ -x "$vroot`$VSERVER $vsname exec which $PSQL`" ] || \
+         fatal "Can't find $PSQL in vserver $vsname."
    else
       [ -x "$vroot`$VSERVER $vsname exec which $PGSQLDUMP`" ] || \
          fatal "Can't find $PGSQLDUMP in vserver $vsname."
    fi
 else
-   if [ "$databases" == "all" ]; then
+   if [ "$databases" == "all" ] && [ "$format" = "plain" ]; then
       [ -x "`which $PGSQLDUMPALL`" ] || \
          fatal "Can't find $PGSQLDUMPALL."
+   elif [ "$format" != "plain" ]; then
+      [ -x "`which $PGSQLDUMPALL`" ] || \
+         fatal "Can't find $PGSQLDUMPALL."
+      [ -x "`which $PGSQLDUMP`" ] || \
+         fatal "Can't find $PGSQLDUMP."
+      [ -x "`which $PSQL`" ] || \
+         fatal "Can't find $PSQL."
    else
       [ -x "`which $PGSQLDUMP`" ] || \
          fatal "Can't find $PGSQLDUMP."
@@ -70,6 +86,30 @@ debug "chown $pguid $vroot$backupdir"
 chown $pguid $vroot$backupdir
 debug "chmod 700 $vroot$backupdir"
 chmod 700 $vroot$backupdir
+
+
+# If we are using the custom (best) or tar pg_dump format, and
+# dumping "all" databases, we will substitute "all" for a list
+# of all non-template databases to avoid the use of pg_dumpall.
+dumpglobals="no"
+if [ "$databases" = "all" ] && [ "$format" != "plain" ]; then
+   cmdprefix=""
+   if [ "$usevserver" = "yes" ]; then
+      	cmdprefix="$VSERVER $vsname exec "
+   fi
+   execstr="${cmdprefix} su - $PGSQLUSER -c 'psql -AtU $PGSQLUSER -c \"SELECT datname FROM pg_database WHERE NOT datistemplate\"'"
+   debug execstr
+   dblist=""
+   for db in $(eval $execstr 2>&1); do
+      dblist="$dblist $db"
+   done
+   if [ "$dblist" != "" ]; then
+      databases="$dblist"
+   fi
+   # Dump globals (pg_dumpall -g) for roles and tablespaces
+   dumpglobals="yes"
+fi
+
 
 # if $databases = all, use pg_dumpall
 if [ "$databases" == "all" ]; then
@@ -101,19 +141,57 @@ if [ "$databases" == "all" ]; then
 
 # else use pg_dump on each specified database
 else
-   for db in $databases; do
-      if [ $usevserver = yes ]; then
-         if [ "$compress" == "yes" ]; then
-            execstr="$VSERVER $vsname exec su - $PGSQLUSER -c \"set -o pipefail ; $PGSQLDUMP $db | $GZIP $GZIP_OPTS > '$backupdir/${db}.sql.gz'\""
-         else
-            execstr="$VSERVER $vsname exec su - $PGSQLUSER -c \"$PGSQLDUMP $db | > '$backupdir/${db}.sql'\""
-         fi
+   # If we're not doing plain format, database=all may now be database=list
+   # so we track the database=all selection in dumpglobals which tells us
+   # to also dump the roles and tablespaces via pg_dumpall -g
+   if [ "$dumpglobals" = "yes" ]; then
+      globalscmd=""
+      if [ "$compress" == "yes" ]; then
+         globalscmd="set -o pipefail ; $PGSQLDUMPALL -g | $GZIP $GZIP_OPTS > '$backupdir/globals.sql.gz'"
       else
-         if [ "$compress" == "yes" ]; then
-            execstr="su - $PGSQLUSER -c \"set -o pipefail ; $PGSQLDUMP $db | $GZIP $GZIP_OPTS > '$backupdir/${db}.sql.gz'\""
+         globalscmd="$PGSQLDUMPALL -g > '$backupdir/globals.sql'"
+      fi
+      if [ $usevserver = yes ]; then
+         execstr="$VSERVER $vsname exec su - $PGSQLUSER -c \"$globalscmd\""
+      else
+         execstr="su - $PGSQLUSER -c \"$globalscmd\""
+      fi
+      debug "$execstr"
+      if [ ! $test ]; then
+         output=`eval $execstr 2>&1`
+         code=$?
+         if [ "$code" == "0" ]; then
+            debug $output
+            info "Successfully finished pgsql globals (roles and tablespaces) dump"
          else
-            execstr="su - $PGSQLUSER -c \"$PGSQLDUMP $db > '$backupdir/${db}.sql'\""
+            warning $output
+            warning "Failed to dump pgsql globals (roles and tablespaces)"
          fi
+      fi
+   fi
+   for db in $databases; do
+      dumpext=".sql"
+      if [ "$format" != "plain" ]; then
+         dumpext="pg_dump"
+      fi
+      # To better support the backupninja global GZIP and rsync-friendly GZIP_OPTS
+      # the custom archive format is told to disable compression. The plain format
+      # is uncompressed by default and the tar format doesn't support pg_dump compression.
+      disablecustomcompress=""
+      if [ "$format" = "custom" ]; then
+         disablecustomcompress="--compress=0"
+      fi
+      dumpcmd=""
+      globalscmd=""
+      if [ "$compress" == "yes" ]; then
+         dumpcmd="set -o pipefail ; $PGSQLDUMP --format=$format ${disablecustomcompress} $db | $GZIP $GZIP_OPTS > '$backupdir/${db}.${dumpext}.gz'"
+      else
+         dumpcmd="$PGSQLDUMP --format=$format ${disablecustomcompress} $db | > '$backupdir/${db}.${dumpext}'"
+      fi
+      if [ $usevserver = yes ]; then
+         execstr="$VSERVER $vsname exec su - $PGSQLUSER -c \"$dumpcmd\""
+      else
+         execstr="su - $PGSQLUSER -c \"$dumpcmd\""
       fi
       debug "$execstr"
       if [ ! $test ]; then

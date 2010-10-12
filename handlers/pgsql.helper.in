@@ -67,6 +67,21 @@ pgsql_wizard() {
       pgsql_compress="compress = no"
    fi
 
+   # pg_dump format, defaults to plain, custom is recommended by PostgreSQL
+   menuBox "$pgsql_title" "Choose a pg_dump format:" \
+      plain "Default plain-text sql script, use with psql." \
+      tar "More flexible than the plain, use with pg_restore." \
+      custom "The most flexible format, use with pg_restore."
+   if [ $? = 0 ]; then
+      result="$REPLY"
+      case "$result" in
+         "tar") pgsql_format="format = tar";;
+         "custom") pgsql_format="format = custom";;
+         *) pgsql_format = "format = plain";;
+      esac
+   fi
+         
+
    # write config file
    get_next_filename $configdirectory/20.pgsql
    cat >> $next_filename <<EOF
@@ -97,7 +112,22 @@ $pgsql_databases
 # if yes, compress the pg_dump/pg_dumpall output.
 $pgsql_compress
 
+# format = < plain | tar | custom > (default = plain)
+# plain -  Output a plain-text SQL script file with the extension .sql.
+#          When dumping all databases, a single file is created via pg_dumpall.
+# tar -    Output a tar archive suitable for input into pg_restore. More 
+#          flexible than plain and can be manipulated by standard Unix tools 
+#          such as tar. Creates a globals.sql file and an archive per database.
+# custom - Output a custom PostgreSQL pg_restore archive. This is the most
+#          flexible format allowing selective import and reordering of database
+#          objects at the time the database is restored via pg_restore. This
+#          option creates a globals.sql file containing the cluster role and
+#          other information dumped by pg_dumpall -g and a pg_restore file
+#          per selected database. See the pg_dump and pg_restore man pages.
+$pgsql_format
+
 ### You can also set the following variables in backupninja.conf:
+# PSQL: psql path (default: /usr/bin/psql)
 # PGSQLDUMP: pg_dump path (default: /usr/bin/pg_dump)
 # PGSQLDUMPALL: pg_dumpall path (default: /usr/bin/pg_dumpall)
 # PGSQLUSER: user running PostgreSQL (default: postgres)

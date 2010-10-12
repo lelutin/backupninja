@@ -83,6 +83,7 @@ vservers = no
 # MYSQL=/usr/bin/mysql
 # MYSQLHOTCOPY=/usr/bin/mysqlhotcopy
 # MYSQLDUMP=/usr/bin/mysqldump
+# PSQL=/usr/bin/psql
 # PGSQLDUMP=/usr/bin/pg_dump
 # PGSQLDUMPALL=/usr/bin/pg_dumpall
 # GZIP=/bin/gzip

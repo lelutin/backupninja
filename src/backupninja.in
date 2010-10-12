@@ -476,6 +476,7 @@ getconf MYSQLADMIN /usr/bin/mysqladmin
 getconf MYSQL /usr/bin/mysql
 getconf MYSQLHOTCOPY /usr/bin/mysqlhotcopy
 getconf MYSQLDUMP /usr/bin/mysqldump
+getconf PSQL /usr/bin/psql
 getconf PGSQLDUMP /usr/bin/pg_dump
 getconf PGSQLDUMPALL /usr/bin/pg_dumpall
 getconf PGSQLUSER postgres
