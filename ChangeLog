@@ -18,7 +18,9 @@ version 0.9.9 -- UNRELEASED
 	   #2370). Thanks to ale for the patch.
 	rsync:
 	 . Fix long rotation.
-
+	sys:
+	 . Route around broken vgcfgbackup not able to handle multiple VG arguments
+	
 version 0.9.8 -- September 12, 2010
     backupninja changes
 	 . Added GZIP_OPTS option, defaulting to --rsyncable, so that this
