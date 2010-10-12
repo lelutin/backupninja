@@ -3,6 +3,9 @@ version 0.9.9 -- UNRELEASED
 	 . Do not error out when no job is configured. Thanks to Jordi Mallach
 	   <jordi@debian.org> for the patch (Closes: #597684)
     handler changes
+	dup:
+	 . Use --tempdir option rather than TMPDIR environment variable.
+	   (Closes Roundup bug #598)
 	postgresql:
 	 . Support various pg_dump formats in addition to pg_dumpall.
 	   Thanks to Jacob Anawalt <jlanawalt@gmail.com> for the patch.

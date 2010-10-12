@@ -185,7 +185,6 @@ if [ "$duplicity_major" -ge 0 -a "$duplicity_minor" -ge 6 -a "$duplicity_sub" -g
 fi
 
 ### Temporary directory
-precmd=
 if [ -n "$tmpdir" ]; then
    if [ ! -d "$tmpdir" ]; then
       info "Temporary directory ($tmpdir) does not exist, creating it."
@@ -194,7 +193,7 @@ if [ -n "$tmpdir" ]; then
       chmod 0700 "$tmpdir"
    fi
    info "Using $tmpdir as TMPDIR"
-   precmd="${precmd}TMPDIR=$tmpdir "
+   execstr_options="${execstr_options} --tempdir '$tmpdir'"
 fi
 
 ### Archive directory
@@ -270,13 +269,13 @@ fi
 
 # cleanup
 if [ "$duplicity_major" -ge 0 -a "$duplicity_minor" -ge 4 -a "$duplicity_sub" -ge 4 ]; then
-   debug "$precmd duplicity cleanup --force $execstr_options $execstr_serverpart"
+   debug "duplicity cleanup --force $execstr_options $execstr_serverpart"
    if [ ! $test ]; then
       export PASSPHRASE=$password
       export FTP_PASSWORD=$ftp_password
       output=`nice -n $nicelevel \
          su -c \
-         "$precmd duplicity cleanup --force $execstr_options $execstr_serverpart 2>&1"`
+         "duplicity cleanup --force $execstr_options $execstr_serverpart 2>&1"`
       exit_code=$?
       if [ $exit_code -eq 0 ]; then
          debug $output
@@ -291,13 +290,13 @@ fi
 # remove-older-than
 if [ "$keep" != "yes" ]; then
    if [ "$duplicity_major" -ge 0 -a "$duplicity_minor" -ge 4 -a "$duplicity_sub" -ge 4 ]; then
-      debug "$precmd duplicity remove-older-than $keep --force $execstr_options $execstr_serverpart"
+      debug "duplicity remove-older-than $keep --force $execstr_options $execstr_serverpart"
       if [ ! $test ]; then
          export PASSPHRASE=$password
          export FTP_PASSWORD=$ftp_password
          output=`nice -n $nicelevel \
                    su -c \
-                      "$precmd duplicity remove-older-than $keep --force $execstr_options $execstr_serverpart 2>&1"`
+                      "duplicity remove-older-than $keep --force $execstr_options $execstr_serverpart 2>&1"`
          exit_code=$?
          if [ $exit_code -eq 0 ]; then
             debug $output
@@ -311,14 +310,14 @@ if [ "$keep" != "yes" ]; then
 fi
 
 ### Backup command
-debug "$precmd duplicity $execstr_command $execstr_options $execstr_source --exclude '**' / $execstr_serverpart"
+debug "duplicity $execstr_command $execstr_options $execstr_source --exclude '**' / $execstr_serverpart"
 if [ ! $test ]; then
    outputfile=`maketemp backupout`
    export PASSPHRASE=$password
    export FTP_PASSWORD=$ftp_password
    output=`nice -n $nicelevel \
              su -c \
-                "$precmd duplicity $execstr_command $execstr_options $execstr_source --exclude '**' / $execstr_serverpart >$outputfile 2>&1"`
+                "duplicity $execstr_command $execstr_options $execstr_source --exclude '**' / $execstr_serverpart >$outputfile 2>&1"`
    exit_code=$?
    debug $output
    cat $outputfile | (while read output ; do
