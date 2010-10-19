@@ -170,7 +170,7 @@ else
       fi
    fi
    for db in $databases; do
-      dumpext=".sql"
+      dumpext="sql"
       if [ "$format" != "plain" ]; then
          dumpext="pg_dump"
       fi
