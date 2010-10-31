@@ -1,4 +1,4 @@
-version 0.9.8.1 -- UNRELEASED
+version 0.9.8.1 -- October 31, 2010 (boo!)
     backupninja changes
 	 . Do not error out when no job is configured. Thanks to Jordi Mallach
 	   <jordi@debian.org> for the patch (Closes: #597684)
