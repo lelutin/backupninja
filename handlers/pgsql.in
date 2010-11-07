@@ -115,13 +115,13 @@ fi
 if [ "$databases" == "all" ]; then
    if [ $usevserver = yes ]; then
       if [ "$compress" == "yes" ]; then
-         execstr="$VSERVER $vsname exec su - $PGSQLUSER -c \"set -o pipefail ; $PGSQLDUMPALL | $GZIP $GZIP_OPTS > '$backupdir/${vsname}.sql.gz'\""
+         execstr="$VSERVER $vsname exec su - $PGSQLUSER -s /bin/bash -c \"set -o pipefail ; $PGSQLDUMPALL | $GZIP $GZIP_OPTS > '$backupdir/${vsname}.sql.gz'\""
       else
          execstr="$VSERVER $vsname exec su - $PGSQLUSER -c \"$PGSQLDUMPALL > '$backupdir/${vsname}.sql'\""
       fi
    else
       if [ "$compress" == "yes" ]; then
-         execstr="su - $PGSQLUSER -c \"set -o pipefail ; $PGSQLDUMPALL | $GZIP $GZIP_OPTS > '$backupdir/${localhost}-all.sql.gz'\""
+         execstr="su - $PGSQLUSER -s /bin/bash -c \"set -o pipefail ; $PGSQLDUMPALL | $GZIP $GZIP_OPTS > '$backupdir/${localhost}-all.sql.gz'\""
       else
          execstr="su - $PGSQLUSER -c \"$PGSQLDUMPALL > '$backupdir/${localhost}-all.sql'\""
       fi
@@ -152,9 +152,9 @@ else
          globalscmd="$PGSQLDUMPALL -g > '$backupdir/globals.sql'"
       fi
       if [ $usevserver = yes ]; then
-         execstr="$VSERVER $vsname exec su - $PGSQLUSER -c \"$globalscmd\""
+         execstr="$VSERVER $vsname exec su - $PGSQLUSER -s /bin/bash -c \"$globalscmd\""
       else
-         execstr="su - $PGSQLUSER -c \"$globalscmd\""
+         execstr="su - $PGSQLUSER -s /bin/bash -c \"$globalscmd\""
       fi
       debug "$execstr"
       if [ ! $test ]; then
@@ -189,9 +189,9 @@ else
          dumpcmd="$PGSQLDUMP --format=$format ${disablecustomcompress} $db | > '$backupdir/${db}.${dumpext}'"
       fi
       if [ $usevserver = yes ]; then
-         execstr="$VSERVER $vsname exec su - $PGSQLUSER -c \"$dumpcmd\""
+         execstr="$VSERVER $vsname exec su - $PGSQLUSER -s /bin/bash -c \"$dumpcmd\""
       else
-         execstr="su - $PGSQLUSER -c \"$dumpcmd\""
+         execstr="su - $PGSQLUSER -s /bin/bash -c \"$dumpcmd\""
       fi
       debug "$execstr"
       if [ ! $test ]; then

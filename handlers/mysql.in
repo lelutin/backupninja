@@ -303,7 +303,7 @@ then
       debug "su $user -c \"$execstr\""
       if [ ! $test ]
       then
-         output=`su $user -c "set -o pipefail ; $execstr" 2>&1`
+         output=`su $user -s /bin/bash -c "set -o pipefail ; $execstr" 2>&1`
          code=$?
          if [ "$code" == "0" ]
          then

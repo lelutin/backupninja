@@ -8,10 +8,17 @@ version 0.9.9 -- UNRELEASED
 	   (Closes Roundup bug #598)
 	 . Remove support for duplicity < 0.4.4. Even etch-backports has
 	   a newer one.
+	ldap:
+	 . Fix reliance on bash for pipefail.
+	mysql:
+	 . Fix reliance on bash for pipefail.
+	   Thanks to Sergio Talens-Oliag <sto@debian.org> for the patch.
+	   (Closes: #602374)
 	postgresql:
 	 . Support various pg_dump formats in addition to pg_dumpall.
 	   Thanks to Jacob Anawalt <jlanawalt@gmail.com> for the patch.
 	   (Closes Roundup bug #2534)
+	 . Fix reliance on bash for pipefail.
 	rdiff:
 	 . Support reading include/exclude patterns from files using the
 	   "include @/etc/backup_includes" syntax (Closes Roundup bug
