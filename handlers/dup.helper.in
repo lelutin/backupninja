@@ -427,6 +427,13 @@ increments = $dup_increments
 keep = $dup_keep
 
 # for how many full backups do we keep their later increments ;
+# default is 6.
+# increments for older full backups will be deleted : only the more
+# recent ones will be kept
+#keepincrofulls = 6
+keepincrofulls = $dup_keepincroffulls
+
+# for how many full backups do we keep their later increments ;
 # default is all (keep all increments).
 # increments for older full backups will be deleted : only the more
 # recent ones (count provided) will be kept
