@@ -419,10 +419,10 @@ incremental = $dup_incremental
 #increments = keep
 increments = $dup_increments
 
-# how many days of data to keep ; default is 60 days.
+# how many days of data to keep ; default is 1 year.
 # (you can also use the time format of duplicity)
 # 'keep = yes' means : do not delete old data, the remote host will take care of this
-#keep = 60
+#keep = 1Y
 #keep = yes
 keep = $dup_keep
 

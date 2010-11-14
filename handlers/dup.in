@@ -25,8 +25,13 @@ getconf exclude
 setsection dest
 getconf incremental yes
 getconf increments 30
+<<<<<<< HEAD
 getconf keep 60
 getconf keepincroffulls all
+=======
+getconf keep 1Y
+getconf keepincroffulls 6
+>>>>>>> Now that there's some removal of increments for old fulls, we can keep fulls for a longer time, for instance 1Y which becomes default
 getconf desturl
 getconf awsaccesskeyid
 getconf awssecretaccesskey
