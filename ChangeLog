@@ -11,6 +11,9 @@ version 0.9.9 -- UNRELEASED
 	   (Closes Roundup bug #598)
 	 . Remove support for duplicity < 0.4.4. Even etch-backports has
 	   a newer one.
+   	 . Now support remove-all-but-n-full command for duplicity >=
+	   0.9.10 to allow removal of increments for older full backups
+           (Closes #2492)
 	ldap:
 	 . Fix reliance on bash for pipefail.
 	mysql:

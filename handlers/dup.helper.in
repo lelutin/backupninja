@@ -124,6 +124,7 @@ do_dup_dest() {
         formItem "keep" "$dup_keep"
         formItem "incremental" "$dup_incremental"
         formItem "increments" "$dup_increments"
+        formItem "keepincroffulls" "$dup_keepincroffulls"
         formItem "bandwidthlimit" "$dup_bandwidth"
         formItem "sshoptions" "$dup_sshoptions"
       formDisplay
@@ -141,8 +142,9 @@ do_dup_dest() {
       dup_keep=${thereply[3]}
       dup_incremental=${thereply[4]}
       dup_increments=${thereply[5]}
-      dup_bandwidth=${thereply[6]}
-      dup_sshoptions=${thereply[7]}
+      dup_keepincroffulls=${thereply[6]}
+      dup_bandwidth=${thereply[7]}
+      dup_sshoptions=${thereply[8]}
 
    done
    set +o noglob
@@ -423,6 +425,14 @@ increments = $dup_increments
 #keep = 60
 #keep = yes
 keep = $dup_keep
+
+# for how many full backups do we keep their later increments ;
+# default is all (keep all increments).
+# increments for older full backups will be deleted : only the more
+# recent ones (count provided) will be kept
+#keepincrofulls = all
+#keepincrofulls = 6
+keepincrofulls = $dup_keepincroffulls
 
 # full destination URL, in duplicity format; if set, desturl overrides
 # sshoptions, destdir, desthost and destuser; it also disables testconnect and
