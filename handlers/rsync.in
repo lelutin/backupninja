@@ -413,6 +413,9 @@ function rotate_long {
             $nice mv $dir.$i $dir.$next
             mkdir -p $metadata.$next
             date +%c%n%s > $metadata.$next/rotated
+            if [ -f $metadata.$i/created ]; then
+              $nice mv $metadata.$i/created $metadata.$next
+            fi
           else
             echo "Debug: skipping rotation of $dir.$i because $dir.$next already exists."
           fi
@@ -429,6 +432,9 @@ function rotate_long {
     $nice mv $backuproot/daily.$max $backuproot/weekly.1
     mkdir -p $backuproot/metadata/weekly.1
     date +%c%n%s > $backuproot/metadata/weekly.1/rotated
+    #if [ -f $backuproot/metadata/daily.$max/created  ]; then
+    #   $nice mv $backuproot/metadata/daily.$max/created $backuproot/metadata/weekly.1/
+    #fi
   fi
 
   max=$((keepweekly+1))
@@ -437,6 +443,9 @@ function rotate_long {
     $nice mv $backuproot/weekly.$max $backuproot/monthly.1
     mkdir -p $backuproot/metadata/monthly.1
     date +%c%n%s > $backuproot/metadata/monthly.1/rotated
+    #if [ -f $backuproot/metadata/weekly.$max/created  ]; then
+    #   $nice mv $backuproot/metadata/weekly.$max/created $backuproot/metadata/weekly.1/
+    #fi
   fi
 
   for rottype in daily weekly monthly; do
@@ -514,6 +523,9 @@ function rotate_long_remote {
             $nice mv \$dir.\$i \$dir.\$next
             mkdir -p \$metadata.\$next
             date +%c%n%s > \$metadata.\$next/rotated
+            if [ -f \$metadata.\$i/created ]; then
+              $nice mv \$metadata.\$i/created \$metadata.\$next
+            fi
           else
             echo "Debug: skipping rotation of \$dir.\$i because \$dir.\$next already exists."
           fi
@@ -530,6 +542,9 @@ function rotate_long_remote {
     $nice mv $backuproot/daily.\$max $backuproot/weekly.1
     mkdir -p $backuproot/metadata/weekly.1
     date +%c%n%s > $backuproot/metadata/weekly.1/rotated
+    #if [ -f $backuproot/metadata/daily.\$max/created  ]; then
+    #   $nice mv $backuproot/metadata/daily.\$max/created $backuproot/metadata/weekly.1/
+    #fi
   fi
 
   max=\$((keepweekly+1))
@@ -538,6 +553,9 @@ function rotate_long_remote {
     $nice mv $backuproot/weekly.\$max $backuproot/monthly.1
     mkdir -p $backuproot/metadata/monthly.1
     date +%c%n%s > $backuproot/metadata/monthly.1/rotated
+    #if [ -f $backuproot/metadata/weekly.\$max/created  ]; then
+    #   $nice mv $backuproot/metadata/weekly.\$max/created $backuproot/metadata/weekly.1/
+    #fi
   fi
 
   for rottype in daily weekly monthly; do
