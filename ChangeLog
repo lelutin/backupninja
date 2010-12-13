@@ -1,7 +1,4 @@
 version 0.9.9 -- UNRELEASED
-    backupninja changes
-	 . Do not error out when no job is configured. Thanks to Jordi Mallach
-	   <jordi@debian.org> for the patch (Closes: #597684)
     handler changes
 	dup:
 	 . Use --tempdir option rather than TMPDIR environment variable.
@@ -25,13 +22,19 @@ version 0.9.9 -- UNRELEASED
 	   #2370). Thanks to ale for the patch.
 	rsync:
 	 . Fix long rotation.
-	sys:
-	 . Route around broken vgcfgbackup not able to handle multiple VG arguments
     helper changes
 	dup:
 	 . Fix separate signing key usecase. Thanks to Ian Beckwith for
 	   the patch.
-	
+
+version 0.9.8.1 -- October 31, 2010 (boo!)
+    backupninja changes
+	 . Do not error out when no job is configured. Thanks to Jordi Mallach
+	   <jordi@debian.org> for the patch (Closes: #597684)
+    handler changes
+	sys:
+	 . Route around broken vgcfgbackup not able to handle multiple VG arguments
+
 version 0.9.8 -- September 12, 2010
     backupninja changes
 	 . Added GZIP_OPTS option, defaulting to --rsyncable, so that this
