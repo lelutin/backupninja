@@ -27,6 +27,10 @@ version 0.9.9 -- UNRELEASED
 	 . Fix long rotation.
 	sys:
 	 . Route around broken vgcfgbackup not able to handle multiple VG arguments
+    helper changes
+	dup:
+	 . Fix separate signing key usecase. Thanks to Ian Beckwith for
+	   the patch.
 	
 version 0.9.8 -- September 12, 2010
     backupninja changes

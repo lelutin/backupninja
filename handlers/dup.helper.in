@@ -179,7 +179,7 @@ do_dup_gpg_signkey() {
       dup_gpg_onekeypair=no
    fi
 
-   if [ "$dup_gpg_onekeypair" == "no" }; then
+   if [ "$dup_gpg_onekeypair" == "no" ]; then
       # signkey ?
       REPLY=
       while [ -z "$REPLY" -o -z "$dup_gpg_signkey" ]; do
