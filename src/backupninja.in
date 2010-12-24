@@ -313,23 +313,47 @@ function process_action() {
    debug $run
    [ "$run" == "no" ] && return
 
-   let "actions_run += 1"
+   # Prepare for lock creation
+   if [ ! -d /var/lock/backupninja ]; then
+      mkdir /var/lock/backupninja
+   fi
+   lockfile=`echo $file | @SED@ 's,/,_,g'`
+   lockfile=/var/lock/backupninja/$lockfile
 
-   # call the handler:
    local bufferfile=`maketemp backupninja.buffer`
    echo "" > $bufferfile
-   echo_debug_msg=1
+
+   # start locked section : avoid concurrent execution of the same backup
+   # uses a construct specific to shell scripts with flock. See man flock for details
    (
-      . $scriptdirectory/$suffix $file
-   ) 2>&1 | (
-      while read a; do
-         echo $a >> $bufferfile
-         [ $debug ] && colorize "$a"
-      done
-   )
-   retcode=$?
-   # ^^^^^^^^ we have a problem! we can't grab the return code "$?". grrr.
-   echo_debug_msg=0
+       debug "executing handler in locked section controlled by $lockfile"
+       flock -x -w 5 200
+       # if all is good, we acquired the lock
+       if [ $? -eq 0 ]; then
+
+	   let "actions_run += 1"
+
+           # call the handler:
+	   echo_debug_msg=1
+	   (
+	       . $scriptdirectory/$suffix $file
+	   ) 2>&1 | (
+	       while read a; do
+		   echo $a >> $bufferfile
+		   [ $debug ] && colorize "$a"
+	       done
+	   )
+	   retcode=$?
+           # ^^^^^^^^ we have a problem! we can't grab the return code "$?". grrr.
+	   echo_debug_msg=0
+
+       else
+	   # a backup is probably ongoing already, so display an error message
+	   debug "failed to acquire lock"
+	   echo "Fatal: Could not acquire lock $lockfile. A backup is probably already running for $file." >>$bufferfile
+       fi
+   ) 200> $lockfile
+   # end of locked section
 
    _warnings=`cat $bufferfile | grep "^Warning: " | wc -l`
    _errors=`cat $bufferfile | grep "^Error: " | wc -l`
@@ -339,6 +363,7 @@ function process_action() {
 
    ret=`grep "\(^Info: \|^Warning: \|^Error: \|^Fatal: \|Halt: \)" $bufferfile`
    rm $bufferfile
+
    if [ $_halts != 0 ]; then
       msg "*halt* -- $file"
       errormsg="$errormsg\n== halt request from $file==\n\n$ret\n"
