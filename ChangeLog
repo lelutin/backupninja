@@ -1,4 +1,8 @@
 version 0.9.9 -- UNRELEASED
+    backupninja changes
+	 . Use locking to avoid running concurrent instances of the same backup
+	   action. Thanks to Olivier Berger <oberger@ouvaton.org> for the patch.
+	   (Closes: #511300)
     handler changes
 	dup:
 	 . Use --tempdir option rather than TMPDIR environment variable.
