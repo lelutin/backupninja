@@ -203,7 +203,7 @@ exclude = /var/cache/backupninja/duplicity
 ## warning: sftp does not support all scp options, especially -i; as
 ## a workaround, you can use "-o <SSHOPTION>"
 ## an example setting would be:
-## sshoptions = -o IdentityFile=/root/.ssh/id_dsa_duplicity
+## sshoptions = -o IdentityFile=/root/.ssh/id_rsa_duplicity
 ##
 ## Default:
 # sshoptions = 

@@ -32,6 +32,8 @@ version 0.9.9 -- UNRELEASED
 	   the patch.
 	rdiff:
 	 . Generate 4096 bits RSA keys.
+    documentation changes
+	 . Recommend using 4096 bits RSA keys everywhere.
 
 version 0.9.8.1 -- October 31, 2010 (boo!)
     backupninja changes

@@ -201,8 +201,8 @@ In order for rdiff-backup to sync files over ssh unattended, you must
 create ssh keys on the source server and copy the public key to the
 remote user's authorized keys file. For example:
 
-  root@srchost# ssh-keygen -t dsa
-  root@srchost# ssh-copy-id -i /root/.ssh/id_dsa.pub backup@desthost 
+  root@srchost# ssh-keygen -t rsa -b 4096
+  root@srchost# ssh-copy-id -i /root/.ssh/id_rsa.pub backup@desthost
 
 Now, you should be able to ssh from user 'root' on srchost to
 user 'backup' on desthost without specifying a password.

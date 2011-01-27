@@ -104,7 +104,7 @@ Then, vital parts of the file system, including /var/backups, are nightly pushed
 .TP
 In order for this to work (ie for diff-backup to run unattended), you must create ssh keys on the source server and copy the public key to the remote user's authorized keys file. For example:
 .br
-root@srchost# ssh-keygen -t dsa
+root@srchost# ssh-keygen -t rsa -b 4096
 .br
 root@srchost# ssh-copy-id -i /root/.ssh/id_dsa.pub backup@desthost
 .TP
