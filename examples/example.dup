@@ -191,9 +191,9 @@ exclude = /var/cache/backupninja/duplicity
 ## Default:
 # ftp_password = 
 
-## bandwith limit, in kbit/s ; default is 0, i.e. no limit
+## bandwith limit, in Kbit/s ; default is 0, i.e. no limit
 ## if using 'desturl' above, 'bandwidthlimit' must not be set
-## an example setting of 128 kbps would be:
+## an example setting of 128 Kbit/s would be:
 ## bandwidthlimit = 128
 ##
 ## Default:

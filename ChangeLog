@@ -26,10 +26,12 @@ version 0.9.9 -- UNRELEASED
 	   #2370). Thanks to ale for the patch.
 	rsync:
 	 . Fix long rotation.
+	 . Make units clearer (Closes Redmine bug #2737)
     helper changes
 	dup:
 	 . Fix separate signing key usecase. Thanks to Ian Beckwith for
 	   the patch.
+	 . Make units clearer (Closes Redmine bug #2737)
 	rdiff:
 	 . Generate 4096 bits RSA keys.
     documentation changes
