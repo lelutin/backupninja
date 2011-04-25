@@ -51,7 +51,7 @@ fi
 
 ### VServers
 # If vservers are configured, check that the ones listed in $vsnames do exist.
-local usevserver=no
+usevserver=no
 if [ $vservers_are_available = yes ]; then
    if [ "$vsnames" = all ]; then
       vsnames="$found_vservers"

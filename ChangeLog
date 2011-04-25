@@ -4,6 +4,8 @@ version 0.9.9 -- UNRELEASED
 	   action. Thanks to Olivier Berger <oberger@ouvaton.org> for the patch.
 	   (Closes: #511300)
     handler changes
+	all handlers:
+	 . Stop using "local VAR" outside functions. (Closes: #530647)
 	dup:
 	 . Use --tempdir option rather than TMPDIR environment variable.
 	   (Closes Roundup bug #598)

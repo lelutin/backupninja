@@ -24,8 +24,8 @@ getconf configfile /etc/mysql/debian.cnf
 
 # Decide if the handler should operate on a vserver or on the host.
 # In the former case, check that $vsname exists and is running.
-local usevserver=no
-local vroot
+usevserver=no
+vroot=''
 if [ $vservers_are_available = yes ]; then
    if [ -n "$vsname" ]; then
       # does it exist ?
