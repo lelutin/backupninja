@@ -164,6 +164,14 @@ exclude = /var/cache/backupninja/duplicity
 ## Default:
 # keep = 60
 
+# for how many full backups do we keep their later increments ;
+# default is all (keep all increments).
+# increments for older full backups will be deleted : only the more
+# recent ones (count provided) will be kept
+#
+## Default:
+# keepincroffulls = all
+
 ## full destination URL, in duplicity format; if set, desturl overrides
 ## sshoptions, destdir, desthost and destuser; it also disables testconnect and
 ## bandwithlimit. For details, see duplicity manpage, section "URL FORMAT", some
