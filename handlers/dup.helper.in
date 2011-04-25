@@ -419,27 +419,21 @@ incremental = $dup_incremental
 #increments = keep
 increments = $dup_increments
 
-# how many days of data to keep ; default is 1 year.
+# how many days of data to keep ; default is 60 days.
 # (you can also use the time format of duplicity)
 # 'keep = yes' means : do not delete old data, the remote host will take care of this
+#keep = 60
 #keep = 1Y
 #keep = yes
 keep = $dup_keep
 
 # for how many full backups do we keep their later increments ;
-# default is 6.
-# increments for older full backups will be deleted : only the more
-# recent ones will be kept
-#keepincrofulls = 6
-keepincrofulls = $dup_keepincroffulls
-
-# for how many full backups do we keep their later increments ;
 # default is all (keep all increments).
 # increments for older full backups will be deleted : only the more
 # recent ones (count provided) will be kept
-#keepincrofulls = all
-#keepincrofulls = 6
-keepincrofulls = $dup_keepincroffulls
+#keepincroffulls = all
+#keepincroffulls = 6
+keepincroffulls = $dup_keepincroffulls
 
 # full destination URL, in duplicity format; if set, desturl overrides
 # sshoptions, destdir, desthost and destuser; it also disables testconnect and
