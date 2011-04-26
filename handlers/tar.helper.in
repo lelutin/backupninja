@@ -17,7 +17,7 @@ tar_wizard() {
    tar_backupname="backupname = $REPLY"
    backupname="$REPLY"
 
-   inputBox "$tar_title" "Directory where to store the backups" "/net/backups/$backupname"
+   inputBox "$tar_title" "Directory where to store the backups" "/var/backups/tar/$backupname"
    [ $? = 1 ] && return
    tar_backupdir="backupdir = $REPLY"
 
