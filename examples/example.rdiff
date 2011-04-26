@@ -161,4 +161,9 @@ exclude = /var/cache/backupninja/duplicity
 ## Default:
 # user =
 
-
+## passed directly to ssh
+## an example setting would be:
+## sshoptions = -o IdentityFile=/root/.ssh/id_rsa_duplicity
+##
+## Default:
+# sshoptions = 
