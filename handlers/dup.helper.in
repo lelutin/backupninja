@@ -545,6 +545,7 @@ dup_wizard() {
    dup_incremental=yes
    dup_increments=30
    dup_keep=60
+   dup_keepincroffulls=
    dup_bandwidth=
    dup_sshoptions=
    dup_destdir="/backups/`hostname`"
