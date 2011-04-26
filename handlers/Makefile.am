@@ -1,7 +1,7 @@
 
 HANDLERS = dup dup.helper ldap ldap.helper maildir makecd		\
          makecd.helper mysql mysql.helper pgsql pgsql.helper rdiff	\
-         rdiff.helper rsync sh svn sys sys.helper trac
+         rdiff.helper rsync sh svn sys sys.helper trac tar tar.helper
 
 CLEANFILES = $(HANDLERS)
 
@@ -89,4 +89,12 @@ sys.helper: $(srcdir)/sys.helper.in
 trac: $(srcdir)/trac.in
 	rm -f trac
 	$(edit) $(srcdir)/trac.in > trac
+
+tar: $(srcdir)/tar.in
+	rm -f tar
+	$(edit) $(srcdir)/tar.in > tar
+
+tar.helper: $(srcdir)/tar.helper.in
+	rm -f tar.helper
+	$(edit) $(srcdir)/tar.helper.in > tar.helper
 
