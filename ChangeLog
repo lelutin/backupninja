@@ -12,8 +12,10 @@ version 0.9.9 -- UNRELEASED
 	 . Remove support for duplicity < 0.4.4. Even etch-backports has
 	   a newer one.
    	 . Now support remove-all-inc-but-n-full command for duplicity >=
-	   0.9.10 to allow removal of increments for older full backups
-           (Closes Redmine bug #2492)
+	   0.9.10 to allow removal of increments for older full backups.
+	   Thanks to Olivier Berger <oberger@ouvaton.org> for the patch.
+	   (Closes Redmine bug #2492)
+	   (Closes: #603478)
 	ldap:
 	 . Fix reliance on bash for pipefail.
 	mysql:
