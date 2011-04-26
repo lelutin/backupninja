@@ -88,9 +88,9 @@ function rotate {
       $nice $mv /$1.$2 /$1.tmp
    fi
 
-   for ((n=`echo "$2 - 1" | bc`; n >= 0; n--)); do
+   for ((n=$[$2 - 1]; n >= 0; n--)); do
       if [ -d $1.$n ]; then
-         dest=`echo "$n + 1" | bc`
+         dest=$[$n + 1]
          $nice $mv /$1.$n /$1.$dest
          $touch /$1.$dest
       fi
@@ -128,7 +128,7 @@ fi
 if [ -z "$days" ]; then
    keep="4"
 else
-   keep="`echo $days - 1 | bc -l`"
+   keep=$[$days - 1]
 fi
 
 # lockfile setup

@@ -253,7 +253,7 @@ function eval_config {
     if [ -z "$days" ]; then
       keep="4"
     else
-      keep="`echo $days - 1 | bc -l`"
+      keep=$[$days - 1]
     fi
   fi
 
@@ -302,9 +302,9 @@ function rotate_short {
     $nice $mv /$folder.$keep /$folder.tmp
   fi
 
-  for ((n=`echo "$keep - 1" | bc`; n >= 0; n--)); do
+  for ((n=$[$keep - 1]; n >= 0; n--)); do
     if [ -d $folder.$n ]; then
-      dest=`echo "$n + 1" | bc`
+      dest=$[$n + 1]
       $nice $mv /$folder.$n /$folder.$dest
       $touch /$folder.$dest
       mkdir -p $metadata/`basename $folder`.$dest
