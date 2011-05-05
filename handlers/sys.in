@@ -542,7 +542,7 @@ fi
 #
 
 if [ "$hardware" == "yes" ]; then
-   if [ "dohwinfo" == "yes" ]; then
+   if [ "$dohwinfo" == "yes" ]; then
       if [ -f $hardwarefile ]; then
     rm $hardwarefile
       fi
