@@ -38,6 +38,8 @@ handlers/sh
 handlers/svn
 handlers/sys
 handlers/sys.helper
+handlers/tar
+handlers/tar.helper
 handlers/trac
 lib/Makefile
 lib/easydialog
