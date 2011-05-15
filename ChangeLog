@@ -37,6 +37,8 @@ version 0.9.9 -- UNRELEASED
 	 . Do arithmetic using bash rather than bc (Closes: #603173)
 	sys:
 	 . Fix hwinfo (Closes: #625501)
+	 . Fix gathering of information about loaded modules:
+	   cut is in /usr/bin actually.
 	tar:
 	 . Install by default. (Closes Redmine bug #2907)
     helper changes

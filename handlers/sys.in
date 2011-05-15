@@ -350,7 +350,7 @@ STATUS="Getting kernel version:"
 catifexec "/bin/uname" "-a"
 STATUS="Checking module information:"
 catifexec "/sbin/lsmod"
-for x  in $(/sbin/lsmod | /bin/cut -f1 -d" " 2>/dev/null | /bin/grep -v Module 2>/dev/null
+for x  in $(/sbin/lsmod | /usr/bin/cut -f1 -d" " 2>/dev/null | /bin/grep -v Module 2>/dev/null
 ) ; do
    STATUS="Checking module information $x:"
    catifexec "/sbin/modinfo" "$x"
