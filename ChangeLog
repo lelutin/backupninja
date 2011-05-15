@@ -1,4 +1,4 @@
-version 0.9.9 -- UNRELEASED
+version 0.9.9 -- May 15, 2011
     backupninja changes
 	 . Use locking to avoid running concurrent instances of the same backup
 	   action. Thanks to Olivier Berger <oberger@ouvaton.org> for the patch.
