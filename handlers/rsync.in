@@ -35,7 +35,7 @@
 #   mountpoint = backup partition mountpoint or backup main folder (either local or remote)
 #   backupdir = folder relative do $mountpoint where the backup should be stored (local or remote)
 #   format = specify backup storage format: short, long or mirror (i.e, no rotations)
-#   days = for short storage format, specify the number of backup increments (min = 5)
+#   days = for short storage format, specify the number of backup increments (min = 2, set to 1 or less to disable)
 #   keepdaily = for long storage format, specify the number of daily backup increments
 #   keepweekly = for long storage format, specify the number of weekly backup increments
 #   keepmonthly = for long storage format, specify the number of monthly backup increments
@@ -290,9 +290,9 @@ function rotate_short {
   local keep="$2"
   local metadata="`dirname $folder`/metadata"
 
-  if [[ "$keep" -lt 4 ]]; then
-    error "Rotate: minimum of 4 rotations"
-    exit 1
+  # No rotations
+  if [[ "$keep" -lt 1 ]]; then
+     return
   fi
 
   if [ -d $folder.$keep ]; then
@@ -325,9 +325,9 @@ function rotate_short_remote {
   local metadata="`dirname $folder`/metadata"
   local keep="$2"
 
-  if [[ "$2" -lt 4 ]]; then
-    error "Rotate: minimum of 4 rotations"
-    exit 1
+  # No rotations
+  if [[ "$keep" -lt 1 ]]; then
+     return
   fi
 
 (
