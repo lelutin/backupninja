@@ -893,7 +893,7 @@ function set_rsync_options {
 
   if [ "$from" == "local" ] || [ "$dest" == "local" ]; then
     # rsync options for local sources or destinations
-    rsync_options="$rsync_options"
+    rsync_options=($rsync_options)
   fi
 
   if [ "$from" == "remote" ] || [ "$dest" == "remote" ]; then
