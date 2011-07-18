@@ -325,7 +325,7 @@ function process_action() {
 
    # start locked section : avoid concurrent execution of the same backup
    # uses a construct specific to shell scripts with flock. See man flock for details
-   (
+   {
        debug "executing handler in locked section controlled by $lockfile"
        flock -x -w 5 200
        # if all is good, we acquired the lock
@@ -352,7 +352,7 @@ function process_action() {
 	   debug "failed to acquire lock"
 	   echo "Fatal: Could not acquire lock $lockfile. A backup is probably already running for $file." >>$bufferfile
        fi
-   ) 200> $lockfile
+   } 200> $lockfile
    # end of locked section
 
    _warnings=`cat $bufferfile | grep "^Warning: " | wc -l`
