@@ -1,5 +1,7 @@
 version 0.9.10 -- UNRELEASED
     handler changes:
+	dup:
+	 . Cleanup: stop supporting duplicity < 0.6.01 (Redmine#2538).
 	sh:
 	 . Allow 'when = XXX' with spaces (Redmine#2769).
 	   Thanks to casper for the patch.
