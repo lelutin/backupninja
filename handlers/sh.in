@@ -5,4 +5,11 @@
 # runs the file /etc/backup.d/scriptname.sh
 #
 
+# No-op function so that 'when = XXX' can be written as such in
+# backup.d/*.sh, i.e. with spaces around the equal sign - as in every
+# other backup.d/ file.
+function when() {
+   true
+}
+
 [ $test ] || ( . $1 )

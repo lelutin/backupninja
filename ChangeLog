@@ -1,3 +1,8 @@
+version 0.9.10 -- UNRELEASED
+    handler changes:
+	sh:
+	 . Allow 'when = XXX' with spaces (Redmine#2769).
+	   Thanks to casper for the patch.
 version 0.9.9 -- May 15, 2011
     backupninja changes
 	 . Use locking to avoid running concurrent instances of the same backup
