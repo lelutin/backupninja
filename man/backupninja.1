@@ -104,9 +104,9 @@ Then, vital parts of the file system, including /var/backups, are nightly pushed
 .TP
 In order for this to work (ie for diff-backup to run unattended), you must create ssh keys on the source server and copy the public key to the remote user's authorized keys file. For example:
 .br
-root@srchost# ssh-keygen -t rsa -b 4096
+root@srchost# ssh-keygen \-t rsa \-b 4096
 .br
-root@srchost# ssh-copy-id -i /root/.ssh/id_dsa.pub backup@desthost
+root@srchost# ssh-copy-id \-i /root/.ssh/id_dsa.pub backup@desthost
 .TP
 Now, you should be able to ssh from user 'root' on srchost to user 'backup' on desthost without specifying a password. When prompted for a password by ssh-keygen, just leave it blank by hitting return. The "wizard" \fBninjahelper(1)\fP will walk you through these steps.
 

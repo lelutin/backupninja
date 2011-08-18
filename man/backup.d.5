@@ -67,7 +67,7 @@ Example templates for the action configuration files can be found in /usr/share/
 
 .SH SCHEDULING
 
-By default, each configuration file is processed everyday at 01:00 (1 AM). This can be changed by specifying the 'when' option in a backup action's config file or in the global configuration file. Special value 'manual' will disable scheduling for the backup action. It is possible to run the backup action manually by invoking \fBninjahelper(1)\fP with --run command line argument.
+By default, each configuration file is processed everyday at 01:00 (1 AM). This can be changed by specifying the 'when' option in a backup action's config file or in the global configuration file. Special value 'manual' will disable scheduling for the backup action. It is possible to run the backup action manually by invoking \fBninjahelper(1)\fP with \-\-run command line argument.
 
 For example:
   when = sundays at 02:00
