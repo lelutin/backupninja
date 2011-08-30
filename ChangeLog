@@ -9,6 +9,11 @@ version 0.9.10 -- UNRELEASED
 	sh:
 	 . Allow 'when = XXX' with spaces (Redmine#2769).
 	   Thanks to casper for the patch.
+    helper changes:
+	rdiff:
+	 . Fix infinite loop when version inconsistency is detected.
+	   Thanks to Chris Lamb <lamby@debian.org> for the patch.
+	   (Closes: #639547)
 version 0.9.9 -- May 15, 2011
     backupninja changes
 	 . Use locking to avoid running concurrent instances of the same backup

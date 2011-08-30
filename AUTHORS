@@ -40,3 +40,4 @@ Jacob Anawalt <jlanawalt@gmail.com> -- pg_dump format option
 Sergio Talens-Oliag <sto@debian.org> -- pipefail fixes
 Bruno Bigras <bigras.bruno@gmail.com> -- enable tar handler in the build system
 casper -- Allow 'when = XXX' with spaces in .sh files.
+Chris Lamb <lamby@debian.org> -- rdiff.helper bugfix
