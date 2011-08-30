@@ -265,7 +265,7 @@ do_rdiff_con() {
             fi
          fi
       else
-         msgBox "incompatible versions of rdiff-backup" "It looks like rdiff-backup is installed on the remote machine, but it may be an incompatible version with the one installed locally, or something else is amiss.\n\nPlease resolve this problem and then try connecting again.\n\n\nTry connecting again?"
+         booleanBox "incompatible versions of rdiff-backup" "It looks like rdiff-backup is installed on the remote machine, but it may be an incompatible version with the one installed locally, or something else is amiss.\n\nPlease resolve this problem and then try connecting again.\n\n\nTry connecting again?"
          if [ $? = 0 ]; then
             do_rdiff_con
          else
