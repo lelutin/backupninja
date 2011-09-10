@@ -275,7 +275,7 @@ fi
 # remove-all-inc-of-but-n-full : remove increments of older full backups : only keep latest ones
 if [ "$keep" != "yes" ]; then
    if [ "$keepincroffulls" != "all" ]; then
-      if [ "$duplicity_major" -ge 0 -a "$duplicity_minor" -ge 9 -a "$duplicity_sub" -ge 10 ]; then
+      if [ "$duplicity_major" -ge 0 -a "$duplicity_minor" -ge 6 -a "$duplicity_sub" -ge 10 ]; then
          debug "$precmd duplicity remove-all-inc-of-but-n-full $keepincroffulls --force $execstr_options $execstr_serverpart"
          if [ ! $test ]; then
             export PASSPHRASE=$password
