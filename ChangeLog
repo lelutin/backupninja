@@ -12,7 +12,7 @@ version 0.9.10 -- UNRELEASED
 	   (Closes: #639545)
 	sh:
 	 . Allow 'when = XXX' with spaces (Redmine#2769).
-	   Thanks to casper for the patch.
+	   Thanks to aihtdikh for the patch.
     helper changes:
 	rdiff:
 	 . Fix infinite loop when version inconsistency is detected.
