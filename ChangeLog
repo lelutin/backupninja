@@ -20,6 +20,8 @@ version 0.9.10 -- UNRELEASED
 	sh:
 	 . Allow 'when = XXX' with spaces (Redmine#2769).
 	   Thanks to aihtdikh for the patch.
+	sys:
+	 . Remove useless and inconsistent executable bit on handler.
     helper changes
 	rdiff:
 	 . Fix infinite loop when version inconsistency is detected.
