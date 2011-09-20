@@ -1,4 +1,6 @@
 version 0.9.10 -- UNRELEASED
+    backupninja changes:
+	 . Fix email reports, that were broken by the new locking support.
     handler changes:
 	dup:
 	 . Cleanup: stop supporting duplicity < 0.6.01 (Redmine#2538).
