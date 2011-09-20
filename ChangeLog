@@ -8,6 +8,11 @@ version 0.9.10 -- UNRELEASED
 	   Thanks to Olivier Berger <oberger@ouvaton.org> for the patch.
 	   (Closes Redmine bug #3443)
 	   (Closes: #641120)
+	ldap:
+	 . Don't install LDAP handler, helper and example configuration file.
+	   Don't mention LDAP support in documentation.
+	   Official LDAP support will come back once this code has found
+	   itself a maintainer. Interested? Get in touch!
 	rsync:
 	 . Fixing $rsync_options output when rsync is local
 	   (Closes Redmine bug #3001)
