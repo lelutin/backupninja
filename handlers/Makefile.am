@@ -1,5 +1,5 @@
 
-HANDLERS = dup dup.helper ldap ldap.helper maildir makecd		\
+HANDLERS = dup dup.helper maildir makecd		\
          makecd.helper mysql mysql.helper pgsql pgsql.helper rdiff	\
          rdiff.helper rsync sh svn sys sys.helper trac tar tar.helper
 
