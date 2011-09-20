@@ -39,8 +39,6 @@ backup action for slow, incremental rsyncs of tens of thousands of maildirs.
 backup action for safe MySQL dumps.
 .IP .pgsql
 backup action for safe PostgreSQL dumps.
-.IP .ldap
-backup action for safe OpenLdap dumps.
 .IP .sys
 backup action for general system reports and hardware information.
 .IP .svn
@@ -56,7 +54,7 @@ These files must be owned by root and must not be world or group readable/writab
 The configuration files are processed in alphabetical order. However, it is suggested that you name the config files in "sysvinit style." 
 .TP
 For example:
- 10-local.ldap.disabled
+ 10-local.pgsql.disabled
  15-runthisfirst.sh
  20-runthisnext.mysql
  90-runthislast.rdiff

@@ -27,7 +27,6 @@ Backup types:
    incremental data is compressed. permissions are retained even
    with an unpriviledged backup user.
  - backup of mysql databases (via mysqlhotcopy and mysqldump).
- - backup of ldap databases (via slapcat and ldapsearch).
  - basic system and hardware info
  - encrypted remote backups (via duplicity).    
  - backup of subversion repositories.
@@ -92,7 +91,6 @@ file in /etc/backup.d according to the file's suffix:
   .rdiff   --  filesystem backup (using rdiff-backup)
   .dup     --  filesystem backup (using duplicity)
   .mysql   --  backup mysql databases
-  .ldap    --  backup ldap databases
   .pgsql   --  backup PostgreSQL databases
   .sys     --  general hardware, partition, and system reports.
   .svn     --  backup subversion repositories
@@ -105,7 +103,7 @@ The configuration files are processed in alphabetical order. However,
 it is suggested that you name the config files in "sysvinit style." 
 
 For example:
-	00-disabled.ldap
+	00-disabled.pgsql
 	10-runthisfirst.sh
 	20-runthisnext.mysql
 	90-runthislast.rdiff
