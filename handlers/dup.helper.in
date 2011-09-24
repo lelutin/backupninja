@@ -286,6 +286,12 @@ nicelevel = $dup_nicelevel
 # if 'desturl' is set below, 'testconnect' must be set to 'no' for now.
 testconnect = $dup_testconnect
 
+## temporary directory used by duplicity, set to some other location if your /tmp is small
+## default is either /tmp or /usr/tmp, depending on the system
+##
+## Default:
+# tmpdir = /tmp
+
 ######################################################
 ## gpg section
 ## (how to encrypt and optionally sign the backups)
