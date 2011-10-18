@@ -1,0 +1,59 @@
+# -*- mode: sh; sh-basic-offset: 3; indent-tabs-mode: nil; -*-
+# vim: set filetype=sh sw=3 sts=3 expandtab autoindent:
+#
+# bup handler script for backupninja
+# requires the bup binary, and ssh for remote connections
+#
+
+### GET CONFIG ###
+
+setsection source
+getconf path
+
+setsection dest
+getconf bupdir
+getconf branch
+
+getconf type local
+# Those two values are only useful if type is set to "remote"
+getconf host localhost
+getconf remote_dir
+
+REMOTE_URL=
+if [ "$type" = "remote" ]; then
+    REMOTE_URL="-r $host:$remote_dir"
+    debug "remote location arguments: '$REPOSITORY'"
+fi
+
+REPOSITORY=
+if [ -n "$bupdir" ]; then
+    REPOSITORY="-d $bupdir"
+    debug "bup repository arguments: '$REPOSITORY'"
+fi
+
+### CHECK CONFIG ###
+if [ -z "$path" ]; then
+    fatal "No source path was given."
+fi
+
+if [ -z "$branch" ]; then
+    fatal "The backup branch was not specified."
+fi
+
+if [ -z "$bupdir" ]; then
+    debug "No bupdir specified: using the default location of ~/.bup !"
+fi
+
+### REMOVE OLD BACKUPS ###
+# This is not yet implemented in bup itself.
+
+### EXECUTE ###
+
+for s_path in $path; do
+    bup $REPOSITORY index $s_path
+done
+
+for s_path in $path; do
+    bup $REPOSITORY save $REMOTE_URL -n $branch $s_path
+done
+
