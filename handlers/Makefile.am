@@ -1,5 +1,5 @@
 
-HANDLERS = dup dup.helper maildir makecd		\
+HANDLERS = bup dup dup.helper maildir makecd		\
          makecd.helper mysql mysql.helper pgsql pgsql.helper rdiff	\
          rdiff.helper rsync sh svn sys sys.helper trac tar tar.helper
 
@@ -17,6 +17,10 @@ edit = sed \
     -e "s,@SED\@,$(SED),g" 
 
 pkgdata_DATA = $(HANDLERS)
+
+bup: $(srcdir)/bup.in
+	rm -f bup
+	$(edit) $(srcdir)/bup.in > bup
 
 dup: $(srcdir)/dup.in
 	rm -f dup
