@@ -454,6 +454,16 @@ keepincroffulls = $dup_keepincroffulls
 #awsaccesskeyid = YOUR_AWS_ACCESS_KEY_ID
 #awssecretaccesskey = YOUR_AWS_SECRET_KEY
 
+## RackSpace's CloudFiles username, API key, and authentication URL.
+## cfusername = YOUR_CF_USERNAME
+## cfapikey = YOUR_CF_API_KEY
+## cfauthurl = YOUR_CF_AUTH_URL
+##
+## Default:
+# cfusername = 
+# cfapikey = 
+# cfauthurl = 
+
 # FTP password, needed for backups using desturl = ftp://...
 #ftp_password = 
 

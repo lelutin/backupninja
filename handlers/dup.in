@@ -30,6 +30,9 @@ getconf keepincroffulls all
 getconf desturl
 getconf awsaccesskeyid
 getconf awssecretaccesskey
+getconf cfusername
+getconf cfapikey
+getconf cfauthurl
 getconf ftp_password
 getconf sshoptions
 getconf bandwidthlimit 0
@@ -45,6 +48,9 @@ destdir=${destdir%/}
 [ -n "$password" ] || fatal "The password option must be set."
 if [ "`echo $desturl | @AWK@ -F ':' '{print $1}'`" == "s3+http" ]; then
    [ -n "$awsaccesskeyid" -a -n "$awssecretaccesskey" ]  || fatal "AWS access keys must be set for S3 backups."
+fi
+if [ "`echo $desturl | @AWK@ -F ':' '{print $1}'`" == "cf+http" ]; then
+   [ -n "$cfusername" -a -n "$cfapikey" ]  || fatal "Cloudfiles access keys must be set for S3 backups."
 fi
 if [ "`echo $desturl | @AWK@ -F ':' '{print $1}'`" == "ftp" ]; then
    [ -n "$ftp_password" ]  || fatal "ftp_password must be set for FTP backups."
@@ -230,6 +236,16 @@ execstr_source=${execstr_source//\\*/\\\\\\*}
 if [ "`echo $desturl | @AWK@ -F ':' '{print $1}'`" == "s3+http" ]; then
    export AWS_ACCESS_KEY_ID="$awsaccesskeyid"
    export AWS_SECRET_ACCESS_KEY="$awssecretaccesskey"
+fi
+
+### If desturl is a RackSpace's CloudFiles URL export the relevant
+### environment variables
+if [ "`echo $desturl | @AWK@ -F ':' '{print $1}'`" == "cf+http" ]; then
+   export CLOUDFILES_USERNAME="$cfusername"
+   export CLOUDFILES_APIKEY="$cfapikey"
+   if [ -n "$cfauthurl" ]; then
+      export CLOUDFILES_AUTHURL="$cfauthurl"
+   fi
 fi
 
 ### Cleanup commands (duplicity >= 0.4.4)

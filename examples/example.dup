@@ -194,6 +194,16 @@ exclude = /var/cache/backupninja/duplicity
 # awsaccesskeyid = 
 # awssecretaccesskey = 
 
+## RackSpace's CloudFiles username, API key, and authentication URL.
+## cfusername = YOUR_CF_USERNAME
+## cfapikey = YOUR_CF_API_KEY
+## cfauthurl = YOUR_CF_AUTH_URL
+##
+## Default:
+# cfusername = 
+# cfapikey = 
+# cfauthurl = 
+
 ## FTP password, needed for backups using desturl = ftp://...
 ##
 ## Default:
