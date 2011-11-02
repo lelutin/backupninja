@@ -17,12 +17,19 @@ getconf branch
 getconf type local
 # Those two values are only useful if type is set to "remote"
 getconf host localhost
+getconf user
 getconf remote_dir
 
 REMOTE_URL=
 if [ "$type" = "remote" ]; then
-    REMOTE_URL="-r $host:$remote_dir"
-    debug "remote location arguments: '$REPOSITORY'"
+    REMOTE_URL="$host"
+
+    if [ "$user" -n ]; then
+        REMOTE_URL="${user}@$REMOTE_URL"
+    fi
+
+    REMOTE_URL="-r $REMOTE_URL:$remote_dir"
+    debug "remote location arguments: '$REMOTE_URL'"
 fi
 
 REPOSITORY=
