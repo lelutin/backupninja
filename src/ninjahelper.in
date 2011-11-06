@@ -203,6 +203,7 @@ fi
 . $libdirectory/easydialog
 . $libdirectory/tools
 . $libdirectory/vserver
+. $libdirectory/ssh
 
 # am I running as root?
 if [ "$UID" != "0" ]; then

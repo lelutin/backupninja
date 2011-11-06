@@ -166,38 +166,10 @@ do_rdiff_ssh_con() {
       [ $? = 0 ] || return
    fi
 
-   if [ ! -f /root/.ssh/id_dsa.pub -a ! -f /root/.ssh/id_rsa.pub ]; then
-      echo "Creating local root's ssh key"
-      ssh-keygen -t rsa -b 4096 -f /root/.ssh/id_rsa -N ""
-      echo "Done. hit return to continue"
-      read
-   fi
-
-   ssh -o PreferredAuthentications=publickey $rdiff_host -l $rdiff_user "exit" 2> /dev/null
-   if [ $? -ne 0 ]; then
-      echo "Copying root's public ssh key to authorized_keys of $rdiff_user@$rdiff_host. When prompted, specify the password for user $rdiff_user@$rdiff_host."
-      ssh-copy-id -i /root/.ssh/id_[rd]sa.pub $rdiff_user@$rdiff_host
-      if [ $? -ne 0 ]; then
-         echo "FAILED: Couldn't copy root's public ssh key to authorized_keys of $rdiff_user@$rdiff_host."
-         ssh $rdiff_user@$rdiff_host 'test -w .ssh || test -w .'
-         result=$?
-         echo "Hit return to continue."
-         read
-         case $result in
-            0 )   msgBox "$rdiff_title: error" "Directories are writable: Probably just a typo the first time." ;;
-            1 )   msgBox "$rdiff_title: error" "Connected successfully to $rdiff_user@$rdiff_host, but unable to write. Check ownership and modes of ~$rdiff_user on $rdiff_host." ;;
-            255 ) msgBox "$rdiff_title: error" "Failed to connect to $rdiff_user@$rdiff_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host." ;;
-            * )   msgBox "$rdiff_title: error" "Unexpected error." ;;
-         esac
-         return
-      else
-         echo "Done. hit return to continue"
-         read
-      fi
-   else
-      echo "root@localhost is already in authorized_keys of $rdiff_user@$rdiff_host."
-      echo "Hit return to continue."
-      read
+   ssh_create_root_key "$rdiff_title" "$rdiff_host" "$rdiff_user"
+   if [ "$?" != "0" ]; then
+      # key setup failed, can't go further
+      return
    fi
 
    # test to see if the remote rdiff backup directory exists and is writable

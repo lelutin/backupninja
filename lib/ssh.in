@@ -1,0 +1,49 @@
+#!@BASH@
+# -*- mode: sh; sh-basic-offset: 3; indent-tabs-mode: nil; -*-
+# vim: set filetype=sh sw=3 sts=3 expandtab autoindent:
+
+#####################################################
+## SSH RELATED FUNCTIONS
+
+function ssh_create_root_key() {
+   local title=$1
+   local host=$2
+   local user=$3
+
+   if [ ! -f /root/.ssh/id_dsa.pub -a ! -f /root/.ssh/id_rsa.pub ]; then
+      echo "Creating local root's ssh key"
+      ssh-keygen -t rsa -b 4096 -f /root/.ssh/id_rsa -N ""
+      echo "Done. hit return to continue"
+      read
+   fi
+
+   ssh -o PreferredAuthentications=publickey $host -l $user "exit" 2> /dev/null
+   if [ $? -ne 0 ]; then
+      echo "Copying root's public ssh key to authorized_keys of $user@$host. When prompted, specify the password for user $user@$host."
+      ssh-copy-id -i /root/.ssh/id_[rd]sa.pub $user@$host
+      if [ $? -ne 0 ]; then
+         echo "FAILED: Couldn't copy root's public ssh key to authorized_keys of $user@$host."
+         ssh $user@$host 'test -w .ssh || test -w .'
+         result=$?
+         echo "Hit return to continue."
+         read
+         case $result in
+            0 )   msgBox "$title: error" "Directories are writable: Probably just a typo the first time." ;;
+            1 )   msgBox "$title: error" "Connected successfully to $user@$host, but unable to write. Check ownership and modes of ~$user on $host." ;;
+            255 ) msgBox "$title: error" "Failed to connect to $user@$host. Check hostname, username, and password. Also, make sure sshd is running on the destination host." ;;
+            * )   msgBox "$title: error" "Unexpected error." ;;
+         esac
+         return 1
+      else
+         echo "Done. hit return to continue"
+         read
+      fi
+   else
+      echo "root@localhost is already in authorized_keys of $user@$host."
+      echo "Hit return to continue."
+      read
+   fi
+
+   return 0
+}
+
