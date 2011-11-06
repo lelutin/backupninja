@@ -146,8 +146,6 @@ do_rdiff_dest() {
 }
 
 do_rdiff_ssh_con() {
-   local remote_status="ok"
-
    IFS=$' \t\n'
    if [ "$_dest_done" = "" ]; then
       msgBox "$rdiff_title: error" "You must first configure the destination."
@@ -172,35 +170,13 @@ do_rdiff_ssh_con() {
       return
    fi
 
-   # test to see if the remote rdiff backup directory exists and is writable
-   echo "Testing to see if remote rdiff backup directory exists and is writable"
-   ssh $rdiff_user@$rdiff_host "test -d ${rdiff_directory}"
-   if [ $? = 0 ]; then
-      ssh $rdiff_user@$rdiff_host "test -w $rdiff_directory"
-      if [ $? != 0 ]; then
-         msgBox "destination directory is not writable!" "The remote destination directory is not writable by the user you specified. Please fix the permissions on the directory and then try again."
-         remote_status=failed
-      fi
-   else
-      booleanBox "Remote directory does not exist" "The destination backup directory does not exist, do you want me to create it for you?"
-      if [ $? = 0 ]; then
-    ssh $rdiff_user@$rdiff_host "mkdir -p ${rdiff_directory}"
-         result=$?
-         case $result in
-            0) msgBox "$rdiff_title: success" "Creation of the remote destination directory was a success!";;
-            1) msgBox "$rdiff_title: error" "Connected successfully to $rdiff_user@$rdiff_host, but was unable to create the destination directory, check the directory permissions."
-               remote_status=failed;;
-            255) msgBox "$rdiff_title: error" "Failed to connect to $rdiff_user@$rdiff_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host."
-               remote_status=failed;;
-            *) msgBox "$rdiff_title: error" "Unexpected error."
-               remote_status=failed;;
-         esac
-      fi
+   ssh_ensure_remote_dir "$rdiff_title" "$rdiff_directory" "$rdiff_host" "$rdiff_user"
+   if [ "$?" != "0" ]; then
+      # couldn't ensure that remote dir is created and accessible, can't go further
+      return
    fi
 
-   if [ "$remote_status" = "ok" ]; then
-      do_rdiff_con
-   fi
+   do_rdiff_con
 }
 
 do_rdiff_con() {
