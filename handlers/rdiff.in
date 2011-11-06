@@ -7,26 +7,6 @@
 
 ### FUNCTIONS ###
 
-function test_connection() {
-   # given a user and host,
-   # tests the connection.
-   # if user or host is missing, returns 0
-   # (ie, assume it's a local connection).
-   if [ $# -lt 2 ]; then
-      debug "(local is assumed to be a good connection)"
-      return 0
-   fi
-   local user=$1
-   local host=$2
-   debug "ssh $sshoptions -o PasswordAuthentication=no $host -l $user 'echo -n 1'"
-   local ret=`ssh $sshoptions -o PasswordAuthentication=no $host -l $user 'echo -n host is alive'`
-   if echo $ret | grep "host is alive"; then
-      debug "Connected to $host as $user successfully"
-   else
-      fatal "Can't connect to $host as $user."
-   fi
-}
-
 function rdiff_version() {
    # given no arguments, returns the local version.
    # given a user and host, returns the remote version.
@@ -136,8 +116,8 @@ fi
 # check the connection at the source and destination
 [ -n "$test" ] || test=0
 if [ "$testconnect" = "yes" ] || [ "${test}" -eq 1 ]; then
-   test_connection $sourceuser $sourcehost
-   test_connection $destuser $desthost
+   ssh_test_connection $sourceuser $sourcehost
+   ssh_test_connection $destuser $desthost
 fi
 
 if [ "$ignore_version" != "yes" ]; then

@@ -1,9 +1,9 @@
 my_execbindir = $(pkglibdir)
-my_execbin_SCRIPTS = easydialog parseini tools vserver
+my_execbin_SCRIPTS = easydialog parseini tools ssh vserver
 
 CLEANFILES = $(my_execbin_SCRIPTS)
 
-EXTRA_DIST = easydialog.in parseini.in tools.in vserver.in
+EXTRA_DIST = easydialog.in parseini.in tools.in ssh.in vserver.in
 
 edit = sed \
     -e "s,@CFGDIR\@,$(CFGDIR),g" \
@@ -24,6 +24,10 @@ parseini: $(srcdir)/parseini.in
 tools: $(srcdir)/tools.in
 	rm -f tools
 	$(edit) tools.in > tools
+
+ssh: $(srcdir)/ssh.in
+	rm -f ssh
+	$(edit) ssh.in > ssh
 
 vserver: $(srcdir)/vserver.in
 	rm -f vserver
