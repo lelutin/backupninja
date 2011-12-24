@@ -893,7 +893,7 @@ function set_rsync_options {
 
   if [ "$from" == "local" ] || [ "$dest" == "local" ]; then
     # rsync options for local sources or destinations
-    rsync_options=($rsync_options)
+    true
   fi
 
   if [ "$from" == "remote" ] || [ "$dest" == "remote" ]; then
@@ -912,8 +912,6 @@ function set_rsync_options {
       remote_rsync="$remote_rsync --fake-super"
     fi
 
-    rsync_options=($rsync_options --rsync-path="$remote_rsync")
-
     if [ "$protocol" == "ssh" ]; then
       if [ ! -e "$id_file" ]; then
         fatal "SSH Identity file $id_file not found"
@@ -925,6 +923,14 @@ function set_rsync_options {
       fi
     fi
 
+  fi
+
+  # Mangle rsync_options so we can use quotes after all other
+  # options were evaluated.
+  if [ "$from" == "local" ] && [ "$dest" == "local" ]; then
+    rsync_options=($rsync_options)
+  else
+    rsync_options=($rsync_options --rsync-path="$remote_rsync")
   fi
 
   include_vservers
