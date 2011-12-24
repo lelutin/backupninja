@@ -887,7 +887,7 @@ function set_filelist {
 
 function set_rsync_options {
 
-  if [ ! -z "$numericids" ]; then
+  if [ "$numericids" != "0" ]; then
     rsync_options="$rsync_options --numeric-ids"
   fi
 
