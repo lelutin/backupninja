@@ -1085,7 +1085,7 @@ for SECTION in $include; do
   $nice $rsync $rsync_options $filelist_flag $excludes $batch_option $orig $dest_path | tee -a $log
 
   if [ "$?" != "0" ]; then
-    warning "Rsync error when trying to transfer $SECTION"
+    fatal "Rsync error when trying to transfer $SECTION"
   fi
 
   update_metadata
