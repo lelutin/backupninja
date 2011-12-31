@@ -18,6 +18,12 @@
 # (see below) is set to 'yes'
 #partition = 
 
+# set to 1 if fsck should run on partition after the backup is made
+#fscheck = 
+
+# set to 1 if partition is mounted read-only
+#read_only = 
+
 # backup partition mountpoint or backup main folder
 # this doesn't need to be a real partition, but should be at least the
 # main folder where the backup is being stored
@@ -26,14 +32,23 @@ mountpoint = /mnt/backup
 # folder relative do mountpoint where the backup should be stored
 backupdir = myserver
 
-# number of backup increments (min = 5)
-days = 7 
+# temp folder
+#tmp = /tmp
 
-# set to 1 if fsck should run on partition after the backup is made
-#fscheck = 
+# specify backup storage format: short, long or mirror (i.e, no rotations)
+format = short
 
-# set to 1 if $partition is mounted read-only
-#read_only = 
+# for short storage format, specify the number of backup increments (min = 2, set to 1 or less to disable)
+days = 7
+
+# for long storage format, specify the number of daily backup increments
+#keepdaily = 7
+
+# for long storage format, specify the number of weekly backup increments
+#keepweekly = 3
+
+# for long storage format, specify the number of monthly backup increments
+#keepmonthly = 1
 
 # use this if you need a lockfile to be kept during backup execution
 # this is an useful feature in case you have some tasks that should
@@ -49,6 +64,9 @@ days = 7
 # temp folder
 #tmp = /tmp
 
+# set to "yes" if you want to use multiconnection ssh support
+#multiconnection = no
+
 [source]
 
 # where the data to be backed up is (local or remote)
@@ -56,6 +74,12 @@ days = 7
 
 # if remote source, specify the hostname or IP
 #host =
+
+# remote port number (remote source only)
+#port = 22
+
+# remote user name (remote source only)
+#user =
 
 # when "yes", test the connection for a remote source before backup
 #testconnect = no
@@ -76,15 +100,18 @@ exclude_vserver = excluded_vserver2
 # ssh command line (remote only)
 #ssh = ssh
 
+# ssh or rsync (remote source only)
+#protocol = ssh
+
 # rsync program
 # it defaults to $RSYNC value from backupninja.conf
 #rsync = $RSYNC
 
 # rsync command options
-#rsync_options = "-av --delete"
+#rsync_options = "-av --delete --recursive"
 
 # when set to 1, use numeric ids instead of user/group mappings on rsync
-#numericids = 0
+#numericids =
 
 # if set to 1, compress data on rsync (remote source only)
 #compress = 0
@@ -95,13 +122,75 @@ exclude_vserver = excluded_vserver2
 # remote rsync program (remote source only)
 #remote_rsync = rsync
 
+# ssh key file (remote source only)
+#id_file = /root/.ssh/id_dsa
+
+# set to "yes" to rsync use a batch file as source
+#batch = no
+
+# folder where the batch file is located
+#batchbase =
+
+# set yes if you want rsync to use a file list source
+#filelist = no
+
+# folder where the file list is placed
+#filelistbase =
+
+[dest]
+
+# backup destination type (local or remote)
+#dest = local
+
+#  when "yes", test the connection for a remote source before backup
+#testconnect = no
+
+# ssh command line (remote dest only)
+#ssh = ssh
+
+# ssh or rsync (remote dest only)
+#protocol = ssh
+
+# when set to 1, use numeric ids instead of user/group mappings on rsync
+#numericids =
+
+# if set to 1, compress data on rsync (remote source only)
+#compress = 0
+
+# destination host name (remote destination only)
+#host =
+
+# remote port number (remote destination only)
+#port = 22
+
+# remote user name (remote destination only)
+#user =
+
+# ssh key file (remote destination only)
+#id_file = /root/.ssh/id_dsa
+
+# set a badnwidth limit in KB/s (remote destination only)
+#bandwidthlimit = 1024
+
+# remote rsync program (remote dest only)
+#remote_rsync = rsync
+
+# set to "yes" to rsync write a batch file from the changes
+#batch = no
+
+# folder where the batch file should be written
+#batchbase = /var/backups/rsync/batches
+
+# set to yes so rsync use the --fake-super flag (remote destination only)
+#fakesuper = yes
+
 # This section is used to stop and start services that should be turned of
 # during the backup procedure.
 #
 #[services]
 #
 # absolute path where scripts are located
-#initscripts =
+#initscripts = /etc/init.d
 #
 # script name to be stoped at the begining of the backup and started at its end
 #service =
