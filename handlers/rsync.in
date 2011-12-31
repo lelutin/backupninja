@@ -125,7 +125,7 @@ function eval_config {
   getconf mountpoint
   getconf backupdir
   getconf format short
-  getconf days
+  getconf days 7
   getconf keepdaily 5
   getconf keepweekly 3
   getconf keepmonthly 1
