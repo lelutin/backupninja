@@ -230,19 +230,16 @@ function eval_config {
 
   if [ "$dest" != "local" ] && [ "$from" == "remote" ]; then
     fatal "When source is remote, destination should be local."
-    exit 1
   fi
 
   if [ "$from" != "local" ] && [ "$from" != "remote" ]; then
     fatal "Invalid source $from"
-    exit 1
   fi
 
   backupdir="$mountpoint/$backupdir"
 
   if [ "$dest" == "local" ] && [ ! -d "$backupdir" ]; then 
-    error "Backupdir $backupdir does not exist"
-    exit 1
+    fatal "Backupdir $backupdir does not exist"
   fi
 
   if [ ! -z "$log" ]; then
@@ -589,22 +586,19 @@ function setup_long_dirs {
     if [ -d $tmpdir ]; then
       mv $tmpdir $dir.1
       if [ $? == 1 ]; then
-        echo "Fatal: could mv $destdir/rotate.tmp $dir.1 on host $host"
-        exit 1
+        fatal "Could not move $tmpdir to $dir.1 on host $host"
       fi
     else
       mkdir --parents $dir.1
       if [ $? == 1 ]; then
-        echo "Fatal: could not create directory $dir.1 on host $host"
-        exit 1
+        fatal "Could not create directory $dir.1 on host $host"
       fi
     fi
     if [ -d $dir.2 ]; then
       echo "Debug: update links $backuptype.2 --> $backuptype.1"
       cp -alf $dir.2/. $dir.1
       #if [ $? == 1 ]; then
-      #  echo "Fatal: could not create hard links to $dir.1 on host $host"
-      #  exit 1
+      #  fatal "Could not create hard links to $dir.1 on host $host"
       #fi
     fi
   fi
@@ -705,7 +699,6 @@ function prepare_storage {
       btype=monthly
     else
       fatal "keeping no backups";
-      exit 1
     fi
 
     suffix="$btype.1"
@@ -724,7 +717,6 @@ function prepare_storage {
     suffix=""
   else
     fatal "Invalid backup format $format"
-    exit 1
   fi
 
 }
@@ -768,7 +760,6 @@ function set_batch_mode {
       batch_option="--read-batch=$batch_file"
     else
       fatal "Batch file not found: $batch_file"
-      exit 1
     fi
   elif [ "$batch" == "write" ]; then
     mkdir -p `dirname $batch_file`
@@ -813,7 +804,6 @@ function test_connect {
 
   if [ -z "$host" ] || [ -z "$user" ]; then
     fatal "Remote host or user not set"
-    exit 1
   fi
 
   debug "$ssh_cmd 'echo -n 1'"
@@ -821,7 +811,6 @@ function test_connect {
 
   if [ "$result" != "1" ]; then
     fatal "Can't connect to $host as $user."
-    exit 1
   else
     debug "Connected to $host successfully"
   fi
@@ -915,7 +904,6 @@ function set_rsync_options {
     if [ "$protocol" == "ssh" ]; then
       if [ ! -e "$id_file" ]; then
         fatal "SSH Identity file $id_file not found"
-        exit 1
       else
         debug RSYNC_RSH=\"$ssh_cmd_base\"
         echo RSYNC_RSH=\"$ssh_cmd_base\" >> $log
@@ -970,8 +958,7 @@ function mount_rw {
       if [ -d "$mountpoint" ]; then
         mount -o remount,rw $mountpoint
         if (($?)); then
-          error "Could not mount $mountpoint"
-          exit 1
+          fatal "Could not mount $mountpoint"
         fi
       fi
     fi
