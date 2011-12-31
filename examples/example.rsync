@@ -170,7 +170,7 @@ exclude_vserver = excluded_vserver2
 #id_file = /root/.ssh/id_dsa
 
 # set a badnwidth limit in KB/s (remote destination only)
-#bandwidthlimit = 1024
+#bandwidthlimit =
 
 # remote rsync program (remote dest only)
 #remote_rsync = rsync
