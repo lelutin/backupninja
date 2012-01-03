@@ -317,6 +317,14 @@ function rotate_short {
     $nice $cp -alf /$folder.1/. /$folder.0
   fi
 
+  # Cleanup orphaned metadata
+  for file in `ls $metadata`; do
+    if [ ! -d "`dirname $folder`/$file" ]; then
+      debug "removing orphaned metadata $file"
+      rm -rf $metadata/$file
+    fi
+  done
+
 }
 
 function rotate_short_remote {
@@ -355,6 +363,14 @@ function rotate_short_remote {
   if [ -d $folder.1 ]; then
     $nice $cp -alf /$folder.1/. /$folder.0
   fi
+
+  # Cleanup orphaned metadata
+  for file in `ls $metadata`; do
+    if [ ! -d "`dirname $folder`/\$file" ]; then
+      debug "removing orphaned metadata \$file"
+      rm -rf $metadata/\$file
+    fi
+  done
   ##### END REMOTE SCRIPT #######
 EOF
 ) | (while read a; do passthru $a; done)
@@ -466,6 +482,14 @@ function rotate_long {
     done
   done
 
+  # Cleanup orphaned metadata
+  for file in `ls $backuproot/metadata`; do
+    if [ ! -d "$backuproot/$file" ]; then
+      debug "removing orphaned metadata $file"
+      rm -rf $backuproot/metadata/$file
+    fi
+  done
+
 }
 
 function rotate_long_remote {
@@ -574,6 +598,14 @@ function rotate_long_remote {
         $nice mv \$dir.\$i $backuproot/rotate.tmp
       fi
     done
+  done
+
+  # Cleanup orphaned metadata
+  for file in `ls $backuproot/metadata`; do
+    if [ ! -d "$backuproot/\$file" ]; then
+      debug "removing orphaned metadata \$file"
+      rm -rf $backuproot/metadata/\$file
+    fi
   done
   ##### END REMOTE SCRIPT #######
 EOF
