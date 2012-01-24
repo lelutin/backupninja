@@ -42,3 +42,4 @@ Bruno Bigras <bigras.bruno@gmail.com> -- enable tar handler in the build system
 aihtdikh -- Allow 'when = XXX' with spaces in .sh files.
 Chris Lamb <lamby@debian.org> -- rdiff.helper bugfix
 Yuval Kogman <nothingmuch@woobling.org> -- RackSpace's CloudFiles support for duplicity
+exobuzz - mysql bugfixes
