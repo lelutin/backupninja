@@ -256,7 +256,7 @@ then
    for db in $databases
    do
       DUMP_BASE="$MYSQLDUMP $defaultsfile $sqldumpoptions"
-      if [ "$db" = "information_schema" ]
+      if [ "$db" = "information_schema" ] || [ "$db" = "performance_schema" ]
       then
          DUMP_BASE="${DUMP_BASE} --skip-lock-tables"
       fi
