@@ -122,6 +122,11 @@ if [ "$duplicity_major" -ge 0 -a "$duplicity_minor" -ge 6 -a "$duplicity_sub" -g
          || warning 'duplicity >= 0.6.17 only supports the IdentityFile SSH option'
    fi
    execstr_options="${execstr_options} --ssh-options '$sshoptions'"
+   # FIXME: use trickle
+   if [ "$bandwidthlimit" != 0 ]; then
+      [ -z "$desturl" ] || warning 'The bandwidthlimit option is not used when desturl is set.'
+      execstr_precmd="trickle -s -d $bandwidthlimit -u $bandwidthlimit"
+   fi
 ## duplicity < 0.6.17 : scp/sftp backend
 else
    scpoptions="$sshoptions"
