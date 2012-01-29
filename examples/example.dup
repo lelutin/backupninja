@@ -217,11 +217,17 @@ exclude = /var/cache/backupninja/duplicity
 ## Default:
 # bandwidthlimit = 0
 
+## duplicity < 0.6.17
+## ------------------
 ## passed directly to ssh, scp (and sftp in duplicity >=0.4.2)
 ## warning: sftp does not support all scp options, especially -i; as
 ## a workaround, you can use "-o <SSHOPTION>"
 ## an example setting would be:
 ## sshoptions = -o IdentityFile=/root/.ssh/id_rsa_duplicity
+##
+## duplicity >= 0.6.17
+## ------------------
+## supports only "-o IdentityFile=..."
 ##
 ## Default:
 # sshoptions = 

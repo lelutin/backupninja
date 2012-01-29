@@ -114,13 +114,23 @@ duplicity_minor="`echo $duplicity_version | @AWK@ -F '.' '{print $2}'`"
 duplicity_sub="`echo $duplicity_version | @AWK@ -F '.' '{print $3}'`"
 
 ### ssh/scp/sftp options (duplicity < 0.4.3 is unsupported)
-scpoptions="$sshoptions"
-if [ "$bandwidthlimit" != 0 ]; then
-   [ -z "$desturl" ] || warning 'The bandwidthlimit option is not used when desturl is set.'
-   scpoptions="$scpoptions -l $bandwidthlimit"
+## duplicity >= 0.6.17 : paramiko backend
+if [ "$duplicity_major" -ge 0 -a "$duplicity_minor" -ge 6 -a "$duplicity_sub" -ge 17 ]; then
+   if [ -n "$sshoptions" ]; then
+      echo "$sshoptions" | grep -Eqs '^-o[[:space:]]*IdentityFile=[^ ]+$' \
+         || warning 'duplicity >= 0.6.17 only supports the IdentityFile SSH option'
+   fi
+   execstr_options="${execstr_options} --ssh-options '$sshoptions'"
+## duplicity < 0.6.17 : scp/sftp backend
+else
+   scpoptions="$sshoptions"
+   if [ "$bandwidthlimit" != 0 ]; then
+      [ -z "$desturl" ] || warning 'The bandwidthlimit option is not used when desturl is set.'
+      scpoptions="$scpoptions -l $bandwidthlimit"
+   fi
+   sftpoptions="$sshoptions"
+   execstr_options="${execstr_options} --scp-command 'scp $scpoptions' --sftp-command 'sftp $sftpoptions'"
 fi
-sftpoptions="$sshoptions"
-execstr_options="${execstr_options} --scp-command 'scp $scpoptions' --sftp-command 'sftp $sftpoptions'"
 
 ### Symmetric or asymmetric (public/private key pair) encryption
 if [ -n "$encryptkey" ]; then
