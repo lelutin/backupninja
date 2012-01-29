@@ -16,6 +16,10 @@ version 1.0 -- UNRELEASED
 	   Thanks to Yuval Kogman <nothingmuch@woobling.org> for the patch.
 	mysql:
 	 . Don't attempt to dump performance_schema database (Redmine#3741).
+    build system changes
+	 . Workaround automake sanity check that would prevent us from
+	   installing lib/* into lib/backupninja/. Where else are be supposed
+	   to install such files anyway?
 
 version 0.9.10 -- September 23, 2011
     backupninja changes
