@@ -5,8 +5,9 @@ version 1.0 -- UNRELEASED
 	   example.dup.
 	 . Add support for RackSpace's CloudFiles.
 	   Thanks to Yuval Kogman <nothingmuch@woobling.org> for the patch.
-	 . Support bandwidthlimit with new duplicity, using trickle
-	   (Closes: #657201).
+	 . Adapt for new duplicity SSH backend.
+	   Support bandwidthlimit with new duplicity, using trickle.
+	   (Closes: #657201)
 	mysql:
 	 . Don't attempt to dump performance_schema database (Redmine#3741).
 	rysnc:
