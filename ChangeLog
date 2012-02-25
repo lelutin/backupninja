@@ -10,6 +10,8 @@ version 1.0 -- UNRELEASED
 	   (Closes: #657201)
 	mysql:
 	 . Don't attempt to dump performance_schema database (Redmine#3741).
+	pgsql:
+	 . Don't produce empty uncompressed backups (Redmine#3820).
 	rysnc:
 	 . Fix numericids option (Redmine#3691).
 	 . Mangle $rsync_options just afterwards (Redmine#3702).

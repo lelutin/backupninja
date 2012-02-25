@@ -186,7 +186,7 @@ else
       if [ "$compress" == "yes" ]; then
          dumpcmd="set -o pipefail ; $PGSQLDUMP --format=$format ${disablecustomcompress} $db | $GZIP $GZIP_OPTS > '$backupdir/${db}.${dumpext}.gz'"
       else
-         dumpcmd="$PGSQLDUMP --format=$format ${disablecustomcompress} $db | > '$backupdir/${db}.${dumpext}'"
+         dumpcmd="$PGSQLDUMP --format=$format ${disablecustomcompress} $db > '$backupdir/${db}.${dumpext}'"
       fi
       if [ $usevserver = yes ]; then
          execstr="$VSERVER $vsname exec su - $PGSQLUSER -s /bin/bash -c \"$dumpcmd\""
