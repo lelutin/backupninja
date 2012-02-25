@@ -271,8 +271,8 @@ if [ $test = 0 ]; then
       debug $output
       info "Successfully finished backing up source $label"
    else
-      warning $output
-      warning "Failed backup up source $label"
+      error $output
+      fatal "Failed backup up source $label"
    fi
 fi
 
