@@ -25,6 +25,8 @@ version 1.0 -- UNRELEASED
 	 . Workaround automake sanity check that would prevent us from
 	   installing lib/* into lib/backupninja/. Where else are be supposed
 	   to install such files anyway?
+    documentation changes
+	 . Document what features available to .sh jobs (Redmine #1558).
 
 version 0.9.10 -- September 23, 2011
     backupninja changes
