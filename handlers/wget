@@ -26,7 +26,7 @@
 #   wget = wget program
 #   wget_options = wget command options
 #   url = remote data url
-#   bandwidthlimit = set a badnwidth limit in kbps (remote source only)
+#   bandwidthlimit = set a bandwidth limit in kbps (remote source only)
 #
 #   [destination]
 #   folder = local folder
@@ -182,8 +182,8 @@ echo "Rotating $backupdir/$folder/$folder..." >> $log
 rotate $backupdir/$folder/$folder $keep
 info "Wget'ing $SECTION on $backupdir/$folder/$folder.0..."
 
-if [ ! -z "$badnwidth" ]; then
-   limit_rate="--limit-rate=$badnwidth""k"
+if [ ! -z "$bandwidth" ]; then
+   limit_rate="--limit-rate=$bandwidth""k"
 fi
 
 cd $backupdir/$folder/$folder.0

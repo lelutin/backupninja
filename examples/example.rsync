@@ -116,7 +116,7 @@ exclude_vserver = excluded_vserver2
 # if set to 1, compress data on rsync (remote source only)
 #compress = 0
 
-# set a badnwidth limit in KB/s (remote source only)
+# set a bandwidth limit in KB/s (remote source only)
 #bandwidthlimit =
 
 # remote rsync program (remote source only)
@@ -169,7 +169,7 @@ exclude_vserver = excluded_vserver2
 # ssh key file (remote destination only)
 #id_file = /root/.ssh/id_dsa
 
-# set a badnwidth limit in KB/s (remote destination only)
+# set a bandwidth limit in KB/s (remote destination only)
 #bandwidthlimit =
 
 # remote rsync program (remote dest only)

@@ -60,7 +60,7 @@
 #   exclude_vserver = vserver-name (valid only if vservers = yes on backupninja.conf)
 #   numericids = when set to 1, use numeric ids instead of user/group mappings on rsync
 #   compress = if set to 1, compress data on rsync (remote source only)
-#   bandwidthlimit = set a badnwidth limit in KB/s (remote source only)
+#   bandwidthlimit = set a bandwidth limit in KB/s (remote source only)
 #   remote_rsync = remote rsync program (remote source only)
 #   id_file = ssh key file (remote source only)
 #   batch = set to "yes" to rsync use a batch file as source
@@ -79,7 +79,7 @@
 #   port = remote port number (remote destination only)
 #   user = remote user name (remote destination only)
 #   id_file = ssh key file (remote destination only)
-#   bandwidthlimit = set a badnwidth limit in KB/s (remote destination only)
+#   bandwidthlimit = set a bandwidth limit in KB/s (remote destination only)
 #   remote_rsync = remote rsync program (remote dest only)
 #   batch = set to "yes" to rsync write a batch file from the changes
 #   batchbase = folder where the batch file should be written
