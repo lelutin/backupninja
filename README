@@ -239,3 +239,23 @@ VSERVERINFO (default: /usr/sbin/vserver-info)
 VSERVER (default: /usr/sbin/vserver)
 VROOTDIR (default: `$VSERVERINFO info SYSINFO |grep vserver-Rootdir | awk '{print $2}'`)
 
+
+.sh CONFIGURATION FILES
+=======================
+
+Shell jobs may use the following features:
+
+  * logging and control flow functions:
+    halt, fatal, error, warning, info, debug, passthru.
+    All such functions take a list of strings a parameters.
+    Those strings are passed to whatever logging mechanism is enabled,
+    and colored if relevant.
+
+  * Using "exit N" is useless, and has unspecified consequences.
+    Just don't do it.
+
+  * when=TIME works as documented above; at may also be written
+    "when = TIME".
+
+  * The $BACKUPNINJA_DEBUG environment variable is set when
+    backupninja is invoked with the -d option.
