@@ -18,7 +18,7 @@ version 1.0 -- UNRELEASED
 	 . Use fatal function to report failure of rdiff-backup jobs as such.
 	rysnc:
 	 . Fix numericids option (Redmine#3691).
-	 . Mangle $rsync_options just afterwards (Redmine#3702).
+	 . Mangle $rsync_options just afterwards (Redmine#3702, Redmine#3001).
 	 . Fix metadata rotation.
 	 . Allow disabling rotation or setting 2 days as minimum for backup
 	   increments in rsync short format (Redmine#2107).
