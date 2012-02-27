@@ -281,6 +281,9 @@ function eval_config {
     excludes="$excludes --exclude=$path"
   done
 
+  # Make sure we'll run bash at the destination
+  ssh_cmd="$ssh_cmd /bin/bash"
+
 }
 
 function rotate_short {
