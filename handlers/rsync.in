@@ -826,7 +826,11 @@ function update_metadata {
   if [ "$dest" == "local" ]; then
     metadata="`dirname $dest_path`/metadata/`basename $dest_path`"
     mkdir -p $metadata
-    date +%c%n%s > $metadata/created
+    # Use the backup start time and not the time the backup was
+    # finished, otherwise daily rotations might not take place.
+    # If we used backup end time, in the next handler run
+    # we might not have $now - $created >= 24:00
+    echo $starttime > $metadata/created
     $touch $backupdir/$SECTION/$suffix
   else
     folder="`echo $dest_path | cut -d : -f 2`"
@@ -836,7 +840,11 @@ function update_metadata {
   $ssh_cmd <<EOF
     ##### BEGIN REMOTE SCRIPT #####
     mkdir -p $metadata
-    date +%c%n%s > $metadata/created
+    # Use the backup start time and not the time the backup was
+    # finished, otherwise daily rotations might not take place.
+    # If we used backup end time, in the next handler run
+    # we might not have $now - $created >= 24:00
+    echo $starttime > $metadata/created
     ##### END REMOTE SCRIPT #######
 EOF
 ) | (while read a; do passthru $a; done)
@@ -1102,7 +1110,8 @@ start_mux
 stop_services
 mount_rw
 
-echo "Starting backup at `date`" >> $log
+starttime="`date +%c%n%s`"
+echo "Starting backup at `echo $starttime | head -n 1`" >> $log
 
 for SECTION in $include; do
 
