@@ -25,6 +25,8 @@ version 1.0 -- UNRELEASED
 	 . Use fatal instead of custom "exit 1" (Redmine#3721).
 	 . Abort on rsync error (Redmine#3692).
 	 . Cleanup orphaned metadata (Redmine#3727).
+	 . Use the backup start time and not the time the backup was finished
+	   (Closes: #654192)
     build system changes
 	 . Workaround automake sanity check that would prevent us from
 	   installing lib/* into lib/backupninja/. Where else are be supposed
