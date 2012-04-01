@@ -1,0 +1,346 @@
+# -*- mode: sh; sh-basic-offset: 3; indent-tabs-mode: nil; -*-
+# vim: set filetype=sh sw=3 sts=3 expandtab autoindent:
+
+HELPERS="$HELPERS bup:git-like_incremental_filesystem_backup"
+
+if [ -z "$BUP" ]; then
+   if [ -x /usr/bin/bup ]; then
+      BUP=/usr/bin/bup
+   else
+      fatal "executable path not defined in 'BUP' configuration option"
+   fi
+fi
+[ -x "$BUP" ] || fatal "bup executable path is not executable or does not exist."
+
+do_bup_src() {
+   set -o noglob
+
+   # choose the files to backup
+   # A backup means nothing if we're not including anything so refuse an empty
+   # list.
+   REPLY=
+   while [ -z "$REPLY" ]; do
+      formBegin "$bup_title - Paths included in the backup"
+         for ((i=0; i < ${#bup_includes[@]} ; i++)); do
+            formItem include ${bup_includes[$i]}
+         done
+         formItem include
+         formItem include
+         formItem include
+         formItem include
+         formItem include
+         formItem include
+         formItem include
+         formItem include
+      formDisplay
+      [ $? = 0 ] || return
+      unset bup_includes
+      bup_includes=($REPLY)
+   done
+
+   # choose the path regex'es to exclude from the backup
+   REPLY=
+   formBegin "$bup_title - Excluded paths matching a regular expression"
+      for ((i=0; i < ${#bup_excludes_rx[@]} ; i++)); do
+         formItem exclude_rx ${bup_excludes_rx[$i]}
+      done
+      formItem exclude_rx
+      formItem exclude_rx
+      formItem exclude_rx
+      formItem exclude_rx
+      formItem exclude_rx
+      formItem exclude_rx
+      formItem exclude_rx
+      formItem exclude_rx
+   formDisplay
+   [ $? = 0 ] || return
+   unset bup_excludes_rx
+   bup_excludes_rx=($REPLY)
+
+   # choose the files to exclude from the backup
+   REPLY=
+   formBegin "$bup_title - Excluded paths not interpreting regular expressions"
+      for ((i=0; i < ${#bup_excludes[@]} ; i++)); do
+         formItem exclude ${bup_excludes[$i]}
+      done
+      formItem exclude
+      formItem exclude
+      formItem exclude
+      formItem exclude
+      formItem exclude
+      formItem exclude
+      formItem exclude
+      formItem exclude
+   formDisplay
+   [ $? = 0 ] || return
+   unset bup_excludes
+   bup_excludes=($REPLY)
+
+   set +o noglob
+
+   _bup_src_done="(DONE)"
+   setDefault dest
+}
+
+do_bup_dest() {
+   set -o noglob
+   REPLY=
+   while [ -z "$REPLY" -o -z "$bup_type" ]; do
+      formBegin "$bup_title - The type of backup that needs to be performed. Can be 'local', 'remote' or 'on'."
+         formItem "dest_type" "$bup_type"
+      formDisplay
+      [ $? = 0 ] || return
+      bup_type="$REPLY"
+      if [ "$bup_type" != "local" ] && [ "$bup_type" != "remote" ] && [ "$bup_type" != "on" ]; then
+         echo "Wrong backup type. Must be one of 'local', 'remote' or 'on'."
+         bup_type=
+         read
+      fi
+   done
+
+   REPLY=
+   while [ -z "$REPLY" -o -z "$bup_directory" -o -z "$bup_branch" ]; do
+      formBegin "$bup_title - Choose the path to the repositories and the branch name that will be used for the backups.  For local backups, files will be saved in the local repository.  For remote backups, only the local file index will be saved in the local repository, while data will be saved in the remote directory."
+         formItem "dest_bup_directory" "$bup_directory"
+         formItem "dest_branch" "$bup_branch"
+         if [ "$bup_type" != "local" ]; then
+            formItem "dest_bup_remote_bupdir" "$bup_remote_bupdir"
+         fi
+      formDisplay
+      [ $? = 0 ] || return
+      tmp_array=($REPLY)
+      bup_directory="${tmp_array[0]}"
+      bup_branch="${tmp_array[1]}"
+      if [ "$bup_type" != "local" ]; then
+         bup_remote_bupdir="${tmp_array[2]}"
+      fi
+
+      echo "Initializing local bup repository in $bup_directory"
+      $BUP -d "$bup_directory" init
+      if [ "$?" -ne 0 ]; then
+         echo "Initialization failed. Check errors above."
+         REPLY=
+         read
+      fi
+   done
+
+   if [ "$bup_type" != "local" ]; then
+      REPLY=
+      while [ -z "$REPLY" -o -z "$bup_host" -o -z "$bup_user" ]; do
+        formBegin "$bup_title - Specify on which host and as which user bup should login to access the remote repository."
+           formItem "dest_host" "$bup_host"
+           formItem "dest_user" "$bup_user"
+           formDisplay
+        [ $? = 0 ] || return
+        tmp_array=($REPLY)
+        bup_host=${tmp_array[0]}
+        bup_user=${tmp_array[1]}
+        if [ -z "$bup_host" ] || [ -z "$bup_user" ]; then
+            echo "You must specify the hostname and the user for the chosen backup type."
+            REPLY=
+            read
+        fi
+      done
+   fi
+   set +o noglob
+
+   _bup_dest_done="(DONE)"
+
+   if [ "$bup_type" = "local" ]; then
+      # No need to setup remote connection for local backups
+      _bup_con_done="(DONE)"
+      setDefault finish
+   else
+      # Reset _bup_con_done in case user re-ran this option and chose a
+      # different backup type.
+      _bup_con_done=
+      setDefault conn
+   fi
+}
+
+do_bup_ssh_con() {
+   IFS=$' \t\n'
+   if [ "$_bup_dest_done" = "" ]; then
+      msgBox "$bup_title: error" "You must first configure the destination."
+      return
+   elif [ "$bup_branch" = "" ]; then
+      msgBox "$bup_title: error" "You must first configure the backup branch your server will push to."
+      return
+   elif [ "$bup_type" = "" ]; then
+      msgBox "$bup_title: error" "You must first configure the backup type."
+      return
+   elif [ "$bup_directory" = "" ]; then
+      msgBox "$bup_title: error" "You must first configure the local bup directory."
+      return
+   else
+      booleanBox "$bup_title" "This step will create an SSH key for the local root user with no passphrase (if one does not already exist), and attempt to copy root's public ssh key to authorized_keys file of $bup_user@$bup_host. This will allow the local root to make unattended backups to $bup_user@$bup_host.\n\n\nAre you sure you want to continue?"
+      [ $? = 0 ] || return
+   fi
+
+   if [ "$bup_type" = "local" ]; then
+      msgBox "$bup_title: info" "This step is not needed for local backups."
+      return
+   fi
+
+   ssh_create_root_key "$bup_title" "$bup_host" "$bup_user"
+   if [ "$?" != "0" ]; then
+      msgBox "$bup_title: error" "root SSH key creation failed, can't go further."
+      return
+   fi
+
+   echo "Initializing remote bup repository"
+   ssh_ensure_remote_dir "$bup_title" "$bup_remote_bupdir" "$bup_host" "$bup_user"
+   if [ "$?" != "0" ]; then
+      msgBox "$bup_title: error" "Couldn't ensure that remote dir is created and accessible, can't go further."
+      return
+   fi
+   ssh $bup_user@$bup_host "bup -d '$bup_remote_bupdir' init"
+   case $? in
+      0) msgBox "$bup_title: success" "Creation of the remote bup repository was a success!";;
+      1) msgBox "$bup_title: error" "Connected successfully to $bup_user@$bup_host, but was unable to initilize the destination bup repository."
+         return;;
+      255) msgBox "$bup_title: error" "Failed to connect to $bup_user@$bup_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host."
+         return;;
+      *) msgBox "$bup_title: error" "Unexpected error."
+         return;;
+   esac
+
+   _bup_con_done="(DONE)"
+   setDefault finish
+}
+
+do_bup_finish() {
+   get_next_filename $configdirectory/90.bup
+
+   cat > $next_filename <<EOF
+## You can schedule the backups per-task with the 'when' option:
+# when = everyday at 02
+
+## Set this option to 'yes' to avoid the version comparison between local and
+## remote server. This can be useful when working with bup versions from git
+## master since the version tag is different for all commits, but should
+## generally not be used.
+#ignore_version = no
+
+## Set this option to 'no' to avoid testing the SSH connection prior to
+## actually running the backup.
+#testconnect yes
+
+## Set this option to 'yes' to have bup generate parity files with the help of
+## the par2 command. Parity files can be used to repair backup storage to some
+## extent in case of corruption. This option is only useful if the backup
+## storage is local (e.g. not sent to a server with backup type "remote")
+#generate_parity no
+
+[source]
+# A few notes about includes and excludes:
+# 1. path and exclude statements support globbing with '*'
+# 2. exclude_rx statements don't support globbing. Instead, they support
+#    regular expression matching of file names.
+# 3. The order of the statements shouldn't matter much.
+# 4. You can specify each statement multiple times to include or exclude
+#    multiple files or directories.
+
+# files/directories to include in the backup
+EOF
+   set -o noglob
+   for ((i=0; i < ${#bup_includes[@]} ; i++)); do
+      echo "path = ${bup_includes[$i]}" >> $next_filename
+   done
+   set +o noglob
+
+   echo "# files/directories to exclude from the backup" >> $next_filename
+   set -o noglob
+   for ((i=0; i < ${#bup_excludes[@]} ; i++)); do
+      echo "exclude = ${bup_excludes[$i]}" >> $next_filename
+   done
+   set +o noglob
+
+   echo "# the following exclusions use regular expressions to match file/directory names" >> $next_filename
+   set -o noglob
+   for ((i=0; i < ${#bup_excludes_rx[@]} ; i++)); do
+      echo "exclude_rx = ${bup_excludes_rx[$i]}" >> $next_filename
+   done
+   set +o noglob
+
+   cat >> $next_filename <<EOF
+
+[dest]
+# Three possible backup types:
+#  * local -- save to a bup repository on the local computer filesystem hierarchy
+#  * remote -- push your data to a bup repository on a remote host via SSH
+#  * on -- pull data from the remote server to the local bup repository via SSH
+type = $bup_type
+# The local bup directory is always needed. It always holds index files and
+# also the whole backup when doing a "local" or an "on" backup.
+bupdir = $bup_directory
+# Backups with bup are saved on a branch (think git branch).
+# Usually each server/backup origin should have its own branch, but some people
+# use multiple branches for a same server for inventive purposes.
+branch = $bup_branch
+EOF
+
+   if [ "$bup_type" = "remote" ] || [ "$bup_type" = "on" ]; then
+      cat >> $next_filename <<EOF
+# When using "remote" or "on" as a backup type, bup needs to store things in a
+# bup repository on the remote server. This option specifies where this
+# repository should be placed on the remote server. It can be an absolute path,
+# or a relative path to the user's home directory.
+remote_bupdir = $bup_remote_bupdir
+# Finally, remote backups need to know how to connect to the remote server. For
+# this you need to specify the hostname or ip address of the remote server and
+# the user name that bup will use to establish an SSH connection to the host.
+host = $bup_host
+user = $bup_user
+EOF
+   fi
+
+   chmod 600 $next_filename
+}
+
+bup_wizard() {
+   # Global variables
+   _bup_src_done=
+   _bup_dest_done=
+   _bup_con_done=
+
+   # Global variables whose '*' shall not be expanded
+   set -o noglob
+   bup_includes=(/etc /var/backups /var/spool/cron/crontabs /root /home /usr/local/bin /usr/local/sbin /var/lib/dpkg/status /var/lib/dpkg/status-old)
+   # Normally, bup automatically excludes its own local repository to avoid
+   # re-entrant backups (backing up the backup) so we shouldn't need to specify
+   # the bupdir in the excludes
+   bup_excludes=
+   bup_excludes_rx=(/home/.*/.gnupg /home/.*/.local/share/Trash /home/.*/.Trash /home/.*/.thumbnails /home/.*/.beagle /home/.*/.aMule /home/.*/gtk-gnutella-downloads)
+   bup_directory=/var/backups/filesystem.bup
+   set +o noglob
+
+   bup_title="bup action wizard"
+   srcitem="Choose paths to include or exclude from the backup"
+   destitem="Choose location of the bup repository and branch of the backup"
+   conitem="Set up ssh keys and test remote connection"
+
+   while true; do
+      menuBox "$bup_title" "choose a step:" \
+         src "$srcitem $_bup_src_done" \
+         dest "$destitem $_bup_dest_done" \
+         conn "$conitem $_bup_con_done" \
+         finish "finish and create config file"
+      [ $? = 0 ] || return
+      result="$REPLY"
+      case "$result" in
+         "src") do_bup_src;;
+         "dest") do_bup_dest;;
+         "conn") do_bup_ssh_con;;
+         "finish")
+            if [[ "$_bup_con_done$_bup_dest_done$_bup_src_done" != "(DONE)(DONE)(DONE)" ]]; then
+               msgBox "$bup_title" "You cannot create the configuration file until the first three steps are completed."
+            else
+               do_bup_finish
+               return
+            fi
+            ;;
+      esac
+   done
+}
+
