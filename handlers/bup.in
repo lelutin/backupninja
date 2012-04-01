@@ -8,10 +8,10 @@
 ### GET CONFIG ###
 
 setsection source
+getconf bupdir
 getconf path
 
 setsection dest
-getconf bupdir
 getconf branch
 
 getconf type local
@@ -24,7 +24,7 @@ REMOTE_URL=
 if [ "$type" = "remote" ]; then
     REMOTE_URL="$host"
 
-    if [ "$user" -n ]; then
+    if [ -n "$user" ]; then
         REMOTE_URL="${user}@$REMOTE_URL"
     fi
 
