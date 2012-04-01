@@ -1,0 +1,176 @@
+# -*- mode: sh; sh-basic-offset: 3; indent-tabs-mode: nil; -*-
+# vim: set filetype=sh sw=3 sts=3 expandtab autoindent:
+
+HELPERS="$HELPERS bup:git-like_incremental_filesystem_backup"
+
+do_bup_src() {
+   # bupdir
+   set -o noglob
+   REPLY=
+   while [ -z "$REPLY" -o -z "$bup_directory" ]
+   do
+      formBegin "$bup_title - The bup directory is a bup repository. For local backups, this is where files will be saved.  For remote backups, only the local file index will be saved there, while files will be saved in the remote directory."
+         formItem "bup_directory" "$bup_directory"
+      formDisplay
+      [ $? = 0 ] || return
+      bup_directory=$REPLY
+      # TODO: try and initialize the bupdir
+   done
+
+   # choose the files to backup
+   REPLY=
+   while [ -z "$REPLY" ]; do
+      formBegin "$bup_title - host system: includes"
+         for ((i=0; i < ${#bup_includes[@]} ; i++)); do
+            formItem include ${bup_includes[$i]}
+         done
+         formItem include
+         formItem include
+         formItem include
+         formItem include
+         formItem include
+         formItem include
+         formItem include
+         formItem include
+      formDisplay
+      [ $? = 0 ] || return
+      unset bup_includes
+      bup_includes=($REPLY)
+   done
+   set +o noglob
+
+   _bup_src_done="(DONE)"
+   setDefault dest
+}
+
+do_bup_dest() {
+    # TODO
+    # type
+    # branch
+    # host
+    # remote_dir
+
+   _bup_dest_done="(DONE)"
+   setDefault conn
+}
+
+do_bup_ssh_con() {
+   IFS=$' \t\n'
+   if [ "$_bup_dest_done" = "" ]; then
+      msgBox "$bup_title: error" "You must first configure the destination."
+      return
+   elif [ "$bup_branch" = "" ]; then
+      msgBox "$bup_title: error" "You must first configure the destination branch."
+      return
+   elif [ "$bup_type" = "" ]; then
+      msgBox "$bup_title: error" "You must first configure the destination backup type."
+      return
+   elif [ "$bup_user" = "" ]; then
+      msgBox "$bup_title: error" "You must first configure the destination user."
+      return
+   elif [ "$bup_host" = "" ]; then
+      msgBox "$bup_title: error" "You must first configure the destination host."
+      return
+   else
+      booleanBox "$bup_title" "This step will create an SSH key for the local root user with no passphrase (if one does not already exist), and attempt to copy root's public ssh key to authorized_keys file of $bup_user@$bup_host. This will allow the local root to make unattended backups to $bup_user@$bup_host.\n\n\nAre you sure you want to continue?"
+      [ $? = 0 ] || return
+   fi
+
+   ssh_create_root_key "$bup_title" "$bup_host" "$bup_user"
+   if [ "$?" != "0" ]; then
+      # key creation failed, can't go further
+      return
+   fi
+
+   ssh_ensure_remote_dir "$bup_title" "$bup_remote_dir" "$bup_host" "$bup_user"
+   if [ "$?" != "0" ]; then
+      # couldn't ensure that remote dir is created and accessible, can't go further
+      return
+   fi
+
+   # An empty directory won't help us much here, we need to run 'bup init' on it
+   echo "Initializing remote bup repository"
+   ssh $bup_user@$bup_host "bup -d $bup_remote_dir init"
+   case $? in
+      0) msgBox "bup_$title: success" "Creation of the remote destination directory was a success!";;
+      1) msgBox "bup_$title: error" "Connected successfully to $bup_user@$bup_host, but was unable to initilize the destination bup repository."
+         return;;
+      255) msgBox "$bup_title: error" "Failed to connect to $bup_user@$bup_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host."
+         return;;
+      *) msgBox "$bup_title: error" "Unexpected error."
+         return;;
+   esac
+
+   _bup_con_done="(DONE)"
+   setDefault finish
+}
+
+do_bup_finish() {
+   ## includes ##
+   formatted_includes=
+   set -o noglob
+   for ((i=0; i < ${#bup_includes[@]} ; i++)); do
+      formatted_includes="${formatted_includes}\npath = ${bup_includes[$i]}"
+   done
+   set +o noglob
+
+   get_next_filename $configdirectory/90.rdiff
+#TODO the contents of this file is not OK
+   cat > $next_filename <<EOF
+[source]
+bupdir = $bup_directory
+$formatted_includes
+
+[dest]
+type = $bup_type
+branch = $bup_branch
+host = $bup_host
+user = $bup_user
+remote_dir = $bup_remote_dir
+EOF
+
+   chmod 600 $next_filename
+}
+
+bup_wizard() {
+   # Global variables
+   _bup_src_done=
+   _bup_dest_done=
+   _bup_con_done=
+
+   # Global variables whose '*' shall not be expanded
+   set -o noglob
+   bup_includes=(/)
+   bup_excludes=(/home/*/.gnupg /home/*/.local/share/Trash /home/*/.Trash /home/*/.thumbnails /home/*/.beagle /home/*/.aMule /home/*/gtk-gnutella-downloads /var/cache/backupninja/duplicity)
+   bup_directory=/var/backups/filesystem.bup
+   set +o noglob
+
+   bup_title="bup action wizard"
+   srcitem="Choose paths to include or exclude from the backup"
+   destitem="Choose location of the bup repository and branch of the backup"
+   conitem="Set up ssh keys and test remote connection"
+
+   while true; do
+      menuBox "$bup_title" "choose a step:" \
+         src "$srcitem $_bup_src_done" \
+         dest "$destitem $_bup_dest_done" \
+         conn "$conitem $_bup_con_done" \
+         finish "finish and create config file"
+      [ $? = 0 ] || return
+      result="$REPLY"
+      case "$result" in
+         "src") do_bup_src;;
+         "dest") do_bup_dest;;
+         "conn") do_bup_ssh_con;;
+         "finish")
+            if [[ "$_bup_con_done$_bup_dest_done$_bup_src_done" != "(DONE)(DONE)(DONE)" ]]; then
+               msgBox "$bup_title" "You cannot create the configuration file until the first three steps are completed."
+            else
+               do_bup_finish
+               return
+            fi
+            ;;
+      esac
+   done
+}
+
