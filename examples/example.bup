@@ -1,0 +1,7 @@
+[source]
+path=/
+bupdir=/var/backups/filesystem.bup
+
+[dest]
+type=local
+branch=localhost

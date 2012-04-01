@@ -90,6 +90,7 @@ file in /etc/backup.d according to the file's suffix:
   .sh      --  run this file as a shell script.
   .rdiff   --  filesystem backup (using rdiff-backup)
   .dup     --  filesystem backup (using duplicity)
+  .bup     --  filesystem backup (using bup)
   .mysql   --  backup mysql databases
   .pgsql   --  backup PostgreSQL databases
   .sys     --  general hardware, partition, and system reports.
@@ -195,9 +196,9 @@ hard links.
 SSH KEYS
 ========
 
-In order for rdiff-backup to sync files over ssh unattended, you must
-create ssh keys on the source server and copy the public key to the
-remote user's authorized keys file. For example:
+In order for rdiff-backup or bup to sync files over ssh unattended, you must
+create ssh keys on the source server and copy the public key to the remote
+user's authorized keys file. For example:
 
   root@srchost# ssh-keygen -t rsa -b 4096
   root@srchost# ssh-copy-id -i /root/.ssh/id_rsa.pub backup@desthost
