@@ -20,6 +20,8 @@ getconf host localhost
 getconf user
 getconf remote_dir
 
+PATH_LIST=$(echo $path | sed -e 's/\n/ /g')
+
 REMOTE_URL=
 if [ "$type" = "remote" ]; then
     REMOTE_URL="$host"
@@ -56,11 +58,11 @@ fi
 
 ### EXECUTE ###
 
-for s_path in $path; do
-    bup $REPOSITORY index $s_path
-done
+debug "indexing $PATH_LIST"
+debug "bup $REPOSITORY index -f $bupdir/bupindex -u $PATH_LIST"
+bup $REPOSITORY index -u $PATH_LIST
 
-for s_path in $path; do
-    bup $REPOSITORY save $REMOTE_URL -n $branch $s_path
-done
+debug "saving $PATH_LIST into branch $branch"
+debug "bup $REPOSITORY save -f $bupdir/bupindex $REMOTE_URL -n $branch $PATH_LIST"
+bup $REPOSITORY save $REMOTE_URL -n $branch $PATH_LIST
 
