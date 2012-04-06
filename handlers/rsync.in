@@ -830,7 +830,7 @@ function update_metadata {
     # finished, otherwise daily rotations might not take place.
     # If we used backup end time, in the next handler run
     # we might not have $now - $created >= 24:00
-    echo $starttime > $metadata/created
+    echo "$starttime" > $metadata/created
     $touch $backupdir/$SECTION/$suffix
   else
     folder="`echo $dest_path | cut -d : -f 2`"
@@ -844,7 +844,7 @@ function update_metadata {
     # finished, otherwise daily rotations might not take place.
     # If we used backup end time, in the next handler run
     # we might not have $now - $created >= 24:00
-    echo $starttime > $metadata/created
+    echo "$starttime" > $metadata/created
     ##### END REMOTE SCRIPT #######
 EOF
 ) | (while read a; do passthru $a; done)
@@ -1111,7 +1111,7 @@ stop_services
 mount_rw
 
 starttime="`date +%c%n%s`"
-echo "Starting backup at `echo $starttime | head -n 1`" >> $log
+echo "Starting backup at `echo "$starttime" | head -n 1`" >> $log
 
 for SECTION in $include; do
 
