@@ -218,7 +218,7 @@ bup_wizard() {
 
    # Global variables whose '*' shall not be expanded
    set -o noglob
-   bup_includes=(/)
+   bup_includes=(/etc /var/backups /var/spool/cron/crontabs /root /home /usr/local/*bin /var/lib/dpkg/status*)
    bup_excludes=(/home/*/.gnupg /home/*/.local/share/Trash /home/*/.Trash /home/*/.thumbnails /home/*/.beagle /home/*/.aMule /home/*/gtk-gnutella-downloads /var/cache/backupninja/duplicity)
    bup_directory=/var/backups/filesystem.bup
    set +o noglob
