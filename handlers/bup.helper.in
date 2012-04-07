@@ -14,7 +14,14 @@ do_bup_src() {
       formDisplay
       [ $? = 0 ] || return
       bup_directory=$REPLY
-      # TODO: try and initialize the bupdir
+
+      echo "Initializing local bup repository in $bup_directory"
+      bup -d $bup_directory init
+      if [ "$?" -ne 0 ]; then
+         echo "Initialization failed. Check errors above."
+         REPLY=
+         read
+      fi
    done
 
    # choose the files to backup
@@ -37,6 +44,27 @@ do_bup_src() {
       unset bup_includes
       bup_includes=($REPLY)
    done
+
+   # choose the files to exclude from the backup
+   REPLY=
+   while [ -z "$REPLY" ]; do
+      formBegin "$bup_title - host system: excludes"
+         for ((i=0; i < ${#bup_excludes[@]} ; i++)); do
+            formItem exclude ${bup_excludes[$i]}
+         done
+         formItem exclude
+         formItem exclude
+         formItem exclude
+         formItem exclude
+         formItem exclude
+         formItem exclude
+         formItem exclude
+         formItem exclude
+      formDisplay
+      [ $? = 0 ] || return
+      unset bup_excludes
+      bup_excludes=($REPLY)
+   done
    set +o noglob
 
    _bup_src_done="(DONE)"
@@ -44,11 +72,41 @@ do_bup_src() {
 }
 
 do_bup_dest() {
-    # TODO
-    # type
-    # branch
-    # host
-    # remote_dir
+   set -o noglob
+   REPLY=
+   while [ -z "$REPLY" -o -z "$bup_type" ]
+   do
+      formBegin "$bup_title - The type of destination bup repository. Can be local or remote."
+         formItem "dest_type" "$bup_type"
+      formDisplay
+      [ $? = 0 ] || return
+      bup_type=$REPLY
+      if [ "$bup_type" != "local" ] && [ "$bup_type" != "remote" ]; then
+        bup_type=
+      fi
+   done
+
+   REPLY=
+   while [ -z "$REPLY" -o -z "$bup_branch" -o -z "$bup_remote_dir" ]
+   do
+     formBegin "$bup_title - destination: last two items are required for type 'remote' only"
+        formItem "dest_bup_directory" "$bup_remote_dir"
+        formItem "dest_branch" "$bup_branch"
+        formItem "dest_host" "$bup_host"
+        formItem "dest_user" "$bup_user"
+        formDisplay
+     [ $? = 0 ] || return
+     tmp_array=($REPLY)
+     bup_remote_dir=${tmp_array[0]}
+     bup_branch=${tmp_array[1]}
+     bup_host=${tmp_array[2]}
+     bup_user=${tmp_array[3]}
+     if [ "$bup_type" = "remote" ] && [ -z "$bup_host" ] || [ -z "$bup_user" ]; then
+        # Do it again, missing items for your type.
+        REPLY=
+     fi
+   done
+   set +o noglob
 
    _bup_dest_done="(DONE)"
    setDefault conn
@@ -65,11 +123,8 @@ do_bup_ssh_con() {
    elif [ "$bup_type" = "" ]; then
       msgBox "$bup_title: error" "You must first configure the destination backup type."
       return
-   elif [ "$bup_user" = "" ]; then
-      msgBox "$bup_title: error" "You must first configure the destination user."
-      return
-   elif [ "$bup_host" = "" ]; then
-      msgBox "$bup_title: error" "You must first configure the destination host."
+   elif [ "$bup_remote_dir" = "" ]; then
+      msgBox "$bup_title: error" "You must first configure the destination bup directory."
       return
    else
       booleanBox "$bup_title" "This step will create an SSH key for the local root user with no passphrase (if one does not already exist), and attempt to copy root's public ssh key to authorized_keys file of $bup_user@$bup_host. This will allow the local root to make unattended backups to $bup_user@$bup_host.\n\n\nAre you sure you want to continue?"
@@ -88,46 +143,69 @@ do_bup_ssh_con() {
       return
    fi
 
-   # An empty directory won't help us much here, we need to run 'bup init' on it
-   echo "Initializing remote bup repository"
-   ssh $bup_user@$bup_host "bup -d $bup_remote_dir init"
-   case $? in
-      0) msgBox "bup_$title: success" "Creation of the remote destination directory was a success!";;
-      1) msgBox "bup_$title: error" "Connected successfully to $bup_user@$bup_host, but was unable to initilize the destination bup repository."
-         return;;
-      255) msgBox "$bup_title: error" "Failed to connect to $bup_user@$bup_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host."
-         return;;
-      *) msgBox "$bup_title: error" "Unexpected error."
-         return;;
-   esac
+   # TODO should we initiate the remote backup? maybe, eh? however:
+   # XXX This shouldn't be done on an already existing bup directory! It'll re-initialize the repository.
+   ## An empty directory won't help us much here. The target directory must be
+   ## a bup repository.
+   #echo "Initializing remote bup repository"
+   #ssh $bup_user@$bup_host "bup -d $bup_remote_dir init"
+   #case $? in
+   #   0) msgBox "bup_$title: success" "Creation of the remote destination directory was a success!";;
+   #   1) msgBox "bup_$title: error" "Connected successfully to $bup_user@$bup_host, but was unable to initilize the destination bup repository."
+   #      return;;
+   #   255) msgBox "$bup_title: error" "Failed to connect to $bup_user@$bup_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host."
+   #      return;;
+   #   *) msgBox "$bup_title: error" "Unexpected error."
+   #      return;;
+   #esac
 
    _bup_con_done="(DONE)"
    setDefault finish
 }
 
 do_bup_finish() {
-   ## includes ##
-   formatted_includes=
+   get_next_filename $configdirectory/90.bup
+
+   cat > $next_filename <<EOF
+# when = everyday at 02
+
+[source]
+bupdir = $bup_directory
+
+# A few notes about includes and excludes:
+# 1. include and exclude statements support globbing with '*'
+# 2. All the excludes come after all the includes. The order is not otherwise
+#    taken into account.
+
+# files to include in the backup
+EOF
    set -o noglob
    for ((i=0; i < ${#bup_includes[@]} ; i++)); do
-      formatted_includes="${formatted_includes}\npath = ${bup_includes[$i]}"
+      echo "path = ${bup_includes[$i]}" >> $next_filename
    done
    set +o noglob
 
-   get_next_filename $configdirectory/90.rdiff
-#TODO the contents of this file is not OK
-   cat > $next_filename <<EOF
-[source]
-bupdir = $bup_directory
-$formatted_includes
+   echo "# files to exclude from the backup" >> $next_filename
+   set -o noglob
+   for ((i=0; i < ${#bup_excludes[@]} ; i++)); do
+      echo "exclude = ${bup_excludes[$i]}" >> $next_filename
+   done
+   set +o noglob
+
+   cat >> $next_filename <<EOF
 
 [dest]
 type = $bup_type
 branch = $bup_branch
-host = $bup_host
-user = $bup_user
 remote_dir = $bup_remote_dir
 EOF
+
+   if [ "$bup_type" = "remote" ]; then
+      cat >> $next_filename <<EOF
+host = $bup_host
+user = $bup_user
+EOF
+   fi
 
    chmod 600 $next_filename
 }
