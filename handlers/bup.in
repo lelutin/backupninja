@@ -8,17 +8,21 @@
 ### GET CONFIG ###
 
 setsection source
-getconf bupdir
 getconf path
 
 setsection dest
+getconf bupdir
 getconf branch
 
 getconf type local
-# Those two values are only useful if type is set to "remote"
+# The three values below are only useful if type is set to "remote"
+#
+# The user is optional. If none is specified, we'll be connecting to remote
+# server as the same user as the one running this backup job (most probably
+# root)
+getconf remote_bupdir
 getconf host localhost
 getconf user
-getconf remote_dir
 
 PATH_LIST=$(echo $path | sed -e 's/\n/ /g')
 
@@ -30,7 +34,7 @@ if [ "$type" = "remote" ]; then
         REMOTE_URL="${user}@$REMOTE_URL"
     fi
 
-    REMOTE_URL="-r $REMOTE_URL:$remote_dir"
+    REMOTE_URL="-r $REMOTE_URL:$remote_bupdir"
     debug "remote location arguments: '$REMOTE_URL'"
 fi
 

@@ -4,26 +4,6 @@
 HELPERS="$HELPERS bup:git-like_incremental_filesystem_backup"
 
 do_bup_src() {
-   # bupdir
-   set -o noglob
-   REPLY=
-   while [ -z "$REPLY" -o -z "$bup_directory" ]
-   do
-      formBegin "$bup_title - The bup directory is a bup repository. For local backups, this is where files will be saved.  For remote backups, only the local file index will be saved there, while files will be saved in the remote directory."
-         formItem "bup_directory" "$bup_directory"
-      formDisplay
-      [ $? = 0 ] || return
-      bup_directory=$REPLY
-
-      echo "Initializing local bup repository in $bup_directory"
-      bup -d $bup_directory init
-      if [ "$?" -ne 0 ]; then
-         echo "Initialization failed. Check errors above."
-         REPLY=
-         read
-      fi
-   done
-
    # choose the files to backup
    REPLY=
    while [ -z "$REPLY" ]; do
@@ -74,6 +54,24 @@ do_bup_src() {
 do_bup_dest() {
    set -o noglob
    REPLY=
+   while [ -z "$REPLY" -o -z "$bup_directory" ]
+   do
+      formBegin "$bup_title - The bup directory is a bup repository. For local backups, this is where files will be saved.  For remote backups, only the local file index will be saved there, while files will be saved in the remote directory."
+         formItem "dest_bup_directory" "$bup_directory"
+      formDisplay
+      [ $? = 0 ] || return
+      bup_directory=$REPLY
+
+      echo "Initializing local bup repository in $bup_directory"
+      bup -d $bup_directory init
+      if [ "$?" -ne 0 ]; then
+         echo "Initialization failed. Check errors above."
+         REPLY=
+         read
+      fi
+   done
+
+   REPLY=
    while [ -z "$REPLY" -o -z "$bup_type" ]
    do
       formBegin "$bup_title - The type of destination bup repository. Can be local or remote."
@@ -87,17 +85,17 @@ do_bup_dest() {
    done
 
    REPLY=
-   while [ -z "$REPLY" -o -z "$bup_branch" -o -z "$bup_remote_dir" ]
+   while [ -z "$REPLY" -o -z "$bup_branch" -o -z "$bup_remote_bupdir" ]
    do
      formBegin "$bup_title - destination: last two items are required for type 'remote' only"
-        formItem "dest_bup_directory" "$bup_remote_dir"
+        formItem "dest_bup_remote_bupdir" "$bup_remote_bupdir"
         formItem "dest_branch" "$bup_branch"
         formItem "dest_host" "$bup_host"
         formItem "dest_user" "$bup_user"
         formDisplay
      [ $? = 0 ] || return
      tmp_array=($REPLY)
-     bup_remote_dir=${tmp_array[0]}
+     bup_remote_bupdir=${tmp_array[0]}
      bup_branch=${tmp_array[1]}
      bup_host=${tmp_array[2]}
      bup_user=${tmp_array[3]}
@@ -118,13 +116,13 @@ do_bup_ssh_con() {
       msgBox "$bup_title: error" "You must first configure the destination."
       return
    elif [ "$bup_branch" = "" ]; then
-      msgBox "$bup_title: error" "You must first configure the destination branch."
+      msgBox "$bup_title: error" "You must first configure the backup branch your server will push to."
       return
    elif [ "$bup_type" = "" ]; then
-      msgBox "$bup_title: error" "You must first configure the destination backup type."
+      msgBox "$bup_title: error" "You must first configure the backup type."
       return
-   elif [ "$bup_remote_dir" = "" ]; then
-      msgBox "$bup_title: error" "You must first configure the destination bup directory."
+   elif [ "$bup_directory" = "" ]; then
+      msgBox "$bup_title: error" "You must first configure the local bup directory."
       return
    else
       booleanBox "$bup_title" "This step will create an SSH key for the local root user with no passphrase (if one does not already exist), and attempt to copy root's public ssh key to authorized_keys file of $bup_user@$bup_host. This will allow the local root to make unattended backups to $bup_user@$bup_host.\n\n\nAre you sure you want to continue?"
@@ -137,7 +135,7 @@ do_bup_ssh_con() {
       return
    fi
 
-   ssh_ensure_remote_dir "$bup_title" "$bup_remote_dir" "$bup_host" "$bup_user"
+   ssh_ensure_remote_dir "$bup_title" "$bup_remote_bupdir" "$bup_host" "$bup_user"
    if [ "$?" != "0" ]; then
       # couldn't ensure that remote dir is created and accessible, can't go further
       return
@@ -148,7 +146,7 @@ do_bup_ssh_con() {
    ## An empty directory won't help us much here. The target directory must be
    ## a bup repository.
    #echo "Initializing remote bup repository"
-   #ssh $bup_user@$bup_host "bup -d $bup_remote_dir init"
+   #ssh $bup_user@$bup_host "bup -d $bup_remote_bupdir init"
    #case $? in
    #   0) msgBox "bup_$title: success" "Creation of the remote destination directory was a success!";;
    #   1) msgBox "bup_$title: error" "Connected successfully to $bup_user@$bup_host, but was unable to initilize the destination bup repository."
@@ -170,8 +168,6 @@ do_bup_finish() {
 # when = everyday at 02
 
 [source]
-bupdir = $bup_directory
-
 # A few notes about includes and excludes:
 # 1. include and exclude statements support globbing with '*'
 # 2. All the excludes come after all the includes. The order is not otherwise
@@ -195,13 +191,14 @@ EOF
    cat >> $next_filename <<EOF
 
 [dest]
+bupdir = $bup_directory
 type = $bup_type
 branch = $bup_branch
-remote_dir = $bup_remote_dir
 EOF
 
    if [ "$bup_type" = "remote" ]; then
       cat >> $next_filename <<EOF
+remote_dir = $bup_remote_bupdir
 host = $bup_host
 user = $bup_user
 EOF
@@ -219,6 +216,9 @@ bup_wizard() {
    # Global variables whose '*' shall not be expanded
    set -o noglob
    bup_includes=(/etc /var/backups /var/spool/cron/crontabs /root /home /usr/local/*bin /var/lib/dpkg/status*)
+   # Normally, bup automatically excludes its own local repository to avoid
+   # re-entrant backups (backing up the backup) so we shouldn't need to specify
+   # the bupdir in the excludes
    bup_excludes=(/home/*/.gnupg /home/*/.local/share/Trash /home/*/.Trash /home/*/.thumbnails /home/*/.beagle /home/*/.aMule /home/*/gtk-gnutella-downloads /var/cache/backupninja/duplicity)
    bup_directory=/var/backups/filesystem.bup
    set +o noglob
