@@ -421,6 +421,11 @@ function rotate_long {
         else
           created=0
         fi
+        # Validate created date
+        if [ -z "$created" ] || echo $created | grep -v -q -e '^[0-9]*$'; then
+           warning "Invalid metatada $created. Skipping rotation."
+           break
+        fi
         cutoff_time=$(( now - (seconds*(i-1)) ))
         if [ ! $created -gt $cutoff_time ]; then
           next=$(( i + 1 ))
@@ -538,6 +543,11 @@ function rotate_long_remote {
           created=\`tail -1 \$metadata.\$i/rotated\`
         else
           created=0
+        fi
+        # Validate created date
+        if [ -z "\$created" ] || echo \$created | grep -v -q -e '^[0-9]*$'; then
+           echo "Warning: Invalid metatada \$created. Skipping rotation."
+           break
         fi
         cutoff_time=\$(( now - (seconds*(i-1)) ))
         if [ ! \$created -gt \$cutoff_time ]; then
