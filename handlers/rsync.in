@@ -277,7 +277,7 @@ function eval_config {
     mv=move_files
   fi
 
-  excludes=`echo "$exclude" | sed -e 's/^/--exclude=/g' -e 's/ / --exclude=/g'`
+  excludes=`echo "$exclude" | @SED@ 's/^/--exclude=/g' -e 's/ / --exclude=/g'`
 
 }
 
