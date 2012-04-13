@@ -277,9 +277,7 @@ function eval_config {
     mv=move_files
   fi
 
-  for path in $exclude; do
-    excludes="$excludes --exclude=$path"
-  done
+  excludes=`echo "$exclude" | sed -e 's/^/--exclude=/g' -e 's/ / --exclude=/g'`
 
 }
 
@@ -1113,8 +1111,8 @@ for SECTION in $include; do
   set_dest
 
   info "Syncing $SECTION on $dest_path..."
-  debug $nice $rsync "${rsync_options[@]}" $filelist_flag $excludes $batch_option $orig $dest_path
-  $nice $rsync "${rsync_options[@]}" $filelist_flag $excludes $batch_option $orig $dest_path | tee -a $log
+  debug $nice $rsync "${rsync_options[@]}" $filelist_flag "$excludes" $batch_option $orig $dest_path
+  $nice $rsync "${rsync_options[@]}" $filelist_flag "$excludes" $batch_option $orig $dest_path | tee -a $log
 
   if [ "$?" != "0" ]; then
     fatal "Rsync error when trying to transfer $SECTION"
