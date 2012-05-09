@@ -447,6 +447,8 @@ function rotate_long {
     echo "Debug: daily.$max --> weekly.1"
     $nice mv $backuproot/daily.$max $backuproot/weekly.1
     mkdir -p $backuproot/metadata/weekly.1
+    # Update increment folder date and setup metadata
+    $touch $backuproot/weekly.1
     date +%c%n%s > $backuproot/metadata/weekly.1/rotated
     #if [ -f $backuproot/metadata/daily.$max/created  ]; then
     #   $nice mv $backuproot/metadata/daily.$max/created $backuproot/metadata/weekly.1/
@@ -458,6 +460,8 @@ function rotate_long {
     echo "Debug: weekly.$max --> monthly.1"
     $nice mv $backuproot/weekly.$max $backuproot/monthly.1
     mkdir -p $backuproot/metadata/monthly.1
+    # Update increment folder date and setup metadata
+    $touch $backuproot/monthly.1
     date +%c%n%s > $backuproot/metadata/monthly.1/rotated
     #if [ -f $backuproot/metadata/weekly.$max/created  ]; then
     #   $nice mv $backuproot/metadata/weekly.$max/created $backuproot/metadata/weekly.1/
@@ -565,6 +569,8 @@ function rotate_long_remote {
     echo "Debug: daily.\$max --> weekly.1"
     $nice mv $backuproot/daily.\$max $backuproot/weekly.1
     mkdir -p $backuproot/metadata/weekly.1
+    # Update increment folder date and setup metadata
+    $touch $backuproot/weekly.1
     date +%c%n%s > $backuproot/metadata/weekly.1/rotated
     #if [ -f $backuproot/metadata/daily.\$max/created  ]; then
     #   $nice mv $backuproot/metadata/daily.\$max/created $backuproot/metadata/weekly.1/
@@ -576,6 +582,8 @@ function rotate_long_remote {
     echo "Debug: weekly.\$max --> monthly.1"
     $nice mv $backuproot/weekly.\$max $backuproot/monthly.1
     mkdir -p $backuproot/metadata/monthly.1
+    # Update increment folder date and setup metadata
+    $touch $backuproot/monthly.1
     date +%c%n%s > $backuproot/metadata/monthly.1/rotated
     #if [ -f $backuproot/metadata/weekly.\$max/created  ]; then
     #   $nice mv $backuproot/metadata/weekly.\$max/created $backuproot/metadata/weekly.1/
