@@ -1121,6 +1121,9 @@ for SECTION in $include; do
   set_filelist
   set_dest
 
+  # Ensure that a non-zero rsync exit status is caught by our handler
+  set -o pipefail
+
   info "Syncing $SECTION on $dest_path..."
   debug $nice $rsync "${rsync_options[@]}" $filelist_flag $excludes $batch_option $orig $dest_path
   $nice $rsync "${rsync_options[@]}" $filelist_flag $excludes $batch_option $orig $dest_path | tee -a $log
