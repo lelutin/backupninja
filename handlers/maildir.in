@@ -57,7 +57,6 @@ getconf rotate yes
 getconf remove yes
 getconf backup yes
 
-getconf loadlimit 5
 getconf speedlimit 0
 getconf keepdaily 5
 getconf keepweekly 3
