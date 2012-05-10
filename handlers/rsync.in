@@ -39,7 +39,6 @@
 #   keepdaily = for long storage format, specify the number of daily backup increments
 #   keepweekly = for long storage format, specify the number of weekly backup increments
 #   keepmonthly = for long storage format, specify the number of monthly backup increments
-#   lockfile = lockfile to be kept during backup execution
 #   nicelevel = rsync command nice level
 #   enable_mv_timestamp_bug = set to "yes" if your system isnt handling timestamps correctly
 #   tmp = temp folder
@@ -129,7 +128,6 @@ function eval_config {
   getconf keepdaily 5
   getconf keepweekly 3
   getconf keepmonthly 1
-  getconf lockfile
   getconf nicelevel 0
   getconf enable_mv_timestamp_bug no
   getconf tmp /tmp
@@ -875,45 +873,6 @@ function test_connect {
 
 }
 
-function set_lockfile {
-
-  if [ ! -z "$lockfile" ]; then
-    mkdir -p `dirname $lockfile`
-    if ( set -o noclobber; echo "$$" > "$lockfile" ) &> /dev/null; then
-      trap 'unset_lockfile' INT TERM EXIT
-    else
-      fatal "Could not create lockfile $lockfile, exiting"
-    fi
-  fi
-
-}
-
-function unset_lockfile {
-
-  if [ ! -z "$lockfile" ]; then
-    $rm -f $lockfile || warning "Could not remove lockfile $lockfile"
-  fi
-
-}
-
-function check_lockfile {
-
-  local pid process
-
-  if [ ! -z "$lockfile" ] && [ -f "$lockfile" ]; then
-    pid="`cat $lockfile`"
-    process="`ps --no-headers -o comm $pid`"
-    if [ "$?" == "0" ] && [ "`ps --no-headers -o comm $$`" == "$process" ]; then
-      info "Another backup is running for $lockfile, skipping run"
-      exit
-    else
-      info "Found old lockfile $lockfile, removing it"
-      unset_lockfile  
-    fi
-  fi
-
-}
-
 function set_filelist {
 
   filelist_flag=""
@@ -1103,8 +1062,6 @@ function end_mux {
 # the backup procedure
 
 eval_config
-check_lockfile
-set_lockfile
 set_rsync_options
 start_mux
 stop_services
@@ -1136,7 +1093,6 @@ done
 mount_ro
 run_fsck
 start_services
-unset_lockfile
 end_mux
 
 echo "Finnishing backup at `date`" >> $log
