@@ -50,11 +50,6 @@ days = 7
 # for long storage format, specify the number of monthly backup increments
 #keepmonthly = 1
 
-# use this if you need a lockfile to be kept during backup execution
-# this is an useful feature in case you have some tasks that should
-# know if the backup is running or not
-#lockfile = 
-
 # rsync command nice level
 #nicelevel = 0
 
