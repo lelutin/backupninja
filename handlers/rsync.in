@@ -391,7 +391,8 @@ function rotate_long {
   local metadata
 
   if [ ! -d "$backuproot" ]; then
-    fatal "Skipping rotate of $backuproot as it doesn't exist."
+    warning "Skipping rotate of $backuproot as it doesn't exist."
+    return
   fi
 
   for rottype in daily weekly monthly; do
