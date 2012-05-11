@@ -1100,6 +1100,28 @@ function end_mux {
 
 }
 
+function set_pipefail {
+
+  # Save initial pipefail status for later restoration
+  if echo "$SHELLOPTS" | grep -q ":pipefail"; then
+     pipefail="-o"
+  else
+     pipefail="+o"
+  fi
+
+  # Ensure that a non-zero rsync exit status is caught by our handler
+  set -o pipefail
+
+}
+
+function restore_pipefail {
+
+  if [ ! -z "$pipefail" ]; then
+    set $pipefail pipefail
+  fi
+
+}
+
 # the backup procedure
 
 eval_config
@@ -1109,6 +1131,7 @@ set_rsync_options
 start_mux
 stop_services
 mount_rw
+set_pipefail
 
 starttime="`date +%c%n%s`"
 echo "Starting backup at `echo $starttime | head -n 1`" >> $log
@@ -1120,9 +1143,6 @@ for SECTION in $include; do
   set_batch_mode
   set_filelist
   set_dest
-
-  # Ensure that a non-zero rsync exit status is caught by our handler
-  set -o pipefail
 
   info "Syncing $SECTION on $dest_path..."
   debug $nice $rsync "${rsync_options[@]}" $filelist_flag $excludes $batch_option $orig $dest_path
@@ -1136,6 +1156,7 @@ for SECTION in $include; do
 
 done
 
+restore_pipefail
 mount_ro
 run_fsck
 start_services
