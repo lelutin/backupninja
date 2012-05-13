@@ -403,7 +403,7 @@ function rotate_long {
       echo "Debug: $dir.1 does not exist, skipping."
       continue 1
     elif [ ! -f $metadata.1/created ] && [ ! -f $metadata.1/rotated ]; then
-      echo "Warning: metadata does not exist for $dir.1. This backup may be only partially completed. Skipping rotation."
+      warning "Warning: metadata does not exist for $dir.1. This backup may be only partially completed. Skipping rotation."
       continue 1
     fi
     
@@ -428,7 +428,7 @@ function rotate_long {
         if [ ! $created -gt $cutoff_time ]; then
           next=$(( i + 1 ))
           if [ ! -d $dir.$next ]; then
-            echo "Debug: $rottype.$i --> $rottype.$next"
+            debug "$rottype.$i --> $rottype.$next"
             $nice mv $dir.$i $dir.$next
             mkdir -p $metadata.$next
             date +%c%n%s > $metadata.$next/rotated
@@ -436,10 +436,10 @@ function rotate_long {
               $nice mv $metadata.$i/created $metadata.$next
             fi
           else
-            echo "Debug: skipping rotation of $dir.$i because $dir.$next already exists."
+            debug "skipping rotation of $dir.$i because $dir.$next already exists."
           fi
         else
-          echo "Debug: skipping rotation of $dir.$i because it was created" $(( (now-created)/86400)) "days ago ("$(( (now-cutoff_time)/86400))" needed)."
+          debug "skipping rotation of $dir.$i because it was created" $(( (now-created)/86400)) "days ago ("$(( (now-cutoff_time)/86400))" needed)."
         fi
       fi
     done
@@ -447,7 +447,7 @@ function rotate_long {
 
   max=$((keepdaily+1))
   if [ $keepweekly -gt 0 -a -d $backuproot/daily.$max -a ! -d $backuproot/weekly.1 ]; then
-    echo "Debug: daily.$max --> weekly.1"
+    debug "daily.$max --> weekly.1"
     $nice mv $backuproot/daily.$max $backuproot/weekly.1
     mkdir -p $backuproot/metadata/weekly.1
     date +%c%n%s > $backuproot/metadata/weekly.1/rotated
@@ -458,7 +458,7 @@ function rotate_long {
 
   max=$((keepweekly+1))
   if [ $keepmonthly -gt 0 -a -d $backuproot/weekly.$max -a ! -d $backuproot/monthly.1 ]; then
-    echo "Debug: weekly.$max --> monthly.1"
+    debug "weekly.$max --> monthly.1"
     $nice mv $backuproot/weekly.$max $backuproot/monthly.1
     mkdir -p $backuproot/metadata/monthly.1
     date +%c%n%s > $backuproot/metadata/monthly.1/rotated
@@ -476,10 +476,10 @@ function rotate_long {
     for (( i=$oldest; i >= $max; i-- )); do
       if [ -d $dir.$i ]; then
         if [ -d $backuproot/rotate.tmp ]; then
-          echo "Debug: removing rotate.tmp"
+          debug "removing rotate.tmp"
           $nice rm -rf $backuproot/rotate.tmp
         fi
-        echo "Debug: moving $rottype.$i to rotate.tmp"
+        debug "moving $rottype.$i to rotate.tmp"
         $nice mv $dir.$i $backuproot/rotate.tmp
       fi
     done
