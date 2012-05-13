@@ -1131,7 +1131,6 @@ set_rsync_options
 start_mux
 stop_services
 mount_rw
-set_pipefail
 
 starttime="`date +%c%n%s`"
 echo "Starting backup at `echo $starttime | head -n 1`" >> $log
@@ -1146,17 +1145,18 @@ for SECTION in $include; do
 
   info "Syncing $SECTION on $dest_path..."
   debug $nice $rsync "${rsync_options[@]}" $filelist_flag $excludes $batch_option $orig $dest_path
+  set_pipefail
   $nice $rsync "${rsync_options[@]}" $filelist_flag $excludes $batch_option $orig $dest_path | tee -a $log
 
   if [ "$?" != "0" ]; then
     fatal "Rsync error when trying to transfer $SECTION"
   fi
 
+  restore_pipefail
   update_metadata
 
 done
 
-restore_pipefail
 mount_ro
 run_fsck
 start_services
