@@ -45,6 +45,7 @@ version 1.0 -- UNRELEASED
 	   installing lib/* into lib/backupninja/. Where else are be supposed
 	   to install such files anyway?
 	 . Have "make dist" ship handlers/*.in instead of make results.
+	 . Have "make dist" ship the FAQ.
     documentation changes
 	 . Document what features available to .sh jobs (Redmine #1558).
 
