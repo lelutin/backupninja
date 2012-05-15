@@ -44,6 +44,7 @@ version 1.0 -- UNRELEASED
 	 . Workaround automake sanity check that would prevent us from
 	   installing lib/* into lib/backupninja/. Where else are be supposed
 	   to install such files anyway?
+	 . Have "make dist" ship handlers/*.in instead of make results.
     documentation changes
 	 . Document what features available to .sh jobs (Redmine #1558).
 
