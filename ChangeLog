@@ -10,6 +10,8 @@ version 1.0 -- UNRELEASED
 	   (Closes: #657201)
 	 . Report failure output at error loglevel so that it is emailed
 	   (Closes: #536858)
+	maildir:
+	 . Remove 'loadlimit' parameter - it is not used anywhere.
 	mysql:
 	 . Don't attempt to dump performance_schema database (Redmine#3741).
 	pgsql:
@@ -22,11 +24,22 @@ version 1.0 -- UNRELEASED
 	 . Fix metadata rotation.
 	 . Allow disabling rotation or setting 2 days as minimum for backup
 	   increments in rsync short format (Redmine#2107).
-	 . Use fatal instead of custom "exit 1" (Redmine#3721).
 	 . Abort on rsync error (Redmine#3692).
 	 . Cleanup orphaned metadata (Redmine#3727).
-	 . Use the backup start time and not the time the backup was finished
-	   (Closes: #654192)
+	 . Use the backup start time and not the time the backup was finished.
+	   (Closes: #654192).
+	 . Use 'debug', 'fatal' and 'warning' functions instead of regular echo
+	   and exit (Redmine#3840, Redmine#3721).
+	 . Quoting $starttime (Redmine#3868).
+	 . Validate created date on long_rotation to avoid too many arguments
+	   at comparison (Redmine#3868).
+	 . Quoting $exclude and $excludes and avoiding a for loop on $exclude
+	   to not expand wildcards in beforehand (Redmine#3882).
+	 . Quote excludes (Redmine#3882).
+	 . Changing remaining 'exit' to 'fatal' at rsync handler (Redmine#3721).
+	 . Removing duplicated locking support (Redmine#3838).
+	 . Documenting rotation parameters at example.rsync (Redmine#3891).
+	 . Ensure that a non-zero rsync exit status is caught (Redmine#3892).
     build system changes
 	 . Workaround automake sanity check that would prevent us from
 	   installing lib/* into lib/backupninja/. Where else are be supposed
