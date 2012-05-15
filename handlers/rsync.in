@@ -39,7 +39,6 @@
 #   keepdaily = for long storage format, specify the number of daily backup increments
 #   keepweekly = for long storage format, specify the number of weekly backup increments
 #   keepmonthly = for long storage format, specify the number of monthly backup increments
-#   lockfile = lockfile to be kept during backup execution
 #   nicelevel = rsync command nice level
 #   enable_mv_timestamp_bug = set to "yes" if your system isnt handling timestamps correctly
 #   tmp = temp folder
@@ -129,7 +128,6 @@ function eval_config {
   getconf keepdaily 5
   getconf keepweekly 3
   getconf keepmonthly 1
-  getconf lockfile
   getconf nicelevel 0
   getconf enable_mv_timestamp_bug no
   getconf tmp /tmp
@@ -277,9 +275,7 @@ function eval_config {
     mv=move_files
   fi
 
-  for path in $exclude; do
-    excludes="$excludes --exclude=$path"
-  done
+  excludes=`echo "$exclude" | @SED@ -e "s/^/--exclude='/g" -e "s/ /' --exclude='/g" -e "s/$/'/"`
 
 }
 
@@ -391,8 +387,8 @@ function rotate_long {
   local metadata
 
   if [ ! -d "$backuproot" ]; then
-    echo "Debug: skipping rotate of $backuproot as it doesn't exist."
-    exit
+    warning "Skipping rotate of $backuproot as it doesn't exist."
+    return
   fi
 
   for rottype in daily weekly monthly; do
@@ -405,12 +401,12 @@ function rotate_long {
       echo "Debug: $dir.1 does not exist, skipping."
       continue 1
     elif [ ! -f $metadata.1/created ] && [ ! -f $metadata.1/rotated ]; then
-      echo "Warning: metadata does not exist for $dir.1. This backup may be only partially completed. Skipping rotation."
+      warning "Warning: metadata does not exist for $dir.1. This backup may be only partially completed. Skipping rotation."
       continue 1
     fi
     
     # Rotate the current list of backups, if we can.
-    oldest=`find $backuproot -maxdepth 1 -type d -name $rottype'.*' | @SED@ 's/^.*\.//' | sort -n | tail -1`
+    oldest=`find $backuproot -maxdepth 1 -type d -name $rottype'.*' | @SED@ -e 's/^.*\.//' | sort -n | tail -1`
     [ "$oldest" == "" ] && oldest=0
     for (( i=$oldest; i > 0; i-- )); do
       if [ -d $dir.$i ]; then
@@ -421,11 +417,16 @@ function rotate_long {
         else
           created=0
         fi
+        # Validate created date
+        if [ -z "$created" ] || echo $created | grep -v -q -e '^[0-9]*$'; then
+           warning "Invalid metadata $created. Skipping rotation."
+           break
+        fi
         cutoff_time=$(( now - (seconds*(i-1)) ))
         if [ ! $created -gt $cutoff_time ]; then
           next=$(( i + 1 ))
           if [ ! -d $dir.$next ]; then
-            echo "Debug: $rottype.$i --> $rottype.$next"
+            debug "$rottype.$i --> $rottype.$next"
             $nice mv $dir.$i $dir.$next
             mkdir -p $metadata.$next
             date +%c%n%s > $metadata.$next/rotated
@@ -433,10 +434,10 @@ function rotate_long {
               $nice mv $metadata.$i/created $metadata.$next
             fi
           else
-            echo "Debug: skipping rotation of $dir.$i because $dir.$next already exists."
+            debug "skipping rotation of $dir.$i because $dir.$next already exists."
           fi
         else
-          echo "Debug: skipping rotation of $dir.$i because it was created" $(( (now-created)/86400)) "days ago ("$(( (now-cutoff_time)/86400))" needed)."
+          debug "skipping rotation of $dir.$i because it was created" $(( (now-created)/86400)) "days ago ("$(( (now-cutoff_time)/86400))" needed)."
         fi
       fi
     done
@@ -444,7 +445,7 @@ function rotate_long {
 
   max=$((keepdaily+1))
   if [ $keepweekly -gt 0 -a -d $backuproot/daily.$max -a ! -d $backuproot/weekly.1 ]; then
-    echo "Debug: daily.$max --> weekly.1"
+    debug "daily.$max --> weekly.1"
     $nice mv $backuproot/daily.$max $backuproot/weekly.1
     mkdir -p $backuproot/metadata/weekly.1
     date +%c%n%s > $backuproot/metadata/weekly.1/rotated
@@ -455,7 +456,7 @@ function rotate_long {
 
   max=$((keepweekly+1))
   if [ $keepmonthly -gt 0 -a -d $backuproot/weekly.$max -a ! -d $backuproot/monthly.1 ]; then
-    echo "Debug: weekly.$max --> monthly.1"
+    debug "weekly.$max --> monthly.1"
     $nice mv $backuproot/weekly.$max $backuproot/monthly.1
     mkdir -p $backuproot/metadata/monthly.1
     date +%c%n%s > $backuproot/metadata/monthly.1/rotated
@@ -467,16 +468,16 @@ function rotate_long {
   for rottype in daily weekly monthly; do
     max=$((keep${rottype}+1))
     dir="$backuproot/$rottype"
-    oldest=`find $backuproot -maxdepth 1 -type d -name $rottype'.*' | @SED@ 's/^.*\.//' | sort -n | tail -1`
+    oldest=`find $backuproot -maxdepth 1 -type d -name $rottype'.*' | @SED@ -e 's/^.*\.//' | sort -n | tail -1`
     [ "$oldest" == "" ] && oldest=0 
     # if we've rotated the last backup off the stack, remove it.
     for (( i=$oldest; i >= $max; i-- )); do
       if [ -d $dir.$i ]; then
         if [ -d $backuproot/rotate.tmp ]; then
-          echo "Debug: removing rotate.tmp"
+          debug "removing rotate.tmp"
           $nice rm -rf $backuproot/rotate.tmp
         fi
-        echo "Debug: moving $rottype.$i to rotate.tmp"
+        debug "moving $rottype.$i to rotate.tmp"
         $nice mv $dir.$i $backuproot/rotate.tmp
       fi
     done
@@ -509,7 +510,7 @@ function rotate_long_remote {
   now=\`date +%s\`
 
   if [ ! -d "$backuproot" ]; then
-    echo "Debug: skipping rotate of $backuproot as it doesn't exist."
+    echo "Fatal: skipping rotate of $backuproot as it doesn't exist."
     exit
   fi
 
@@ -528,7 +529,7 @@ function rotate_long_remote {
     fi
     
     # Rotate the current list of backups, if we can.
-    oldest=\`find $backuproot -maxdepth 1 -type d -name \$rottype'.*' | @SED@ 's/^.*\.//' | sort -n | tail -1\`
+    oldest=\`find $backuproot -maxdepth 1 -type d -name \$rottype'.*' | @SED@ -e 's/^.*\.//' | sort -n | tail -1\`
     [ "\$oldest" == "" ] && oldest=0
     for (( i=\$oldest; i > 0; i-- )); do
       if [ -d \$dir.\$i ]; then
@@ -538,6 +539,11 @@ function rotate_long_remote {
           created=\`tail -1 \$metadata.\$i/rotated\`
         else
           created=0
+        fi
+        # Validate created date
+        if [ -z "\$created" ] || echo \$created | grep -v -q -e '^[0-9]*$'; then
+           echo "Warning: Invalid metadata \$created. Skipping rotation."
+           break
         fi
         cutoff_time=\$(( now - (seconds*(i-1)) ))
         if [ ! \$created -gt \$cutoff_time ]; then
@@ -585,7 +591,7 @@ function rotate_long_remote {
   for rottype in daily weekly monthly; do
     max=\$((keep\${rottype}+1))
     dir="$backuproot/\$rottype"
-    oldest=\`find $backuproot -maxdepth 1 -type d -name \$rottype'.*' | @SED@ 's/^.*\.//' | sort -n | tail -1\`
+    oldest=\`find $backuproot -maxdepth 1 -type d -name \$rottype'.*' | @SED@ -e 's/^.*\.//' | sort -n | tail -1\`
     [ "\$oldest" == "" ] && oldest=0 
     # if we've rotated the last backup off the stack, remove it.
     for (( i=\$oldest; i >= \$max; i-- )); do
@@ -830,7 +836,7 @@ function update_metadata {
     # finished, otherwise daily rotations might not take place.
     # If we used backup end time, in the next handler run
     # we might not have $now - $created >= 24:00
-    echo $starttime > $metadata/created
+    echo "$starttime" > $metadata/created
     $touch $backupdir/$SECTION/$suffix
   else
     folder="`echo $dest_path | cut -d : -f 2`"
@@ -844,7 +850,7 @@ function update_metadata {
     # finished, otherwise daily rotations might not take place.
     # If we used backup end time, in the next handler run
     # we might not have $now - $created >= 24:00
-    echo $starttime > $metadata/created
+    echo "$starttime" > $metadata/created
     ##### END REMOTE SCRIPT #######
 EOF
 ) | (while read a; do passthru $a; done)
@@ -871,45 +877,6 @@ function test_connect {
     fatal "Can't connect to $host as $user."
   else
     debug "Connected to $host successfully"
-  fi
-
-}
-
-function set_lockfile {
-
-  if [ ! -z "$lockfile" ]; then
-    mkdir -p `dirname $lockfile`
-    if ( set -o noclobber; echo "$$" > "$lockfile" ) &> /dev/null; then
-      trap 'unset_lockfile' INT TERM EXIT
-    else
-      fatal "Could not create lockfile $lockfile, exiting"
-    fi
-  fi
-
-}
-
-function unset_lockfile {
-
-  if [ ! -z "$lockfile" ]; then
-    $rm -f $lockfile || warning "Could not remove lockfile $lockfile"
-  fi
-
-}
-
-function check_lockfile {
-
-  local pid process
-
-  if [ ! -z "$lockfile" ] && [ -f "$lockfile" ]; then
-    pid="`cat $lockfile`"
-    process="`ps --no-headers -o comm $pid`"
-    if [ "$?" == "0" ] && [ "`ps --no-headers -o comm $$`" == "$process" ]; then
-      info "Another backup is running for $lockfile, skipping run"
-      exit
-    else
-      info "Found old lockfile $lockfile, removing it"
-      unset_lockfile  
-    fi
   fi
 
 }
@@ -1125,15 +1092,13 @@ function restore_pipefail {
 # the backup procedure
 
 eval_config
-check_lockfile
-set_lockfile
 set_rsync_options
 start_mux
 stop_services
 mount_rw
 
 starttime="`date +%c%n%s`"
-echo "Starting backup at `echo $starttime | head -n 1`" >> $log
+echo "Starting backup at `echo "$starttime" | head -n 1`" >> $log
 
 for SECTION in $include; do
 
@@ -1144,9 +1109,9 @@ for SECTION in $include; do
   set_dest
 
   info "Syncing $SECTION on $dest_path..."
-  debug $nice $rsync "${rsync_options[@]}" $filelist_flag $excludes $batch_option $orig $dest_path
+  debug $nice $rsync "${rsync_options[@]}" $filelist_flag "$excludes" $batch_option $orig $dest_path
   set_pipefail
-  $nice $rsync "${rsync_options[@]}" $filelist_flag $excludes $batch_option $orig $dest_path | tee -a $log
+  $nice $rsync "${rsync_options[@]}" $filelist_flag "$excludes" $batch_option $orig $dest_path | tee -a $log
 
   if [ "$?" != "0" ]; then
     fatal "Rsync error when trying to transfer $SECTION"
@@ -1160,7 +1125,6 @@ done
 mount_ro
 run_fsck
 start_services
-unset_lockfile
 end_mux
 
 echo "Finnishing backup at `date`" >> $log

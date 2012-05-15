@@ -36,9 +36,33 @@ backupdir = myserver
 #tmp = /tmp
 
 # specify backup storage format: short, long or mirror (i.e, no rotations)
+#
+# In the short format, incremental backups are rotated every day the handler
+# runs an by a finite number of times (backup.0, backup.1, backup.1, etc), so
+# if you want to have incremental backups for longer periods (like months) you
+# have to configure rotations for 30 or more using the "days" parameter at the
+# [general] section in the handler config.
+# 
+# The short format is better described here:
+# http://www.mikerubel.org/computers/rsync_snapshots/#Incremental
+# 
+# The long format is inspired by the maildir handler and allows keeping backups
+# of longer periods (weeks and months) using less rotations as it stores
+# the increments in folders like daily.1, weekly.1, monthly.1 and has three
+# rotation parameters:
+# 
+#   keepdaily   = number of daily backup increments
+#   keepweekly  = number of weekly backup increments
+#   keepmonthly = number of monthly backup increments
+#
 format = short
 
 # for short storage format, specify the number of backup increments (min = 2, set to 1 or less to disable)
+#
+# Note that setting days = 0 is almost the same as using format = mirror except
+# that with the days config your backup gets a .0 suffix at the destination
+# folder, making it easier to turn it later to an incremental backup.
+#
 days = 7
 
 # for long storage format, specify the number of daily backup increments
@@ -49,11 +73,6 @@ days = 7
 
 # for long storage format, specify the number of monthly backup increments
 #keepmonthly = 1
-
-# use this if you need a lockfile to be kept during backup execution
-# this is an useful feature in case you have some tasks that should
-# know if the backup is running or not
-#lockfile = 
 
 # rsync command nice level
 #nicelevel = 0
