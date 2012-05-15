@@ -46,6 +46,7 @@ version 1.0 -- UNRELEASED
 	   to install such files anyway?
 	 . Have "make dist" ship handlers/*.in instead of make results.
 	 . Have "make dist" ship the FAQ.
+	 . Install handlers as pkgdata_DATA, instead of their .in files.
     documentation changes
 	 . Document what features available to .sh jobs (Redmine #1558).
 

@@ -16,7 +16,7 @@ edit = sed \
     -e "s,@AWK\@,$(AWK),g" \
     -e "s,@SED\@,$(SED),g" 
 
-dist_pkgdata_DATA = $(DIST_HANDLERS)
+pkgdata_DATA = $(HANDLERS)
 
 dup: $(srcdir)/dup.in
 	rm -f dup
