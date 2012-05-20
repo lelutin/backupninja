@@ -1,3 +1,9 @@
+version 1.0 -- UNRELEASED
+    handler changes
+	mysql:
+	 . Use --skip-events when backing up the performance_schema database.
+	   (Closes: #673572)
+
 version 1.0-rc1 -- May 15, 2012
     handler changes
 	dup:
