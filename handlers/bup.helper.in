@@ -198,7 +198,7 @@ EOF
 
    if [ "$bup_type" = "remote" ]; then
       cat >> $next_filename <<EOF
-remote_dir = $bup_remote_bupdir
+remote_bupdir = $bup_remote_bupdir
 host = $bup_host
 user = $bup_user
 EOF
