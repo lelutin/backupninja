@@ -3,16 +3,20 @@ HANDLERS = dup dup.helper maildir makecd		\
          makecd.helper mysql mysql.helper pgsql pgsql.helper rdiff	\
          rdiff.helper rsync sh svn sys sys.helper trac tar tar.helper
 
+DIST_HANDLERS = dup.in dup.helper.in maildir.in makecd.in		\
+         makecd.helper.in mysql.in mysql.helper.in pgsql.in pgsql.helper.in rdiff.in	\
+         rdiff.helper.in rsync.in sh.in svn.in sys.in sys.helper.in trac.in tar.in tar.helper.in wget
+
 CLEANFILES = $(HANDLERS)
 
-EXTRA_DIST = Makefile.am $(HANDLERS)
+EXTRA_DIST = Makefile.am $(DIST_HANDLERS)
 
 edit = sed \
     -e "s,@BASH\@,$(BASH),g" \
     -e "s,@AWK\@,$(AWK),g" \
     -e "s,@SED\@,$(SED),g" 
 
-dist_pkgdata_DATA = $(HANDLERS)
+pkgdata_DATA = $(HANDLERS)
 
 dup: $(srcdir)/dup.in
 	rm -f dup

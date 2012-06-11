@@ -349,7 +349,7 @@ function process_action() {
 
        else
 	   # a backup is probably ongoing already, so display an error message
-	   debug "failed to acquire lock"
+	   debug "failed to acquire lock $lockfile"
 	   echo "Fatal: Could not acquire lock $lockfile. A backup is probably already running for $file." >>$bufferfile
        fi
    } 200> $lockfile

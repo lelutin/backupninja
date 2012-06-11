@@ -43,3 +43,4 @@ aihtdikh -- Allow 'when = XXX' with spaces in .sh files.
 Chris Lamb <lamby@debian.org> -- rdiff.helper bugfix
 Yuval Kogman <nothingmuch@woobling.org> -- RackSpace's CloudFiles support for duplicity
 exobuzz - mysql bugfixes
+Glennie Vignarajah <glennie@glennie.fr> -- mysql bugfix

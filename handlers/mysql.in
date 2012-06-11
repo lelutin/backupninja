@@ -256,10 +256,15 @@ then
    for db in $databases
    do
       DUMP_BASE="$MYSQLDUMP $defaultsfile $sqldumpoptions"
-      if [ "$db" = "information_schema" ] || [ "$db" = "performance_schema" ]
-      then
-         DUMP_BASE="${DUMP_BASE} --skip-lock-tables"
-      fi
+
+      case "$db" in
+         information_schema)
+            DUMP_BASE="${DUMP_BASE} --skip-lock-tables"
+            ;;
+         performance_schema)
+            DUMP_BASE="${DUMP_BASE} --skip-lock-tables --skip-events"
+            ;;
+      esac
 
       # Dumping structure and data
       DUMP="$DUMP_BASE $ignore $db"
