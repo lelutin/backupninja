@@ -3,6 +3,8 @@ version 1.0 -- UNRELEASED
 	mysql:
 	 . Use --skip-events when backing up the performance_schema database.
 	   (Closes: #673572)
+    backupninja changes
+	 . Make it clear what lockfile could not be acquired, if any.
 
 version 1.0-rc1 -- May 15, 2012
     handler changes
