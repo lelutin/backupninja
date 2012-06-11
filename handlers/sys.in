@@ -348,13 +348,15 @@ echo "Getting information about the kernel."
 echo
 STATUS="Getting kernel version:"
 catifexec "/bin/uname" "-a"
-STATUS="Checking module information:"
-catifexec "/sbin/lsmod"
-for x  in $(/sbin/lsmod | /usr/bin/cut -f1 -d" " 2>/dev/null | /bin/grep -v Module 2>/dev/null
-) ; do
-   STATUS="Checking module information $x:"
-   catifexec "/sbin/modinfo" "$x"
-done
+if [ "$hardware" == "yes" ]; then
+   STATUS="Checking module information:"
+   catifexec "/sbin/lsmod"
+   for x  in $(/sbin/lsmod | /usr/bin/cut -f1 -d" " 2>/dev/null | /bin/grep -v Module 2>/dev/null
+   ) ; do
+      STATUS="Checking module information $x:"
+      catifexec "/sbin/modinfo" "$x"
+   done
+fi
 
 STATUS="Gathering information about your filesystems:"
 catiffile "/proc/filesystems"
@@ -432,9 +434,11 @@ catiffile "/proc/rtc"
 STATUS="Gathering information about your ide drivers:"
 catiffile "/proc/ide"
 
-STATUS="Gathering information about your bus:"
-catifexec "/usr/bin/lspci"
-catiffile "/proc/bus"
+if [ "$hardware" == "yes" ]; then
+   STATUS="Gathering information about your bus:"
+   catifexec "/usr/bin/lspci"
+   catiffile "/proc/bus"
+fi
 
 echo
 echo "Getting disk and filesystem information."

@@ -5,6 +5,8 @@ version 1.0 -- UNRELEASED
 	   (Closes: #673572)
     backupninja changes
 	 . Make it clear what lockfile could not be acquired, if any.
+	sys:
+	 . Don't execute /usr/bin/lspci or /sbin/modinfo when $hardware == "no"
 
 version 1.0-rc1 -- May 15, 2012
     handler changes
