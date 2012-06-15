@@ -1116,7 +1116,7 @@ for SECTION in $include; do
   set_dest
 
   info "Syncing $SECTION on $dest_path..."
-  debug $nice $rsync "${rsync_options[@]}" $filelist_flag "$excludes" $batch_option $orig $dest_path
+  debug $nice $rsync "${rsync_options[@]}" $filelist_flag $excludes $batch_option $orig $dest_path
   set_pipefail
   $nice $rsync "${rsync_options[@]}" $filelist_flag "$excludes" $batch_option $orig $dest_path | tee -a $log
 
