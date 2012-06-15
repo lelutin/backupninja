@@ -275,8 +275,15 @@ function eval_config {
     mv=move_files
   fi
 
-  excludes=`echo "$exclude" | @SED@ -e "s/^/--exclude='/g" -e "s/ /' --exclude='/g" -e "s/$/'/"`
-
+  set -o noglob
+  SAVEIFS=$IFS
+  IFS=$(echo -en "\n\b")
+  for i in $exclude; do
+     str="${i//__star__/*}"
+     excludes="${excludes} --exclude='$str'"
+  done
+  IFS=$SAVEIFS
+  set +o noglob
 }
 
 function rotate_short {
