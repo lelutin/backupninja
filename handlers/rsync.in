@@ -1116,9 +1116,9 @@ for SECTION in $include; do
   set_dest
 
   info "Syncing $SECTION on $dest_path..."
-  debug $nice $rsync "${rsync_options[@]}" $filelist_flag $excludes $batch_option $orig $dest_path
+  debug $nice $rsync ${rsync_options[@]} $filelist_flag $excludes $batch_option $orig $dest_path
   set_pipefail
-  $nice $rsync "${rsync_options[@]}" $filelist_flag "$excludes" $batch_option $orig $dest_path | tee -a $log
+  $nice su -c "$rsync ${rsync_options[@]} --delete-excluded $filelist_flag $excludes $batch_option $orig $dest_path" | tee -a $log
 
   if [ "$?" != "0" ]; then
     fatal "Rsync error when trying to transfer $SECTION"
