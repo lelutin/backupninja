@@ -1096,6 +1096,23 @@ function restore_pipefail {
 
 }
 
+function check_rsync_exit_status {
+
+  if [ -z "$1" ]; then
+    return
+  fi
+
+  case $1 in
+    1|2|3|4|5|6|10|11|12|13|14|21)
+       fatal "Rsync error $1 when trying to transfer $SECTION"
+       ;;
+    *)
+       warning "Rsync error $1 when trying to transfer $SECTION"
+       ;;
+  esac
+
+}
+
 # the backup procedure
 
 eval_config
@@ -1120,10 +1137,7 @@ for SECTION in $include; do
   set_pipefail
   $nice su -c "$rsync ${rsync_options[@]} --delete-excluded $filelist_flag $excludes $batch_option $orig $dest_path" | tee -a $log
 
-  if [ "$?" != "0" ]; then
-    fatal "Rsync error when trying to transfer $SECTION"
-  fi
-
+  check_rsync_exit_status $?
   restore_pipefail
   update_metadata
 
