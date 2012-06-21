@@ -1,3 +1,9 @@
+version 1.1 -- UNRELEASED
+    handler changes
+	rsync:
+	 . Issue warnings, not fatal errors, on non-fatal rsync errors.
+	   (Redmine#3966)
+
 version 1.0 -- June 15, 2012
     The "happy birthdays" release!
     handler changes
