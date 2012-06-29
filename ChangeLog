@@ -1,4 +1,4 @@
-version 1.1 -- UNRELEASED
+version 1.0.1 -- June 29, 2012
     handler changes
 	rsync:
 	 . Issue warnings, not fatal errors, on non-fatal rsync errors.
