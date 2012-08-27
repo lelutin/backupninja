@@ -496,6 +496,7 @@ getconf usecolors "yes"
 getconf SLAPCAT /usr/sbin/slapcat
 getconf LDAPSEARCH /usr/bin/ldapsearch
 getconf RDIFFBACKUP /usr/bin/rdiff-backup
+getconf BUP /usr/bin/bup
 getconf CSTREAM /usr/bin/cstream
 getconf MYSQLADMIN /usr/bin/mysqladmin
 getconf MYSQL /usr/bin/mysql
