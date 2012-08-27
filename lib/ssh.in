@@ -86,3 +86,23 @@ function ssh_ensure_remote_dir() {
 
    return 0
 }
+
+function test_connection() {
+   # given a user and host,
+   # tests the connection.
+   # if user or host is missing, returns 0
+   # (ie, assume it's a local connection).
+   if [ $# -lt 2 ]; then
+      debug "(local is assumed to be a good connection)"
+      return 0
+   fi
+   local user=$1
+   local host=$2
+   debug "ssh -o PasswordAuthentication=no $host -l $user 'echo -n host is alive'"
+   local ret=`ssh -o PasswordAuthentication=no $host -l $user 'echo -n host is alive'`
+   if echo $ret | grep "host is alive"; then
+      debug "Connected to $host as $user successfully"
+   else
+      fatal "Can't connect to $host as $user."
+   fi
+}
