@@ -28,6 +28,8 @@ PATH_LIST=$(echo $path | sed -e 's/\n/ /g')
 
 REMOTE_URL=
 if [ "$type" = "remote" ]; then
+    ssh_test_connection $user $host
+
     REMOTE_URL="$host"
 
     if [ -n "$user" ]; then
