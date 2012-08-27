@@ -34,6 +34,7 @@ getconf ignore_version no
 
 setsection source
 getconf path
+getconf exclude
 
 setsection dest
 getconf bupdir
@@ -53,6 +54,10 @@ getconf host localhost
 getconf user
 
 PATH_LIST=$(echo $path | sed -e 's/\n/ /g')
+EXCLUDE_LIST=
+if [ -n "$exclude" ]; then
+    EXCLUDE_LIST=$(echo $exclude | sed -e '1s/^/--exclude=/' -e 's/[\n ]/ --exclude=/g')
+fi
 
 debug "backup type is set to '$desttype'"
 
@@ -105,8 +110,8 @@ fi
 ### EXECUTE ###
 
 if [ "$desttype" = "on" ]; then
-    debug "bup on $HOST_SPEC index -u $PATH_LIST"
-    if output=$(bup on $HOST_SPEC index -u $PATH_LIST 2>&1); then
+    debug "bup on $HOST_SPEC index -u $EXCLUDE_LIST $PATH_LIST"
+    if output=$(bup on $HOST_SPEC index -u $EXCLUDE_LIST $PATH_LIST 2>&1); then
         debug "$output"
         info "Indexing completed successfully"
     else
@@ -123,8 +128,8 @@ if [ "$desttype" = "on" ]; then
         warning "bup save encountered errors"
     fi
 else
-    debug "bup index -u $PATH_LIST"
-    if output=$(bup index -u $PATH_LIST 2>&1); then
+    debug "bup index -u $EXCLUDE_LIST $PATH_LIST"
+    if output=$(bup index -u $EXCLUDE_LIST $PATH_LIST 2>&1); then
         debug "$output"
         info "Indexing completed successfully"
     else
