@@ -87,7 +87,7 @@ function ssh_ensure_remote_dir() {
    return 0
 }
 
-function test_connection() {
+function ssh_test_connection() {
    # given a user and host,
    # tests the connection.
    # if user or host is missing, returns 0
