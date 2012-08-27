@@ -74,20 +74,22 @@ do_bup_dest() {
    REPLY=
    while [ -z "$REPLY" -o -z "$bup_type" ]
    do
-      formBegin "$bup_title - The type of destination bup repository. Can be local or remote."
+      formBegin "$bup_title - The type of destination bup repository. Can be 'local', 'remote' or 'on'."
          formItem "dest_type" "$bup_type"
       formDisplay
       [ $? = 0 ] || return
       bup_type=$REPLY
-      if [ "$bup_type" != "local" ] && [ "$bup_type" != "remote" ]; then
-        bup_type=
+      if [ "$bup_type" != "local" ] && [ "$bup_type" != "remote" ] && [ "$bup_type" != "on" ]; then
+         echo "Wrong backup type. Must be one of 'local', 'remote' or 'on'."
+         bup_type=
+         read
       fi
    done
 
    REPLY=
    while [ -z "$REPLY" -o -z "$bup_branch" -o -z "$bup_remote_bupdir" ]
    do
-     formBegin "$bup_title - destination: last two items are required for type 'remote' only"
+     formBegin "$bup_title - destination: last two items are required for types 'remote' and 'on'."
         formItem "dest_bup_remote_bupdir" "$bup_remote_bupdir"
         formItem "dest_branch" "$bup_branch"
         formItem "dest_host" "$bup_host"
@@ -99,9 +101,12 @@ do_bup_dest() {
      bup_branch=${tmp_array[1]}
      bup_host=${tmp_array[2]}
      bup_user=${tmp_array[3]}
-     if [ "$bup_type" = "remote" ] && [ -z "$bup_host" ] || [ -z "$bup_user" ]; then
-        # Do it again, missing items for your type.
-        REPLY=
+     if [ "$bup_type" = "remote" ] || [ "$bup_type" = "on" ]; then
+        if [ -z "$bup_host" ] || [ -z "$bup_user" ]; then
+            echo "You must specify the hostname and the user for the chosen backup type."
+            REPLY=
+            read
+        fi
      fi
    done
    set +o noglob
@@ -173,7 +178,7 @@ do_bup_finish() {
 # 2. All the excludes come after all the includes. The order is not otherwise
 #    taken into account.
 
-# files to include in the backup
+# files/directories to include in the backup
 EOF
    set -o noglob
    for ((i=0; i < ${#bup_includes[@]} ; i++)); do
@@ -191,12 +196,19 @@ EOF
    cat >> $next_filename <<EOF
 
 [dest]
-bupdir = $bup_directory
+# Three possible backup types:
+#  * local -- save to a bup repository on the local computer filesystem hierarchy
+#  * remote -- push your data to a bup repository on a remote host via SSH
+#  * on -- pull data from the remote server to the local bup repository via SSH
 type = $bup_type
+# The local bup directory is always needed. It always holds index files and
+# also the whole backup when doing a "local" or an "on" backup.
+bupdir = $bup_directory
+# Each server/backup origin should have its own branch.
 branch = $bup_branch
 EOF
 
-   if [ "$bup_type" = "remote" ]; then
+   if [ "$bup_type" = "remote" ] || [ "$bup_type" = "on" ]; then
       cat >> $next_filename <<EOF
 remote_bupdir = $bup_remote_bupdir
 host = $bup_host
