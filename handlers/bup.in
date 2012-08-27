@@ -38,10 +38,10 @@ if [ "$type" = "remote" ]; then
     debug "remote location arguments: '$REMOTE_URL'"
 fi
 
-REPOSITORY=
 if [ -n "$bupdir" ]; then
-    REPOSITORY="-d $bupdir"
-    debug "bup repository arguments: '$REPOSITORY'"
+    BUP_DIR="$bupdir"
+    export BUP_DIR
+    debug "BUP_DIR set to: $bupdir"
 fi
 
 ### CHECK CONFIG ###
@@ -63,10 +63,10 @@ fi
 ### EXECUTE ###
 
 debug "indexing $PATH_LIST"
-debug "bup $REPOSITORY index -f $bupdir/bupindex -u $PATH_LIST"
-bup $REPOSITORY index -u $PATH_LIST
+debug "bup index -f $bupdir/bupindex -u $PATH_LIST"
+bup index -u $PATH_LIST
 
 debug "saving $PATH_LIST into branch $branch"
-debug "bup $REPOSITORY save -f $bupdir/bupindex $REMOTE_URL -n $branch $PATH_LIST"
-bup $REPOSITORY save $REMOTE_URL -n $branch $PATH_LIST
+debug "bup save -f $bupdir/bupindex $REMOTE_URL -n $branch $PATH_LIST"
+bup save $REMOTE_URL -n $branch $PATH_LIST
 
