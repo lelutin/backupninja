@@ -5,7 +5,32 @@
 # requires the bup binary, and ssh for remote connections
 #
 
+### FUNCTIONS ###
+
+function get_version() {
+   # given no arguments, returns the local version.
+   # given a user and host, returns the remote version.
+   # if user or host is missing, returns the local version.
+   local version
+   if [ "$#" -lt 2 ]; then
+      debug "$BUP --version"
+      echo `$BUP --version`
+   else
+      local user=$1
+      local host=$2
+      debug "ssh $host -l $user '$BUP --version'"
+      version=`ssh $host -l $user "$BUP --version"`
+      if [ $? = 127 ]; then
+         fatal "Unable to execute bup on remote server. It probably isn't installed"
+      else
+         echo "$version"
+      fi
+   fi
+}
+
 ### GET CONFIG ###
+
+getconf ignore_version no
 
 setsection source
 getconf path
@@ -61,6 +86,17 @@ fi
 
 if [ -z "$bupdir" ]; then
     debug "No bupdir specified: using the default location of ~/.bup !"
+fi
+
+if [ "$ignore_version" != "yes" ]; then
+   # see that bup has the same version at the source and destination
+   sourceversion=`get_version`
+   if [ "$desttype" != "local" ]; then
+      destversion=`get_version $user $host`
+      if [ "$sourceversion" != "$destversion" ]; then
+         fatal "bup does not have the same version at the source and at the destination."
+      fi
+   fi
 fi
 
 ### REMOVE OLD BACKUPS ###
