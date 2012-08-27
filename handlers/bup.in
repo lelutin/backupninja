@@ -70,14 +70,38 @@ fi
 
 if [ "$desttype" = "on" ]; then
     debug "bup on $HOST_SPEC index -u $PATH_LIST"
-    bup on $HOST_SPEC index -u $PATH_LIST
+    if output=$(bup on $HOST_SPEC index -u $PATH_LIST 2>&1); then
+        debug "$output"
+        info "Indexing completed successfully"
+    else
+        warning "$output"
+        warning "bup index encountered errors"
+    fi
 
     debug "bup on $HOST_SPEC save -n $branch $PATH_LIST"
-    bup on $HOST_SPEC save -n $branch $PATH_LIST
+    if output=$(bup on $HOST_SPEC save -n $branch $PATH_LIST 2>&1); then
+        debug "$output"
+        info "Successfullly finished backing up"
+    else
+        warning "$output"
+        warning "bup save encountered errors"
+    fi
 else
     debug "bup index -u $PATH_LIST"
-    bup index -u $PATH_LIST
+    if output=$(bup index -u $PATH_LIST 2>&1); then
+        debug "$output"
+        info "Indexing completed successfully"
+    else
+        warning "$output"
+        warning "bup index encountered errors"
+    fi
 
     debug "bup save $REMOTE_URL -n $branch $PATH_LIST"
-    bup save $REMOTE_URL -n $branch $PATH_LIST
+    if output=$(bup save $REMOTE_URL -n $branch $PATH_LIST 2>&1); then
+        debug "$output"
+        info "Successfullly finished backing up"
+    else
+        warning "$output"
+        warning "bup save encountered errors"
+    fi
 fi
