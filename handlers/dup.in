@@ -55,6 +55,13 @@ fi
 if [ "`echo $desturl | @AWK@ -F ':' '{print $1}'`" == "ftp" ]; then
    [ -n "$ftp_password" ]  || fatal "ftp_password must be set for FTP backups."
 fi
+if [ "`echo $desturl | @AWK@ -F ':' '{print $1}'`" == "file" ]; then
+   if [ ! -e "`echo $desturl | @AWK@ -F '://' '{print $2}'`" ]; then
+      fatal "The destination directory ($desturl) does not exist."
+   elif [ ! -d "`echo $desturl | @AWK@ -F '://' '{print $2}'`" ]; then
+      fatal "The destination ($desturl) is not a directory."
+   fi
+fi
 
 ### VServers
 # If vservers are configured, check that the ones listed in $vsnames do exist.

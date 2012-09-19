@@ -1,3 +1,9 @@
+version 1.1  -- UNRELEASED
+    handler changes
+	dup:
+	 . For local backups, check that the destination directory exists.
+	   Thanks to ulrich for the preliminary patch. (Redmine#4049)
+
 version 1.0.1 -- June 29, 2012
     handler changes
 	rsync:
