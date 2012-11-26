@@ -72,19 +72,12 @@ stripped_srcdir=${srcdir/*:/}
 destdir=${destdir%/}
 srcdir=${srcdir%/}
 
-if [ ! -n $destdir ]; then
-   destdir='-o mail_location=$destdir'
-fi
-if [ ! -n $srcdir ]; then
-   srcdir='-o mail_location=$srcdir'
+if [ -n "$srcconffile" ]; then
+   srcconffile="-c $srcconffile"
 fi
 
-if [ ! -n $srcconffile ]; then
-   srcconffile='-c $srcconffile'
-fi
-
-if [ ! -n $destconffile ]; then
-   destconffile='-c $destconffile'
+if [ -n "$destconffile" ]; then
+   destconffile="-c $destconffile"
 fi
 
 [ -d $stripped_srcdir ] || fatal "source directory $srcdir doesn't exist"
@@ -97,16 +90,20 @@ function do_user() {
    local user=$1
    local btype=$2
    local letter=${user:0:1} 
-   local target="$stripped_destdir/$letter/$user/$current_backup"
+   local target="$stripped_destdir/$letter/$user/$btype.1"
+   local failedcount=0
+   local ret=0
 
    debug "syncing"
    while [ $failedcount -lt 4 ]; do
-      debug $DSYNC $testflags -u $user backup $srcconffile $srcdir \
+      echo "failedcount: $failedcount"
+      echo "returned: $ret" 
+      debug $DSYNC $testflags -u $user backup $srcconffile \
          ssh -i $destid_file $destuser@$desthost $DSYNC $destconffile \
-         -u $user $destdir 2>&1
-      ret=`$DSYNC $testflags -u $user backup $srcconffile $srcdir \
+         -u $user 2>&1
+      ret=`$DSYNC $testflags -u $user backup $srcconffile \
          ssh -i $destid_file $destuser@$desthost $DSYNC $destconffile \
-         -u $user $destdir 2>&1`
+         -u $user 2>&1`
       ret=$?
       if [ $ret == 2 ]; then
          # dsync needs to be run again
@@ -114,9 +111,7 @@ function do_user() {
       elif [ $ret == 0 ]; then
          # things worked, so we break out of the loop
          let "failedcount = 4"
-         # move the directory to the $btype.1 and make a 'created' file
-         ssh -o PasswordAuthentication=no $desthost -l $destuser -i $destid_file $sshoptions "mv $target ../$btype.1"
-         ssh -o PasswordAuthentication=no $desthost -l $destuser -i $destid_file $sshoptions "date +%c%n%s > ../$btype.1/created"
+         ssh -o PasswordAuthentication=no $desthost -l $destuser -i $destid_file $sshoptions "date +%c%n%s > $stripped_destdir/$letter/$user/$btype.1/created"
       elif [ $ret != 0 ]; then
          # things did not work in a good way, report it and try again
          warning "dsync $user failed"
@@ -159,7 +154,6 @@ function do_rotate() {
    local user=$1
    local letter=${user:0:1}
    local backuproot="$stripped_destdir/$letter/$user"
-   local target="$stripped_destdir/$letter/$user/$current_backup"
 (
    ssh -T -o PasswordAuthentication=no $desthost -l $destuser -i $destid_file $sshoptions <<EOF
 ##### BEGIN REMOTE SCRIPT #####
@@ -181,11 +175,6 @@ function do_rotate() {
       dir="$backuproot/\$rottype"
       if [ ! -d \$dir.1 ]; then
          echo "Debug: \$dir.1 does not exist, skipping."
-         continue 1
-      fi
-
-      if [ -f \$target ]; then
-         echo "Warning: \$target exists. Previous backup did not complete properly. Skipping rotation."
          continue 1
       fi
 
@@ -214,7 +203,7 @@ function do_rotate() {
                echo "Debug: skipping rotation of \$dir.\$i because it was created" \$(( (now-created)/86400)) "days ago ("\$(( (now-cutoff_time)/86400))" needed)."
             fi
          fi
-      done
+      done     
    done
 
    max=\$((keepdaily+1))
@@ -276,7 +265,7 @@ function setup_remote_dirs() {
          if [ -d $tmpdir ]; then
             mv $tmpdir $dir.1
             if [ \$? == 1 ]; then
-               echo "Fatal: could mv $stripped_destdir/rotate.tmp $dir.1 on host $desthost"
+               echo "Fatal: could not mv $stripped_destdir/rotate.tmp $dir.1 on host $desthost"
                exit 1
             fi
          else
