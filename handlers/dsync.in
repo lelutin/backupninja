@@ -119,8 +119,8 @@ function do_user() {
          let "failedcount = failedcount + 1"
       fi
 
-      if [ $failedcount -gt 4 ]; then
-         fatal "dsync failed 3 times for this user -- something is not working right. bailing out."
+      if [ $failedcount -gt 3 ]; then
+         warning "dsync failed 3 times for this user -- something is not working right. bailing out."
       fi
    done
 }
