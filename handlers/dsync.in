@@ -108,7 +108,7 @@ function do_user() {
          let "failedcount = failedcount + 1"
       elif [ $ret == 0 ]; then
          # things worked, so we break out of the loop
-         let "failedcount = 4"
+         break
          ssh -o PasswordAuthentication=no $desthost -l $destuser -i $destid_file $sshoptions "date +%c%n%s > $stripped_destdir/$letter/$user/$btype.1/created"
       elif [ $ret != 0 ]; then
          # things did not work in a good way, report it and try again
