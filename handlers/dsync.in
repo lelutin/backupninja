@@ -96,8 +96,6 @@ function do_user() {
 
    debug "syncing"
    while [ $failedcount -lt 4 ]; do
-      echo "failedcount: $failedcount"
-      echo "returned: $ret" 
       debug $DSYNC $testflags -u $user backup $srcconffile \
          ssh -i $destid_file $destuser@$desthost $DSYNC $destconffile \
          -u $user 2>&1
