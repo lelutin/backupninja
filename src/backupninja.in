@@ -508,6 +508,8 @@ getconf PGSQLUSER postgres
 getconf GZIP /bin/gzip
 getconf GZIP_OPTS --rsyncable
 getconf RSYNC /usr/bin/rsync
+getconf DSYNC /usr/bin/dsync
+getconf DOVEADM /usr/bin/doveadm
 getconf admingroup root
 
 # initialize vservers support

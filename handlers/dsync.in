@@ -169,6 +169,7 @@ function do_rotate() {
       echo "Debug: skipping rotate of $user. $backuproot doesn't exist."
       exit
    fi
+
    for rottype in daily weekly monthly; do
       seconds=\$((seconds_\${rottype}))
 
@@ -333,7 +334,7 @@ if [ "$backup" == "yes" ]; then
       do_user $testuser $btype
    else
       [ -d "$stripped_srcdir" ] || fatal "directory $stripped_srcdir not found."
-      for user in `$DOVEADM user \* | cut -d@ -f1`
+      for user in `@DOVEADM@ user \* | cut -d@ -f1`
       do
          debug $user
          [ "$user" != "" ] || continue
