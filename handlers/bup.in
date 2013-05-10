@@ -80,6 +80,9 @@ if [ -n "$bupdir" ]; then
     debug "BUP_DIR set to: $bupdir"
 fi
 
+debug "Initializing remote bupdir if it does not exist"
+ssh $user@$host "[[ -d $remote_bupdir ]] || bup -d $remote_bupdir init"
+
 ### CHECK CONFIG ###
 if [ -z "$path" ]; then
     fatal "No source path was given."
