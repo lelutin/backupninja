@@ -47,6 +47,28 @@ do_bup_src() {
    done
    set +o noglob
 
+   # choose the path regex'es to exclude from the backup
+   REPLY=
+   while [ -z "$REPLY" ]; do
+      formBegin "$bup_title - host system: exclude regular expressions"
+         for ((i=0; i < ${#bup_excludes_rx[@]} ; i++)); do
+            formItem exclude_rx ${bup_excludes_rx[$i]}
+         done
+         formItem exclude_rx
+         formItem exclude_rx
+         formItem exclude_rx
+         formItem exclude_rx
+         formItem exclude_rx
+         formItem exclude_rx
+         formItem exclude_rx
+         formItem exclude_rx
+      formDisplay
+      [ $? = 0 ] || return
+      unset bup_excludes_rx
+      bup_excludes_rx=($REPLY)
+   done
+   set +o noglob
+
    _bup_src_done="(DONE)"
    setDefault dest
 }
@@ -193,6 +215,13 @@ EOF
    done
    set +o noglob
 
+   echo "# exclude from the backup paths that match those regular expressions" >> $next_filename
+   set -o noglob
+   for ((i=0; i < ${#bup_excludes_rx[@]} ; i++)); do
+      echo "exclude_rx = ${bup_excludes_rx[$i]}" >> $next_filename
+   done
+   set +o noglob
+
    cat >> $next_filename <<EOF
 
 [dest]
@@ -232,6 +261,7 @@ bup_wizard() {
    # re-entrant backups (backing up the backup) so we shouldn't need to specify
    # the bupdir in the excludes
    bup_excludes=(/home/*/.gnupg /home/*/.local/share/Trash /home/*/.Trash /home/*/.thumbnails /home/*/.beagle /home/*/.aMule /home/*/gtk-gnutella-downloads /var/cache/backupninja/duplicity)
+   bup_excludes_rx=
    bup_directory=/var/backups/filesystem.bup
    set +o noglob
 
