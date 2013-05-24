@@ -7,6 +7,8 @@
 
 ### FUNCTIONS ###
 
+[ -z "$BUP" ] || fatal "executable path not defined in 'BUP' configuration option"
+
 function get_version() {
    # given no arguments, returns the local version.
    # given a user and host, returns the remote version.
