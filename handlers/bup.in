@@ -7,7 +7,13 @@
 
 ### FUNCTIONS ###
 
-[ -z "$BUP" ] || fatal "executable path not defined in 'BUP' configuration option"
+if [ -z "$BUP" ]; then
+   if [ -x /usr/bin/bup ]; then
+      BUP=/usr/bin/bup
+   else
+      fatal "executable path not defined in 'BUP' configuration option"
+   fi
+fi
 
 function get_version() {
    # given no arguments, returns the local version.
