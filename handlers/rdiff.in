@@ -85,6 +85,7 @@ getconf testconnect yes
 getconf nicelevel 0
 getconf bwlimit
 getconf ignore_version no
+getconf output_as_info no
 
 setsection source
 getconf type; sourcetype=$type
@@ -182,7 +183,11 @@ if [ "$keep" != yes ]; then
    if [ $test = 0 ]; then
       output="`su -c "$removestr" 2>&1`"
       if [ $? = 0 ]; then
-         debug $output
+         if [ "$output_as_info" == "yes" ]; then
+            info $output
+         else
+            debug $output
+         fi
          info "Removing backups older than $keep days succeeded."
       else
          warning $output
@@ -268,7 +273,11 @@ debug "$execstr"
 if [ $test = 0 ]; then
    output=`nice -n $nicelevel su -c "$execstr" 2>&1`
    if [ $? = 0 ]; then
-      debug $output
+      if [ "$output_as_info" == "yes" ]; then
+         info $output
+      else
+         debug $output
+      fi
       info "Successfully finished backing up source $label"
    else
       error $output

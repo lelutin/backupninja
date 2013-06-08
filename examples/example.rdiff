@@ -53,6 +53,20 @@
 ## Default:
 # ignore_version = no
 
+## should backupninja write program output as Info messages rather than Debug
+## messages? (default: no)
+## Usually rdiff-backup output (for increment expiration and backup) is written
+## to output as Debug messages; this option causes backupninja to use Info-level
+## messages instead. Since backup reports include Info messages, this option is
+## useful to receive output like rdiff-backup session statistics in reports. In
+## addition, since rdiff-backup has a habit of using a zero exit code when
+## non-fatal errors are encountered (causing backupninja to conclude the backup
+## was entirely successful), this option is useful for inspecting non-fatal
+## filesystem and permission errors from rdiff-backup.
+##
+## Default:
+# output_as_info = no
+
 ######################################################
 ## source section
 ## (where the files to be backed up are coming from)
