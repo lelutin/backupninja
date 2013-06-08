@@ -46,3 +46,4 @@ exobuzz - mysql bugfixes
 Glennie Vignarajah <glennie@glennie.fr> -- mysql bugfix
 ddpaul <paul@reic.ru> -- rsync bugfix
 ulrich -- duplicity bugfix preliminary patch
+David Gasaway <dave@gasaway.org> -- rdiff's output_as_info option
