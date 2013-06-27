@@ -48,6 +48,10 @@ case $compress in
       compress_option="-j"
       EXTENSION="tar.bz2"
       ;;
+   "xz")
+      compress_option="-J"
+      EXTENSION="tar.xz"
+      ;;
    "none")
       compress_option=""
       ;;

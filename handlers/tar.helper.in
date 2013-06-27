@@ -25,7 +25,8 @@ tar_wizard() {
        "none"     "do not filter trough" off \
        "compress" "filter trough compress" off \
        "gzip"     "filter trough gzip" off \
-       "bzip"     "filter trough bzip" on
+       "bzip"     "filter trough bzip" on \
+       "xz"       "filter trough xz" off
    [ $? = 1 ] && return;
    result="$REPLY"
    tar_compress="compress = $REPLY "
