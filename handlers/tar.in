@@ -72,11 +72,13 @@ debug "Running backup: " $TAR -c -p -v $compress_option $exclude_options \
    -f "$backupdir/$backupname-"`$DATE "+$DATEFORMAT"`".$EXTENSION" \
    $includes
 
+if [ ! $test ]; then
 $TAR -c -p -v $compress_option $exclude_options \
    -f "$backupdir/$backupname-"`$DATE "+$DATEFORMAT"`".$EXTENSION" \
    $includes \
    > "$backupdir/$backupname-"`$DATE "+$DATEFORMAT"`.list \
    2> "$backupdir/$backupname-"`$DATE "+$DATEFORMAT"`.err
+fi
 
 [ $? -ne 0 ] && fatal "Tar backup failed"
 
