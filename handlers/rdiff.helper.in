@@ -282,11 +282,32 @@ do_rdiff_con() {
    setDefault finish
 }
 
+do_rdiff_adv() {
+   booleanBox "$rdiff_title" "Should backupninja write program output as Info messages rather than Debug messages?" no
+   if [ $? = 0 ]; then
+      rdiff_output_as_info=yes
+   else
+      rdiff_output_as_info=no
+   fi
+}
+
 do_rdiff_finish() {
    get_next_filename $configdirectory/90.rdiff
    cat > $next_filename <<EOF
 # options = --force
 # when = everyday at 02
+
+## should backupninja write program output as Info messages rather than Debug
+## messages? (default: no)
+## Usually rdiff-backup output (for increment expiration and backup) is written
+## to output as Debug messages; this option causes backupninja to use Info-level
+## messages instead. Since backup reports include Info messages, this option is
+## useful to receive output like rdiff-backup session statistics in reports. In
+## addition, since rdiff-backup has a habit of using a zero exit code when
+## non-fatal errors are encountered (causing backupninja to conclude the backup
+## was entirely successful), this option is useful for inspecting non-fatal
+## filesystem and permission errors from rdiff-backup.
+output_as_info = $rdiff_output_as_info
 
 [source]
 type = local
@@ -378,6 +399,7 @@ rdiff_main_menu() {
          src "$srcitem" \
          dest "$destitem" \
          conn "$conitem" \
+         adv "$advitem" \
          finish "finish and create config file"
       [ $? = 0 ] || return
       result="$REPLY"
@@ -411,6 +433,7 @@ rdiff_wizard() {
    rdiff_type=remote
    rdiff_user=
    rdiff_host=
+   rdiff_output_as_info="no"
 
    # Global variables whose '*' shall not be expanded
    set -o noglob
