@@ -125,8 +125,16 @@ duplicity_sub="`echo $duplicity_version | @AWK@ -F '.' '{print $3}'`"
 ## duplicity >= 0.6.17 : paramiko backend
 if [ "$duplicity_major" -ge 0 -a "$duplicity_minor" -ge 6 -a "$duplicity_sub" -ge 17 ]; then
    if [ -n "$sshoptions" ]; then
-      echo "$sshoptions" | grep -Eqs '^-o[[:space:]]*IdentityFile=[^ ]+$' \
-         || warning 'duplicity >= 0.6.17 only supports the IdentityFile SSH option'
+      if echo "$sshoptions" | grep -Eqs '^-o[[:space:]]*IdentityFile=[^ ]+$' ; then
+         spaceless_sshoptions="$(echo -n "$sshoptions" | @SED@ 's/^-o[[:space:]]*/-o/')"
+         if [ "$spaceless_sshoptions" != "$sshoptions" ] ; then
+            warning 'Since duplicity >= 0.6.17, sshoptions option requires no space between -o and IdentityFile.'
+            warning 'The bad space has been ignored. Update your duplicity handler config file to suppress this message.'
+            sshoptions="$spaceless_sshoptions"
+         fi
+      else
+         warning 'duplicity >= 0.6.17 only supports the IdentityFile SSH option'
+      fi
    fi
    execstr_options="${execstr_options} --ssh-options '$sshoptions'"
    if [ "$bandwidthlimit" != 0 ]; then
