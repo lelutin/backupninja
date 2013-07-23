@@ -482,8 +482,10 @@ bandwidthlimit = $dup_bandwidth
 ## sshoptions = -o IdentityFile=/root/.ssh/id_rsa_duplicity
 ##
 ## duplicity >= 0.6.17
-## ------------------
-## supports only "-o IdentityFile=..."
+## -------------------
+## supports only "-oIdentityFile=..." since duplicity >=0.6.17 uses paramiko,
+## a ssh python module.
+## warning: requires no space beetween "-o" and "IdentityFile=...".
 ##
 ## Default:
 # sshoptions = 
