@@ -25,9 +25,9 @@
 # (4) hardware information.
 #     write to a text file the important things which hwinfo can gleen.
 #
-# (5) the Luks header of every Luks block device, if option luksheaders
+# (5) the LUKS header of every LUKS block device, if option luksheaders
 #     is enabled.
-#     in case you (have to) scramble such a Luks header (for some time),
+#     in case you (have to) scramble such a LUKS header (for some time),
 #     and restore it later by running "dd if=luksheader.sda2.bin of=/dev/sda2"
 #     (MAKE SURE YOU PASS THE CORRECT DEVICE AS of= !!!)
 #
@@ -119,11 +119,11 @@ fi
 
 if [ "$luksheaders" == "yes" ]; then
    if [ ! -x "$DD" ]; then
-      warning "can't find dd, skipping backup of Luks headers."
+      warning "can't find dd, skipping backup of LUKS headers."
       luksheaders="no"
    fi
    if [ ! -x "$CRYPTSETUP" ]; then
-      warning "can't find cryptsetup, skipping backup of Luks headers."
+      warning "can't find cryptsetup, skipping backup of LUKS headers."
       luksheaders="no"
    fi
 fi
@@ -609,26 +609,26 @@ if [ "$luksheaders" == "yes" ]; then
       label=${label//\//-}
       outputfile=${luksheadersfile//__star__/$label}
       # the following sizes are expressed in terms of 512-byte sectors
-      debug "Let us find out the Luks header size for $dev"
+      debug "Let us find out the LUKS header size for $dev"
       debug "$CRYPTSETUP luksDump \"$dev\" | grep '^Payload offset:' | @AWK@ '{print $3}'"
       headersize=`$CRYPTSETUP luksDump "$dev" | grep '^Payload offset:' | @AWK@ '{print $3}'`
       if [ $? -ne 0 ]; then
-         warning "Could not compute the size of Luks header, skipping $dev"
+         warning "Could not compute the size of LUKS header, skipping $dev"
          continue
       elif [ -z "$headersize" -o -n "`echo \"$headersize\" | @SED@ 's/[0-9]*//g'`" ]; then
-         warning "The computed size of Luks header is not an integer, skipping $dev"
+         warning "The computed size of LUKS header is not an integer, skipping $dev"
          continue
       fi
-      debug "Let us backup the Luks header of $dev"
+      debug "Let us backup the LUKS header of $dev"
       debug "$DD if=\"${dev}\" of=\"${outputfile}\" bs=512 count=\"${headersize}\""
       output=`$DD if="${dev}" of="${outputfile}" bs=512 count="${headersize}" 2>&1`
       exit_code=$?
       if [ $exit_code -eq 0 ]; then
          debug $output
-         info "The Luks header of $dev was saved to $outputfile."
+         info "The LUKS header of $dev was saved to $outputfile."
       else
          debug $output
-         fatal "The Luks header of $dev could not be saved."
+         fatal "The LUKS header of $dev could not be saved."
       fi
    done
 fi
