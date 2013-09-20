@@ -33,6 +33,15 @@
 #
 # (6) LVM metadata for every detected volume group, if "lvm = yes"
 #
+# (7) a copy of each device's MBR, if "mbr = yes". A master boot record 
+#     (MBR) is the 512-byte boot sector that is the first sector of a 
+#     partitioned data storage device of a hard disk. To restore the MBR 
+#     one could do something like: dd if=sda.mbr of=/dev/sda 
+#     (MAKE SURE YOU PASS THE CORRECT DEVICE AS of= !!!)
+#     WARNING: Restoring the MBR with a mismatching partition table will 
+#     make your data unreadable and nearly impossible to recover
+#
+# (8) a copy of the BIOS, if "bios = yes" and flashrom is installed
 
 if [ -f /etc/debian_version ]
 then
@@ -100,6 +109,12 @@ getconf VGS `which vgs`
 getconf VGCFGBACKUP `which vgcfgbackup`
 getconf lvm no
 
+getconf mbr no
+getconf mbrfile $parentdir/mbr.__star__.bin
+
+getconf FLASHROM `which flashrom`
+getconf bios no
+
 getconf vsnames all
 
 # If vservers are configured, check that the ones listed in $vsnames are running.
@@ -136,6 +151,20 @@ if [ "$lvm" == "yes" ]; then
    if [ ! -x "$VGCFGBACKUP" ]; then
       warning "can't find vgcfgbackup, skipping backup of LVM metadata"
       lvm="no"
+   fi
+fi
+
+if [ "$mbr" == "yes" ]; then
+   if [ ! -x "$DD" ]; then
+      warning "can't find dd, skipping backup of MBR."
+      mbr="no"
+   fi
+fi
+
+if [ "$bios" == "yes" ]; then
+   if [ ! -x "$FLASHROM" ]; then
+      warning "can't find flashrom, skipping backup of BIOS."
+      mbr="no"
    fi
 fi
 
@@ -633,6 +662,25 @@ if [ "$luksheaders" == "yes" ]; then
    done
 fi
 
+if [ "$mbr" == "yes" ]; then
+   devices=`LC_ALL=C $SFDISK -l 2>/dev/null | grep "^Disk /dev" | @AWK@ '{print $2}' | cut -d: -f1`
+   if [ "$devices" == "" ]; then
+      warning "No harddisks found"
+   fi
+   for dev in $devices; do
+      debug "Will try to backup MBR tables for device $dev"
+      [ -b $dev ] || continue
+      label=${dev#/dev/}
+      label=${label//\//-}
+      outputfile=${mbrfile//__star__/$label}
+      debug "$DD if=$dev of=$outputfile bs=512 count=1 2>/dev/null"
+      $DD if=$dev of=$outputfile bs=512 count=1 2>/dev/null
+      if [ $? -ne 0 ]; then
+         warning "The MBR for $dev could not be saved."
+      fi
+   done
+fi
+
 ## LVM ####################################
 
 # returns 0 on success, 1 on error, 2 if not tried
@@ -692,3 +740,15 @@ if [ "$lvm" == "yes" ]; then
          ;;
    esac
 fi
+
+## BIOS ####################################
+
+if [ "$bios" == "yes" ]; then
+   debug "Trying to backup BIOS"
+   debug "$FLASHROM -r ${parentdir}/bios --programmer internal >/dev/null 2>&1"
+   $FLASHROM -r ${parentdir}/bios --programmer internal >/dev/null 2>&1
+   if [ $? -ne 0 ]; then
+      warning "The BIOS could not be saved."
+   fi
+fi
+

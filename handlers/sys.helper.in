@@ -20,6 +20,8 @@ sys_wizard() {
    hardware="hardware = no"
    luksheaders="luksheaders = no"
    lvm="lvm = no"
+   mbr="mbr = no"
+   bios="bios = no"
    for opt in $result; do
       case $opt in
          '"packages"') packages="packages = yes";;
@@ -28,6 +30,8 @@ sys_wizard() {
          '"hardware"') hardware="hardware = yes";;
          '"luksheaders"') luksheaders="luksheaders = yes";;
          '"lvm"') lvm="lvm = yes";;
+         '"mbr"') mbr="mbr = yes";;
+         '"bios"') bios="bios = yes";;
       esac
    done
    get_next_filename $configdirectory/10.sys
@@ -38,6 +42,8 @@ $sfdisk
 $hardware
 $luksheaders
 $lvm
+$mbr
+$bios
 
 # packagesfile = /var/backups/dpkg-selections.txt
 # selectionsfile = /var/backups/debconfsel.txt

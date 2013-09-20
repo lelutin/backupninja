@@ -33,6 +33,15 @@
 #
 # (6) LVM metadata for every detected volume group, if "lvm = yes"
 #
+# (7) a copy of each device's MBR, if "mbr = yes". A master boot record 
+#     (MBR) is the 512-byte boot sector that is the first sector of a 
+#     partitioned data storage device of a hard disk. To restore the MBR 
+#     one could do something like: dd if=sda.mbr of=/dev/sda 
+#     (MAKE SURE YOU PASS THE CORRECT DEVICE AS of= !!!)
+#     WARNING: Restoring the MBR with a mismatching partition table will 
+#     make your data unreadable and nearly impossible to recover
+#
+# (8) a copy of the BIOS, if "bios = yes" and flashrom is installed
 
 # here are the defaults, commented out:
 
@@ -64,6 +73,12 @@
 # luksheadersfile = /var/backups/luksheader.__star__.bin
 
 # lvm = no
+
+# mbr = no
+
+# note: to backup your BIOS, you need the program 'flashrom' installed, and your
+# mainboard needs to be supported, see http://flashrom.org/Supported_hardware#Supported_mainboards
+# bios = no
 
 # If vservers = yes in /etc/backupninja.conf then the following variables can
 # be used:
