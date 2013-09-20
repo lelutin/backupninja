@@ -5,7 +5,7 @@ Requirements:
   bash gawk
 
 Recommended: 
-  rdiff-backup duplicity rsync gzip hwinfo sfdisk
+  rdiff-backup duplicity rsync gzip hwinfo sfdisk cryptsetup flashrom hwinfo
 
 Installation:
   To install backupninja, simply do the following:
