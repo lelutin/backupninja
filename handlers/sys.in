@@ -615,7 +615,7 @@ if [ "$luksheaders" == "yes" ]; then
       if [ $? -ne 0 ]; then
          warning "Could not compute the size of Luks header, skipping $dev"
          continue
-      elif [ -z "$headersize" -o -n "`echo \"$headersize\" | sed 's/[0-9]*//g'`" ]; then
+      elif [ -z "$headersize" -o -n "`echo \"$headersize\" | @SED@ 's/[0-9]*//g'`" ]; then
          warning "The computed size of Luks header is not an integer, skipping $dev"
          continue
       fi
