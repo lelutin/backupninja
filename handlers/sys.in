@@ -595,8 +595,10 @@ fi
 if [ "$luksheaders" == "yes" ]; then
    devices=`LC_ALL=C $SFDISK -l 2>/dev/null | grep "^Disk /dev" | @AWK@ '{print $2}' | cut -d: -f1`
    [ -n "$devices" ] || warning "No block device found"
+   partitions=`LC_ALL=C $SFDISK -l 2>/dev/null |grep "^/dev" | @AWK@ '{print $1}'`
+   [ -n "$partitions" ] || warning "No partitions found"
    targetdevices=""
-   for dev in $devices; do
+   for dev in $devices $partitions; do
       [ -b $dev ] || continue
       debug "$CRYPTSETUP isLuks $dev"
       $CRYPTSETUP isLuks $dev
@@ -611,13 +613,13 @@ if [ "$luksheaders" == "yes" ]; then
       debug "$CRYPTSETUP luksDump \"$dev\" | grep '^Payload offset:' | @AWK@ '{print $3}'"
       headersize=`$CRYPTSETUP luksDump "$dev" | grep '^Payload offset:' | @AWK@ '{print $3}'`
       if [ $? -ne 0 ]; then
-         warning "Could not compute the size of Luks header, skipping device $dev"
+         warning "Could not compute the size of Luks header, skipping $dev"
          continue
       elif [ -z "$headersize" -o -n "`echo \"$headersize\" | sed 's/[0-9]*//g'`" ]; then
-         warning "The computed size of Luks header is not an integer, skipping device $dev"
+         warning "The computed size of Luks header is not an integer, skipping $dev"
          continue
       fi
-      debug "Let us backup the Luks header of device $dev"
+      debug "Let us backup the Luks header of $dev"
       debug "$DD if=\"${dev}\" of=\"${outputfile}\" bs=512 count=\"${headersize}\""
       output=`$DD if="${dev}" of="${outputfile}" bs=512 count="${headersize}" 2>&1`
       exit_code=$?
