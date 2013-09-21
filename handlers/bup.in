@@ -94,7 +94,7 @@ if [ -n "$bupdir" ]; then
 fi
 
 debug "Initializing remote bupdir if it does not exist"
-ssh $user@$host "[[ -d $remote_bupdir ]] || bup -d $remote_bupdir init"
+ssh $user@$host "test -d $remote_bupdir || bup -d $remote_bupdir init"
 
 ### CHECK CONFIG ###
 if [ -z "$path" ]; then
