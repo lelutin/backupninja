@@ -173,13 +173,13 @@ do_bup_ssh_con() {
 
    ssh_create_root_key "$bup_title" "$bup_host" "$bup_user"
    if [ "$?" != "0" ]; then
-      # key creation failed, can't go further
+      msgBox "$bup_title: error" "root SSH key creation failed, can't go further."
       return
    fi
 
    ssh_ensure_remote_dir "$bup_title" "$bup_remote_bupdir" "$bup_host" "$bup_user"
    if [ "$?" != "0" ]; then
-      # couldn't ensure that remote dir is created and accessible, can't go further
+      msgBox "$bup_title: error" "Couldn't ensure that remote dir is created and accessible, can't go further."
       return
    fi
 
