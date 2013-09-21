@@ -85,7 +85,7 @@ do_bup_dest() {
       bup_directory=$REPLY
 
       echo "Initializing local bup repository in $bup_directory"
-      bup -d $bup_directory init
+      bup -d "$bup_directory" init
       if [ "$?" -ne 0 ]; then
          echo "Initialization failed. Check errors above."
          REPLY=
@@ -177,27 +177,22 @@ do_bup_ssh_con() {
       return
    fi
 
+   echo "Initializing remote bup repository"
    ssh_ensure_remote_dir "$bup_title" "$bup_remote_bupdir" "$bup_host" "$bup_user"
    if [ "$?" != "0" ]; then
       msgBox "$bup_title: error" "Couldn't ensure that remote dir is created and accessible, can't go further."
       return
    fi
-
-   # TODO should we initiate the remote backup? maybe, eh? however:
-   # XXX This shouldn't be done on an already existing bup directory! It'll re-initialize the repository.
-   ## An empty directory won't help us much here. The target directory must be
-   ## a bup repository.
-   #echo "Initializing remote bup repository"
-   #ssh $bup_user@$bup_host "bup -d $bup_remote_bupdir init"
-   #case $? in
-   #   0) msgBox "bup_$title: success" "Creation of the remote destination directory was a success!";;
-   #   1) msgBox "bup_$title: error" "Connected successfully to $bup_user@$bup_host, but was unable to initilize the destination bup repository."
-   #      return;;
-   #   255) msgBox "$bup_title: error" "Failed to connect to $bup_user@$bup_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host."
-   #      return;;
-   #   *) msgBox "$bup_title: error" "Unexpected error."
-   #      return;;
-   #esac
+   ssh $bup_user@$bup_host "bup -d '$bup_remote_bupdir' init"
+   case $? in
+      0) msgBox "$bup_title: success" "Creation of the remote destination repository was a success!";;
+      1) msgBox "$bup_title: error" "Connected successfully to $bup_user@$bup_host, but was unable to initilize the destination bup repository."
+         return;;
+      255) msgBox "$bup_title: error" "Failed to connect to $bup_user@$bup_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host."
+         return;;
+      *) msgBox "$bup_title: error" "Unexpected error."
+         return;;
+   esac
 
    _bup_con_done="(DONE)"
    setDefault finish
