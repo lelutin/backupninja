@@ -134,7 +134,17 @@ do_bup_dest() {
    set +o noglob
 
    _bup_dest_done="(DONE)"
-   setDefault conn
+
+   if [ "$bup_type" = "local" ]; then
+      # No need to setup remote connection for local backups
+      _bup_con_done="(DONE)"
+      setDefault finish
+   else
+      # Reset _bup_con_done in case user re-ran this option and chose a
+      # different backup type.
+      _bup_con_done=
+      setDefault conn
+   }
 }
 
 do_bup_ssh_con() {
@@ -154,6 +164,11 @@ do_bup_ssh_con() {
    else
       booleanBox "$bup_title" "This step will create an SSH key for the local root user with no passphrase (if one does not already exist), and attempt to copy root's public ssh key to authorized_keys file of $bup_user@$bup_host. This will allow the local root to make unattended backups to $bup_user@$bup_host.\n\n\nAre you sure you want to continue?"
       [ $? = 0 ] || return
+   fi
+
+   if [ "$bup_type" = "local" ]; then
+      msgBox "$bup_title: info" "This step is not needed for local backups."
+      return
    fi
 
    ssh_create_root_key "$bup_title" "$bup_host" "$bup_user"
