@@ -75,7 +75,7 @@ fi
 debug "backup type is set to '$desttype'"
 
 REMOTE_URL=
-if [ "$desttype" = "remote" ] || [ "$desttype" = "on" ]; then
+if [ "$desttype" != "local" ]; then
     ssh_test_connection $user $host
 
     HOST_SPEC="$host"
@@ -85,6 +85,18 @@ if [ "$desttype" = "remote" ] || [ "$desttype" = "on" ]; then
     fi
 
     REMOTE_URL="-r $HOST_SPEC:$remote_bupdir"
+
+    # Even though we're already doing this in bup.helper, this gives users the
+    # possibility to just move the bup repository out of the way in case of
+    # corruption and let the next backup run automatically create a new repository.
+    #
+    # calling bup init on an already existing repository is safe.
+    debug "Initializing remote bupdir if it does not exist"
+    ssh $user@$host "mkdir -p $remote_bupdir && bup -d '$remote_bupdir' init"
+    if [ "$?" != "0" ]; then
+        fatal "An error occurred while initializing the remote repository."
+    fi
+
 fi
 
 if [ -n "$bupdir" ]; then
@@ -92,9 +104,6 @@ if [ -n "$bupdir" ]; then
     export BUP_DIR
     debug "BUP_DIR set to: $bupdir"
 fi
-
-debug "Initializing remote bupdir if it does not exist"
-ssh $user@$host "test -d $remote_bupdir || bup -d $remote_bupdir init"
 
 ### CHECK CONFIG ###
 if [ -z "$path" ]; then
