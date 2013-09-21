@@ -270,8 +270,8 @@ bup_wizard() {
    # Normally, bup automatically excludes its own local repository to avoid
    # re-entrant backups (backing up the backup) so we shouldn't need to specify
    # the bupdir in the excludes
-   bup_excludes=(/home/*/.gnupg /home/*/.local/share/Trash /home/*/.Trash /home/*/.thumbnails /home/*/.beagle /home/*/.aMule /home/*/gtk-gnutella-downloads /var/cache/backupninja/duplicity)
-   bup_excludes_rx=
+   bup_excludes=
+   bup_excludes_rx=(/home/.*/.gnupg /home/.*/.local/share/Trash /home/.*/.Trash /home/.*/.thumbnails /home/.*/.beagle /home/.*/.aMule /home/.*/gtk-gnutella-downloads)
    bup_directory=/var/backups/filesystem.bup
    set +o noglob
 
