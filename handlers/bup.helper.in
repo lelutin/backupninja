@@ -4,7 +4,11 @@
 HELPERS="$HELPERS bup:git-like_incremental_filesystem_backup"
 
 do_bup_src() {
+   set -o noglob
+
    # choose the files to backup
+   # A backup means nothing if we're not including anything so refuse an empty
+   # list.
    REPLY=
    while [ -z "$REPLY" ]; do
       formBegin "$bup_title - host system: includes"
@@ -27,46 +31,42 @@ do_bup_src() {
 
    # choose the files to exclude from the backup
    REPLY=
-   while [ -z "$REPLY" ]; do
-      formBegin "$bup_title - host system: excludes"
-         for ((i=0; i < ${#bup_excludes[@]} ; i++)); do
-            formItem exclude ${bup_excludes[$i]}
-         done
-         formItem exclude
-         formItem exclude
-         formItem exclude
-         formItem exclude
-         formItem exclude
-         formItem exclude
-         formItem exclude
-         formItem exclude
-      formDisplay
-      [ $? = 0 ] || return
-      unset bup_excludes
-      bup_excludes=($REPLY)
-   done
-   set +o noglob
+   formBegin "$bup_title - host system: excludes"
+      for ((i=0; i < ${#bup_excludes[@]} ; i++)); do
+         formItem exclude ${bup_excludes[$i]}
+      done
+      formItem exclude
+      formItem exclude
+      formItem exclude
+      formItem exclude
+      formItem exclude
+      formItem exclude
+      formItem exclude
+      formItem exclude
+   formDisplay
+   [ $? = 0 ] || return
+   unset bup_excludes
+   bup_excludes=($REPLY)
 
    # choose the path regex'es to exclude from the backup
    REPLY=
-   while [ -z "$REPLY" ]; do
-      formBegin "$bup_title - host system: exclude regular expressions"
-         for ((i=0; i < ${#bup_excludes_rx[@]} ; i++)); do
-            formItem exclude_rx ${bup_excludes_rx[$i]}
-         done
-         formItem exclude_rx
-         formItem exclude_rx
-         formItem exclude_rx
-         formItem exclude_rx
-         formItem exclude_rx
-         formItem exclude_rx
-         formItem exclude_rx
-         formItem exclude_rx
-      formDisplay
-      [ $? = 0 ] || return
-      unset bup_excludes_rx
-      bup_excludes_rx=($REPLY)
-   done
+   formBegin "$bup_title - host system: exclude regular expressions"
+      for ((i=0; i < ${#bup_excludes_rx[@]} ; i++)); do
+         formItem exclude_rx ${bup_excludes_rx[$i]}
+      done
+      formItem exclude_rx
+      formItem exclude_rx
+      formItem exclude_rx
+      formItem exclude_rx
+      formItem exclude_rx
+      formItem exclude_rx
+      formItem exclude_rx
+      formItem exclude_rx
+   formDisplay
+   [ $? = 0 ] || return
+   unset bup_excludes_rx
+   bup_excludes_rx=($REPLY)
+
    set +o noglob
 
    _bup_src_done="(DONE)"
