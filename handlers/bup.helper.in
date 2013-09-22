@@ -29,25 +29,6 @@ do_bup_src() {
       bup_includes=($REPLY)
    done
 
-   # choose the files to exclude from the backup
-   REPLY=
-   formBegin "$bup_title - host system: excludes"
-      for ((i=0; i < ${#bup_excludes[@]} ; i++)); do
-         formItem exclude ${bup_excludes[$i]}
-      done
-      formItem exclude
-      formItem exclude
-      formItem exclude
-      formItem exclude
-      formItem exclude
-      formItem exclude
-      formItem exclude
-      formItem exclude
-   formDisplay
-   [ $? = 0 ] || return
-   unset bup_excludes
-   bup_excludes=($REPLY)
-
    # choose the path regex'es to exclude from the backup
    REPLY=
    formBegin "$bup_title - host system: exclude regular expressions"
@@ -66,6 +47,25 @@ do_bup_src() {
    [ $? = 0 ] || return
    unset bup_excludes_rx
    bup_excludes_rx=($REPLY)
+
+   # choose the files to exclude from the backup
+   REPLY=
+   formBegin "$bup_title - host system: excludes that don't interpret regular expressions"
+      for ((i=0; i < ${#bup_excludes[@]} ; i++)); do
+         formItem exclude ${bup_excludes[$i]}
+      done
+      formItem exclude
+      formItem exclude
+      formItem exclude
+      formItem exclude
+      formItem exclude
+      formItem exclude
+      formItem exclude
+      formItem exclude
+   formDisplay
+   [ $? = 0 ] || return
+   unset bup_excludes
+   bup_excludes=($REPLY)
 
    set +o noglob
 
