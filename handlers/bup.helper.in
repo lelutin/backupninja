@@ -144,7 +144,7 @@ do_bup_dest() {
       # different backup type.
       _bup_con_done=
       setDefault conn
-   }
+   fi
 }
 
 do_bup_ssh_con() {
