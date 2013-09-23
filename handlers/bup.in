@@ -136,7 +136,7 @@ fi
 
 if [ "$desttype" = "on" ]; then
     debug "bup on $HOST_SPEC index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST"
-    if output=$(bup on $HOST_SPEC index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST 2>&1); then
+    if output=$(bup on $HOST_SPEC -d "$remote_bupdir" index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST 2>&1); then
         debug $output
         info "Indexing completed successfully"
     else
@@ -145,7 +145,7 @@ if [ "$desttype" = "on" ]; then
     fi
 
     debug "bup on $HOST_SPEC save -n $branch $PATH_LIST"
-    if output=$(bup on $HOST_SPEC save -n $branch $PATH_LIST 2>&1); then
+    if output=$(bup on $HOST_SPEC -d "$remote_bupdir" save -n $branch $PATH_LIST 2>&1); then
         debug $output
         info "Successfullly finished backing up"
     else
