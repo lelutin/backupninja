@@ -9,6 +9,16 @@
 ## helper will provide.
 ##
 
+## Set this option to 'yes' to avoid the version comparison between local and
+## remote server. This can be useful when working with bup versions from git
+## master since the version tag is different for all commits, but should
+## generally not be used.
+#ignore_version = no
+
+## Set this option to 'no' to avoid testing the SSH connection prior to
+## actually running the backup.
+#testconnect yes
+
 ######################################################
 ## source section
 ## (where the files to be backed up are coming from)
