@@ -14,6 +14,7 @@ if [ -z "$BUP" ]; then
       fatal "executable path not defined in 'BUP' configuration option"
    fi
 fi
+[ -x "$BUP" ] || fatal "bup executable path is not executable or does not exist."
 
 function get_version() {
    # given no arguments, returns the local version.
