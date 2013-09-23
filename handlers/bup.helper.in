@@ -220,9 +220,12 @@ do_bup_finish() {
 
 [source]
 # A few notes about includes and excludes:
-# 1. include and exclude statements support globbing with '*'
-# 2. All the excludes come after all the includes. The order is not otherwise
-#    taken into account.
+# 1. path and exclude statements support globbing with '*'
+# 2. exclude_rx statements don't support globbing. Instead, they support
+#    regular expression matching of file names.
+# 3. The order of the statements shouldn't matter much.
+# 4. You can specify each statement multiple times to include or exclude
+#    multiple files or directories.
 
 # files/directories to include in the backup
 EOF
@@ -232,14 +235,14 @@ EOF
    done
    set +o noglob
 
-   echo "# files to exclude from the backup" >> $next_filename
+   echo "# files/directories to exclude from the backup" >> $next_filename
    set -o noglob
    for ((i=0; i < ${#bup_excludes[@]} ; i++)); do
       echo "exclude = ${bup_excludes[$i]}" >> $next_filename
    done
    set +o noglob
 
-   echo "# exclude from the backup paths that match those regular expressions" >> $next_filename
+   echo "# the following exclusions use regular expressions to match file/directory names" >> $next_filename
    set -o noglob
    for ((i=0; i < ${#bup_excludes_rx[@]} ; i++)); do
       echo "exclude_rx = ${bup_excludes_rx[$i]}" >> $next_filename
@@ -257,13 +260,22 @@ type = $bup_type
 # The local bup directory is always needed. It always holds index files and
 # also the whole backup when doing a "local" or an "on" backup.
 bupdir = $bup_directory
-# Each server/backup origin should have its own branch.
+# Backups with bup are saved on a branch (think git branch).
+# # Usually each server/backup origin should have its own branch, but some people
+# # use multiple branches for a same server for inventive purposes.
 branch = $bup_branch
 EOF
 
    if [ "$bup_type" = "remote" ] || [ "$bup_type" = "on" ]; then
       cat >> $next_filename <<EOF
+# When using "remote" or "on" as a backup type, bup needs to store things in a
+# # bup repository on the remote server. This option specifies where this
+# # repository should be placed on the remote server. It can be an absolute path,
+# # or a relative path to the user's home directory.
 remote_bupdir = $bup_remote_bupdir
+# Finally, remote backups need to know how to connect to the remote server. For
+# # this you need to specify the hostname or ip address of the remote server and
+# # the user name that bup will use to establish an SSH connection to the host.
 host = $bup_host
 user = $bup_user
 EOF
