@@ -76,27 +76,9 @@ do_bup_src() {
 do_bup_dest() {
    set -o noglob
    REPLY=
-   while [ -z "$REPLY" -o -z "$bup_directory" ]
-   do
-      formBegin "$bup_title - The bup directory is a bup repository. For local backups, this is where files will be saved.  For remote backups, only the local file index will be saved there, while files will be saved in the remote directory."
-         formItem "dest_bup_directory" "$bup_directory"
-      formDisplay
-      [ $? = 0 ] || return
-      bup_directory=$REPLY
-
-      echo "Initializing local bup repository in $bup_directory"
-      bup -d "$bup_directory" init
-      if [ "$?" -ne 0 ]; then
-         echo "Initialization failed. Check errors above."
-         REPLY=
-         read
-      fi
-   done
-
-   REPLY=
    while [ -z "$REPLY" -o -z "$bup_type" ]
    do
-      formBegin "$bup_title - The type of destination bup repository. Can be 'local', 'remote' or 'on'."
+      formBegin "$bup_title - The type of backup that needs to be performed. Can be 'local', 'remote' or 'on'."
          formItem "dest_type" "$bup_type"
       formDisplay
       [ $? = 0 ] || return
@@ -109,28 +91,51 @@ do_bup_dest() {
    done
 
    REPLY=
-   while [ -z "$REPLY" -o -z "$bup_branch" -o -z "$bup_remote_bupdir" ]
+   while [ -z "$REPLY" -o -z "$bup_directory" -o -z "$bup_branch" ]
    do
-     formBegin "$bup_title - destination: last two items are required for types 'remote' and 'on'."
-        formItem "dest_bup_remote_bupdir" "$bup_remote_bupdir"
-        formItem "dest_branch" "$bup_branch"
-        formItem "dest_host" "$bup_host"
-        formItem "dest_user" "$bup_user"
-        formDisplay
-     [ $? = 0 ] || return
-     tmp_array=($REPLY)
-     bup_remote_bupdir=${tmp_array[0]}
-     bup_branch=${tmp_array[1]}
-     bup_host=${tmp_array[2]}
-     bup_user=${tmp_array[3]}
-     if [ "$bup_type" = "remote" ] || [ "$bup_type" = "on" ]; then
+      formBegin "$bup_title - Choose the path to the repositories and the branch name that will be used for the backups.  For local backups, files will be saved in the local repository.  For remote backups, only the local file index will be saved in the local repository, while data will be saved in the remote directory."
+         formItem "dest_bup_directory" "$bup_directory"
+         formItem "dest_branch" "$bup_branch"
+         if [ "$bup_type" != "local" ]; then
+            formItem "dest_bup_remote_bupdir" "$bup_remote_bupdir"
+         fi
+      formDisplay
+      [ $? = 0 ] || return
+      tmp_array=($REPLY)
+      bup_directory=${tmp_array[0]}
+      bup_branch=${tmp_array[1]}
+      if [ "$bup_type" != "local" ]; then
+         bup_remote_bupdir=${tmp_array[2]}
+      fi
+
+      echo "Initializing local bup repository in $bup_directory"
+      bup -d "$bup_directory" init
+      if [ "$?" -ne 0 ]; then
+         echo "Initialization failed. Check errors above."
+         REPLY=
+         read
+      fi
+   done
+
+   if [ "$bup_type" != "local" ]; then
+      REPLY=
+      while [ -z "$REPLY" -o -z "$bup_host" -o -z "$bup_user" ]
+      do
+        formBegin "$bup_title - Specify on which host and with which user bup should login to access the remote repository."
+           formItem "dest_host" "$bup_host"
+           formItem "dest_user" "$bup_user"
+           formDisplay
+        [ $? = 0 ] || return
+        tmp_array=($REPLY)
+        bup_host=${tmp_array[0]}
+        bup_user=${tmp_array[1]}
         if [ -z "$bup_host" ] || [ -z "$bup_user" ]; then
             echo "You must specify the hostname and the user for the chosen backup type."
             REPLY=
             read
         fi
-     fi
-   done
+      done
+   fi
    set +o noglob
 
    _bup_dest_done="(DONE)"
