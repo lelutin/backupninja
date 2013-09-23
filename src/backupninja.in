@@ -474,6 +474,7 @@ fi
 # include shared functions
 . $libdirectory/tools
 . $libdirectory/vserver
+. $libdirectory/ssh
 
 setfile $conffile
 
