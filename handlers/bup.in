@@ -27,8 +27,8 @@ function get_version() {
    else
       local user=$1
       local host=$2
-      debug "ssh $host -l $user '$BUP --version'"
-      version=`ssh $host -l $user "$BUP --version"`
+      debug "ssh $host -l $user 'bup --version'"
+      version=`ssh $host -l $user "bup --version"`
       if [ $? = 127 ]; then
          fatal "Unable to execute bup on remote server. It probably isn't installed"
       else
@@ -143,8 +143,8 @@ fi
 
 if [ "${test}" -eq 0 ]; then
    if [ "$desttype" = "on" ]; then
-      debug "bup on $HOST_SPEC index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST"
-      if output=$(bup on $HOST_SPEC -d "$remote_bupdir" index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST 2>&1); then
+      debug "$BUP on $HOST_SPEC index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST"
+      if output=$($BUP on $HOST_SPEC -d "$remote_bupdir" index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST 2>&1); then
          debug $output
          info "Indexing completed successfully"
       else
@@ -152,8 +152,8 @@ if [ "${test}" -eq 0 ]; then
          warning "bup index encountered errors"
       fi
 
-      debug "bup on $HOST_SPEC save -n $branch $PATH_LIST"
-      if output=$(bup on $HOST_SPEC -d "$remote_bupdir" save -n $branch $PATH_LIST 2>&1); then
+      debug "$BUP on $HOST_SPEC save -n $branch $PATH_LIST"
+      if output=$($BUP on $HOST_SPEC -d "$remote_bupdir" save -n $branch $PATH_LIST 2>&1); then
          debug $output
          info "Successfullly finished backing up"
       else
@@ -161,8 +161,8 @@ if [ "${test}" -eq 0 ]; then
          warning "bup save encountered errors"
       fi
    else
-      debug "bup index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST"
-      if output=$(bup index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST 2>&1); then
+      debug "$BUP index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST"
+      if output=$($BUP index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST 2>&1); then
          debug $output
          info "Indexing completed successfully"
       else
@@ -170,8 +170,8 @@ if [ "${test}" -eq 0 ]; then
          warning "bup index encountered errors"
       fi
 
-      debug "bup save $REMOTE_URL -n $branch $PATH_LIST"
-      if output=$(bup save $REMOTE_URL -n $branch $PATH_LIST 2>&1); then
+      debug "$BUP save $REMOTE_URL -n $branch $PATH_LIST"
+      if output=$($BUP save $REMOTE_URL -n $branch $PATH_LIST 2>&1); then
          debug $output
          info "Successfullly finished backing up"
       else
