@@ -40,6 +40,7 @@ function get_version() {
 ### GET CONFIG ###
 
 getconf ignore_version no
+getconf testconnect yes
 
 setsection source
 getconf path
