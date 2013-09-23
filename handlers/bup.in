@@ -66,57 +66,62 @@ getconf user
 PATH_LIST=$(echo $path | sed -e 's/\n/ /g')
 EXCLUDE_LIST=
 if [ -n "$exclude" ]; then
-    EXCLUDE_LIST=$(echo $exclude | sed -e '1s/^/--exclude=/' -e 's/[\n ]/ --exclude=/g')
+   EXCLUDE_LIST=$(echo $exclude | sed -e '1s/^/--exclude=/' -e 's/[\n ]/ --exclude=/g')
 fi
 EXCLUDE_RX_LIST=
 if [ -n "$exclude_rx" ]; then
-    EXCLUDE_RX_LIST=$(echo $exclude_rx | sed -e '1s/^/--exclude-rx=/' -e 's/[\n ]/ --exclude-rx=/g')
+   EXCLUDE_RX_LIST=$(echo $exclude_rx | sed -e '1s/^/--exclude-rx=/' -e 's/[\n ]/ --exclude-rx=/g')
 fi
 
 debug "backup type is set to '$desttype'"
 
+[ -n "$test" ] || test=0
+
 REMOTE_URL=
 if [ "$desttype" != "local" ]; then
-    ssh_test_connection $user $host
+   if [ "$testconnect" = "yes" ] || [ "${test}" -eq 1 ]; then
+      ssh_test_connection $user $host
+   fi
 
-    HOST_SPEC="$host"
+   HOST_SPEC="$host"
 
-    if [ -n "$user" ]; then
-        HOST_SPEC="${user}@$host"
-    fi
+   if [ -n "$user" ]; then
+      HOST_SPEC="${user}@$host"
+   fi
 
-    REMOTE_URL="-r $HOST_SPEC:$remote_bupdir"
+   REMOTE_URL="-r $HOST_SPEC:$remote_bupdir"
 
-    # Even though we're already doing this in bup.helper, this gives users the
-    # possibility to just move the bup repository out of the way in case of
-    # corruption and let the next backup run automatically create a new repository.
-    #
-    # calling bup init on an already existing repository is safe.
-    debug "Initializing remote bupdir if it does not exist"
-    ssh $user@$host "mkdir -p $remote_bupdir && bup -d '$remote_bupdir' init"
-    if [ "$?" != "0" ]; then
-        fatal "An error occurred while initializing the remote repository."
-    fi
-
+   if [ "${test}" -eq 0 ]; then
+      # Even though we're already doing this in bup.helper, this gives users the
+      # possibility to just move the bup repository out of the way in case of
+      # corruption and let the next backup run automatically create a new repository.
+      #
+      # calling bup init on an already existing repository is safe.
+      debug "Initializing remote bupdir if it does not exist"
+      ssh $user@$host "mkdir -p $remote_bupdir && bup -d '$remote_bupdir' init"
+      if [ "$?" != "0" ]; then
+         fatal "An error occurred while initializing the remote repository."
+      fi
+   fi
 fi
 
 if [ -n "$bupdir" ]; then
-    BUP_DIR="$bupdir"
-    export BUP_DIR
-    debug "BUP_DIR set to: $bupdir"
+   BUP_DIR="$bupdir"
+   export BUP_DIR
+   debug "BUP_DIR set to: $bupdir"
 fi
 
 ### CHECK CONFIG ###
 if [ -z "$path" ]; then
-    fatal "No source path was given."
+   fatal "No source path was given."
 fi
 
 if [ -z "$branch" ]; then
-    fatal "The backup branch was not specified."
+   fatal "The backup branch was not specified."
 fi
 
 if [ -z "$bupdir" ]; then
-    debug "No bupdir specified: using the default location of ~/.bup !"
+   debug "No bupdir specified: using the default location of ~/.bup !"
 fi
 
 if [ "$ignore_version" != "yes" ]; then
@@ -135,40 +140,42 @@ fi
 
 ### EXECUTE ###
 
-if [ "$desttype" = "on" ]; then
-    debug "bup on $HOST_SPEC index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST"
-    if output=$(bup on $HOST_SPEC -d "$remote_bupdir" index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST 2>&1); then
-        debug $output
-        info "Indexing completed successfully"
-    else
-        warning $output
-        warning "bup index encountered errors"
-    fi
+if [ "${test}" -eq 0 ]; then
+   if [ "$desttype" = "on" ]; then
+      debug "bup on $HOST_SPEC index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST"
+      if output=$(bup on $HOST_SPEC -d "$remote_bupdir" index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST 2>&1); then
+         debug $output
+         info "Indexing completed successfully"
+      else
+         warning $output
+         warning "bup index encountered errors"
+      fi
 
-    debug "bup on $HOST_SPEC save -n $branch $PATH_LIST"
-    if output=$(bup on $HOST_SPEC -d "$remote_bupdir" save -n $branch $PATH_LIST 2>&1); then
-        debug $output
-        info "Successfullly finished backing up"
-    else
-        warning $output
-        warning "bup save encountered errors"
-    fi
-else
-    debug "bup index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST"
-    if output=$(bup index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST 2>&1); then
-        debug $output
-        info "Indexing completed successfully"
-    else
-        warning $output
-        warning "bup index encountered errors"
-    fi
+      debug "bup on $HOST_SPEC save -n $branch $PATH_LIST"
+      if output=$(bup on $HOST_SPEC -d "$remote_bupdir" save -n $branch $PATH_LIST 2>&1); then
+         debug $output
+         info "Successfullly finished backing up"
+      else
+         warning $output
+         warning "bup save encountered errors"
+      fi
+   else
+      debug "bup index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST"
+      if output=$(bup index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST 2>&1); then
+         debug $output
+         info "Indexing completed successfully"
+      else
+         warning $output
+         warning "bup index encountered errors"
+      fi
 
-    debug "bup save $REMOTE_URL -n $branch $PATH_LIST"
-    if output=$(bup save $REMOTE_URL -n $branch $PATH_LIST 2>&1); then
-        debug $output
-        info "Successfullly finished backing up"
-    else
-        warning $output
-        warning "bup save encountered errors"
-    fi
+      debug "bup save $REMOTE_URL -n $branch $PATH_LIST"
+      if output=$(bup save $REMOTE_URL -n $branch $PATH_LIST 2>&1); then
+         debug $output
+         info "Successfullly finished backing up"
+      else
+         warning $output
+         warning "bup save encountered errors"
+      fi
+   fi
 fi
