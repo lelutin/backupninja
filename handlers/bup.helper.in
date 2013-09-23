@@ -216,7 +216,18 @@ do_bup_finish() {
    get_next_filename $configdirectory/90.bup
 
    cat > $next_filename <<EOF
+## You can schedule the backups per-task with the 'when' option:
 # when = everyday at 02
+
+## Set this option to 'yes' to avoid the version comparison between local and
+## remote server. This can be useful when working with bup versions from git
+## master since the version tag is different for all commits, but should
+## generally not be used.
+#ignore_version = no
+
+## Set this option to 'no' to avoid testing the SSH connection prior to
+## actually running the backup.
+#testconnect yes
 
 [source]
 # A few notes about includes and excludes:
