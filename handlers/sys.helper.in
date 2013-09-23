@@ -57,4 +57,3 @@ $bios
 EOF
    chmod 600 $next_filename
 }
-
