@@ -50,7 +50,7 @@ do_bup_src() {
 
    # choose the files to exclude from the backup
    REPLY=
-   formBegin "$bup_title - host system: excludes that don't interpret regular expressions"
+   formBegin "$bup_title - host system: excludes not interpreting regular expressions"
       for ((i=0; i < ${#bup_excludes[@]} ; i++)); do
          formItem exclude ${bup_excludes[$i]}
       done
@@ -190,7 +190,7 @@ do_bup_ssh_con() {
    fi
    ssh $bup_user@$bup_host "bup -d '$bup_remote_bupdir' init"
    case $? in
-      0) msgBox "$bup_title: success" "Creation of the remote destination repository was a success!";;
+      0) msgBox "$bup_title: success" "Creation of the remote bup repository was a success!";;
       1) msgBox "$bup_title: error" "Connected successfully to $bup_user@$bup_host, but was unable to initilize the destination bup repository."
          return;;
       255) msgBox "$bup_title: error" "Failed to connect to $bup_user@$bup_host. Check hostname, username, and password. Also, make sure sshd is running on the destination host."
