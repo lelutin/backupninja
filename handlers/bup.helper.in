@@ -3,6 +3,15 @@
 
 HELPERS="$HELPERS bup:git-like_incremental_filesystem_backup"
 
+if [ -z "$BUP" ]; then
+   if [ -x /usr/bin/bup ]; then
+      BUP=/usr/bin/bup
+   else
+      fatal "executable path not defined in 'BUP' configuration option"
+   fi
+fi
+[ -x "$BUP" ] || fatal "bup executable path is not executable or does not exist."
+
 do_bup_src() {
    set -o noglob
 
@@ -109,7 +118,7 @@ do_bup_dest() {
       fi
 
       echo "Initializing local bup repository in $bup_directory"
-      bup -d "$bup_directory" init
+      $BUP -d "$bup_directory" init
       if [ "$?" -ne 0 ]; then
          echo "Initialization failed. Check errors above."
          REPLY=
@@ -188,7 +197,7 @@ do_bup_ssh_con() {
       msgBox "$bup_title: error" "Couldn't ensure that remote dir is created and accessible, can't go further."
       return
    fi
-   ssh $bup_user@$bup_host "bup -d '$bup_remote_bupdir' init"
+   ssh $bup_user@$bup_host "$BUP -d '$bup_remote_bupdir' init"
    case $? in
       0) msgBox "$bup_title: success" "Creation of the remote bup repository was a success!";;
       1) msgBox "$bup_title: error" "Connected successfully to $bup_user@$bup_host, but was unable to initilize the destination bup repository."
