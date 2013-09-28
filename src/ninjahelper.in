@@ -202,8 +202,8 @@ fi
 # include shared functions
 . $libdirectory/easydialog
 . $libdirectory/tools
-. $libdirectory/vserver
 . $libdirectory/ssh
+. $libdirectory/vserver
 
 # am I running as root?
 if [ "$UID" != "0" ]; then

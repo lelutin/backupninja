@@ -164,17 +164,10 @@ do_rdiff_ssh_con() {
       [ $? = 0 ] || return
    fi
 
-   ssh_create_root_key "$rdiff_title" "$rdiff_host" "$rdiff_user"
-   if [ "$?" != "0" ]; then
-      # key setup failed, can't go further
-      return
-   fi
+   # if key setup fails, can't go further
+   ssh_create_root_key "$rdiff_title" "$rdiff_host" "$rdiff_user" || return
 
-   ssh_ensure_remote_dir "$rdiff_title" "$rdiff_directory" "$rdiff_host" "$rdiff_user"
-   if [ "$?" != "0" ]; then
-      # couldn't ensure that remote dir is created and accessible, can't go further
-      return
-   fi
+   ssh_ensure_remote_dir "$rdiff_title" "$rdiff_directory" "$rdiff_host" "$rdiff_user" || return
 
    do_rdiff_con
 }
