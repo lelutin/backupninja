@@ -64,15 +64,26 @@ getconf remote_bupdir
 getconf host localhost
 getconf user
 
-PATH_LIST=$(echo $path | sed -e 's/\n/ /g')
+SAVEIFS=$IFS
+IFS=$(echo -en "\n\b")
+# TODO: order the includes and excludes
+# includes
+PATH_LIST=
+for i in $path; do
+   PATH_LIST="${PATH_LIST}'${i}' " ;;
+done
+# excludes
 EXCLUDE_LIST=
-if [ -n "$exclude" ]; then
-   EXCLUDE_LIST=$(echo $exclude | sed -e '1s/^/--exclude=/' -e 's/[\n ]/ --exclude=/g')
-fi
+for i in $exclude; do
+   EXCLUDE_LIST="${EXCLUDE_LIST}--exclude '${i}' " ;;
+done
+# excludes with regexp
 EXCLUDE_RX_LIST=
-if [ -n "$exclude_rx" ]; then
-   EXCLUDE_RX_LIST=$(echo $exclude_rx | sed -e '1s/^/--exclude-rx=/' -e 's/[\n ]/ --exclude-rx=/g')
-fi
+for i in $exclude_rx; do
+   EXCLUDE_RX_LIST="${EXCLUDE_RX_LIST}--exclude-rx '${i}' " ;;
+done
+
+IFS=$SAVEIFS
 
 debug "backup type is set to '$desttype'"
 
