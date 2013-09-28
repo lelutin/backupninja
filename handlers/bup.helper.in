@@ -85,8 +85,7 @@ do_bup_src() {
 do_bup_dest() {
    set -o noglob
    REPLY=
-   while [ -z "$REPLY" -o -z "$bup_type" ]
-   do
+   while [ -z "$REPLY" -o -z "$bup_type" ]; do
       formBegin "$bup_title - The type of backup that needs to be performed. Can be 'local', 'remote' or 'on'."
          formItem "dest_type" "$bup_type"
       formDisplay
@@ -100,8 +99,7 @@ do_bup_dest() {
    done
 
    REPLY=
-   while [ -z "$REPLY" -o -z "$bup_directory" -o -z "$bup_branch" ]
-   do
+   while [ -z "$REPLY" -o -z "$bup_directory" -o -z "$bup_branch" ]; do
       formBegin "$bup_title - Choose the path to the repositories and the branch name that will be used for the backups.  For local backups, files will be saved in the local repository.  For remote backups, only the local file index will be saved in the local repository, while data will be saved in the remote directory."
          formItem "dest_bup_directory" "$bup_directory"
          formItem "dest_branch" "$bup_branch"
