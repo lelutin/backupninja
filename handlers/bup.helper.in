@@ -270,21 +270,21 @@ type = $bup_type
 # also the whole backup when doing a "local" or an "on" backup.
 bupdir = $bup_directory
 # Backups with bup are saved on a branch (think git branch).
-# # Usually each server/backup origin should have its own branch, but some people
-# # use multiple branches for a same server for inventive purposes.
+# Usually each server/backup origin should have its own branch, but some people
+# use multiple branches for a same server for inventive purposes.
 branch = $bup_branch
 EOF
 
    if [ "$bup_type" = "remote" ] || [ "$bup_type" = "on" ]; then
       cat >> $next_filename <<EOF
 # When using "remote" or "on" as a backup type, bup needs to store things in a
-# # bup repository on the remote server. This option specifies where this
-# # repository should be placed on the remote server. It can be an absolute path,
-# # or a relative path to the user's home directory.
+# bup repository on the remote server. This option specifies where this
+# repository should be placed on the remote server. It can be an absolute path,
+# or a relative path to the user's home directory.
 remote_bupdir = $bup_remote_bupdir
 # Finally, remote backups need to know how to connect to the remote server. For
-# # this you need to specify the hostname or ip address of the remote server and
-# # the user name that bup will use to establish an SSH connection to the host.
+# this you need to specify the hostname or ip address of the remote server and
+# the user name that bup will use to establish an SSH connection to the host.
 host = $bup_host
 user = $bup_user
 EOF
