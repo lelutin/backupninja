@@ -20,7 +20,7 @@ do_bup_src() {
    # list.
    REPLY=
    while [ -z "$REPLY" ]; do
-      formBegin "$bup_title - host system: includes"
+      formBegin "$bup_title - Paths included in the backup"
          for ((i=0; i < ${#bup_includes[@]} ; i++)); do
             formItem include ${bup_includes[$i]}
          done
@@ -40,7 +40,7 @@ do_bup_src() {
 
    # choose the path regex'es to exclude from the backup
    REPLY=
-   formBegin "$bup_title - host system: exclude regular expressions"
+   formBegin "$bup_title - Excluded paths matching a regular expression"
       for ((i=0; i < ${#bup_excludes_rx[@]} ; i++)); do
          formItem exclude_rx ${bup_excludes_rx[$i]}
       done
@@ -59,7 +59,7 @@ do_bup_src() {
 
    # choose the files to exclude from the backup
    REPLY=
-   formBegin "$bup_title - host system: excludes not interpreting regular expressions"
+   formBegin "$bup_title - Excluded paths not interpreting regular expressions"
       for ((i=0; i < ${#bup_excludes[@]} ; i++)); do
          formItem exclude ${bup_excludes[$i]}
       done
@@ -130,7 +130,7 @@ do_bup_dest() {
       REPLY=
       while [ -z "$REPLY" -o -z "$bup_host" -o -z "$bup_user" ]
       do
-        formBegin "$bup_title - Specify on which host and with which user bup should login to access the remote repository."
+        formBegin "$bup_title - Specify on which host and as which user bup should login to access the remote repository."
            formItem "dest_host" "$bup_host"
            formItem "dest_user" "$bup_user"
            formDisplay
