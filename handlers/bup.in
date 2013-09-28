@@ -95,13 +95,7 @@ if [ "$desttype" != "local" ]; then
       ssh_test_connection $user $host
    fi
 
-   HOST_SPEC="$host"
-
-   if [ -n "$user" ]; then
-      HOST_SPEC="${user}@$host"
-   fi
-
-   REMOTE_URL="-r $HOST_SPEC:$remote_bupdir"
+   REMOTE_URL="-r $user@$host:$remote_bupdir"
 
    if [ "${test}" -eq 0 ]; then
       # Even though we're already doing this in bup.helper, this gives users the
@@ -136,6 +130,11 @@ if [ -z "$bupdir" ]; then
    debug "No bupdir specified: using the default location of ~/.bup !"
 fi
 
+if [ "$desttype" != "local" ]; then
+   [ -n "$user" ] || fatal "Username must be specified for non-local backups."
+   [ -n "$host" ] || fatal "Host name must be specified for non-local backups."
+fi
+
 if [ "$ignore_version" != "yes" ]; then
    # see that bup has the same version at the source and destination
    sourceversion=`bup_version`
@@ -154,8 +153,8 @@ fi
 
 if [ "${test}" -eq 0 ]; then
    if [ "$desttype" = "on" ]; then
-      debug "$BUP on $HOST_SPEC index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST"
-      if output=$($BUP on $HOST_SPEC -d "$remote_bupdir" index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST 2>&1); then
+      debug "$BUP on $user@host index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST"
+      if output=$($BUP on $user@host -d "$remote_bupdir" index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST 2>&1); then
          debug $output
          info "Indexing completed successfully"
       else
@@ -163,8 +162,8 @@ if [ "${test}" -eq 0 ]; then
          warning "bup index encountered errors"
       fi
 
-      debug "$BUP on $HOST_SPEC save -n $branch $PATH_LIST"
-      if output=$($BUP on $HOST_SPEC -d "$remote_bupdir" save -n $branch $PATH_LIST 2>&1); then
+      debug "$BUP on $user@host save -n $branch $PATH_LIST"
+      if output=$($BUP on $user@host -d "$remote_bupdir" save -n $branch $PATH_LIST 2>&1); then
          debug $output
          info "Successfullly finished backing up"
       else
