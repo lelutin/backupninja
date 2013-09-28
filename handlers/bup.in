@@ -29,11 +29,11 @@ function bup_version() {
       local host=$2
       debug "ssh $host -l $user 'bup --version'"
       version=`ssh $host -l $user "bup --version"`
-      if [ $? = 127 ]; then
-         fatal "Unable to execute bup on remote server. It probably isn't installed"
-      else
-         echo "$version"
+      if [ $? -ne 0 ]; then
+         fatal "Unable to retrieve bup's version tag."
       fi
+
+      echo "$version"
    fi
 }
 
