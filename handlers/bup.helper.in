@@ -90,7 +90,7 @@ do_bup_dest() {
          formItem "dest_type" "$bup_type"
       formDisplay
       [ $? = 0 ] || return
-      bup_type=$REPLY
+      bup_type="$REPLY"
       if [ "$bup_type" != "local" ] && [ "$bup_type" != "remote" ] && [ "$bup_type" != "on" ]; then
          echo "Wrong backup type. Must be one of 'local', 'remote' or 'on'."
          bup_type=
@@ -109,10 +109,10 @@ do_bup_dest() {
       formDisplay
       [ $? = 0 ] || return
       tmp_array=($REPLY)
-      bup_directory=${tmp_array[0]}
-      bup_branch=${tmp_array[1]}
+      bup_directory="${tmp_array[0]}"
+      bup_branch="${tmp_array[1]}"
       if [ "$bup_type" != "local" ]; then
-         bup_remote_bupdir=${tmp_array[2]}
+         bup_remote_bupdir="${tmp_array[2]}"
       fi
 
       echo "Initializing local bup repository in $bup_directory"
