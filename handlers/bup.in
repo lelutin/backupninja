@@ -23,7 +23,7 @@ function bup_version() {
    local version
    if [ "$#" -lt 2 ]; then
       debug "$BUP --version"
-      echo `$BUP --version`
+      $BUP --version
    else
       local user=$1
       local host=$2
