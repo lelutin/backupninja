@@ -157,37 +157,37 @@ if [ "${test}" -eq 0 ]; then
    if [ "$desttype" = "on" ]; then
       debug "$BUP on $user@host index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST"
       if output=$($BUP on $user@host -d "$remote_bupdir" index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST 2>&1); then
-         debug $output
+         debug "$output"
          info "Indexing completed successfully"
       else
-         warning $output
+         warning "$output"
          warning "bup index encountered errors"
       fi
 
       debug "$BUP on $user@host save -n $branch $PATH_LIST"
       if output=$($BUP on $user@host -d "$remote_bupdir" save -n $branch $PATH_LIST 2>&1); then
-         debug $output
+         debug "$output"
          info "Successfullly finished backing up"
       else
-         warning $output
+         warning "$output"
          warning "bup save encountered errors"
       fi
    else
       debug "$BUP index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST"
       if output=$($BUP index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST 2>&1); then
-         debug $output
+         debug "$output"
          info "Indexing completed successfully"
       else
-         warning $output
+         warning "$output"
          warning "bup index encountered errors"
       fi
 
       debug "$BUP save $REMOTE_URL -n $branch $PATH_LIST"
       if output=$($BUP save $REMOTE_URL -n $branch $PATH_LIST 2>&1); then
-         debug $output
+         debug "$output"
          info "Successfullly finished backing up"
       else
-         warning $output
+         warning "$output"
          warning "bup save encountered errors"
       fi
    fi
