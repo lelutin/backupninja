@@ -110,33 +110,33 @@ fi
 # This is not yet implemented in bup itself.
 
 ### EXECUTE ###
-SAVEIFS=$IFS
+saveifs=$IFS
 IFS=$(echo -en "\n\b")
 # TODO: order the includes and excludes
 # includes
-PATH_LIST=
+path_list=
 for i in $path; do
-   PATH_LIST="${PATH_LIST}'${i}' " ;;
+   path_list="${path_list}'${i}' " ;;
 done
 # excludes
-EXCLUDE_LIST=
+exclude_list=
 for i in $exclude; do
-   EXCLUDE_LIST="${EXCLUDE_LIST}--exclude '${i}' " ;;
+   exclude_list="${exclude_list}--exclude '${i}' " ;;
 done
 # excludes with regexp
-EXCLUDE_RX_LIST=
+exclude_rx_list=
 for i in $exclude_rx; do
-   EXCLUDE_RX_LIST="${EXCLUDE_RX_LIST}--exclude-rx '${i}' " ;;
+   exclude_rx_list="${exclude_rx_list}--exclude-rx '${i}' " ;;
 done
-IFS=$SAVEIFS
+IFS=$saveifs
 
-REMOTE_URL=
+remote_url=
 if [ "$desttype" != "local" ]; then
    if [ "$testconnect" = "yes" ] || [ "${test}" -eq 1 ]; then
       ssh_test_connection $user $host
    fi
 
-   REMOTE_URL="-r $user@$host:$remote_bupdir"
+   remote_url="-r $user@$host:$remote_bupdir"
 
    if [ "${test}" -eq 0 ]; then
       # Even though we're already doing this in bup.helper, this gives users the
@@ -155,8 +155,8 @@ fi
 
 if [ "${test}" -eq 0 ]; then
    if [ "$desttype" = "on" ]; then
-      debug "$BUP on $user@host index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST"
-      if output=$($BUP on $user@host -d "$remote_bupdir" index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST 2>&1); then
+      debug "$BUP on $user@host index -u $exclude_list $exclude_rx_list $path_list"
+      if output=$($BUP on $user@host -d "$remote_bupdir" index -u $exclude_list $exclude_rx_list $path_list 2>&1); then
          debug "$output"
          info "Indexing completed successfully"
       else
@@ -164,8 +164,8 @@ if [ "${test}" -eq 0 ]; then
          warning "bup index encountered errors"
       fi
 
-      debug "$BUP on $user@host save -n $branch $PATH_LIST"
-      if output=$($BUP on $user@host -d "$remote_bupdir" save -n $branch $PATH_LIST 2>&1); then
+      debug "$BUP on $user@host save -n $branch $path_list"
+      if output=$($BUP on $user@host -d "$remote_bupdir" save -n $branch $path_list 2>&1); then
          debug "$output"
          info "Successfullly finished backing up"
       else
@@ -173,8 +173,8 @@ if [ "${test}" -eq 0 ]; then
          warning "bup save encountered errors"
       fi
    else
-      debug "$BUP index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST"
-      if output=$($BUP index -u $EXCLUDE_LIST $EXCLUDE_RX_LIST $PATH_LIST 2>&1); then
+      debug "$BUP index -u $exclude_list $exclude_rx_list $path_list"
+      if output=$($BUP index -u $exclude_list $exclude_rx_list $path_list 2>&1); then
          debug "$output"
          info "Indexing completed successfully"
       else
@@ -182,8 +182,8 @@ if [ "${test}" -eq 0 ]; then
          warning "bup index encountered errors"
       fi
 
-      debug "$BUP save $REMOTE_URL -n $branch $PATH_LIST"
-      if output=$($BUP save $REMOTE_URL -n $branch $PATH_LIST 2>&1); then
+      debug "$BUP save $remote_url -n $branch $path_list"
+      if output=$($BUP save $remote_url -n $branch $path_list 2>&1); then
          debug "$output"
          info "Successfullly finished backing up"
       else
