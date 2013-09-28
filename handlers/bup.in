@@ -104,9 +104,9 @@ if [ "$desttype" != "local" ]; then
       #
       # calling bup init on an already existing repository is safe.
       debug "Initializing remote bupdir if it does not exist"
-      ssh $user@$host "mkdir -p $remote_bupdir && bup -d '$remote_bupdir' init"
+      output=`ssh $user@$host "mkdir -p $remote_bupdir && bup -d '$remote_bupdir' init"`
       if [ "$?" != "0" ]; then
-         fatal "An error occurred while initializing the remote repository."
+         fatal "An error occurred during repository initialization: $output"
       fi
    fi
 fi
