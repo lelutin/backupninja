@@ -56,7 +56,7 @@
 
 ## when set to yes, encryptkey variable must be set below; if you want to use
 ## two different keys for encryption and signing, you must also set the signkey
-## variable below.
+## variable (and probably signpassword) below.
 ## default is set to no, for backwards compatibility with backupninja <= 0.5.
 ##
 ## Default:
@@ -77,13 +77,22 @@
 ## Default:
 # signkey = 
 
-## password
-## NB: neither quote this, nor should it contain any quotes, 
+## password used to unlock the encryption key
+## NB: neither quote this, nor should it contain any quotes,
 ## an example setting would be:
 ## password = a_very_complicated_passphrase
 ##
 ## Default:
 # password = 
+
+## password used to unlock the signature key, used only if
+## it differs from the encryption key
+## NB: neither quote this, nor should it contain any quotes,
+## an example setting would be:
+## signpassword = a_very_complicated_passphrase
+##
+## Default:
+# signpassword =
 
 ######################################################
 ## source section

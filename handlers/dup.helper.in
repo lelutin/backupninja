@@ -193,12 +193,22 @@ do_dup_gpg_signkey() {
 }
 
 do_dup_gpg_passphrase() {
-   local question="Enter the passphrase needed to unlock the GnuPG key:"
+   local question="Enter the passphrase needed to unlock the GnuPG encryption key:"
    REPLY=
    while [ -z "$REPLY" -o -z "$dup_gpg_password" ]; do
       passwordBox "$dup_title - GnuPG" "$question"
       [ $? = 0 ] || return 1
       dup_gpg_password="$REPLY"
+   done
+}
+
+do_dup_gpg_sign_passphrase() {
+   local question="Enter the passphrase needed to unlock the GnuPG signature key:"
+   REPLY=
+   while [ -z "$REPLY" -o -z "$dup_gpg_signpassword" ]; do
+      passwordBox "$dup_title - GnuPG" "$question"
+      [ $? = 0 ] || return 1
+      dup_gpg_signpassword="$REPLY"
    done
 }
 
@@ -225,6 +235,9 @@ do_dup_gpg() {
 
    # a passphrase is alway needed
    do_dup_gpg_passphrase
+
+   # If the signature key differs, we also need a passphrase for it
+   [ -n "$dup_gpg_signkey" -a -n "$dup_gpg_encryptkey" -a "$dup_gpg_signkey" != "$dup_gpg_encryptkey" ] && do_dup_gpg_sign_passphrase
 
    _gpg_done="(DONE)"
    setDefault adv
@@ -329,9 +342,18 @@ encryptkey = $dup_gpg_encryptkey
 # if not set, encryptkey will be used.
 signkey = $dup_gpg_signkey
 
-# password
-# NB: neither quote this, nor should it include any quotes
+## password used to unlock the encryption key
+## NB: neither quote this, nor should it contain any quotes,
+## an example setting would be:
+## password = a_very_complicated_passphrase
 password = $dup_gpg_password
+
+## password used to unlock the signature key, used only if
+## it differs from the encryption key
+## NB: neither quote this, nor should it contain any quotes,
+## an example setting would be:
+## signpassword = a_very_complicated_passphrase
+signpassword = $dup_gpg_signpassword
 
 ######################################################
 ## source section
@@ -584,6 +606,7 @@ dup_wizard() {
    dup_gpg_onekeypair="yes"
    dup_gpg_signkey=""
    dup_gpg_password=""
+   dup_gpg_signpassword=""
    dup_nicelevel=19
    dup_testconnect=yes
    dup_options=

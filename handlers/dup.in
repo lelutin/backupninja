@@ -12,6 +12,7 @@ getconf tmpdir
 
 setsection gpg
 getconf password
+getconf signpassword
 getconf sign no
 getconf encryptkey
 getconf signkey
@@ -46,6 +47,7 @@ destdir=${destdir%/}
 [ -n "$desturl" -o -n "$destdir" ]  || fatal "The destination directory (destdir) must be set when desturl is not used."
 [ -n "$include" -o -n "$vsinclude" ]  || fatal "No source includes specified"
 [ -n "$password" ] || fatal "The password option must be set."
+[ -n "$signpassword" -a -n "$signkey" -a -n "$encryptkey" -a "$signkey" != "$encryptkey" ] || fatal "The signpassword option must be set because signkey is different from encryptkey."
 if [ "`echo $desturl | @AWK@ -F ':' '{print $1}'`" == "s3+http" ]; then
    [ -n "$awsaccesskeyid" -a -n "$awssecretaccesskey" ]  || fatal "AWS access keys must be set for S3 backups."
 fi
@@ -283,6 +285,7 @@ fi
 debug "$execstr_precmd duplicity cleanup --force $execstr_options $execstr_serverpart"
 if [ ! $test ]; then
    export PASSPHRASE=$password
+   export SIGN_PASSPHRASE=$signpassword
    export FTP_PASSWORD=$ftp_password
    output=`nice -n $nicelevel \
              su -c \
@@ -302,6 +305,7 @@ if [ "$keep" != "yes" ]; then
    debug "$execstr_precmd duplicity remove-older-than $keep --force $execstr_options $execstr_serverpart"
    if [ ! $test ]; then
       export PASSPHRASE=$password
+      export SIGN_PASSPHRASE=$signpassword
       export FTP_PASSWORD=$ftp_password
       output=`nice -n $nicelevel \
                 su -c \
@@ -324,6 +328,7 @@ if [ "$keep" != "yes" ]; then
          debug "$execstr_precmd duplicity remove-all-inc-of-but-n-full $keepincroffulls --force $execstr_options $execstr_serverpart"
          if [ ! $test ]; then
             export PASSPHRASE=$password
+            export SIGN_PASSPHRASE=$signpassword
             export FTP_PASSWORD=$ftp_password
             output=`nice -n $nicelevel \
                su -c \
@@ -346,6 +351,7 @@ debug "$execstr_precmd duplicity $execstr_command $execstr_options $execstr_sour
 if [ ! $test ]; then
    outputfile=`maketemp backupout`
    export PASSPHRASE=$password
+   export SIGN_PASSPHRASE=$signpassword
    export FTP_PASSWORD=$ftp_password
    output=`nice -n $nicelevel \
              su -c \
