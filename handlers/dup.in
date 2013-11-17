@@ -191,7 +191,9 @@ else
 fi
 
 ### Cleanup options
-execstr_options="${execstr_options} --extra-clean"
+if [ "$duplicity_major" -le 0 -a "$duplicity_minor" -le 6 -a "$duplicity_sub" -le 19 ]; then
+   execstr_options="${execstr_options} --extra-clean"
+fi
 
 ### Temporary directory
 if [ -n "$tmpdir" ]; then
