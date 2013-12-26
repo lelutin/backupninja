@@ -302,7 +302,7 @@ then
          if [ "$compress" == "yes" ]; then
             execstr="$DUMP | $GZIP $GZIP_OPTS > '$dumpdir/${db}.sql.gz'"
          else
-            execstr="$DUMP -r '$dumpdir/${db}.sql'"
+            execstr="$DUMP > '$dumpdir/${db}.sql'"
          fi
       fi
       debug "su $user -c \"$execstr\""
