@@ -6,6 +6,10 @@ version 1.0.2  -- UNRELEASED
 	 . For local backups, check that the destination directory exists.
 	   Thanks to ulrich for the preliminary patch. (Redmine#4049)
 	 . Gracefully handle legacy spaces between -o and IdentityFile.
+	 . Don't remove useful signature files with --extra-clean,
+	   on duplicity versions that have a sane handling of the cache.
+	   Thanks to Alexander Mette <mail@amette.eu> for the patch!
+	   (Closes: Redmine#6357)
 	mysql:
 	 . Make "nodata" option compatible with compress=no.
 	 . Fix non-qualified table name extraction. (Closes: Redmine#4373)

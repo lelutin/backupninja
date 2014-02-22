@@ -49,3 +49,4 @@ ulrich -- duplicity bugfix preliminary patch
 David Gasaway <dave@gasaway.org> -- rdiff's output_as_info option
 Pierre ROUDIER <contact@pierreroudier.net> -- xz and test mode for tar handler
 olb <olb@nebkha.net> -- update of duplicity/paramiko SSH options handling
+Alexander Mette <mail@amette.eu> -- duplicity bugfix
