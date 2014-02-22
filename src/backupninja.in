@@ -326,32 +326,32 @@ function process_action() {
    # start locked section : avoid concurrent execution of the same backup
    # uses a construct specific to shell scripts with flock. See man flock for details
    {
-       debug "executing handler in locked section controlled by $lockfile"
-       flock -x -w 5 200
-       # if all is good, we acquired the lock
-       if [ $? -eq 0 ]; then
+      debug "executing handler in locked section controlled by $lockfile"
+      flock -x -w 5 200
+      # if all is good, we acquired the lock
+      if [ $? -eq 0 ]; then
 
-	   let "actions_run += 1"
+         let "actions_run += 1"
 
-           # call the handler:
-	   echo_debug_msg=1
-	   (
-	       . $scriptdirectory/$suffix $file
-	   ) 2>&1 | (
-	       while read a; do
-		   echo $a >> $bufferfile
-		   [ $debug ] && colorize "$a"
-	       done
-	   )
-	   retcode=$?
-           # ^^^^^^^^ we have a problem! we can't grab the return code "$?". grrr.
-	   echo_debug_msg=0
+         # call the handler:
+         echo_debug_msg=1
+         (
+            . $scriptdirectory/$suffix $file
+         ) 2>&1 | (
+            while read a; do
+               echo $a >> $bufferfile
+               [ $debug ] && colorize "$a"
+            done
+         )
+         retcode=$?
+         # ^^^^^^^^ we have a problem! we can't grab the return code "$?". grrr.
+         echo_debug_msg=0
 
-       else
-	   # a backup is probably ongoing already, so display an error message
-	   debug "failed to acquire lock $lockfile"
-	   echo "Fatal: Could not acquire lock $lockfile. A backup is probably already running for $file." >>$bufferfile
-       fi
+      else
+         # a backup is probably ongoing already, so display an error message
+         debug "failed to acquire lock $lockfile"
+         echo "Fatal: Could not acquire lock $lockfile. A backup is probably already running for $file." >>$bufferfile
+      fi
    } 200> $lockfile
    # end of locked section
 
@@ -592,7 +592,7 @@ if [ $doit == 1 ]; then
 
    {
       for ((i=0; i < ${#messages[@]} ; i++)); do
-          echo ${messages[$i]}
+         echo ${messages[$i]}
       done
       echo -e "$errormsg"
       if [ "$reportspace" == "yes" ]; then
