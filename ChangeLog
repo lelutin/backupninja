@@ -1,8 +1,36 @@
-version 1.1  -- UNRELEASED
+version 1.0.2  -- UNRELEASED
     handler changes
+	dsync:
+	 . Miscellaneous improvements to this experimental handler.
 	dup:
 	 . For local backups, check that the destination directory exists.
 	   Thanks to ulrich for the preliminary patch. (Redmine#4049)
+	 . Gracefully handle legacy spaces between -o and IdentityFile.
+	mysql:
+	 . Make "nodata" option compatible with compress=no.
+	rdiff:
+	 . Add option to include rdiff-backup output in reports.
+	   Thanks to David Gasaway <dave@gasaway.org> for the patch!
+	rsync:
+	 . Solve quoting issue with "su". (Closes: #683731, Redmine#4019)
+	sys:
+	 . Fix LUKS header backup to properly detect partitions.
+	 . Provide the ability to backup the MBR for every device found,
+	   and to backup the BIOS (if the flashrom program is installed,
+	   and the mainboard is supported).
+	tar:
+	 . Support test mode and xz compression.
+	   Thanks to Pierre ROUDIER <contact@pierreroudier.net> for the patches.
+    helper changes
+	rdiff:
+	 . Don't give misleading information regarding required fields.
+	   (Redmine#4410)
+	 . Support output_as_info.
+	   Thanks to David Gasaway <dave@gasaway.org> for the patch!
+    backupninja changes
+	 . Indentation fixes, thanks to exobuzz. (Redmine#6726)
+    documentation changes
+	 . Update INSTALL file to add some missing recommended programs.
 
 version 1.0.1 -- June 29, 2012
     handler changes
