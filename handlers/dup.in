@@ -191,7 +191,7 @@ else
 fi
 
 ### Cleanup options
-if [ "$duplicity_major" -le 0 -a "$duplicity_minor" -le 6 -a "$duplicity_sub" -le 19 ]; then
+if ! [ "$duplicity_major" -ge 0 -a "$duplicity_minor" -ge 6 -a "$duplicity_sub" -ge 20 ]; then
    execstr_options="${execstr_options} --extra-clean"
 fi
 
