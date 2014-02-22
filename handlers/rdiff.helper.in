@@ -124,7 +124,7 @@ do_rdiff_dest() {
    REPLY=
    while [ -z "$REPLY" -o -z "$rdiff_directory" -o -z "$rdiff_host" -o -z "$rdiff_user" ]
    do
-     formBegin "$rdiff_title - destination: last three items are required"
+     formBegin "$rdiff_title - destination"
         formItem "keep" "$rdiff_keep"
         formItem "dest_directory" "$rdiff_directory"
         formItem "dest_host" "$rdiff_host"
