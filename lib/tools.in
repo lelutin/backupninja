@@ -15,6 +15,44 @@ function maketemp() {
    echo $tempfile
 }
 
+#
+# compare version numbers.
+# returns 0 if equal, 1 if $1>$2, and 2 if $1<$2
+#
+
+function compare_versions() {
+   if [[ "$1" == "$2" ]]; then
+      return 0
+   fi
+   local IFS=.
+   local i version_1=($1) version_2=($2)
+   for ((i=${#version_1[@]}; i<${#version_2[@]}; i++)); do
+      version_1[i]=0
+   done
+   for ((i=0; i<${#version_1[@]}; i++)); do
+      if [[ -z ${version_2[i]} ]]; then
+         version_2[i]=0
+      fi
+      if ((10#${version_1[i]} > 10#${version_2[i]})); then
+         return 1
+      fi
+      if ((10#${version_1[i]} < 10#${version_2[i]})); then
+         return 2
+      fi
+   done
+   return 0
+}
+
+#
+# compare version numbers: >=
+#
+
+function version_ge() {
+   compare_versions "$1" "$2"
+   comp=$?
+   [ $comp -eq 0 ] || [ $comp -eq 1 ]
+}
+
 #####################################################
 ## CONFIG-FILE RELATED FUNCTIONS
 
