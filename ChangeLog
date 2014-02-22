@@ -11,6 +11,9 @@ version 1.0.2  -- UNRELEASED
 	   Thanks to Alexander Mette <mail@amette.eu> for the patch!
 	   (Closes: Redmine#6357)
 	 . Fix buggy version comparison. (Redmine#6746)
+	 . Support using a different passphrase for the signing key
+	   from the one used for the encryption key.
+	   Thanks to Dominik George <nik@naturalnet.de> for the patch!
 	mysql:
 	 . Make "nodata" option compatible with compress=no.
 	 . Fix non-qualified table name extraction. (Closes: Redmine#4373)
