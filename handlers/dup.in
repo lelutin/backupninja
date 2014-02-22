@@ -117,13 +117,10 @@ fi
 
 ### duplicity version (ignore anything else than 0-9 and ".")
 duplicity_version="`duplicity --version | @AWK@ '{print $2}' | @SED@ 's/[^.[:digit:]]//g'`"
-duplicity_major="`echo $duplicity_version | @AWK@ -F '.' '{print $1}'`"
-duplicity_minor="`echo $duplicity_version | @AWK@ -F '.' '{print $2}'`"
-duplicity_sub="`echo $duplicity_version | @AWK@ -F '.' '{print $3}'`"
 
 ### ssh/scp/sftp options (duplicity < 0.4.3 is unsupported)
 ## duplicity >= 0.6.17 : paramiko backend
-if [ "$duplicity_major" -ge 0 -a "$duplicity_minor" -ge 6 -a "$duplicity_sub" -ge 17 ]; then
+if version_ge "$duplicity_version" '0.6.17'; then
    if [ -n "$sshoptions" ]; then
       if echo "$sshoptions" | grep -Eqs '^-o[[:space:]]*IdentityFile=[^ ]+$' ; then
          spaceless_sshoptions="$(echo -n "$sshoptions" | @SED@ 's/^-o[[:space:]]*/-o/')"
@@ -191,7 +188,7 @@ else
 fi
 
 ### Cleanup options
-if ! [ "$duplicity_major" -ge 0 -a "$duplicity_minor" -ge 6 -a "$duplicity_sub" -ge 20 ]; then
+if ! version_ge "$duplicity_version" '0.6.20'; then
    execstr_options="${execstr_options} --extra-clean"
 fi
 
@@ -323,7 +320,7 @@ fi
 # remove-all-inc-of-but-n-full : remove increments of older full backups : only keep latest ones
 if [ "$keep" != "yes" ]; then
    if [ "$keepincroffulls" != "all" ]; then
-      if [ "$duplicity_major" -ge 0 -a "$duplicity_minor" -ge 6 -a "$duplicity_sub" -ge 10 ]; then
+      if version_ge "$duplicity_version" '0.6.10'; then
          debug "$execstr_precmd duplicity remove-all-inc-of-but-n-full $keepincroffulls --force $execstr_options $execstr_serverpart"
          if [ ! $test ]; then
             export PASSPHRASE=$password
