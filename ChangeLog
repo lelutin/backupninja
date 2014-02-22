@@ -8,6 +8,7 @@ version 1.0.2  -- UNRELEASED
 	 . Gracefully handle legacy spaces between -o and IdentityFile.
 	mysql:
 	 . Make "nodata" option compatible with compress=no.
+	 . Fix non-qualified table name extraction. (Closes: Redmine#4373)
 	rdiff:
 	 . Add option to include rdiff-backup output in reports.
 	   Thanks to David Gasaway <dave@gasaway.org> for the patch!

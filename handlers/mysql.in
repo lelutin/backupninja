@@ -276,7 +276,7 @@ then
          DUMP_STRUCT="$DUMP_BASE --no-data $db"
          for qualified_table in $nodata
          do
-            table=$( expr match "$qualified_table" "$db\.\([^\w]*\)" )
+            table=$( expr match "$qualified_table" "$db\.\(.\+\)" )
             DUMP_STRUCT="$DUMP_STRUCT $table"
          done
          DUMP="( $DUMP; $DUMP_STRUCT )"
