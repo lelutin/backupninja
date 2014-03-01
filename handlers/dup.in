@@ -104,7 +104,7 @@ fi
 ### COMMAND-LINE MANGLING ######################################################
 
 ### initialize $execstr*
-execstr_precmd=
+execstr_precmd='LC_ALL=C'
 execstr_command=
 execstr_options="$options --no-print-statistics"
 execstr_source=
