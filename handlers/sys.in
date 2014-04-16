@@ -53,6 +53,11 @@ then
    os=redhat
    debug "Redhat detected"
    osversion="/etc/redhat-release"
+elif [ -f /etc/SuSE-release ]
+then
+   os=suse
+   debug "SuSE detected"
+   osversion="/etc/SuSE-release"
 else
    warning "Unknown OS detected!"
 fi
@@ -66,14 +71,14 @@ if [ ! -d $parentdir ]; then
    mkdir -p $parentdir
 fi
 
-if [ $os = "debian" ]
+if [ "$os" = "debian" ]
 then
    getconf packagesfile $parentdir/dpkg-selections.txt
    getconf packagemgr   `which dpkg`
    getconf packagemgroptions ' --get-selections *'
    getconf selectionsfile $parentdir/debconfsel.txt
    getconf debconfgetselections `which debconf-get-selections`
-elif [ $os = "redhat" ]
+elif [ "$os" = "redhat" ]
 then
    getconf packagesfile  $parentdir/rpmpackages.txt
    getconf packagemgr   `which rpm`
@@ -81,6 +86,11 @@ then
 
    getconf SYSREPORT `which sysreport`
    getconf sysreport_options ' -norpm '
+elif [ "$os" = "suse" ]
+then
+   getconf packagesfile  $parentdir/rpmpackages.txt
+   getconf packagemgr   `which rpm`
+   getconf packagemgroptions   ' -qa '
 else
    getconf packagesfile $parentdir/unknownOS.txt
 fi
