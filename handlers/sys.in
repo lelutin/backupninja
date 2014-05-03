@@ -303,7 +303,7 @@ STATUS="Checking available memory:"
 catifexec "/usr/bin/free"
 
 STATUS="Checking free disk space:"
-catifexec "/bin/df" "-al"
+catifexec "/bin/df" "-al --exclude-type=tmpfs"
 
 STATUS="Collecting what services run at what run level:"
 if [ $os = "redhat" ]; then
