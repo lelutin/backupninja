@@ -24,14 +24,14 @@ sys_wizard() {
    bios="bios = no"
    for opt in $result; do
       case $opt in
-         '"packages"') packages="packages = yes";;
-         '"partitions"') partitions="partitions = yes";;
-         '"sfdisk"') sfdisk="dosfdisk = yes";;
-         '"hardware"') hardware="hardware = yes";;
-         '"luksheaders"') luksheaders="luksheaders = yes";;
-         '"lvm"') lvm="lvm = yes";;
-         '"mbr"') mbr="mbr = yes";;
-         '"bios"') bios="bios = yes";;
+         'packages') packages="packages = yes";;
+         'partitions') partitions="partitions = yes";;
+         'sfdisk') sfdisk="dosfdisk = yes";;
+         'hardware') hardware="hardware = yes";;
+         'luksheaders') luksheaders="luksheaders = yes";;
+         'lvm') lvm="lvm = yes";;
+         'mbr') mbr="mbr = yes";;
+         'bios') bios="bios = yes";;
       esac
    done
    get_next_filename $configdirectory/10.sys
