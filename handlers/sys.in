@@ -203,7 +203,7 @@ if [ "$packages" == "yes" ]; then
             # don't expand * since it can be used in $packagemgroptions
             set -o noglob
             debug "$VSERVER $vserver exec $packagemgr $packagemgroptions > $VROOTDIR/$vserver$packagesfile"
-       $VSERVER $vserver exec $packagemgr $packagemgroptions > $VROOTDIR/$vserver$packagesfile || fatal "can not save $packagemgr info to $packagesfile"
+            $VSERVER $vserver exec $packagemgr $packagemgroptions > $VROOTDIR/$vserver$packagesfile || fatal "can not save $packagemgr info to $packagesfile"
             set +o noglob
          fi
          # is $debconfgetselections available inside $vserver ?
@@ -271,7 +271,7 @@ catiffile () {
       echo $DASHES >> $sysreportfile
       for file in `find $1 -maxdepth 3 -noleaf -type f`
       do
-       catiffile $file
+         catiffile $file
       done
    fi
    echo $DASHES >> $sysreportfile
@@ -558,14 +558,14 @@ fi
 if [ "$partitions" == "yes" ]; then
    if [ "$dosfdisk" == "yes" ]; then
       if [ ! -x "$SFDISK" ]; then
-    warning "can't find sfdisk, skipping sfdisk report."
-    partitions="no"
+         warning "can't find sfdisk, skipping sfdisk report."
+         partitions="no"
       fi
    fi
    if [ "$dohwinfo" == "yes" ]; then
       if [ ! -x "$HWINFO" ]; then
-    warning "can't find hwinfo, skipping partition report."
-    partitions="no"
+         warning "can't find hwinfo, skipping partition report."
+         partitions="no"
       fi
    fi
 fi
@@ -587,15 +587,15 @@ fi
 if [ "$hardware" == "yes" ]; then
    if [ "$dohwinfo" == "yes" ]; then
       if [ -f $hardwarefile ]; then
-    rm $hardwarefile
+         rm $hardwarefile
       fi
       touch $hardwarefile
       echo -e "\n\n====================== summary ======================\n" >>  $hardwarefile
       debug "$HWINFO --short --cpu --network --disk --pci  >> $hardwarefile"
       $HWINFO --short --cpu --network --disk --pci  >> $hardwarefile
       for flag in cpu network bios pci; do
-    echo -e "\n\n====================== $flag ======================\n" >>  $hardwarefile
-    $HWINFO --$flag >> $hardwarefile
+         echo -e "\n\n====================== $flag ======================\n" >>  $hardwarefile
+         $HWINFO --$flag >> $hardwarefile
       done
    fi
 fi
@@ -608,21 +608,21 @@ fi
 if [ "$partitions" == "yes" ]; then
    if [ "$dosfdisk" == "yes" ]; then
       devices=`LC_ALL=C $SFDISK -l 2>/dev/null | grep "^Disk /dev" | @AWK@ '{print $2}' | cut -d: -f1`
-   if [ "$devices" == "" ]; then
-      warning "No harddisks found"
-   fi
-   for dev in $devices; do
-      debug "$SFDISK will try to backup partition tables for device $dev"
-      [ -b $dev ] || continue
-      label=${dev#/dev/}
-      label=${label//\//-}
-      outputfile=${partitionsfile//__star__/$label}
-      debug "$SFDISK $sfdisk_options -d $dev > $outputfile 2>/dev/null"
-      $SFDISK $sfdisk_options -d $dev > $outputfile 2>/dev/null
-      if [ $? -ne 0 ]; then
-         warning "The partition table for $dev could not be saved."
+      if [ "$devices" == "" ]; then
+         warning "No harddisks found"
       fi
-   done
+      for dev in $devices; do
+         debug "$SFDISK will try to backup partition tables for device $dev"
+         [ -b $dev ] || continue
+         label=${dev#/dev/}
+         label=${label//\//-}
+         outputfile=${partitionsfile//__star__/$label}
+         debug "$SFDISK $sfdisk_options -d $dev > $outputfile 2>/dev/null"
+         $SFDISK $sfdisk_options -d $dev > $outputfile 2>/dev/null
+         if [ $? -ne 0 ]; then
+            warning "The partition table for $dev could not be saved."
+         fi
+      done
    fi
    if [ "$dohwinfo" == "yes" ]; then
       debug "Using $HWINFO to get all available disk information"
