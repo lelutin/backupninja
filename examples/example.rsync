@@ -98,7 +98,7 @@ days = 7
 #port = 22
 
 # remote user name (remote source only)
-#user =
+user = remoteuser
 
 # when "yes", test the connection for a remote source before backup
 #testconnect = no
