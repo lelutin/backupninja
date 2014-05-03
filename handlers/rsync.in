@@ -284,6 +284,10 @@ function eval_config {
   done
   IFS=$SAVEIFS
   set +o noglob
+
+  # Make sure we'll run bash at the destination
+  ssh_cmd="$ssh_cmd /bin/bash"
+
 }
 
 function rotate_short {
