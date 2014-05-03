@@ -25,11 +25,19 @@ version 1.0.2  -- UNRELEASED
 	   Thanks to David Gasaway <dave@gasaway.org> for the patch!
 	rsync:
 	 . Solve quoting issue with "su". (Closes: #683731, Redmine#4019)
+	 . Update increment folder date to avoid ending up with contradictory
+	   information. (Closes: Redmine#3929)
+	 . Force rsync handler run bash at the remote destination.
+	   (Closes: Redmine#3003)
 	sys:
 	 . Fix LUKS header backup to properly detect partitions.
 	 . Provide the ability to backup the MBR for every device found,
 	   and to backup the BIOS (if the flashrom program is installed,
 	   and the mainboard is supported).
+	 . Add suse to the list of supported OS (Redmine#7101).
+	   Thanks to Christian Prause <cprause@suse.com> for the patch.
+	 . Fix indentation. Thanks to Jools Wills <jools@oxfordinspire.co.uk>
+	   for the patch. (Closes: Redmine#6802)
 	tar:
 	 . Support test mode and xz compression.
 	   Thanks to Pierre ROUDIER <contact@pierreroudier.net> for the patches.
@@ -39,6 +47,9 @@ version 1.0.2  -- UNRELEASED
 	   (Redmine#4410)
 	 . Support output_as_info.
 	   Thanks to David Gasaway <dave@gasaway.org> for the patch!
+	sys:
+	 . Remove spurious quotes that broke the helper (Closes: Redmine#6803).
+	   Thanks to Jools Wills <jools@oxfordinspire.co.uk> for the patch.
     backupninja changes
 	 . Indentation fixes, thanks to exobuzz. (Redmine#6726)
     documentation changes

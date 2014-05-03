@@ -51,3 +51,5 @@ Pierre ROUDIER <contact@pierreroudier.net> -- xz and test mode for tar handler
 olb <olb@nebkha.net> -- update of duplicity/paramiko SSH options handling
 Alexander Mette <mail@amette.eu> -- duplicity bugfix
 Dominik George <nik@naturalnet.de> -- Support using a different passphrase for the signing key from the one used for the encryption key in the dup handler
+Christian Prause <cprause@suse.com> -- Support suse in the sys handler
+Jools Wills <jools@oxfordinspire.co.uk> -- Bugfix in the sys helper, indentation fixes
