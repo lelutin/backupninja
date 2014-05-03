@@ -38,6 +38,7 @@ version 1.0.2  -- UNRELEASED
 	   Thanks to Christian Prause <cprause@suse.com> for the patch.
 	 . Fix indentation. Thanks to Jools Wills <jools@oxfordinspire.co.uk>
 	   for the patch. (Closes: Redmine#6802)
+	 . Exclude tmpfs filesystems from df output. (Closes: Debian#745818)
 	tar:
 	 . Support test mode and xz compression.
 	   Thanks to Pierre ROUDIER <contact@pierreroudier.net> for the patches.
