@@ -544,7 +544,7 @@ errormsg=""
 if [ "$singlerun" ]; then
    files=$singlerun
 else
-   files=`find $configdirectory -follow -mindepth 1 -maxdepth 1 -type f ! -name '.*.swp' | sort -n`
+   files=`find $configdirectory -follow -mindepth 1 -maxdepth 1 -type f ! -name '.*.swp' ! -name '*~' | sort -n`
 
    if [ -z "$files" ]; then
       info "No backup actions configured in '$configdirectory', run ninjahelper!"

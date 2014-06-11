@@ -240,7 +240,7 @@ while true; do
 menulist=
 action=
 let "i = 1"
-for file in `find ${configdirectory} -follow -mindepth 1 -maxdepth 1 -type f ! -name '.*.swp' | sort -n`; do
+for file in `find ${configdirectory} -follow -mindepth 1 -maxdepth 1 -type f ! -name '.*.swp' ! -name '*~' | sort -n`; do
    menulist="$menulist $i $file"
    actions[$i]=$file
    let "i += 1"
