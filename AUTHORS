@@ -53,3 +53,4 @@ Alexander Mette <mail@amette.eu> -- duplicity bugfix
 Dominik George <nik@naturalnet.de> -- Support using a different passphrase for the signing key from the one used for the encryption key in the dup handler
 Christian Prause <cprause@suse.com> -- Support suse in the sys handler
 Jools Wills <jools@oxfordinspire.co.uk> -- Bugfix in the sys helper, indentation fixes
+Mark Janssen <mark@sig-io.nl> -- ignore jobs whose filename ends with "~"

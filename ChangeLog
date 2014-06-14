@@ -53,6 +53,8 @@ version 1.0.2  -- UNRELEASED
 	   Thanks to Jools Wills <jools@oxfordinspire.co.uk> for the patch.
     backupninja changes
 	 . Indentation fixes, thanks to exobuzz. (Redmine#6726)
+	 . Ignore jobs whose filename ends with "~".
+	   Thanks to Mark Janssen <mark@sig-io.nl> for the patch.
     documentation changes
 	 . Update INSTALL file to add some missing recommended programs.
 
