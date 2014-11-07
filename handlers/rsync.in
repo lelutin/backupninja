@@ -747,6 +747,10 @@ function move_files {
 
 function prepare_storage {
 
+  if [ "$test" ]; then
+    return
+  fi
+
   section="`basename $SECTION`"
 
   if [ "$format" == "short" ]; then
