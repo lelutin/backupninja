@@ -29,6 +29,8 @@ version 1.0.2  -- UNRELEASED
 	   information. (Closes: Redmine#3929)
 	 . Force rsync handler run bash at the remote destination.
 	   (Closes: Redmine#3003)
+	 . Support running in test mode (Closes: Redmine#8196).
+	   Thanks to shred for the initial patch.
 	sys:
 	 . Fix LUKS header backup to properly detect partitions.
 	 . Provide the ability to backup the MBR for every device found,
