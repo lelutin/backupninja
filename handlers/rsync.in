@@ -747,25 +747,24 @@ function move_files {
 
 function prepare_storage {
 
-  if [ "$test" ]; then
-    return
-  fi
-
   section="`basename $SECTION`"
 
   if [ "$format" == "short" ]; then
 
     suffix="$section.0"
-    info "Rotating $backupdir/$SECTION..."
-    echo "Rotating $backupdir/$SECTION..." >> $log
 
-    if [ "$dest" == "remote" ]; then
-      rotate_short_remote $backupdir/$SECTION/$section $keep
-    else
-      rotate_short $backupdir/$SECTION/$section $keep
-      if [ ! -d "$backupdir/$SECTION/$section.0" ]; then
-        mkdir -p $backupdir/$SECTION/$section.0
-      fi
+    if [ ! "$test" ]; then
+       info "Rotating $backupdir/$SECTION..."
+       echo "Rotating $backupdir/$SECTION..." >> $log
+
+       if [ "$dest" == "remote" ]; then
+          rotate_short_remote $backupdir/$SECTION/$section $keep
+       else
+          rotate_short $backupdir/$SECTION/$section $keep
+          if [ ! -d "$backupdir/$SECTION/$section.0" ]; then
+             mkdir -p $backupdir/$SECTION/$section.0
+          fi
+       fi
     fi
 
   elif [ "$format" == "long" ]; then
@@ -781,15 +780,18 @@ function prepare_storage {
     fi
 
     suffix="$btype.1"
-    info "Rotating $backupdir/$SECTION/..."
-    echo "Rotating $backupdir/$SECTION/..." >> $log
 
-    if [ "$dest" == "remote" ]; then
-      rotate_long_remote $backupdir/$SECTION
-      setup_long_dirs_remote $backupdir/$SECTION $btype
-    else
-      rotate_long $backupdir/$SECTION
-      setup_long_dirs $backupdir/$SECTION $btype
+    if [ ! "$test" ]; then
+       info "Rotating $backupdir/$SECTION/..."
+       echo "Rotating $backupdir/$SECTION/..." >> $log
+
+       if [ "$dest" == "remote" ]; then
+          rotate_long_remote $backupdir/$SECTION
+          setup_long_dirs_remote $backupdir/$SECTION $btype
+       else
+          rotate_long $backupdir/$SECTION
+          setup_long_dirs $backupdir/$SECTION $btype
+       fi
     fi
 
   elif [ "$format" == "mirror" ]; then
