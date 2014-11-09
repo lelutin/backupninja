@@ -194,7 +194,7 @@ if [ "${test}" -eq 0 ]; then
    fi
 fi
 
-if [ "$generate_parity" = "yes" ];
+if [ "$generate_parity" = "yes" ]; then
     debug "$BUP fsck -g"
     if output=$($BUP fsck -g); then
         info "Parity files generated successfully"
