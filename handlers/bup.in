@@ -156,8 +156,8 @@ fi
 
 if [ "${test}" -eq 0 ]; then
    if [ "$desttype" = "on" ]; then
-      debug "$BUP on $user@host index -u $exclude_list $exclude_rx_list $path_list"
-      if output=$($BUP on $user@host -d "$remote_bupdir" index -u $exclude_list $exclude_rx_list $path_list 2>&1); then
+      debug "$BUP on $user@$host index -u $exclude_list $exclude_rx_list $path_list"
+      if output=$($BUP on $user@$host -d "$remote_bupdir" index -u $exclude_list $exclude_rx_list $path_list 2>&1); then
          debug "$output"
          info "Indexing completed successfully"
       else
@@ -165,8 +165,8 @@ if [ "${test}" -eq 0 ]; then
          warning "bup index encountered errors"
       fi
 
-      debug "$BUP on $user@host save -n $branch $path_list"
-      if output=$($BUP on $user@host -d "$remote_bupdir" save -n $branch $path_list 2>&1); then
+      debug "$BUP on $user@$host save -n $branch $path_list"
+      if output=$($BUP on $user@$host -d "$remote_bupdir" save -n $branch $path_list 2>&1); then
          debug "$output"
          info "Successfullly finished backing up"
       else
