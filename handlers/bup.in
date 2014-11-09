@@ -117,17 +117,17 @@ IFS=$(echo -en "\n\b")
 # includes
 path_list=
 for i in $path; do
-   path_list="${path_list}'${i}' " ;;
+   path_list="${path_list}'${i}' "
 done
 # excludes
 exclude_list=
 for i in $exclude; do
-   exclude_list="${exclude_list}--exclude '${i}' " ;;
+   exclude_list="${exclude_list}--exclude '${i}' "
 done
 # excludes with regexp
 exclude_rx_list=
 for i in $exclude_rx; do
-   exclude_rx_list="${exclude_rx_list}--exclude-rx '${i}' " ;;
+   exclude_rx_list="${exclude_rx_list}--exclude-rx '${i}' "
 done
 IFS=$saveifs
 
