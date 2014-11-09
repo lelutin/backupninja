@@ -41,6 +41,7 @@ function bup_version() {
 
 getconf ignore_version no
 getconf testconnect yes
+getconf generate_parity no
 
 setsection source
 getconf path
@@ -192,3 +193,14 @@ if [ "${test}" -eq 0 ]; then
       fi
    fi
 fi
+
+if [ "$generate_parity" = "yes" ];
+    debug "$BUP fsck -g"
+    if output=$($BUP fsck -g); then
+        info "Parity files generated successfully"
+    else
+        warning "$output"
+        warning "Error encountered while generating parity files"
+    fi
+fi
+

@@ -19,6 +19,12 @@
 ## actually running the backup.
 #testconnect yes
 
+## Set this option to 'yes' to have bup generate parity files with the help of
+## the par2 command. Parity files can be used to repair backup storage to some
+## extent in case of corruption. This option is only useful if the backup
+## storage is local (e.g. not sent to a server with backup type "remote")
+#generate_parity no
+
 ######################################################
 ## source section
 ## (where the files to be backed up are coming from)

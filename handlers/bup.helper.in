@@ -227,6 +227,12 @@ do_bup_finish() {
 ## actually running the backup.
 #testconnect yes
 
+## Set this option to 'yes' to have bup generate parity files with the help of
+## the par2 command. Parity files can be used to repair backup storage to some
+## extent in case of corruption. This option is only useful if the backup
+## storage is local (e.g. not sent to a server with backup type "remote")
+#generate_parity no
+
 [source]
 # A few notes about includes and excludes:
 # 1. path and exclude statements support globbing with '*'
