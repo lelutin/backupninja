@@ -118,6 +118,7 @@ fi
 ### EXECUTE ###
 saveifs=$IFS
 IFS=$(echo -en "\n\b")
+set -o noglob
 # includes
 path_list=
 for i in $path; do
@@ -133,6 +134,7 @@ exclude_rx_list=
 for i in $exclude_rx; do
    exclude_rx_list="${exclude_rx_list}--exclude-rx '${i}' "
 done
+set +o noglob
 IFS=$saveifs
 
 remote_url=
