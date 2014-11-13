@@ -160,10 +160,16 @@ if [ "$desttype" != "local" ]; then
    fi
 fi
 
+# scripting in bash can be SO MUCH of a PITA some times. Here, we need to
+# enclose bup calls that use accumulated variables (e.g. all the *_list
+# variables) in another shell since otherwise the single quotes that the
+# variables contain won't be interpreted by shell and just passed in to bup
+# as-is (thus creating a confusing situation where bup complains that
+# /root/'/some/path' doesn't exist).
 if [ "${test}" -eq 0 ]; then
    if [ "$desttype" = "on" ]; then
       debug "$BUP on $user@$host index -u $exclude_list $exclude_rx_list $path_list"
-      if output=$($BUP on $user@$host -d "$remote_bupdir" index -u $exclude_list $exclude_rx_list $path_list 2>&1); then
+      if output=$(sh -c "$BUP on $user@$host -d '$remote_bupdir' index -u $exclude_list $exclude_rx_list $path_list" 2>&1); then
          debug "$output"
          info "Indexing completed successfully"
       else
@@ -172,7 +178,7 @@ if [ "${test}" -eq 0 ]; then
       fi
 
       debug "$BUP on $user@$host save -n $branch $path_list"
-      if output=$($BUP on $user@$host -d "$remote_bupdir" save -n $branch $path_list 2>&1); then
+      if output=$(sh -c "$BUP on $user@$host -d '$remote_bupdir' save -n $branch $path_list" 2>&1); then
          debug "$output"
          info "Successfullly finished backing up"
       else
@@ -181,7 +187,7 @@ if [ "${test}" -eq 0 ]; then
       fi
    else
       debug "$BUP index -u $exclude_list $exclude_rx_list $path_list"
-      if output=$($BUP index -u $exclude_list $exclude_rx_list $path_list 2>&1); then
+      if output=$(sh -c "$BUP index -u $exclude_list $exclude_rx_list $path_list" 2>&1); then
          debug "$output"
          info "Indexing completed successfully"
       else
@@ -190,7 +196,7 @@ if [ "${test}" -eq 0 ]; then
       fi
 
       debug "$BUP save $remote_url -n $branch $path_list"
-      if output=$($BUP save $remote_url -n $branch $path_list 2>&1); then
+      if output=$(sh -c "$BUP save $remote_url -n $branch $path_list" 2>&1); then
          debug "$output"
          info "Successfullly finished backing up"
       else
