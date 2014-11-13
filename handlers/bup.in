@@ -91,6 +91,11 @@ if [ -z "$bupdir" ]; then
    debug "No bupdir specified: using the default location of ~/.bup !"
 fi
 
+if [ -z "$remote_bupdir" ]; then
+   debug "No remote_bupdir specified: using the default location of ~/.bup !"
+   remote_bupdir=~/.bup
+fi
+
 if [ "$desttype" != "local" ]; then
    [ -n "$user" ] || fatal "Username must be specified for non-local backups."
    [ -n "$host" ] || fatal "Host name must be specified for non-local backups."
