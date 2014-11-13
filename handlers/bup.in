@@ -118,7 +118,6 @@ fi
 ### EXECUTE ###
 saveifs=$IFS
 IFS=$(echo -en "\n\b")
-# TODO: order the includes and excludes
 # includes
 path_list=
 for i in $path; do
