@@ -307,7 +307,7 @@ bup_wizard() {
 
    # Global variables whose '*' shall not be expanded
    set -o noglob
-   bup_includes=(/etc /var/backups /var/spool/cron/crontabs /root /home /usr/local/*bin /var/lib/dpkg/status*)
+   bup_includes=(/etc /var/backups /var/spool/cron/crontabs /root /home /usr/local/bin /usr/local/sbin /var/lib/dpkg/status /var/lib/dpkg/status-old)
    # Normally, bup automatically excludes its own local repository to avoid
    # re-entrant backups (backing up the backup) so we shouldn't need to specify
    # the bupdir in the excludes
