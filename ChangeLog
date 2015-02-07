@@ -12,7 +12,7 @@ version 1.0.2  -- UNRELEASED
 	   (Closes: Redmine#6357)
 	 . Fix buggy version comparison. (Redmine#6746)
 	 . Support using a different passphrase for the signing key
-	   from the one used for the encryption key.
+	   from the one used for the encryption key (Closes: #726072).
 	   Thanks to Dominik George <nik@naturalnet.de> for the patch!
 	 · Run duplicity in a C locales environment (Closes: #736280).
 	   Thanks to Jonathan Dupart <jonathan@dupart.org> for the report,
