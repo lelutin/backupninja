@@ -27,7 +27,7 @@ function test_connection() {
    fi
 }
 
-function get_version() {
+function rdiff_version() {
    # given no arguments, returns the local version.
    # given a user and host, returns the remote version.
    # if user or host is missing, returns the local version.
@@ -142,8 +142,8 @@ fi
 
 if [ "$ignore_version" != "yes" ]; then
    # see that rdiff-backup has the same version at the source and destination
-   sourceversion=`get_version $sourceuser $sourcehost`
-   destversion=`get_version $destuser $desthost`
+   sourceversion=`rdiff_version $sourceuser $sourcehost`
+   destversion=`rdiff_version $destuser $desthost`
    if [ "$sourceversion" != "$destversion" ]; then
       fatal "rdiff-backup does not have the same version at the source and at the destination."
    fi
