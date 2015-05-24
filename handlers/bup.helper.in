@@ -126,8 +126,7 @@ do_bup_dest() {
 
    if [ "$bup_type" != "local" ]; then
       REPLY=
-      while [ -z "$REPLY" -o -z "$bup_host" -o -z "$bup_user" ]
-      do
+      while [ -z "$REPLY" -o -z "$bup_host" -o -z "$bup_user" ]; do
         formBegin "$bup_title - Specify on which host and as which user bup should login to access the remote repository."
            formItem "dest_host" "$bup_host"
            formItem "dest_user" "$bup_user"
